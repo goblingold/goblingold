@@ -1,0 +1,3 @@
+anchor build
+solana program deploy /Users/manolo/Workspace/springboard/springboard/target/deploy/springboard.so -u d
+npm run test

@@ -1,0 +1,25 @@
+[package]
+name = "best-apy"
+version = "0.1.0"
+description = "Created with Anchor"
+edition = "2018"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "best_apy"
+
+[features]
+no-entrypoint = []
+no-idl = []
+cpi = ["no-entrypoint"]
+default = []
+devnet = []
+
+[dependencies]
+anchor-lang = "0.22.1"
+anchor-spl = "0.22.1"
+spl-token-lending = {package = "spl-token-lending", git = "https://github.com/solana-labs/solana-program-library", features = ["no-entrypoint"], rev = "cd8d79a"}
+port-anchor-adaptor = "0.3.3"
+mango = {package = "mango", git = "https://github.com/blockworks-foundation/mango-v3", features = ["no-entrypoint"], rev = "ae5fe3b"} # v3.4.1
+solend-token-lending = { version = "0.1.1", features = ["no-entrypoint"] }
+arrayref = "^0.3.6"
