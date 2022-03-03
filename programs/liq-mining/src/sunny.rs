@@ -32,7 +32,7 @@ pub struct InitializeSunnyData {
 }
 
 impl<'info> InitializeSunny<'info> {
-    pub fn initialize_vault(&self, bump: u8) -> ProgramResult {
+    pub fn initialize_vault(&self, bump: u8) -> Result<()> {
         let accounts = vec![
             self.sunny_pool.to_account_info(),
             self.vault_signer.to_account_info(),
@@ -69,7 +69,7 @@ impl<'info> InitializeSunny<'info> {
 }
 
 impl<'info> InitializeSunnyMiner<'info> {
-    pub fn initialize_miner(&self, bump: u8) -> ProgramResult {
+    pub fn initialize_miner(&self, bump: u8) -> Result<()> {
         let accounts = vec![
             self.sunny_pool.to_account_info(),
             self.vault_sunny.to_account_info(),
@@ -117,7 +117,7 @@ pub struct StakeData {
 }
 
 impl<'info> SunnyStake<'info> {
-    pub fn stake(&self) -> ProgramResult {
+    pub fn stake(&self) -> Result<()> {
         let seeds = &[
             self.vault_account.to_account_info().key.as_ref(),
             &[self.vault_account.bump],
@@ -227,7 +227,7 @@ pub struct UnstakeData {
 }
 
 impl<'info> SunnyUnstake<'info> {
-    pub fn unstake(&self, amount: u64) -> ProgramResult {
+    pub fn unstake(&self, amount: u64) -> Result<()> {
         let seeds = &[
             self.vault_account.to_account_info().key.as_ref(),
             &[self.vault_account.bump],
@@ -355,7 +355,7 @@ impl<'info> SunnyUnstake<'info> {
 }
 
 impl<'info> SunnyClaimRewards<'info> {
-    pub fn claim_rewards(&self) -> ProgramResult {
+    pub fn claim_rewards(&self) -> Result<()> {
         let seeds = &[
             self.vault_account.to_account_info().key.as_ref(),
             &[self.vault_account.bump],
@@ -446,7 +446,7 @@ impl<'info> SunnyClaimRewards<'info> {
 }
 
 impl<'info> SunnyRedeem<'info> {
-    pub fn redeem(&self) -> ProgramResult {
+    pub fn redeem(&self) -> Result<()> {
         let seeds = &[
             self.vault_account.to_account_info().key.as_ref(),
             &[self.vault_account.bump],

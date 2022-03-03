@@ -16,9 +16,9 @@ default = []
 devnet = []
 
 [dependencies]
-anchor-lang = "0.20.1"
-anchor-spl = "0.20.1"
-stable-swap-anchor = { version =  "1.6.8" }
+anchor-lang = "0.22.1"
+anchor-spl = "0.22.1"
+stable-swap-anchor = { version =  "1.7.0" }
 quarry-mine = { version = "1.11.11", features = ["cpi"] }
 quarry-mint-wrapper = { version = "1.11.11", features = ["cpi"] }
 redeemer = { version = "1.0.11", features = ["cpi"] }

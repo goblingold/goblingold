@@ -7,6 +7,7 @@ use quarry_mine::{program::QuarryMine, Miner};
 use quarry_mint_wrapper::program::QuarryMintWrapper;
 use stable_swap_anchor::StableSwap;
 use std::{convert::TryInto, mem::size_of};
+use crate::error::ErrorCode;
 
 mod sunny;
 mod swap;
@@ -20,7 +21,7 @@ pub const ALLOWED_RUNNER: &str = "DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod";
 pub mod liq_mining {
     use super::*;
 
-    pub fn initialize_strategy(ctx: Context<InitializeStrategy>, bump: u8) -> ProgramResult {
+    pub fn initialize_strategy(ctx: Context<InitializeStrategy>, bump: u8) -> Result<()> {
         let vault_account = &mut ctx.accounts.vault_account;
         vault_account.bump = bump;
         vault_account.dao_authority = *ctx.accounts.dao_authority.key;
@@ -37,7 +38,7 @@ pub mod liq_mining {
 
         vault_account.stable_swap_pool_id = *ctx.accounts.stable_swap_pool_id.to_account_info().key;
 
-        vault_account.past_rebalance_price = LpTokenConversion {
+        vault_account.previous_lp_price = LpPrice {
             total_tokens: 1,
             minted_tokens: 1,
         };
@@ -45,19 +46,19 @@ pub mod liq_mining {
         Ok(())
     }
 
-    pub fn initialize_associated_token_account(_ctx: Context<InitializeATA>) -> ProgramResult {
+    pub fn initialize_associated_token_account(_ctx: Context<InitializeATA>) -> Result<()> {
         Ok(())
     }
 
-    pub fn initialize_sunny(ctx: Context<InitializeSunny>, bump: u8) -> ProgramResult {
+    pub fn initialize_sunny(ctx: Context<InitializeSunny>, bump: u8) -> Result<()> {
         ctx.accounts.initialize_vault(bump)
     }
 
-    pub fn initialize_sunny_miner(ctx: Context<InitializeSunnyMiner>, bump: u8) -> ProgramResult {
+    pub fn initialize_sunny_miner(ctx: Context<InitializeSunnyMiner>, bump: u8) -> Result<()> {
         ctx.accounts.initialize_miner(bump)
     }
 
-    pub fn create_quarry_miner(ctx: Context<CreateQuarryMiner>, bump: u8) -> ProgramResult {
+    pub fn create_quarry_miner(ctx: Context<CreateQuarryMiner>, bump: u8) -> Result<()> {
         let seeds = &[
             ctx.accounts.vault_account.to_account_info().key.as_ref(),
             &[ctx.accounts.vault_account.bump],
@@ -75,7 +76,7 @@ pub mod liq_mining {
         Ok(())
     }
 
-    pub fn deposit(ctx: Context<Deposit>, amount: u64) -> ProgramResult {
+    pub fn deposit(ctx: Context<Deposit>, amount: u64) -> Result<()> {
         // Transfer user token to vault account
         let cpi_accounts = Transfer {
             from: ctx.accounts.user_input_token_account.to_account_info(),
@@ -87,7 +88,7 @@ pub mod liq_mining {
         token::transfer(cpi_ctx, amount)?;
 
         // Mint vault tokens to user vault account
-        let lp_amount = LpTokenConversion {
+        let lp_amount = LpPrice {
             total_tokens: ctx.accounts.vault_account.total_amount,
             minted_tokens: ctx.accounts.vault_lp_token_mint_address.supply,
         }
@@ -113,12 +114,12 @@ pub mod liq_mining {
             .vault_account
             .total_amount
             .checked_add(amount)
-            .unwrap();
+            .ok_or(ErrorCode::MathOverflow)?;
 
         Ok(())
     }
 
-    pub fn withdraw(ctx: Context<Withdraw>, lp_amount: u64) -> ProgramResult {
+    pub fn withdraw(ctx: Context<Withdraw>, lp_amount: u64) -> Result<()> {
         let seeds = &[
             ctx.accounts.vault_account.to_account_info().key.as_ref(),
             &[ctx.accounts.vault_account.bump],
@@ -128,10 +129,9 @@ pub mod liq_mining {
         let amount = ctx
             .accounts
             .vault_account
-            .past_rebalance_price
+            .previous_lp_price
             .lp_to_token(lp_amount);
 
-        // Transfer tokens back to user
         let cpi_accounts = Transfer {
             from: ctx.accounts.vault_input_token_account.to_account_info(),
             to: ctx.accounts.user_input_token_account.to_account_info(),
@@ -141,7 +141,6 @@ pub mod liq_mining {
         let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer);
         token::transfer(cpi_ctx, amount)?;
 
-        // Burn user vault tokens
         let cpi_accounts = Burn {
             mint: ctx.accounts.vault_lp_token_mint_address.to_account_info(),
             to: ctx.accounts.user_lp_token_account.to_account_info(),
@@ -151,18 +150,17 @@ pub mod liq_mining {
         let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
         token::burn(cpi_ctx, lp_amount)?;
 
-        // Update total deposited amount
         ctx.accounts.vault_account.total_amount = ctx
             .accounts
             .vault_account
             .total_amount
-            .checked_add(amount)
-            .unwrap();
+            .checked_sub(amount)
+            .ok_or(ErrorCode::MathOverflow)?;
 
         Ok(())
     }
 
-    pub fn deposit_saber(ctx: Context<SaberDeposit>) -> ProgramResult {
+    pub fn deposit_saber(ctx: Context<SaberDeposit>) -> Result<()> {
         let seeds = &[
             ctx.accounts.vault_account.to_account_info().key.as_ref(),
             &[ctx.accounts.vault_account.bump],
@@ -179,12 +177,20 @@ pub mod liq_mining {
         let amount_a = ctx.accounts.deposit.input_a.user.amount;
         let amount_b = 0;
         let min_amount_mint = 0;
+        let amount_before = ctx.accounts.deposit.output_lp.amount;
+
         stable_swap_anchor::deposit(cpi_ctx, amount_a, amount_b, min_amount_mint)?;
+
+        ctx.accounts.deposit.output_lp.reload()?;
+        let amount_after = ctx.accounts.deposit.output_lp.amount;
+        let amount_diff = amount_after
+            .checked_sub(amount_before)
+            .ok_or(ErrorCode::MathOverflow)?;
 
         Ok(())
     }
 
-    pub fn withdraw_saber(ctx: Context<SaberWithdraw>) -> ProgramResult {
+    pub fn withdraw_saber(ctx: Context<SaberWithdraw>) -> Result<()> {
         let seeds = &[
             ctx.accounts.vault_account.to_account_info().key.as_ref(),
             &[ctx.accounts.vault_account.bump],
@@ -205,15 +211,15 @@ pub mod liq_mining {
         Ok(())
     }
 
-    pub fn stake_sunny(ctx: Context<SunnyStake>) -> ProgramResult {
+    pub fn stake_sunny(ctx: Context<SunnyStake>) -> Result<()> {
         ctx.accounts.stake()
     }
 
-    pub fn unstake_sunny(ctx: Context<SunnyUnstake>, amount: u64) -> ProgramResult {
+    pub fn unstake_sunny(ctx: Context<SunnyUnstake>, amount: u64) -> Result<()> {
         ctx.accounts.unstake(amount)
     }
 
-    pub fn stake(ctx: Context<Stake>) -> ProgramResult {
+    pub fn stake(ctx: Context<Stake>) -> Result<()> {
         let seeds = &[
             ctx.accounts.vault_account.to_account_info().key.as_ref(),
             &[ctx.accounts.vault_account.bump],
@@ -233,7 +239,7 @@ pub mod liq_mining {
         Ok(())
     }
 
-    pub fn unstake(ctx: Context<Unstake>) -> ProgramResult {
+    pub fn unstake(ctx: Context<Unstake>) -> Result<()> {
         let seeds = &[
             ctx.accounts.vault_account.to_account_info().key.as_ref(),
             &[ctx.accounts.vault_account.bump],
@@ -254,11 +260,11 @@ pub mod liq_mining {
         Ok(())
     }
 
-    pub fn sunny_claim_rewards(ctx: Context<SunnyClaimRewards>) -> ProgramResult {
+    pub fn sunny_claim_rewards(ctx: Context<SunnyClaimRewards>) -> Result<()> {
         ctx.accounts.claim_rewards()
     }
 
-    pub fn claim_rewards(ctx: Context<ClaimRewards>) -> ProgramResult {
+    pub fn claim_rewards(ctx: Context<ClaimRewards>) -> Result<()> {
         let seeds = &[
             ctx.accounts.vault_account.to_account_info().key.as_ref(),
             &[ctx.accounts.vault_account.bump],
@@ -276,11 +282,11 @@ pub mod liq_mining {
         Ok(())
     }
 
-    pub fn sunny_redeem(ctx: Context<SunnyRedeem>) -> ProgramResult {
+    pub fn sunny_redeem(ctx: Context<SunnyRedeem>) -> Result<()> {
         ctx.accounts.redeem()
     }
 
-    pub fn redeem(ctx: Context<SaberRedeem>) -> ProgramResult {
+    pub fn redeem(ctx: Context<SaberRedeem>) -> Result<()> {
         let seeds = &[
             ctx.accounts.vault_account.to_account_info().key.as_ref(),
             &[ctx.accounts.vault_account.bump],
@@ -300,42 +306,45 @@ pub mod liq_mining {
         Ok(())
     }
 
-    pub fn swap(ctx: Context<RaydiumSwap>) -> ProgramResult {
+    pub fn swap(ctx: Context<RaydiumSwap>) -> Result<()> {
         ctx.accounts.swap_rewards()
     }
 }
 
 #[account]
-pub struct LpTokenConversion {
+pub struct LpPrice {
     pub total_tokens: u64,
     pub minted_tokens: u64,
 }
 
-impl LpTokenConversion {
-    pub fn token_to_lp(&self, amount: u64) -> u64 {
+impl LpPrice {
+    /// Transform input token amount to LP amount
+    pub fn token_to_lp(&self, amount: u64) -> Result<u64> {
         if self.minted_tokens == 0 {
-            amount
+            Ok(amount)
         } else {
-            (amount as u128)
+            Ok((amount as u128)
                 .checked_mul(self.minted_tokens as u128)
-                .unwrap()
+                .ok_or(ErrorCode::MathOverflow)?
                 .checked_div(self.total_tokens as u128)
-                .unwrap()
+                .ok_or(ErrorCode::MathOverflow)?
                 .try_into()
-                .unwrap()
+                .map_err(|_| ErrorCode::MathOverflow)?)
         }
     }
 
-    pub fn lp_to_token(&self, lp_amount: u64) -> u64 {
-        (lp_amount as u128)
+    /// Transform LP amount to input token amount
+    pub fn lp_to_token(&self, lp_amount: u64) -> Result<u64> {
+        Ok((lp_amount as u128)
             .checked_mul(self.total_tokens as u128)
-            .unwrap()
+            .ok_or(ErrorCode::MathOverflow)?
             .checked_div(self.minted_tokens as u128)
-            .unwrap()
+            .ok_or(ErrorCode::MathOverflow)?
             .try_into()
-            .unwrap()
+            .map_err(|_| ErrorCode::MathOverflow)?)
     }
 }
+
 
 // TODO check constraints: token_accounts mints, ...
 /// Accounts for the entrypoint. For those used in cpi-calls, only the accounts related with the
@@ -344,7 +353,7 @@ impl LpTokenConversion {
 #[derive(Accounts)]
 pub struct InitializeStrategy<'info> {
     // TODO uncomment
-    //#[account(constraint = Pubkey::from_str(ALLOWED_DEPLOYER).unwrap()== *user_signer.key)]
+    //#[account(constraint = Pubkey::from_str(ALLOWED_DEPLOYER)..ok_or(ErrorCode::MathOverflow)?== *user_signer.key)]
     pub user_signer: Signer<'info>,
     #[account(
         init,
@@ -1200,5 +1209,5 @@ pub struct VaultAccount {
     pub input_token_mint_key: Pubkey,
     pub stable_swap_pool_id: Pubkey,
     pub total_amount: u64, // Total amount of saber lps
-    pub past_rebalance_price: LpTokenConversion,
+    pub previous_lp_price: LpPrice,
 }
