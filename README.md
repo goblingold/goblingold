@@ -1,1 +1,1 @@
-# GoblinGold DAO
+# GoblinGold DAO Programs
