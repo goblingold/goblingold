@@ -163,8 +163,7 @@ impl VaultAccount {
 }
 
 /// Protocol data
-#[account]
-#[derive(Default, Copy)]
+#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default)]
 pub struct ProtocolData {
     /// Percentage of the TVL that should be deposited in the protocol
     pub weight: u16,
@@ -226,8 +225,7 @@ impl ProtocolData {
 }
 
 /// Time-average quantities
-#[account]
-#[derive(Default, Copy)]
+#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default)]
 pub struct SlotAverage {
     /// Last slot the average was updated
     pub slot: u64,
@@ -265,8 +263,7 @@ impl SlotAverage {
 }
 
 /// Slot-updated amounts
-#[account]
-#[derive(Default, Copy)]
+#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default)]
 pub struct UpdatedAmount {
     /// Last slot the amount was updated
     pub slot: u64,
@@ -275,7 +272,7 @@ pub struct UpdatedAmount {
 }
 
 /// Strategy LP token price
-#[account]
+#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default)]
 pub struct LpPrice {
     /// Total amount of tokens to be distributed
     pub total_tokens: u64,

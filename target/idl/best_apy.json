@@ -1704,7 +1704,9 @@
           }
         ]
       }
-    },
+    }
+  ],
+  "types": [
     {
       "name": "ProtocolData",
       "type": {
@@ -1784,9 +1786,7 @@
           }
         ]
       }
-    }
-  ],
-  "types": [
+    },
     {
       "name": "Protocols",
       "type": {
