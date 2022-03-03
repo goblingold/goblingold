@@ -14,7 +14,7 @@
     "devDependencies": {
         "@types/expect": "^24.3.0",
         "@types/mocha": "^9.1.0",
-        "chai": "^4.3.4",
+        "chai": "^4.3.6",
         "ts-mocha": "^9.0.2"
     }
 }
