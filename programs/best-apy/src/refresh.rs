@@ -61,12 +61,12 @@ impl<'info> RefreshRewardsWeights<'info> {
             .iter_mut()
             .for_each(|protocol| protocol.reset_average());
 
-        self.mint_rewards()?;
-
         self.vault_account.previous_lp_price = LpPrice {
             total_tokens: self.vault_account.current_tvl,
             minted_tokens: self.vault_lp_token_mint_pubkey.supply,
         };
+
+        self.mint_rewards()?;
 
         Ok(())
     }
