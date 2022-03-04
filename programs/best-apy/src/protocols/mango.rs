@@ -36,6 +36,7 @@ pub struct MangoInitialize<'info> {
     /// CHECK: Mango CPI
     pub mango_program_id: AccountInfo<'info>,
     /// CHECK: Mango CPI
+    #[account(mut)]
     pub mango_group_account: AccountInfo<'info>,
     pub system_program: Program<'info, System>,
 }
