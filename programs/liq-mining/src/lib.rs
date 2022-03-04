@@ -89,7 +89,7 @@ pub mod liq_mining {
 
         // Mint vault tokens to user vault account
         let lp_amount = LpPrice {
-            total_tokens: ctx.accounts.vault_account.total_amount,
+            total_tokens: ctx.accounts.vault_account.current_tvl,
             minted_tokens: ctx.accounts.vault_lp_token_mint_address.supply,
         }
         .token_to_lp(amount);
@@ -109,10 +109,10 @@ pub mod liq_mining {
         token::mint_to(cpi_ctx, lp_amount)?;
 
         // Update total deposited amount
-        ctx.accounts.vault_account.total_amount = ctx
+        ctx.accounts.vault_account.current_tvl = ctx
             .accounts
             .vault_account
-            .total_amount
+            .current_tvl
             .checked_add(amount)
             .ok_or(ErrorCode::MathOverflow)?;
 
@@ -150,10 +150,10 @@ pub mod liq_mining {
         let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
         token::burn(cpi_ctx, lp_amount)?;
 
-        ctx.accounts.vault_account.total_amount = ctx
+        ctx.accounts.vault_account.current_tvl = ctx
             .accounts
             .vault_account
-            .total_amount
+            .current_tvl
             .checked_sub(amount)
             .ok_or(ErrorCode::MathOverflow)?;
 
@@ -177,15 +177,23 @@ pub mod liq_mining {
         let amount_a = ctx.accounts.deposit.input_a.user.amount;
         let amount_b = 0;
         let min_amount_mint = 0;
-        let amount_before = ctx.accounts.deposit.output_lp.amount;
+
+        let amount_before = ctx.accounts.deposit.vault_input_token_account.amount;
+        ctx.vault_account.previous_lp_price = LpPrice {
+            total_tokens: ctx.vault_account.current_tvl,
+            minted_tokens: ctx.vault_input_token_account.supply,
+        };
 
         stable_swap_anchor::deposit(cpi_ctx, amount_a, amount_b, min_amount_mint)?;
 
-        ctx.accounts.deposit.output_lp.reload()?;
-        let amount_after = ctx.accounts.deposit.output_lp.amount;
+        ctx.accounts.deposit.current_tvl.reload()?;
+        let amount_after = ctx.accounts.deposit.current_tvl.amount;
         let amount_diff = amount_after
             .checked_sub(amount_before)
             .ok_or(ErrorCode::MathOverflow)?;
+
+        ctx.accounts.vault_account.current_tvl = ctx.accounts.vault_account.current_tvl.checked_add(amount_diff)
+        .ok_or(ErrorCode::MathOverflow)?;
 
         Ok(())
     }
@@ -600,7 +608,7 @@ pub struct SaberDeposit<'info> {
         constraint = deposit.input_a.user.mint == vault_account.input_token_mint_key,
         constraint = deposit.input_a.user.owner == *vault_signer.key,
         constraint = deposit.input_b.user.owner == *vault_signer.key,
-        constraint = deposit.output_lp.owner == *vault_signer.key
+        constraint = deposit.current_tvl.owner == *vault_signer.key
     )]
     pub deposit: StableSwapAnchorDeposit<'info>,
 }
@@ -633,10 +641,10 @@ pub struct StableSwapAnchorDeposit<'info> {
     pub pool_mint: AccountInfo<'info>,
     #[account(
         mut,
-        associated_token::mint = output_lp.mint,
-        associated_token::authority = output_lp.owner,
+        associated_token::mint = vault_input_token_account.mint,
+        associated_token::authority = vault_input_token_account.owner,
     )]
-    pub output_lp: Box<Account<'info, TokenAccount>>,
+    pub vault_input_token_account: Box<Account<'info, TokenAccount>>,
 }
 
 impl<'info> StableSwapAnchorDeposit<'info> {
@@ -646,7 +654,7 @@ impl<'info> StableSwapAnchorDeposit<'info> {
             input_a: self.input_a.to_cpi_accounts(),
             input_b: self.input_b.to_cpi_accounts(),
             pool_mint: self.pool_mint.to_account_info(),
-            output_lp: self.output_lp.to_account_info(),
+            output_lp: self.vault_input_token_account.to_account_info(),
         }
     }
 }
@@ -1208,6 +1216,6 @@ pub struct VaultAccount {
     pub lp_token_mint_key: Pubkey,
     pub input_token_mint_key: Pubkey,
     pub stable_swap_pool_id: Pubkey,
-    pub total_amount: u64, // Total amount of saber lps
+    pub current_tvl: u64, // Total amount of saber lps
     pub previous_lp_price: LpPrice,
 }
