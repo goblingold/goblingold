@@ -11,9 +11,9 @@
           "isSigner": true
         },
         {
-          "name": "vaultAccount",
-          "isMut": true,
-          "isSigner": true
+          "name": "inputTokenMintAddress",
+          "isMut": false,
+          "isSigner": false
         },
         {
           "name": "vaultSigner",
@@ -21,8 +21,13 @@
           "isSigner": false
         },
         {
-          "name": "systemProgram",
-          "isMut": false,
+          "name": "vaultAccount",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "vaultInputTokenAccount",
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -31,17 +36,17 @@
           "isSigner": true
         },
         {
-          "name": "inputTokenMintAddress",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "vaultInputTokenAccount",
+          "name": "daoTreasuryLpTokenAccount",
           "isMut": true,
           "isSigner": false
         },
         {
-          "name": "daoTreasuryLpTokenAccount",
+          "name": "daoTreasuryOwner",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
           "isMut": false,
           "isSigner": false
         },

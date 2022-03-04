@@ -50,6 +50,7 @@ pub mod best_apy {
             .dao_treasury_lp_token_account
             .to_account_info()
             .key;
+
         Ok(())
     }
 
@@ -210,13 +211,20 @@ pub struct InitializeStrategy<'info> {
     #[account(
         mut,
         constraint = Pubkey::from_str(ALLOWED_DEPLOYER).unwrap()== *user_signer.key
-   )]
+    )]
     pub user_signer: Signer<'info>,
-    #[account(init, payer = user_signer, space = 8 + size_of::<VaultAccount>())]
-    pub vault_account: Box<Account<'info, VaultAccount>>,
+    pub input_token_mint_address: Account<'info, Mint>,
     /// CHECK: only used as signing PDA
     pub vault_signer: AccountInfo<'info>,
-    pub system_program: Program<'info, System>,
+    #[account(init, payer = user_signer, space = 8 + size_of::<VaultAccount>())]
+    pub vault_account: Box<Account<'info, VaultAccount>>,
+    #[account(
+        init,
+        payer = user_signer,
+        associated_token::mint = input_token_mint_address,
+        associated_token::authority = vault_signer,
+    )]
+    pub vault_input_token_account: Account<'info, TokenAccount>,
     #[account(
         init,
         payer = user_signer,
@@ -226,19 +234,17 @@ pub struct InitializeStrategy<'info> {
         mint::authority = vault_signer,
     )]
     pub vault_lp_token_mint_pubkey: Account<'info, Mint>,
-    pub input_token_mint_address: Account<'info, Mint>,
     #[account(
         init,
         payer = user_signer,
-        associated_token::mint = input_token_mint_address,
-        associated_token::authority = vault_signer,
-   )]
-    pub vault_input_token_account: Account<'info, TokenAccount>,
-    #[account(
-        constraint = dao_treasury_lp_token_account.owner == Pubkey::from_str(ALLOWED_DEPLOYER).unwrap(),
-        constraint = dao_treasury_lp_token_account.mint == vault_lp_token_mint_pubkey.key()
+        associated_token::mint = vault_lp_token_mint_pubkey,
+        associated_token::authority = dao_treasury_owner,
     )]
     pub dao_treasury_lp_token_account: Account<'info, TokenAccount>,
+    #[account(constraint = dao_treasury_owner.key == &Pubkey::from_str(ALLOWED_DEPLOYER).unwrap())]
+    /// CHECKED: address is checked
+    pub dao_treasury_owner: AccountInfo<'info>,
+    pub system_program: Program<'info, System>,
     pub associated_token_program: Program<'info, AssociatedToken>,
     pub token_program: Program<'info, Token>,
     pub rent: Sysvar<'info, Rent>,
