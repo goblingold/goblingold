@@ -145,8 +145,8 @@ impl<'info> PortInitialize<'info> {
             let cpi_ctx = CpiContext::new_with_signer(
                 self.port_staking_program_id.to_account_info(),
                 port_anchor_adaptor::CreateStakeAccount {
-                    staking_pool: self.vault_port_staking_account.to_account_info(),
-                    stake_account: self.port_staking_pool_account.to_account_info(),
+                    stake_account: self.vault_port_staking_account.to_account_info(),
+                    staking_pool: self.port_staking_pool_account.to_account_info(),
                     owner: self.vault_signer.to_account_info(),
                     rent: self.rent.to_account_info(),
                 },
