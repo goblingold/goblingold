@@ -105,8 +105,8 @@ pub struct SolendDeposit<'info> {
     pub solend_program_id: AccountInfo<'info>,
     #[account(
         mut,
-        associated_token:: mint = PubkeyWrapper(vault_solend_destination_collateral_token_account.mint),
-        associated_token:: authority = generic_accs.vault_signer,
+        associated_token::mint = PubkeyWrapper(vault_solend_destination_collateral_token_account.mint),
+        associated_token::authority = generic_accs.vault_signer,
     )]
     pub vault_solend_destination_collateral_token_account: Box<Account<'info, TokenAccount>>,
     #[account(mut)]
@@ -229,8 +229,8 @@ pub struct SolendWithdraw<'info> {
     pub solend_program_id: AccountInfo<'info>,
     #[account(
         mut,
-        associated_token:: mint = PubkeyWrapper(vault_solend_destination_collateral_token_account.mint),
-        associated_token:: authority = generic_accs.vault_signer,
+        associated_token::mint = PubkeyWrapper(vault_solend_destination_collateral_token_account.mint),
+        associated_token::authority = generic_accs.vault_signer,
     )]
     pub vault_solend_destination_collateral_token_account: Account<'info, TokenAccount>,
     #[account(mut)]

@@ -170,8 +170,8 @@ pub struct PortDeposit<'info> {
     pub port_staking_program_id: AccountInfo<'info>,
     #[account(
         mut,
-        associated_token:: mint = PubkeyWrapper(vault_port_collateral_token_account.mint),
-        associated_token:: authority = generic_accs.vault_signer,
+        associated_token::mint = PubkeyWrapper(vault_port_collateral_token_account.mint),
+        associated_token::authority = generic_accs.vault_signer,
     )]
     pub vault_port_collateral_token_account: Box<Account<'info, TokenAccount>>,
     #[account(mut)]
@@ -281,8 +281,8 @@ pub struct PortWithdraw<'info> {
     pub port_staking_program_id: AccountInfo<'info>,
     #[account(
         mut,
-        associated_token:: mint = PubkeyWrapper(vault_port_collateral_token_account.mint),
-        associated_token:: authority = generic_accs.vault_signer,
+        associated_token::mint = PubkeyWrapper(vault_port_collateral_token_account.mint),
+        associated_token::authority = generic_accs.vault_signer,
     )]
     pub vault_port_collateral_token_account: Account<'info, TokenAccount>,
     #[account(mut)]
@@ -470,8 +470,8 @@ pub struct PortClaimRewards<'info> {
     pub vault_port_staking_account: AccountInfo<'info>,
     #[account(
         mut,
-        associated_token:: mint = PubkeyWrapper(vault_port_rewards_account.mint),
-        associated_token:: authority = vault_signer,
+        associated_token::mint = PubkeyWrapper(vault_port_rewards_account.mint),
+        associated_token::authority = vault_signer,
     )]
     pub vault_port_rewards_account: Account<'info, TokenAccount>,
     #[account(mut)]
