@@ -47,7 +47,7 @@ impl<'info> MangoInitialize<'info> {
         let seeds = generate_seeds!(self.vault_account);
         let signer = &[&seeds[..]];
 
-        let account_num = 0;
+        let account_num = 1;
         let ix = mango::instruction::create_mango_account(
             &mango_program_id::ID,
             self.mango_group_account.key,
