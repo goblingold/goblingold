@@ -5,6 +5,7 @@ use std::{cmp, convert::TryInto};
 
 /// Strategy vault account
 #[account]
+#[derive(Default)]
 pub struct VaultAccount {
     /// PDA bump seed
     pub bump: u8,
@@ -25,6 +26,17 @@ pub struct VaultAccount {
 }
 
 impl VaultAccount {
+    /// Initialize a new vault
+    pub fn init(params: InitVaultAccountParams) -> Self {
+        Self {
+            bump: params.bump,
+            input_mint_pubkey: params.input_mint_pubkey,
+            vault_lp_token_mint_pubkey: params.vault_lp_token_mint_pubkey,
+            dao_treasury_lp_token_account: params.dao_treasury_lp_token_account,
+            ..Self::default()
+        }
+    }
+
     /// Update protocol weights
     pub fn update_protocol_weights(&mut self, elapsed_slots: u64) -> Result<()> {
         let mut deposit: Vec<u128> = self
@@ -160,6 +172,18 @@ impl VaultAccount {
             err!(ErrorCode::InvalidProtocolWithdraw)
         }
     }
+}
+
+/// Initialize a new vault
+pub struct InitVaultAccountParams {
+    /// PDA bump seed
+    pub bump: u8,
+    /// Strategy input token mint address
+    pub input_mint_pubkey: Pubkey,
+    /// Strategy LP token mint address
+    pub vault_lp_token_mint_pubkey: Pubkey,
+    /// Destination fee account
+    pub dao_treasury_lp_token_account: Pubkey,
 }
 
 /// Protocol data

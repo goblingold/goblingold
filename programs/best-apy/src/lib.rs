@@ -11,7 +11,7 @@ use error::ErrorCode;
 use protocols::{francium::*, mango::*, port::*, solend::*, tulip::*};
 use std::mem::size_of;
 use std::str::FromStr;
-use vault::VaultAccount;
+use vault::{InitVaultAccountParams, VaultAccount};
 
 mod deposit;
 mod duplicated_ixs;
@@ -36,20 +36,14 @@ pub mod best_apy {
     /// Initialize the vault account and its fields
     // ACCESS RESTRICTED. ONLY ALLOWED_DEPLOYER
     pub fn initialize_strategy(ctx: Context<InitializeStrategy>, bump: u8) -> Result<()> {
-        let vault_account = &mut ctx.accounts.vault_account;
-        vault_account.bump = bump;
-        vault_account.vault_lp_token_mint_pubkey = *ctx
-            .accounts
-            .vault_lp_token_mint_pubkey
-            .to_account_info()
-            .key;
-        vault_account.input_mint_pubkey =
-            *ctx.accounts.input_token_mint_address.to_account_info().key;
-        vault_account.dao_treasury_lp_token_account = *ctx
-            .accounts
-            .dao_treasury_lp_token_account
-            .to_account_info()
-            .key;
+        ctx.accounts
+            .vault_account
+            .set_inner(VaultAccount::init(InitVaultAccountParams {
+                bump,
+                input_mint_pubkey: ctx.accounts.vault_lp_token_mint_pubkey.key(),
+                vault_lp_token_mint_pubkey: ctx.accounts.input_token_mint_address.key(),
+                dao_treasury_lp_token_account: ctx.accounts.dao_treasury_lp_token_account.key(),
+            }));
 
         Ok(())
     }
