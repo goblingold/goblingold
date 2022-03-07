@@ -298,13 +298,17 @@ impl LpPrice {
 
     /// Transform LP amount to input token amount
     pub fn lp_to_token(&self, lp_amount: u64) -> Result<u64> {
-        Ok((lp_amount as u128)
-            .checked_mul(self.total_tokens as u128)
-            .ok_or(ErrorCode::MathOverflow)?
-            .checked_div(self.minted_tokens as u128)
-            .ok_or(ErrorCode::MathOverflow)?
-            .try_into()
-            .map_err(|_| ErrorCode::MathOverflow)?)
+        if self.minted_tokens == 0 {
+            Ok(lp_amount)
+        } else {
+            Ok((lp_amount as u128)
+                .checked_mul(self.total_tokens as u128)
+                .ok_or(ErrorCode::MathOverflow)?
+                .checked_div(self.minted_tokens as u128)
+                .ok_or(ErrorCode::MathOverflow)?
+                .try_into()
+                .map_err(|_| ErrorCode::MathOverflow)?)
+        }
     }
 }
 
