@@ -31,16 +31,18 @@ impl<'info> RefreshRewardsWeights<'info> {
             ErrorCode::ForbiddenRefresh
         );
 
-        for protocol in self.vault_account.protocols.iter() {
-            let last_updated = protocol.tvl.slot;
-            require!(
-                self.clock
-                    .slot
-                    .checked_sub(last_updated)
-                    .ok_or(ErrorCode::MathOverflow)?
-                    < MAX_ELAPSED_SLOTS_FOR_TVL,
-                ErrorCode::StaleProtocolTVL
-            )
+        if self.vault_account.tvl.slot != u64::default() {
+            for protocol in self.vault_account.protocols.iter() {
+                let last_updated = protocol.tvl.slot;
+                require!(
+                    self.clock
+                        .slot
+                        .checked_sub(last_updated)
+                        .ok_or(ErrorCode::MathOverflow)?
+                        < MAX_ELAPSED_SLOTS_FOR_TVL,
+                    ErrorCode::StaleProtocolTVL
+                )
+            }
         }
 
         self.vault_account.tvl = UpdatedAmount {
