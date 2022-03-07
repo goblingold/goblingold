@@ -287,7 +287,7 @@ pub struct Deposit<'info> {
     #[account(
         mut,
         constraint = vault_lp_token_mint_pubkey.mint_authority == COption::Some(*vault_signer.key),
-        constraint = vault_account.vault_lp_token_mint_pubkey == *vault_lp_token_mint_pubkey.to_account_info().key
+        constraint = vault_lp_token_mint_pubkey.key() == vault_account.vault_lp_token_mint_pubkey,
     )]
     pub vault_lp_token_mint_pubkey: Account<'info, Mint>,
     #[account(
@@ -315,7 +315,7 @@ pub struct Withdraw<'info> {
     #[account(
         mut,
         constraint = vault_lp_token_mint_pubkey.mint_authority == COption::Some(*vault_signer.key),
-        constraint = vault_account.vault_lp_token_mint_pubkey == *vault_lp_token_mint_pubkey.to_account_info().key
+        constraint = vault_lp_token_mint_pubkey.key() == vault_account.vault_lp_token_mint_pubkey,
     )]
     pub vault_lp_token_mint_pubkey: Account<'info, Mint>,
     #[account(
@@ -338,12 +338,15 @@ pub struct RefreshRewardsWeights<'info> {
     pub vault_signer: AccountInfo<'info>,
     #[account(mut)]
     pub vault_account: Box<Account<'info, VaultAccount>>,
-    #[account(address = vault_account.input_mint_pubkey)]
+    #[account(
+        associated_token::mint = PubkeyWrapper::from(vault_account.input_mint_pubkey),
+        associated_token::authority = vault_signer,
+    )]
     pub vault_input_token_account: Account<'info, TokenAccount>,
     #[account(
         mut,
         constraint = vault_lp_token_mint_pubkey.mint_authority == COption::Some(*vault_signer.key),
-        constraint = vault_account.vault_lp_token_mint_pubkey == *vault_lp_token_mint_pubkey.to_account_info().key
+        constraint = vault_lp_token_mint_pubkey.key() == vault_account.vault_lp_token_mint_pubkey,
     )]
     pub vault_lp_token_mint_pubkey: Account<'info, Mint>,
     #[account(mut, address = vault_account.dao_treasury_lp_token_account)]
