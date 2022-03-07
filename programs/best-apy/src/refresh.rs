@@ -39,7 +39,7 @@ impl<'info> RefreshRewardsWeights<'info> {
                     .checked_sub(last_updated)
                     .ok_or(ErrorCode::MathOverflow)?
                     < MAX_ELAPSED_SLOTS_FOR_TVL,
-                ErrorCode::ForbiddenRefresh
+                ErrorCode::StaleProtocolTVL
             )
         }
 

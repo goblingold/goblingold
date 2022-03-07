@@ -7,6 +7,8 @@ pub enum ErrorCode {
     InvalidZeroWithdraw,
     #[msg("Can not refresh weights yet, not enough slots since last refresh")]
     ForbiddenRefresh,
+    #[msg("A protocol TVL is stale and must be refreshed")]
+    StaleProtocolTVL,
     #[msg("Invalid amount to deposit.")]
     InvalidProtocolDeposit,
     #[msg("Invalid amount to withdraw.")]
