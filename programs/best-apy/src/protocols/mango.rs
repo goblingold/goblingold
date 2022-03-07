@@ -9,7 +9,6 @@ use crate::{
 };
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::{program::invoke_signed, pubkey::Pubkey};
-use anchor_spl::token::Token;
 use std::str::FromStr;
 
 /// Program ids
@@ -254,7 +253,9 @@ pub struct MangoTVL<'info> {
     pub mango_cache_account: AccountInfo<'info>,
     /// CHECK: Mango CPI
     pub mango_root_bank_account: AccountInfo<'info>,
-    pub token_program: Program<'info, Token>,
+    #[account(constraint = default_pubkey.key == &Pubkey::default())]
+    /// CHECK: address is checked
+    pub default_pubkey: AccountInfo<'info>,
 }
 
 impl<'info> MangoTVL<'info> {
@@ -296,9 +297,8 @@ impl<'info> MangoTVL<'info> {
         )
         .unwrap();
 
-        // No open orders, any account can be used to build the vector
         let open_orders_ais_vec =
-            vec![self.token_program.to_account_info(); mango::state::MAX_PAIRS];
+            vec![self.default_pubkey.to_account_info(); mango::state::MAX_PAIRS];
         let open_orders_ais = arrayref::array_ref![open_orders_ais_vec, 0, mango::state::MAX_PAIRS];
         let active_assets =
             mango::state::UserActiveAssets::new(&mango_group, &mango_account, vec![]);

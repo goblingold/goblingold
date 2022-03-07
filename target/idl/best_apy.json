@@ -524,7 +524,7 @@
           "isSigner": false
         },
         {
-          "name": "tokenProgram",
+          "name": "defaultPubkey",
           "isMut": false,
           "isSigner": false
         }
