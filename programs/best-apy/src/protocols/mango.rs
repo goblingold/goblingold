@@ -261,12 +261,11 @@ pub struct MangoTVL<'info> {
 impl<'info> MangoTVL<'info> {
     /// Update the protocol TVL
     pub fn update_tvl(&mut self) -> Result<()> {
-        let mut tracked = self.generic_accs.vault_account.protocols[Protocols::Mango as usize];
+        let slot = self.generic_accs.clock.slot;
+        let amount = self.max_withdrawable()?;
 
-        tracked.tvl = UpdatedAmount {
-            slot: self.generic_accs.clock.slot,
-            amount: self.max_withdrawable()?,
-        };
+        let protocol = &mut self.generic_accs.vault_account.protocols[Protocols::Mango as usize];
+        protocol.tvl = UpdatedAmount { slot, amount };
 
         Ok(())
     }

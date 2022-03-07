@@ -281,14 +281,19 @@ pub struct TulipTVL<'info> {
 impl<'info> TulipTVL<'info> {
     /// Update the protocol TVL
     pub fn update_tvl(&mut self) -> Result<()> {
-        let mut tracked = self.generic_accs.vault_account.protocols[Protocols::Tulip as usize];
+        let slot = self.generic_accs.clock.slot;
+        let amount = self.max_withdrawable()?;
 
-        tracked.tvl = UpdatedAmount {
-            slot: self.generic_accs.clock.slot,
-            amount: self.lp_to_liquidity(tracked.lp_amount)?,
-        };
+        let protocol = &mut self.generic_accs.vault_account.protocols[Protocols::Tulip as usize];
+        protocol.tvl = UpdatedAmount { slot, amount };
 
         Ok(())
+    }
+
+    /// Calculate the max native units to withdraw
+    fn max_withdrawable(&self) -> Result<u64> {
+        let protocol = self.generic_accs.vault_account.protocols[Protocols::Tulip as usize];
+        self.lp_to_liquidity(protocol.lp_amount)
     }
 
     /// Convert reserve collateral to liquidity
