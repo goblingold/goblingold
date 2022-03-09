@@ -83,7 +83,7 @@ pub mod liq_mining {
             to: ctx.accounts.vault_input_token_account.to_account_info(),
             authority: ctx.accounts.user_signer.to_account_info(),
         };
-        let cpi_program = ctx.accounts.token_program_id.to_account_info();
+        let cpi_program = ctx.accounts.token_program.to_account_info();
         let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
         token::transfer(cpi_ctx, amount)?;
 
@@ -104,7 +104,7 @@ pub mod liq_mining {
             to: ctx.accounts.user_lp_token_account.to_account_info(),
             authority: ctx.accounts.vault_signer.to_account_info(),
         };
-        let cpi_program = ctx.accounts.token_program_id.to_account_info();
+        let cpi_program = ctx.accounts.token_program.to_account_info();
         let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer);
         token::mint_to(cpi_ctx, lp_amount)?;
 
@@ -137,7 +137,7 @@ pub mod liq_mining {
             to: ctx.accounts.user_input_token_account.to_account_info(),
             authority: ctx.accounts.vault_signer.to_account_info(),
         };
-        let cpi_program = ctx.accounts.token_program_id.to_account_info();
+        let cpi_program = ctx.accounts.token_program.to_account_info();
         let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer);
         token::transfer(cpi_ctx, amount)?;
 
@@ -146,7 +146,7 @@ pub mod liq_mining {
             to: ctx.accounts.user_lp_token_account.to_account_info(),
             authority: ctx.accounts.user_signer.to_account_info(),
         };
-        let cpi_program = ctx.accounts.token_program_id.to_account_info();
+        let cpi_program = ctx.accounts.token_program.to_account_info();
         let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
         token::burn(cpi_ctx, lp_amount)?;
 
@@ -376,12 +376,23 @@ pub struct InitializeStrategy<'info> {
         mint::decimals = vault_input_token_mint_address.decimals,
         mint::authority = vault_signer,
     )]
-    pub vault_lp_token_mint_address: Account<'info, Mint>,
-    pub vault_input_token_mint_address: Account<'info, Mint>,
-    pub dao_authority: AccountInfo<'info>,
+    pub vault_lp_token_mint_pubkey: Account<'info, Mint>,
+    pub input_token_mint_address: Account<'info, Mint>,
     pub stable_swap_pool_id: AccountInfo<'info>,
+    #[account(
+        init,
+        payer = user_signer,
+        associated_token::mint = input_token_mint_address,
+        associated_token::authority = vault_signer,
+   )]
+    pub vault_input_token_account: Account<'info, TokenAccount>,
+    #[account(
+        constraint = dao_treasury_lp_token_account.owner == Pubkey::from_str(ALLOWED_DEPLOYER).unwrap(),
+        constraint = dao_treasury_lp_token_account.mint == vault_lp_token_mint_pubkey.key()
+    )]
+    pub dao_treasury_lp_token_account: Account<'info, TokenAccount>,
+    pub associated_token_program: Program<'info, AssociatedToken>,
     pub token_program: Program<'info, Token>,
-    pub system_program: Program<'info, System>,
     pub rent: Sysvar<'info, Rent>,
 }
 
@@ -554,7 +565,7 @@ pub struct Deposit<'info> {
         associated_token::authority = vault_signer,
     )]
     pub vault_input_token_account: Account<'info, TokenAccount>,
-    pub token_program_id: Program<'info, Token>,
+    pub token_program: Program<'info, Token>,
 }
 
 #[derive(Accounts)]
@@ -590,7 +601,7 @@ pub struct Withdraw<'info> {
         associated_token::authority = vault_signer,
     )]
     pub vault_input_token_account: Account<'info, TokenAccount>,
-    pub token_program_id: Program<'info, Token>,
+    pub token_program: Program<'info, Token>,
 }
 
 #[derive(Accounts)]
@@ -1202,7 +1213,7 @@ pub struct RaydiumSwap<'info> {
     #[account(mut)]
     pub serum_pc_vault_account: AccountInfo<'info>,
     pub serum_vault_signer: AccountInfo<'info>,
-    pub token_program_id: Program<'info, Token>,
+    pub token_program: Program<'info, Token>,
 }
 
 // TODO what should be stored here?

@@ -1,25 +1,25 @@
 [package]
+description = "Created with Anchor"
+edition = "2021"
 name = "liq-mining"
 version = "0.1.0"
-description = "Created with Anchor"
-edition = "2018"
 
 [lib]
 crate-type = ["cdylib", "lib"]
 name = "liq_mining"
 
 [features]
-no-entrypoint = []
-no-idl = []
 cpi = ["no-entrypoint"]
 default = []
 devnet = []
+no-entrypoint = []
+no-idl = []
 
 [dependencies]
 anchor-lang = "0.22.1"
 anchor-spl = "0.22.1"
-stable-swap-anchor = { version =  "1.7.0" }
-quarry-mine = { version = "1.11.11", features = ["cpi"] }
-quarry-mint-wrapper = { version = "1.11.11", features = ["cpi"] }
-redeemer = { version = "1.0.11", features = ["cpi"] }
-mint-proxy = { version = "1.0.11", features = ["cpi"] }
+mint-proxy = {version = "1.0.11", features = ["cpi"]}
+quarry-mine = {version = "3.0.0", features = ["cpi"]}
+quarry-mint-wrapper = {version = "3.0.0", features = ["cpi"]}
+redeemer = {version = "1.0.11", features = ["cpi"]}
+stable-swap-anchor = {version = "1.7.3"}
