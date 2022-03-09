@@ -8,9 +8,11 @@ use quarry_mint_wrapper::program::QuarryMintWrapper;
 use stable_swap_anchor::StableSwap;
 use std::{convert::TryInto, mem::size_of};
 use crate::error::ErrorCode;
+use std::str::FromStr;
 
 mod sunny;
 mod swap;
+mod error;
 
 declare_id!("z6QfgcpnNRCyG3M3Hsm7QhhtGL8QZtYC22Xj2Z2v1t7");
 
@@ -24,15 +26,15 @@ pub mod liq_mining {
     pub fn initialize_strategy(ctx: Context<InitializeStrategy>, bump: u8) -> Result<()> {
         let vault_account = &mut ctx.accounts.vault_account;
         vault_account.bump = bump;
-        vault_account.dao_authority = *ctx.accounts.dao_authority.key;
+        vault_account.dao_authority = *ctx.accounts.dao_treasury_lp_token_account.to_account_info().key;
         vault_account.lp_token_mint_key = *ctx
             .accounts
-            .vault_lp_token_mint_address
+            .vault_lp_token_mint_pubkey
             .to_account_info()
             .key;
         vault_account.input_token_mint_key = *ctx
             .accounts
-            .vault_input_token_mint_address
+            .vault_lp_token_mint_pubkey
             .to_account_info()
             .key;
 
@@ -92,7 +94,7 @@ pub mod liq_mining {
             total_tokens: ctx.accounts.vault_account.current_tvl,
             minted_tokens: ctx.accounts.vault_lp_token_mint_address.supply,
         }
-        .token_to_lp(amount);
+        .token_to_lp(amount)?;
 
         let seeds = &[
             ctx.accounts.vault_account.to_account_info().key.as_ref(),
@@ -130,7 +132,7 @@ pub mod liq_mining {
             .accounts
             .vault_account
             .previous_lp_price
-            .lp_to_token(lp_amount);
+            .lp_to_token(lp_amount)?;
 
         let cpi_accounts = Transfer {
             from: ctx.accounts.vault_input_token_account.to_account_info(),
@@ -179,9 +181,9 @@ pub mod liq_mining {
         let min_amount_mint = 0;
 
         let amount_before = ctx.accounts.deposit.vault_input_token_account.amount;
-        ctx.vault_account.previous_lp_price = LpPrice {
-            total_tokens: ctx.vault_account.current_tvl,
-            minted_tokens: ctx.vault_input_token_account.supply,
+        ctx.accounts.vault_account.previous_lp_price = LpPrice {
+            total_tokens: ctx.accounts.vault_account.current_tvl,
+            minted_tokens: ctx.accounts.deposit.vault_input_token_account.supply,
         };
 
         stable_swap_anchor::deposit(cpi_ctx, amount_a, amount_b, min_amount_mint)?;
@@ -360,8 +362,10 @@ impl LpPrice {
 
 #[derive(Accounts)]
 pub struct InitializeStrategy<'info> {
-    // TODO uncomment
-    //#[account(constraint = Pubkey::from_str(ALLOWED_DEPLOYER)..ok_or(ErrorCode::MathOverflow)?== *user_signer.key)]
+    #[account(
+        mut,
+        constraint = Pubkey::from_str(ALLOWED_DEPLOYER).unwrap()== *user_signer.key
+    )]    
     pub user_signer: Signer<'info>,
     #[account(
         init,
@@ -373,7 +377,7 @@ pub struct InitializeStrategy<'info> {
     #[account(
         init,
         payer = user_signer,
-        mint::decimals = vault_input_token_mint_address.decimals,
+        mint::decimals = input_token_mint_address.decimals,
         mint::authority = vault_signer,
     )]
     pub vault_lp_token_mint_pubkey: Account<'info, Mint>,
@@ -393,11 +397,13 @@ pub struct InitializeStrategy<'info> {
     pub dao_treasury_lp_token_account: Account<'info, TokenAccount>,
     pub associated_token_program: Program<'info, AssociatedToken>,
     pub token_program: Program<'info, Token>,
+    pub system_program: Program<'info, System>,
     pub rent: Sysvar<'info, Rent>,
 }
 
 #[derive(Accounts)]
 pub struct InitializeATA<'info> {
+    #[account(mut)]
     pub user_signer: Signer<'info>,
     #[account(
         seeds = [vault_account.to_account_info().key.as_ref()],
@@ -439,6 +445,7 @@ pub struct InitializeSunny<'info> {
 
 #[derive(Accounts)]
 pub struct InitializeSunnyMiner<'info> {
+    #[account(mut)]
     pub user_signer: Signer<'info>,
     #[account(
         seeds = [vault_account.to_account_info().key.as_ref()],
@@ -472,6 +479,7 @@ pub struct InitializeSunnyMiner<'info> {
 
 #[derive(Accounts)]
 pub struct CreateQuarryMiner<'info> {
+    #[account(mut)]
     pub user_signer: Signer<'info>,
     #[account(
         seeds = [vault_account.to_account_info().key.as_ref()],
@@ -561,6 +569,12 @@ pub struct Deposit<'info> {
     pub vault_lp_token_mint_address: Account<'info, Mint>,
     #[account(
         mut,
+        constraint = vault_lp_token_mint_pubkey.mint_authority == COption::Some(*vault_signer.key),
+        constraint = vault_account.vault_lp_token_mint_pubkey == *vault_lp_token_mint_pubkey.to_account_info().key
+    )]
+    pub vault_lp_token_mint_pubkey: Account<'info, Mint>,
+    #[account(
+        mut,
         associated_token::mint = vault_account.input_token_mint_key,
         associated_token::authority = vault_signer,
     )]
@@ -589,6 +603,12 @@ pub struct Withdraw<'info> {
     )]
     pub vault_signer: AccountInfo<'info>,
     pub vault_account: Account<'info, VaultAccount>,
+    #[account(
+        mut,
+        constraint = vault_lp_token_mint_pubkey.mint_authority == COption::Some(*vault_signer.key),
+        constraint = vault_account.vault_lp_token_mint_pubkey == *vault_lp_token_mint_pubkey.to_account_info().key
+    )]
+    pub vault_lp_token_mint_pubkey: Account<'info, Mint>,
     #[account(
         mut,
         constraint = vault_lp_token_mint_address.key() == vault_account.lp_token_mint_key,
@@ -1047,7 +1067,8 @@ pub struct SunnyRedeem<'info> {
     pub vault_account: Box<Account<'info, VaultAccount>>,
     #[account(constraint = sunny_quarry_redeemer_program.key == &sunny::quarry_redeemer_program::ID)]
     pub sunny_quarry_redeemer_program: AccountInfo<'info>,
-    pub redeemer_program_id: Program<'info, redeemer::program::Redeemer>,
+    #[account(constraint = redeemer_program_id.key == &redeemer::program::Redeemer::ID)]
+    pub redeemer_program_id: AccountInfo<'info>,
     #[account(
         constraint = redeem_saber.redeem_ctx.source_authority.key ==  vault_signer.key,
         constraint = redeem_saber.redeem_ctx.iou_source.owner == *vault_signer.key,
@@ -1070,7 +1091,8 @@ pub struct SaberRedeem<'info> {
     )]
     pub vault_signer: AccountInfo<'info>,
     pub vault_account: Account<'info, VaultAccount>,
-    pub redeemer_program_id: Program<'info, redeemer::program::Redeemer>,
+    #[account(constraint = redeemer_program_id.key == &redeemer::program::Redeemer::ID)]
+    pub redeemer_program_id: AccountInfo<'info>,
     #[account(
         constraint = redeem.redeem_ctx.source_authority.key ==  vault_signer.key,
         constraint = redeem.redeem_ctx.iou_source.owner == *vault_signer.key,
@@ -1225,6 +1247,8 @@ pub struct VaultAccount {
     pub bump: u8,
     pub dao_authority: Pubkey,
     pub lp_token_mint_key: Pubkey,
+        /// Strategy LP token mint address
+        pub vault_lp_token_mint_pubkey: Pubkey,
     pub input_token_mint_key: Pubkey,
     pub stable_swap_pool_id: Pubkey,
     pub current_tvl: u64, // Total amount of saber lps

@@ -33,7 +33,7 @@ impl<'info> RaydiumSwap<'info> {
 
         let swap_ix = raydium_amm_instruction::swap_base_in(
             &self.raydium_amm_program_id.key(),
-            &self.amm_id.key.key(),
+            &self.amm_id.key(),
             &self.amm_authority.key(),
             &self.amm_open_orders.key(),
             &self.amm_target_orders.key(),
