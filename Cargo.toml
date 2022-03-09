@@ -2,3 +2,7 @@
 members = [
     "programs/*"
 ]
+
+[patch.crates-io]
+mint_proxy = { package = "mint-proxy", git = "https://github.com/goblingold/saber-periphery", rev="23fa6ed" }
+redeemer = { package = "redeemer", git = "https://github.com/goblingold/saber-periphery", rev="23fa6ed" }
