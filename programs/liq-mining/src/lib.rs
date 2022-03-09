@@ -27,12 +27,12 @@ pub mod liq_mining {
         let vault_account = &mut ctx.accounts.vault_account;
         vault_account.bump = bump;
         vault_account.dao_authority = *ctx.accounts.dao_treasury_lp_token_account.to_account_info().key;
-        vault_account.lp_token_mint_key = *ctx
+        vault_account.input_mint_pubkey = *ctx
             .accounts
             .vault_lp_token_mint_pubkey
             .to_account_info()
             .key;
-        vault_account.input_token_mint_key = *ctx
+        vault_account.input_mint_pubkey = *ctx
             .accounts
             .vault_lp_token_mint_pubkey
             .to_account_info()
@@ -183,13 +183,13 @@ pub mod liq_mining {
         let amount_before = ctx.accounts.deposit.vault_input_token_account.amount;
         ctx.accounts.vault_account.previous_lp_price = LpPrice {
             total_tokens: ctx.accounts.vault_account.current_tvl,
-            minted_tokens: ctx.accounts.deposit.vault_input_token_account.supply,
+            minted_tokens: ctx.accounts.vault_lp_token_mint_pubkey.supply,
         };
 
         stable_swap_anchor::deposit(cpi_ctx, amount_a, amount_b, min_amount_mint)?;
 
-        ctx.accounts.deposit.current_tvl.reload()?;
-        let amount_after = ctx.accounts.deposit.current_tvl.amount;
+        ctx.accounts.deposit.vault_input_token_account.reload()?;
+        let amount_after = ctx.accounts.deposit.vault_input_token_account.amount;
         let amount_diff = amount_after
             .checked_sub(amount_before)
             .ok_or(ErrorCode::MathOverflow)?;
@@ -545,13 +545,13 @@ pub struct Deposit<'info> {
     pub user_signer: Signer<'info>,
     #[account(
         mut,
-        constraint = user_input_token_account.mint == vault_account.input_token_mint_key,
+        constraint = user_input_token_account.mint == vault_account.input_mint_pubkey,
         constraint = user_input_token_account.owner == *user_signer.key
     )]
     pub user_input_token_account: Account<'info, TokenAccount>,
     #[account(
         mut,
-        constraint = user_lp_token_account.mint == vault_account.lp_token_mint_key,
+        constraint = user_lp_token_account.mint == vault_account.input_mint_pubkey,
         constraint = user_lp_token_account.owner == *user_signer.key,
     )]
     pub user_lp_token_account: Account<'info, TokenAccount>,
@@ -563,7 +563,7 @@ pub struct Deposit<'info> {
     pub vault_account: Account<'info, VaultAccount>,
     #[account(
         mut,
-        constraint = vault_lp_token_mint_address.key() == vault_account.lp_token_mint_key,
+        constraint = vault_lp_token_mint_address.key() == vault_account.input_mint_pubkey,
         constraint = vault_lp_token_mint_address.mint_authority == COption::Some(*vault_signer.key),
     )]
     pub vault_lp_token_mint_address: Account<'info, Mint>,
@@ -575,7 +575,7 @@ pub struct Deposit<'info> {
     pub vault_lp_token_mint_pubkey: Account<'info, Mint>,
     #[account(
         mut,
-        associated_token::mint = vault_account.input_token_mint_key,
+        associated_token::mint = vault_account.input_mint_pubkey,
         associated_token::authority = vault_signer,
     )]
     pub vault_input_token_account: Account<'info, TokenAccount>,
@@ -587,13 +587,13 @@ pub struct Withdraw<'info> {
     pub user_signer: Signer<'info>,
     #[account(
         mut,
-        constraint = user_input_token_account.mint == vault_account.input_token_mint_key,
+        constraint = user_input_token_account.mint == vault_account.input_mint_pubkey,
         constraint = user_input_token_account.owner == *user_signer.key
     )]
     pub user_input_token_account: Account<'info, TokenAccount>,
     #[account(
         mut,
-        constraint = user_lp_token_account.mint == vault_account.lp_token_mint_key,
+        constraint = user_lp_token_account.mint == vault_account.input_mint_pubkey,
         constraint = user_lp_token_account.owner == *user_signer.key,
     )]
     pub user_lp_token_account: Account<'info, TokenAccount>,
@@ -611,13 +611,13 @@ pub struct Withdraw<'info> {
     pub vault_lp_token_mint_pubkey: Account<'info, Mint>,
     #[account(
         mut,
-        constraint = vault_lp_token_mint_address.key() == vault_account.lp_token_mint_key,
+        constraint = vault_lp_token_mint_address.key() == vault_account.input_mint_pubkey,
         constraint = vault_lp_token_mint_address.mint_authority == COption::Some(*vault_signer.key),
     )]
     pub vault_lp_token_mint_address: Account<'info, Mint>,
     #[account(
         mut,
-        associated_token::mint = vault_account.input_token_mint_key,
+        associated_token::mint = vault_account.input_mint_pubkey,
         associated_token::authority = vault_signer,
     )]
     pub vault_input_token_account: Account<'info, TokenAccount>,
@@ -634,12 +634,17 @@ pub struct SaberDeposit<'info> {
     pub vault_account: Account<'info, VaultAccount>,
     pub stable_swap_program_id: Program<'info, StableSwap>,
     #[account(
+        mut,
+        constraint = vault_lp_token_mint_pubkey.mint_authority == COption::Some(*vault_signer.key),
+        constraint = vault_account.vault_lp_token_mint_pubkey == *vault_lp_token_mint_pubkey.to_account_info().key
+    )]
+    pub vault_lp_token_mint_pubkey: Account<'info, Mint>,
+    #[account(
         constraint = deposit.user.swap.key == &vault_account.stable_swap_pool_id,
         constraint = deposit.user.user_authority.key == vault_signer.key,
-        constraint = deposit.input_a.user.mint == vault_account.input_token_mint_key,
+        constraint = deposit.input_a.user.mint == vault_account.input_mint_pubkey,
         constraint = deposit.input_a.user.owner == *vault_signer.key,
         constraint = deposit.input_b.user.owner == *vault_signer.key,
-        constraint = deposit.current_tvl.owner == *vault_signer.key
     )]
     pub deposit: StableSwapAnchorDeposit<'info>,
 }
@@ -657,7 +662,7 @@ pub struct SaberWithdraw<'info> {
         constraint = withdraw.input_lp.owner == *vault_signer.key,
         constraint = withdraw.user.swap.key == &vault_account.stable_swap_pool_id,
         constraint = withdraw.user.user_authority.key == vault_signer.key,
-        constraint = withdraw.output.user_token.user.mint == vault_account.input_token_mint_key,
+        constraint = withdraw.output.user_token.user.mint == vault_account.input_mint_pubkey,
         constraint = withdraw.output.user_token.user.owner == *vault_signer.key,
     )]
     pub withdraw: StableSwapWithdrawOne<'info>,
@@ -1202,7 +1207,7 @@ pub struct RaydiumSwap<'info> {
     pub vault_input_token_account: Box<Account<'info, TokenAccount>>,
     #[account(
         mut,
-        associated_token::mint = vault_account.input_token_mint_key,
+        associated_token::mint = vault_account.input_mint_pubkey,
         associated_token::authority = vault_signer,
     )]
     pub vault_output_token_account: Box<Account<'info, TokenAccount>>,
@@ -1243,14 +1248,20 @@ pub struct RaydiumSwap<'info> {
 //  - quarry miner?
 //  - rewards tokens?
 #[account]
+#[derive(Default)]
 pub struct VaultAccount {
+    /// PDA bump seed
     pub bump: u8,
-    pub dao_authority: Pubkey,
-    pub lp_token_mint_key: Pubkey,
-        /// Strategy LP token mint address
-        pub vault_lp_token_mint_pubkey: Pubkey,
-    pub input_token_mint_key: Pubkey,
+    /// Strategy input token mint address
+    pub input_mint_pubkey: Pubkey,
+    /// Strategy LP token mint address
+    pub vault_lp_token_mint_pubkey: Pubkey,
+    /// Pool id from the stable swap program
     pub stable_swap_pool_id: Pubkey,
-    pub current_tvl: u64, // Total amount of saber lps
+    /// Destination fee account
+    pub dao_treasury_lp_token_account: Pubkey,
+    /// Current TVL deposited in the strategy (considering deposits/withdraws)
+    pub current_tvl: u64,
+    /// Price of the LP token in the previous interval
     pub previous_lp_price: LpPrice,
 }

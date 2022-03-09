@@ -16,10 +16,10 @@ no-entrypoint = []
 no-idl = []
 
 [dependencies]
-anchor-lang = "0.22.1"
-anchor-spl = "0.22.1"
+anchor-lang = "0.20.1"
+anchor-spl = "0.20.1"
 mint-proxy = {version = "1.0.11", features = ["cpi"]}
-quarry-mine = {version = "3.0.0", features = ["cpi"]}
-quarry-mint-wrapper = {version = "3.0.0", features = ["cpi"]}
+quarry-mine = {version = "2.0.1", features = ["cpi"]}
+quarry-mint-wrapper = {version = "2.0.1", features = ["cpi"]}
 redeemer = {version = "1.0.11", features = ["cpi"]}
 stable-swap-anchor = {version = "1.7.3"}
