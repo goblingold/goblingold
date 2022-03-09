@@ -4,6 +4,11 @@ use crate::{GenericDepositAccounts, GenericWithdrawAccounts};
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::sysvar;
 
+/// Anchor generated sighash
+const IX_WITHDRAW_SIGHASH: [u8; 8] = [183, 18, 70, 156, 148, 109, 161, 34];
+/// Instruction data length (sighash + u64)
+const IX_WITHDRAW_DATA_LEN: usize = 16;
+
 impl<'info> GenericDepositAccounts<'info> {
     /// Compute the amount to deposit into the protocol
     pub fn amount_to_deposit(&self, protocol: Protocols) -> Result<u64> {
@@ -46,10 +51,10 @@ impl<'info> GenericWithdrawAccounts<'info> {
         ) {
             let ix_data: &[u8] = &next_ix.data;
             require!(
-                // Anchor generated sighash
-                ix_data[..8] == [183, 18, 70, 156, 148, 109, 161, 34],
+                next_ix.data.len() == IX_WITHDRAW_DATA_LEN && ix_data[..8] == IX_WITHDRAW_SIGHASH,
                 ErrorCode::InvalidInstructions
             );
+
             // Anchor generated module
             use crate::instruction;
             let ix = instruction::Withdraw::deserialize(&mut &ix_data[8..])

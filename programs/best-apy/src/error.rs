@@ -7,17 +7,19 @@ pub enum ErrorCode {
     InvalidZeroWithdraw,
     #[msg("Can not refresh weights yet, not enough slots since last refresh")]
     ForbiddenRefresh,
-    #[msg("Invalid amount to deposit.")]
+    #[msg("A protocol TVL is stale and must be refreshed")]
+    StaleProtocolTVL,
+    #[msg("Invalid amount to deposit")]
     InvalidProtocolDeposit,
-    #[msg("Invalid amount to withdraw.")]
+    #[msg("Invalid amount to withdraw")]
     InvalidProtocolWithdraw,
-    #[msg("Invalid deposited amount. Please deposit more than 100 lamports.")]
+    #[msg("Invalid deposited amount. Please deposit more than 100 lamports")]
     InvalidDepositAmount,
-    #[msg("Invalid owner.")]
+    #[msg("Invalid owner")]
     InvalidOwner,
-    #[msg("Invalid mint.")]
+    #[msg("Invalid mint")]
     InvalidMint,
-    #[msg("Deposits and withdraws aren't allowed on PAUSE.")]
+    #[msg("Deposits and withdraws aren't allowed on PAUSE")]
     OnPaused,
     #[msg("The instructions provided are invalid")]
     InvalidInstructions,

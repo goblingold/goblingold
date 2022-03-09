@@ -11,7 +11,7 @@ use error::ErrorCode;
 use protocols::{francium::*, mango::*, port::*, solend::*, tulip::*};
 use std::mem::size_of;
 use std::str::FromStr;
-use vault::VaultAccount;
+use vault::{InitVaultAccountParams, VaultAccount};
 
 mod deposit;
 mod duplicated_ixs;
@@ -36,20 +36,15 @@ pub mod best_apy {
     /// Initialize the vault account and its fields
     // ACCESS RESTRICTED. ONLY ALLOWED_DEPLOYER
     pub fn initialize_strategy(ctx: Context<InitializeStrategy>, bump: u8) -> Result<()> {
-        let vault_account = &mut ctx.accounts.vault_account;
-        vault_account.bump = bump;
-        vault_account.vault_lp_token_mint_pubkey = *ctx
-            .accounts
-            .vault_lp_token_mint_pubkey
-            .to_account_info()
-            .key;
-        vault_account.input_mint_pubkey =
-            *ctx.accounts.input_token_mint_address.to_account_info().key;
-        vault_account.dao_treasury_lp_token_account = *ctx
-            .accounts
-            .dao_treasury_lp_token_account
-            .to_account_info()
-            .key;
+        ctx.accounts
+            .vault_account
+            .set_inner(VaultAccount::init(InitVaultAccountParams {
+                bump,
+                input_mint_pubkey: ctx.accounts.vault_lp_token_mint_pubkey.key(),
+                vault_lp_token_mint_pubkey: ctx.accounts.input_token_mint_address.key(),
+                dao_treasury_lp_token_account: ctx.accounts.dao_treasury_lp_token_account.key(),
+            }));
+
         Ok(())
     }
 
@@ -210,13 +205,20 @@ pub struct InitializeStrategy<'info> {
     #[account(
         mut,
         constraint = Pubkey::from_str(ALLOWED_DEPLOYER).unwrap()== *user_signer.key
-   )]
+    )]
     pub user_signer: Signer<'info>,
-    #[account(init, payer = user_signer, space = 8 + size_of::<VaultAccount>())]
-    pub vault_account: Box<Account<'info, VaultAccount>>,
+    pub input_token_mint_address: Account<'info, Mint>,
     /// CHECK: only used as signing PDA
     pub vault_signer: AccountInfo<'info>,
-    pub system_program: Program<'info, System>,
+    #[account(init, payer = user_signer, space = 8 + size_of::<VaultAccount>())]
+    pub vault_account: Box<Account<'info, VaultAccount>>,
+    #[account(
+        init,
+        payer = user_signer,
+        associated_token::mint = input_token_mint_address,
+        associated_token::authority = vault_signer,
+    )]
+    pub vault_input_token_account: Account<'info, TokenAccount>,
     #[account(
         init,
         payer = user_signer,
@@ -226,19 +228,17 @@ pub struct InitializeStrategy<'info> {
         mint::authority = vault_signer,
     )]
     pub vault_lp_token_mint_pubkey: Account<'info, Mint>,
-    pub input_token_mint_address: Account<'info, Mint>,
     #[account(
         init,
         payer = user_signer,
-        associated_token::mint = input_token_mint_address,
-        associated_token::authority = vault_signer,
-   )]
-    pub vault_input_token_account: Account<'info, TokenAccount>,
-    #[account(
-        constraint = dao_treasury_lp_token_account.owner == Pubkey::from_str(ALLOWED_DEPLOYER).unwrap(),
-        constraint = dao_treasury_lp_token_account.mint == vault_lp_token_mint_pubkey.key()
+        associated_token::mint = vault_lp_token_mint_pubkey,
+        associated_token::authority = dao_treasury_owner,
     )]
     pub dao_treasury_lp_token_account: Account<'info, TokenAccount>,
+    #[account(constraint = dao_treasury_owner.key == &Pubkey::from_str(ALLOWED_DEPLOYER).unwrap())]
+    /// CHECKED: address is checked
+    pub dao_treasury_owner: AccountInfo<'info>,
+    pub system_program: Program<'info, System>,
     pub associated_token_program: Program<'info, AssociatedToken>,
     pub token_program: Program<'info, Token>,
     pub rent: Sysvar<'info, Rent>,
@@ -281,7 +281,7 @@ pub struct Deposit<'info> {
     #[account(
         mut,
         constraint = vault_lp_token_mint_pubkey.mint_authority == COption::Some(*vault_signer.key),
-        constraint = vault_account.vault_lp_token_mint_pubkey == *vault_lp_token_mint_pubkey.to_account_info().key
+        constraint = vault_lp_token_mint_pubkey.key() == vault_account.vault_lp_token_mint_pubkey,
     )]
     pub vault_lp_token_mint_pubkey: Account<'info, Mint>,
     #[account(
@@ -309,7 +309,7 @@ pub struct Withdraw<'info> {
     #[account(
         mut,
         constraint = vault_lp_token_mint_pubkey.mint_authority == COption::Some(*vault_signer.key),
-        constraint = vault_account.vault_lp_token_mint_pubkey == *vault_lp_token_mint_pubkey.to_account_info().key
+        constraint = vault_lp_token_mint_pubkey.key() == vault_account.vault_lp_token_mint_pubkey,
     )]
     pub vault_lp_token_mint_pubkey: Account<'info, Mint>,
     #[account(
@@ -332,12 +332,15 @@ pub struct RefreshRewardsWeights<'info> {
     pub vault_signer: AccountInfo<'info>,
     #[account(mut)]
     pub vault_account: Box<Account<'info, VaultAccount>>,
-    #[account(address = vault_account.input_mint_pubkey)]
+    #[account(
+        associated_token::mint = PubkeyWrapper::from(vault_account.input_mint_pubkey),
+        associated_token::authority = vault_signer,
+    )]
     pub vault_input_token_account: Account<'info, TokenAccount>,
     #[account(
         mut,
         constraint = vault_lp_token_mint_pubkey.mint_authority == COption::Some(*vault_signer.key),
-        constraint = vault_account.vault_lp_token_mint_pubkey == *vault_lp_token_mint_pubkey.to_account_info().key
+        constraint = vault_lp_token_mint_pubkey.key() == vault_account.vault_lp_token_mint_pubkey,
     )]
     pub vault_lp_token_mint_pubkey: Account<'info, Mint>,
     #[account(mut, address = vault_account.dao_treasury_lp_token_account)]

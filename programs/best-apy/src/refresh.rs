@@ -31,16 +31,18 @@ impl<'info> RefreshRewardsWeights<'info> {
             ErrorCode::ForbiddenRefresh
         );
 
-        for protocol in self.vault_account.protocols.iter() {
-            let last_updated = protocol.tvl.slot;
-            require!(
-                self.clock
-                    .slot
-                    .checked_sub(last_updated)
-                    .ok_or(ErrorCode::MathOverflow)?
-                    < MAX_ELAPSED_SLOTS_FOR_TVL,
-                ErrorCode::ForbiddenRefresh
-            )
+        if self.vault_account.tvl.slot != u64::default() {
+            for protocol in self.vault_account.protocols.iter() {
+                let last_updated = protocol.tvl.slot;
+                require!(
+                    self.clock
+                        .slot
+                        .checked_sub(last_updated)
+                        .ok_or(ErrorCode::MathOverflow)?
+                        < MAX_ELAPSED_SLOTS_FOR_TVL,
+                    ErrorCode::StaleProtocolTVL
+                )
+            }
         }
 
         self.vault_account.tvl = UpdatedAmount {
@@ -61,12 +63,12 @@ impl<'info> RefreshRewardsWeights<'info> {
             .iter_mut()
             .for_each(|protocol| protocol.reset_average());
 
-        self.mint_rewards()?;
-
         self.vault_account.previous_lp_price = LpPrice {
             total_tokens: self.vault_account.current_tvl,
             minted_tokens: self.vault_lp_token_mint_pubkey.supply,
         };
+
+        self.mint_rewards()?;
 
         Ok(())
     }

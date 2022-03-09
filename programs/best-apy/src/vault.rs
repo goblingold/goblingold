@@ -5,6 +5,7 @@ use std::{cmp, convert::TryInto};
 
 /// Strategy vault account
 #[account]
+#[derive(Default)]
 pub struct VaultAccount {
     /// PDA bump seed
     pub bump: u8,
@@ -25,6 +26,17 @@ pub struct VaultAccount {
 }
 
 impl VaultAccount {
+    /// Initialize a new vault
+    pub fn init(params: InitVaultAccountParams) -> Self {
+        Self {
+            bump: params.bump,
+            input_mint_pubkey: params.input_mint_pubkey,
+            vault_lp_token_mint_pubkey: params.vault_lp_token_mint_pubkey,
+            dao_treasury_lp_token_account: params.dao_treasury_lp_token_account,
+            ..Self::default()
+        }
+    }
+
     /// Update protocol weights
     pub fn update_protocol_weights(&mut self, elapsed_slots: u64) -> Result<()> {
         let mut deposit: Vec<u128> = self
@@ -162,9 +174,20 @@ impl VaultAccount {
     }
 }
 
+/// Initialize a new vault
+pub struct InitVaultAccountParams {
+    /// PDA bump seed
+    pub bump: u8,
+    /// Strategy input token mint address
+    pub input_mint_pubkey: Pubkey,
+    /// Strategy LP token mint address
+    pub vault_lp_token_mint_pubkey: Pubkey,
+    /// Destination fee account
+    pub dao_treasury_lp_token_account: Pubkey,
+}
+
 /// Protocol data
-#[account]
-#[derive(Default, Copy)]
+#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default)]
 pub struct ProtocolData {
     /// Percentage of the TVL that should be deposited in the protocol
     pub weight: u16,
@@ -226,8 +249,7 @@ impl ProtocolData {
 }
 
 /// Time-average quantities
-#[account]
-#[derive(Default, Copy)]
+#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default)]
 pub struct SlotAverage {
     /// Last slot the average was updated
     pub slot: u64,
@@ -265,8 +287,7 @@ impl SlotAverage {
 }
 
 /// Slot-updated amounts
-#[account]
-#[derive(Default, Copy)]
+#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default)]
 pub struct UpdatedAmount {
     /// Last slot the amount was updated
     pub slot: u64,
@@ -275,7 +296,7 @@ pub struct UpdatedAmount {
 }
 
 /// Strategy LP token price
-#[account]
+#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default)]
 pub struct LpPrice {
     /// Total amount of tokens to be distributed
     pub total_tokens: u64,
@@ -301,13 +322,17 @@ impl LpPrice {
 
     /// Transform LP amount to input token amount
     pub fn lp_to_token(&self, lp_amount: u64) -> Result<u64> {
-        Ok((lp_amount as u128)
-            .checked_mul(self.total_tokens as u128)
-            .ok_or(ErrorCode::MathOverflow)?
-            .checked_div(self.minted_tokens as u128)
-            .ok_or(ErrorCode::MathOverflow)?
-            .try_into()
-            .map_err(|_| ErrorCode::MathOverflow)?)
+        if self.minted_tokens == 0 {
+            Ok(lp_amount)
+        } else {
+            Ok((lp_amount as u128)
+                .checked_mul(self.total_tokens as u128)
+                .ok_or(ErrorCode::MathOverflow)?
+                .checked_div(self.minted_tokens as u128)
+                .ok_or(ErrorCode::MathOverflow)?
+                .try_into()
+                .map_err(|_| ErrorCode::MathOverflow)?)
+        }
     }
 }
 

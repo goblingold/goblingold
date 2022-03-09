@@ -145,8 +145,8 @@ impl<'info> PortInitialize<'info> {
             let cpi_ctx = CpiContext::new_with_signer(
                 self.port_staking_program_id.to_account_info(),
                 port_anchor_adaptor::CreateStakeAccount {
-                    staking_pool: self.vault_port_staking_account.to_account_info(),
-                    stake_account: self.port_staking_pool_account.to_account_info(),
+                    stake_account: self.vault_port_staking_account.to_account_info(),
+                    staking_pool: self.port_staking_pool_account.to_account_info(),
                     owner: self.vault_signer.to_account_info(),
                     rent: self.rent.to_account_info(),
                 },
@@ -170,8 +170,8 @@ pub struct PortDeposit<'info> {
     pub port_staking_program_id: AccountInfo<'info>,
     #[account(
         mut,
-        associated_token:: mint = PubkeyWrapper(vault_port_collateral_token_account.mint),
-        associated_token:: authority = generic_accs.vault_signer,
+        associated_token::mint = PubkeyWrapper(vault_port_collateral_token_account.mint),
+        associated_token::authority = generic_accs.vault_signer,
     )]
     pub vault_port_collateral_token_account: Box<Account<'info, TokenAccount>>,
     #[account(mut)]
@@ -281,8 +281,8 @@ pub struct PortWithdraw<'info> {
     pub port_staking_program_id: AccountInfo<'info>,
     #[account(
         mut,
-        associated_token:: mint = PubkeyWrapper(vault_port_collateral_token_account.mint),
-        associated_token:: authority = generic_accs.vault_signer,
+        associated_token::mint = PubkeyWrapper(vault_port_collateral_token_account.mint),
+        associated_token::authority = generic_accs.vault_signer,
     )]
     pub vault_port_collateral_token_account: Account<'info, TokenAccount>,
     #[account(mut)]
@@ -427,14 +427,19 @@ pub struct PortTVL<'info> {
 impl<'info> PortTVL<'info> {
     /// Update the protocol TVL
     pub fn update_tvl(&mut self) -> Result<()> {
-        let mut tracked = self.generic_accs.vault_account.protocols[Protocols::Port as usize];
+        let slot = self.generic_accs.clock.slot;
+        let amount = self.max_withdrawable()?;
 
-        tracked.tvl = UpdatedAmount {
-            slot: self.generic_accs.clock.slot,
-            amount: self.lp_to_liquidity(tracked.lp_amount)?,
-        };
+        let protocol = &mut self.generic_accs.vault_account.protocols[Protocols::Port as usize];
+        protocol.tvl = UpdatedAmount { slot, amount };
 
         Ok(())
+    }
+
+    /// Calculate the max native units to withdraw
+    fn max_withdrawable(&self) -> Result<u64> {
+        let protocol = self.generic_accs.vault_account.protocols[Protocols::Port as usize];
+        self.lp_to_liquidity(protocol.lp_amount)
     }
 
     /// Convert reserve collateral to liquidity
@@ -470,8 +475,8 @@ pub struct PortClaimRewards<'info> {
     pub vault_port_staking_account: AccountInfo<'info>,
     #[account(
         mut,
-        associated_token:: mint = PubkeyWrapper(vault_port_rewards_account.mint),
-        associated_token:: authority = vault_signer,
+        associated_token::mint = PubkeyWrapper(vault_port_rewards_account.mint),
+        associated_token::authority = vault_signer,
     )]
     pub vault_port_rewards_account: Account<'info, TokenAccount>,
     #[account(mut)]

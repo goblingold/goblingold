@@ -11,9 +11,9 @@
           "isSigner": true
         },
         {
-          "name": "vaultAccount",
-          "isMut": true,
-          "isSigner": true
+          "name": "inputTokenMintAddress",
+          "isMut": false,
+          "isSigner": false
         },
         {
           "name": "vaultSigner",
@@ -21,8 +21,13 @@
           "isSigner": false
         },
         {
-          "name": "systemProgram",
-          "isMut": false,
+          "name": "vaultAccount",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "vaultInputTokenAccount",
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -31,17 +36,17 @@
           "isSigner": true
         },
         {
-          "name": "inputTokenMintAddress",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "vaultInputTokenAccount",
+          "name": "daoTreasuryLpTokenAccount",
           "isMut": true,
           "isSigner": false
         },
         {
-          "name": "daoTreasuryLpTokenAccount",
+          "name": "daoTreasuryOwner",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
           "isMut": false,
           "isSigner": false
         },
@@ -307,7 +312,7 @@
         },
         {
           "name": "mangoGroupAccount",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -519,7 +524,7 @@
           "isSigner": false
         },
         {
-          "name": "tokenProgram",
+          "name": "defaultPubkey",
           "isMut": false,
           "isSigner": false
         }
@@ -1704,7 +1709,9 @@
           }
         ]
       }
-    },
+    }
+  ],
+  "types": [
     {
       "name": "ProtocolData",
       "type": {
@@ -1784,9 +1791,7 @@
           }
         ]
       }
-    }
-  ],
-  "types": [
+    },
     {
       "name": "Protocols",
       "type": {
@@ -1824,41 +1829,46 @@
     },
     {
       "code": 6002,
-      "name": "InvalidProtocolDeposit",
-      "msg": "Invalid amount to deposit."
+      "name": "StaleProtocolTVL",
+      "msg": "A protocol TVL is stale and must be refreshed"
     },
     {
       "code": 6003,
-      "name": "InvalidProtocolWithdraw",
-      "msg": "Invalid amount to withdraw."
+      "name": "InvalidProtocolDeposit",
+      "msg": "Invalid amount to deposit"
     },
     {
       "code": 6004,
-      "name": "InvalidDepositAmount",
-      "msg": "Invalid deposited amount. Please deposit more than 100 lamports."
+      "name": "InvalidProtocolWithdraw",
+      "msg": "Invalid amount to withdraw"
     },
     {
       "code": 6005,
-      "name": "InvalidOwner",
-      "msg": "Invalid owner."
+      "name": "InvalidDepositAmount",
+      "msg": "Invalid deposited amount. Please deposit more than 100 lamports"
     },
     {
       "code": 6006,
-      "name": "InvalidMint",
-      "msg": "Invalid mint."
+      "name": "InvalidOwner",
+      "msg": "Invalid owner"
     },
     {
       "code": 6007,
-      "name": "OnPaused",
-      "msg": "Deposits and withdraws aren't allowed on PAUSE."
+      "name": "InvalidMint",
+      "msg": "Invalid mint"
     },
     {
       "code": 6008,
+      "name": "OnPaused",
+      "msg": "Deposits and withdraws aren't allowed on PAUSE"
+    },
+    {
+      "code": 6009,
       "name": "InvalidInstructions",
       "msg": "The instructions provided are invalid"
     },
     {
-      "code": 6009,
+      "code": 6010,
       "name": "MathOverflow",
       "msg": "Math operation overflow"
     }

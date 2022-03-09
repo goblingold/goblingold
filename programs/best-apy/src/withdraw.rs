@@ -37,17 +37,13 @@ impl<'info> Withdraw<'info> {
         };
         let cpi_program = self.token_program.to_account_info();
         let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer);
-
-        // TODO REMOVE OR ADD FEE
-        // Just int case the lp conversion is not exact, give one lamport less
-        let amount_conservative = amount.checked_sub(1).ok_or(ErrorCode::MathOverflow)?;
-        token::transfer(cpi_ctx, amount_conservative)?;
+        token::transfer(cpi_ctx, amount)?;
 
         // Update total withdraw
         self.vault_account.current_tvl = self
             .vault_account
             .current_tvl
-            .checked_sub(amount_conservative)
+            .checked_sub(amount)
             .ok_or(ErrorCode::MathOverflow)?;
 
         Ok(())

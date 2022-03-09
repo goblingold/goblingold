@@ -9,7 +9,6 @@ use crate::{
 };
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::{program::invoke_signed, pubkey::Pubkey};
-use anchor_spl::token::Token;
 use std::str::FromStr;
 
 /// Program ids
@@ -36,6 +35,7 @@ pub struct MangoInitialize<'info> {
     /// CHECK: Mango CPI
     pub mango_program_id: AccountInfo<'info>,
     /// CHECK: Mango CPI
+    #[account(mut)]
     pub mango_group_account: AccountInfo<'info>,
     pub system_program: Program<'info, System>,
 }
@@ -46,7 +46,7 @@ impl<'info> MangoInitialize<'info> {
         let seeds = generate_seeds!(self.vault_account);
         let signer = &[&seeds[..]];
 
-        let account_num = 0;
+        let account_num = 1;
         let ix = mango::instruction::create_mango_account(
             &mango_program_id::ID,
             self.mango_group_account.key,
@@ -253,18 +253,19 @@ pub struct MangoTVL<'info> {
     pub mango_cache_account: AccountInfo<'info>,
     /// CHECK: Mango CPI
     pub mango_root_bank_account: AccountInfo<'info>,
-    pub token_program: Program<'info, Token>,
+    #[account(constraint = default_pubkey.key == &Pubkey::default())]
+    /// CHECK: address is checked
+    pub default_pubkey: AccountInfo<'info>,
 }
 
 impl<'info> MangoTVL<'info> {
     /// Update the protocol TVL
     pub fn update_tvl(&mut self) -> Result<()> {
-        let mut tracked = self.generic_accs.vault_account.protocols[Protocols::Mango as usize];
+        let slot = self.generic_accs.clock.slot;
+        let amount = self.max_withdrawable()?;
 
-        tracked.tvl = UpdatedAmount {
-            slot: self.generic_accs.clock.slot,
-            amount: self.max_withdrawable()?,
-        };
+        let protocol = &mut self.generic_accs.vault_account.protocols[Protocols::Mango as usize];
+        protocol.tvl = UpdatedAmount { slot, amount };
 
         Ok(())
     }
@@ -295,9 +296,8 @@ impl<'info> MangoTVL<'info> {
         )
         .unwrap();
 
-        // No open orders, any account can be used to build the vector
         let open_orders_ais_vec =
-            vec![self.token_program.to_account_info(); mango::state::MAX_PAIRS];
+            vec![self.default_pubkey.to_account_info(); mango::state::MAX_PAIRS];
         let open_orders_ais = arrayref::array_ref![open_orders_ais_vec, 0, mango::state::MAX_PAIRS];
         let active_assets =
             mango::state::UserActiveAssets::new(&mango_group, &mango_account, vec![]);
