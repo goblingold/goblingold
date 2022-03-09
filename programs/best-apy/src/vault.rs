@@ -17,12 +17,13 @@ pub struct VaultAccount {
     pub dao_treasury_lp_token_account: Pubkey,
     /// Current TVL deposited in the strategy (considering deposits/withdraws)
     pub current_tvl: u64,
-    /// Slot-updated TVL calculated from the protocols
-    pub tvl: UpdatedAmount,
+    /// Last refresh slot in which protocol rewards were accrued
+    pub last_refresh_slot: u64,
     /// Price of the LP token in the previous interval
     pub previous_lp_price: LpPrice,
     /// Protocol data
     pub protocols: [ProtocolData; PROTOCOLS_LEN],
+    // TODO additional padding
 }
 
 impl VaultAccount {
@@ -200,8 +201,8 @@ pub struct ProtocolData {
 }
 
 impl ProtocolData {
-    /// Reset the average deposited amount
-    pub fn reset_average(&mut self) {
+    /// Initialize the average deposited amount
+    pub fn initialize_average(&mut self) {
         self.deposited.slot = self.tvl.slot;
         self.deposited.amount = self.tvl.amount;
         self.deposited.avg_sum = 0_u128;

@@ -1,6 +1,6 @@
 use crate::error::ErrorCode;
 use crate::macros::generate_seeds;
-use crate::vault::{LpPrice, UpdatedAmount};
+use crate::vault::LpPrice;
 use crate::RefreshRewardsWeights;
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self, MintTo};
@@ -23,7 +23,7 @@ impl<'info> RefreshRewardsWeights<'info> {
         let elapsed_slots = self
             .clock
             .slot
-            .checked_sub(self.vault_account.tvl.slot)
+            .checked_sub(self.vault_account.last_refresh_slot)
             .ok_or(ErrorCode::MathOverflow)?;
 
         require!(
@@ -31,7 +31,7 @@ impl<'info> RefreshRewardsWeights<'info> {
             ErrorCode::ForbiddenRefresh
         );
 
-        if self.vault_account.tvl.slot != u64::default() {
+        if self.vault_account.last_refresh_slot != u64::default() {
             for protocol in self.vault_account.protocols.iter() {
                 let last_updated = protocol.tvl.slot;
                 require!(
@@ -45,40 +45,35 @@ impl<'info> RefreshRewardsWeights<'info> {
             }
         }
 
-        self.vault_account.tvl = UpdatedAmount {
-            slot: self.clock.slot,
-            amount: self
-                .vault_account
-                .protocols
-                .iter()
-                .try_fold(self.vault_input_token_account.amount, |acc, &protocol| {
-                    acc.checked_add(protocol.tvl.amount)
-                })
-                .ok_or(ErrorCode::MathOverflow)?,
-        };
-
+        self.vault_account.last_refresh_slot = self.clock.slot;
         self.vault_account.update_protocol_weights(elapsed_slots)?;
         self.vault_account
             .protocols
             .iter_mut()
-            .for_each(|protocol| protocol.reset_average());
+            .for_each(|protocol| protocol.initialize_average());
 
         self.vault_account.previous_lp_price = LpPrice {
             total_tokens: self.vault_account.current_tvl,
             minted_tokens: self.vault_lp_token_mint_pubkey.supply,
         };
 
-        self.mint_rewards()?;
+        self.mint_rewards_and_update_tvl()?;
 
         Ok(())
     }
 
     /// Mint LP tokens to the treasury account in order to take the rewards
-    pub fn mint_rewards(&mut self) -> Result<()> {
-        let rewards = self
+    pub fn mint_rewards_and_update_tvl(&mut self) -> Result<()> {
+        let last_tvl = self
             .vault_account
-            .tvl
-            .amount
+            .protocols
+            .iter()
+            .try_fold(self.vault_input_token_account.amount, |acc, &protocol| {
+                acc.checked_add(protocol.tvl.amount)
+            })
+            .ok_or(ErrorCode::MathOverflow)?;
+
+        let rewards = last_tvl
             .checked_sub(self.vault_account.current_tvl)
             .ok_or(ErrorCode::MathOverflow)?;
 
@@ -118,7 +113,7 @@ impl<'info> RefreshRewardsWeights<'info> {
                 let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer);
                 token::mint_to(cpi_ctx, lp_fee)?;
 
-                self.vault_account.current_tvl = self.vault_account.tvl.amount;
+                self.vault_account.current_tvl = last_tvl;
             }
         }
 
