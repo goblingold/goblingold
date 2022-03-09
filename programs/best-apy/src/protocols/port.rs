@@ -467,6 +467,9 @@ pub struct PortClaimRewards<'info> {
     pub vault_signer: AccountInfo<'info>,
     #[account(mut)]
     pub vault_account: Box<Account<'info, VaultAccount>>,
+    #[account(constraint = dao_treasury_owner.key == &Pubkey::from_str(ALLOWED_DEPLOYER).unwrap())]
+    /// CHECKED: address is checked
+    pub dao_treasury_owner: AccountInfo<'info>,
     #[account(constraint = port_staking_program_id.key == &port_staking_program_id::ID)]
     /// CHECK: Port CPI
     pub port_staking_program_id: AccountInfo<'info>,
@@ -476,7 +479,7 @@ pub struct PortClaimRewards<'info> {
     #[account(
         mut,
         associated_token::mint = PubkeyWrapper(vault_port_rewards_account.mint),
-        associated_token::authority = vault_signer,
+        associated_token::authority = dao_treasury_owner,
     )]
     pub vault_port_rewards_account: Account<'info, TokenAccount>,
     #[account(mut)]
