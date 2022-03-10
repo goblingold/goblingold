@@ -14,7 +14,7 @@ pub mod serum {
 }
 
 impl<'info> RaydiumSwap<'info> {
-    pub fn swap_rewards(&self) -> ProgramResult {
+    pub fn swap_rewards(&self) -> Result<()> {
         // TODO now infinity slipagge. Set the min amount with pyth:
         //   - check oracle is not stale
         //   - check uncertainty in the price is below certain threshold
@@ -24,7 +24,7 @@ impl<'info> RaydiumSwap<'info> {
         self.swap(amount_in, min_amount_out)
     }
 
-    pub fn swap(&self, amount_in: u64, min_amount_out: u64) -> ProgramResult {
+    pub fn swap(&self, amount_in: u64, min_amount_out: u64) -> Result<()> {
         let seeds = &[
             self.vault_account.to_account_info().key.as_ref(),
             &[self.vault_account.bump],

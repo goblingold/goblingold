@@ -314,18 +314,6 @@ dependencies = [
 
 [[package]]
 name = "anchor-spl"
-version = "0.20.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9ea94b04fc9a0aaae4d4473b0595fb5f55b6c9b38e0d6f596df8c8060f95f096"
-dependencies = [
- "anchor-lang 0.20.1",
- "solana-program",
- "spl-associated-token-account",
- "spl-token 3.3.0",
-]
-
-[[package]]
-name = "anchor-spl"
 version = "0.22.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bcdf03d76450451f6c587098fa0d9775dc7eabf9173c89bd1bb17dd72b49e748"
@@ -421,7 +409,7 @@ name = "best-apy"
 version = "0.1.0"
 dependencies = [
  "anchor-lang 0.22.1",
- "anchor-spl 0.22.1",
+ "anchor-spl",
  "arrayref",
  "mango",
  "port-anchor-adaptor",
@@ -1039,7 +1027,7 @@ name = "liq-mining"
 version = "0.1.0"
 dependencies = [
  "anchor-lang 0.22.1",
- "anchor-spl 0.22.1",
+ "anchor-spl",
  "mint-proxy",
  "quarry-mine",
  "quarry-mint-wrapper",
@@ -1151,14 +1139,14 @@ dependencies = [
 [[package]]
 name = "mint-proxy"
 version = "1.0.12"
-source = "git+https://github.com/goblingold/saber-periphery?rev=23fa6ed#23fa6ed0929c1211088cb6b23f9a4c787b6e27d7"
+source = "git+https://github.com/saber-hq/saber-periphery?rev=3ffb64b#3ffb64b293ef0c035dcd54bbd8c538dfc7e0b4cb"
 dependencies = [
- "anchor-lang 0.20.1",
- "anchor-spl 0.20.1",
+ "anchor-lang 0.22.1",
+ "anchor-spl",
  "bytemuck",
  "spl-token 3.3.0",
  "static-pubkey",
- "vipers 1.5.5",
+ "vipers",
 ]
 
 [[package]]
@@ -1395,11 +1383,11 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "029a4d6519dd2b7ee53c0b4e95014591e2614d29f4330088a2f744c5efcad4ca"
 dependencies = [
  "anchor-lang 0.22.1",
- "anchor-spl 0.22.1",
+ "anchor-spl",
  "num-traits",
  "quarry-mint-wrapper",
  "spl-math",
- "vipers 2.0.1",
+ "vipers",
 ]
 
 [[package]]
@@ -1409,8 +1397,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c4e60652a19b72968bf788fe24a01ea72db17eb4569405d5251c12d02a1be674"
 dependencies = [
  "anchor-lang 0.22.1",
- "anchor-spl 0.22.1",
- "vipers 2.0.1",
+ "anchor-spl",
+ "vipers",
 ]
 
 [[package]]
@@ -1475,12 +1463,12 @@ dependencies = [
 [[package]]
 name = "redeemer"
 version = "1.0.12"
-source = "git+https://github.com/goblingold/saber-periphery?rev=23fa6ed#23fa6ed0929c1211088cb6b23f9a4c787b6e27d7"
+source = "git+https://github.com/saber-hq/saber-periphery?rev=3ffb64b#3ffb64b293ef0c035dcd54bbd8c538dfc7e0b4cb"
 dependencies = [
- "anchor-lang 0.20.1",
- "anchor-spl 0.20.1",
+ "anchor-lang 0.22.1",
+ "anchor-spl",
  "mint-proxy",
- "vipers 1.5.5",
+ "vipers",
 ]
 
 [[package]]
@@ -2090,22 +2078,12 @@ checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
 
 [[package]]
 name = "vipers"
-version = "1.5.5"
-source = "git+https://github.com/goblingold/vipers?rev=a947df7#a947df740dbad99a791492bb1400912f7e225b49"
-dependencies = [
- "anchor-lang 0.20.1",
- "anchor-spl 0.20.1",
- "spl-associated-token-account",
-]
-
-[[package]]
-name = "vipers"
 version = "2.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c7fa532cf7883844a9ca02b4b3baf96efd02926f32ec67dc22b2fb3c2349b3dc"
 dependencies = [
  "anchor-lang 0.22.1",
- "anchor-spl 0.22.1",
+ "anchor-spl",
 ]
 
 [[package]]

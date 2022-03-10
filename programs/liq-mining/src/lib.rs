@@ -1,3 +1,4 @@
+use crate::error::ErrorCode;
 use anchor_lang::prelude::borsh::{BorshDeserialize, BorshSerialize};
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::{program_option::COption, pubkey::Pubkey};
@@ -6,13 +7,12 @@ use anchor_spl::token::{self, Burn, Mint, MintTo, Token, TokenAccount, Transfer}
 use quarry_mine::{program::QuarryMine, Miner};
 use quarry_mint_wrapper::program::QuarryMintWrapper;
 use stable_swap_anchor::StableSwap;
-use std::{convert::TryInto, mem::size_of};
-use crate::error::ErrorCode;
 use std::str::FromStr;
+use std::{convert::TryInto, mem::size_of};
 
+mod error;
 mod sunny;
 mod swap;
-mod error;
 
 declare_id!("z6QfgcpnNRCyG3M3Hsm7QhhtGL8QZtYC22Xj2Z2v1t7");
 
@@ -26,7 +26,11 @@ pub mod liq_mining {
     pub fn initialize_strategy(ctx: Context<InitializeStrategy>, bump: u8) -> Result<()> {
         let vault_account = &mut ctx.accounts.vault_account;
         vault_account.bump = bump;
-        vault_account.dao_authority = *ctx.accounts.dao_treasury_lp_token_account.to_account_info().key;
+        vault_account.dao_treasury_lp_token_account = *ctx
+            .accounts
+            .dao_treasury_lp_token_account
+            .to_account_info()
+            .key;
         vault_account.input_mint_pubkey = *ctx
             .accounts
             .vault_lp_token_mint_pubkey
@@ -194,8 +198,12 @@ pub mod liq_mining {
             .checked_sub(amount_before)
             .ok_or(ErrorCode::MathOverflow)?;
 
-        ctx.accounts.vault_account.current_tvl = ctx.accounts.vault_account.current_tvl.checked_add(amount_diff)
-        .ok_or(ErrorCode::MathOverflow)?;
+        ctx.accounts.vault_account.current_tvl = ctx
+            .accounts
+            .vault_account
+            .current_tvl
+            .checked_add(amount_diff)
+            .ok_or(ErrorCode::MathOverflow)?;
 
         Ok(())
     }
@@ -322,6 +330,7 @@ pub mod liq_mining {
 }
 
 #[account]
+#[derive(Default)]
 pub struct LpPrice {
     pub total_tokens: u64,
     pub minted_tokens: u64,
@@ -355,7 +364,6 @@ impl LpPrice {
     }
 }
 
-
 // TODO check constraints: token_accounts mints, ...
 /// Accounts for the entrypoint. For those used in cpi-calls, only the accounts related with the
 /// vault are checked. The rest of them are delegated to the underlying cpi program.
@@ -365,14 +373,14 @@ pub struct InitializeStrategy<'info> {
     #[account(
         mut,
         constraint = Pubkey::from_str(ALLOWED_DEPLOYER).unwrap()== *user_signer.key
-    )]    
+    )]
     pub user_signer: Signer<'info>,
     #[account(
         init,
         payer = user_signer,
         space = 8 + size_of::<VaultAccount>()
     )]
-    pub vault_account: Account<'info, VaultAccount>,
+    pub vault_account: Box<Account<'info, VaultAccount>>,
     pub vault_signer: AccountInfo<'info>,
     #[account(
         init,
@@ -560,7 +568,7 @@ pub struct Deposit<'info> {
         bump = vault_account.bump
     )]
     pub vault_signer: AccountInfo<'info>,
-    pub vault_account: Account<'info, VaultAccount>,
+    pub vault_account: Box<Account<'info, VaultAccount>>,
     #[account(
         mut,
         constraint = vault_lp_token_mint_address.key() == vault_account.input_mint_pubkey,
@@ -573,11 +581,11 @@ pub struct Deposit<'info> {
         constraint = vault_account.vault_lp_token_mint_pubkey == *vault_lp_token_mint_pubkey.to_account_info().key
     )]
     pub vault_lp_token_mint_pubkey: Account<'info, Mint>,
-    #[account(
-        mut,
-        associated_token::mint = vault_account.input_mint_pubkey,
-        associated_token::authority = vault_signer,
-    )]
+    // #[account(
+    //     mut,
+    //     associated_token::mint = vault_account.input_mint_pubkey,
+    //     associated_token::authority = vault_signer,
+    // )]
     pub vault_input_token_account: Account<'info, TokenAccount>,
     pub token_program: Program<'info, Token>,
 }
@@ -602,7 +610,7 @@ pub struct Withdraw<'info> {
         bump = vault_account.bump
     )]
     pub vault_signer: AccountInfo<'info>,
-    pub vault_account: Account<'info, VaultAccount>,
+    pub vault_account: Box<Account<'info, VaultAccount>>,
     #[account(
         mut,
         constraint = vault_lp_token_mint_pubkey.mint_authority == COption::Some(*vault_signer.key),
@@ -615,11 +623,11 @@ pub struct Withdraw<'info> {
         constraint = vault_lp_token_mint_address.mint_authority == COption::Some(*vault_signer.key),
     )]
     pub vault_lp_token_mint_address: Account<'info, Mint>,
-    #[account(
-        mut,
-        associated_token::mint = vault_account.input_mint_pubkey,
-        associated_token::authority = vault_signer,
-    )]
+    // #[account(
+    //     mut,
+    //     associated_token::mint = vault_account.input_mint_pubkey,
+    //     associated_token::authority = vault_signer,
+    // )]
     pub vault_input_token_account: Account<'info, TokenAccount>,
     pub token_program: Program<'info, Token>,
 }
@@ -675,11 +683,11 @@ pub struct StableSwapAnchorDeposit<'info> {
     pub input_b: StableSwapAnchorSwapToken<'info>,
     #[account(mut)]
     pub pool_mint: AccountInfo<'info>,
-    #[account(
-        mut,
-        associated_token::mint = vault_input_token_account.mint,
-        associated_token::authority = vault_input_token_account.owner,
-    )]
+    // #[account(
+    //     mut,
+    //     associated_token::mint = vault_input_token_account.mint,
+    //     associated_token::authority = vault_input_token_account.owner,
+    // )]
     pub vault_input_token_account: Box<Account<'info, TokenAccount>>,
 }
 
@@ -756,11 +764,11 @@ impl<'info> StableSwapAnchorSwapOutput<'info> {
 
 #[derive(Accounts)]
 pub struct StableSwapAnchorSwapToken<'info> {
-    #[account(
-        mut,
-        associated_token::mint = user.mint,
-        associated_token::authority = user.owner,
-    )]
+    // #[account(
+    //     mut,
+    //     associated_token::mint = user.mint,
+    //     associated_token::authority = user.owner,
+    // )]
     pub user: Account<'info, TokenAccount>,
     #[account(mut)]
     pub reserve: AccountInfo<'info>,
@@ -843,11 +851,11 @@ pub struct SunnyUnstake<'info> {
 
 #[derive(Accounts)]
 pub struct SunnyStakeInternal<'info> {
-    #[account(
-        mut,
-        associated_token::mint = vault_sunny_ata.mint,
-        associated_token::authority = vault_sunny_ata.owner,
-    )]
+    // #[account(
+    //     mut,
+    //     associated_token::mint = vault_sunny_ata.mint,
+    //     associated_token::authority = vault_sunny_ata.owner,
+    // )]
     pub vault_sunny_ata: Box<Account<'info, TokenAccount>>,
     pub rewarder: AccountInfo<'info>,
     #[account(mut)]
@@ -897,17 +905,17 @@ pub struct QuarryMineUserStake<'info> {
     pub miner: Account<'info, Miner>,
     #[account(mut)]
     pub quarry: AccountInfo<'info>,
-    #[account(
-        mut,
-        associated_token::mint = miner_vault.mint,
-        associated_token::authority = miner.key(),
-    )]
+    // #[account(
+    //     mut,
+    //     associated_token::mint = miner_vault.mint,
+    //     associated_token::authority = miner.key(),
+    // )]
     pub miner_vault: Account<'info, TokenAccount>,
-    #[account(
-        mut,
-        associated_token::mint = miner_vault.mint,
-        associated_token::authority = authority,
-    )]
+    // #[account(
+    //     mut,
+    //     associated_token::mint = miner_vault.mint,
+    //     associated_token::authority = authority,
+    // )]
     pub token_account: Account<'info, TokenAccount>,
     pub token_program: Program<'info, Token>,
     pub rewarder: AccountInfo<'info>,
@@ -937,23 +945,23 @@ pub struct SunnyClaimRewards<'info> {
     pub vault_account: Account<'info, VaultAccount>,
     #[account(mut)]
     pub vault_sunny: AccountInfo<'info>,
-    #[account(
-        mut,
-        associated_token::mint = rewards_mint,
-        associated_token::authority = vault_sunny,
-    )]
+    // #[account(
+    //     mut,
+    //     associated_token::mint = rewards_mint,
+    //     associated_token::authority = vault_sunny,
+    // )]
     pub vault_sunny_rewards_ata: Box<Account<'info, TokenAccount>>,
-    #[account(
-        mut,
-        associated_token::mint = vault_sunny_lp.mint,
-        associated_token::authority = vault_sunny,
-    )]
+    // #[account(
+    //     mut,
+    //     associated_token::mint = vault_sunny_lp.mint,
+    //     associated_token::authority = vault_sunny,
+    // )]
     pub vault_sunny_lp: Box<Account<'info, TokenAccount>>,
-    #[account(
-        mut,
-        associated_token::mint = rewards_mint,
-        associated_token::authority = vault_signer,
-    )]
+    // #[account(
+    //     mut,
+    //     associated_token::mint = rewards_mint,
+    //     associated_token::authority = vault_signer,
+    // )]
     pub vault_signer_rewards: Box<Account<'info, TokenAccount>>,
     #[account(mut)]
     pub vault_miner: AccountInfo<'info>,
@@ -1007,11 +1015,11 @@ pub struct QuarryMineClaimRewards<'info> {
     pub minter: AccountInfo<'info>,
     #[account(mut)]
     pub rewards_token_mint: Account<'info, Mint>,
-    #[account(
-        mut,
-        associated_token::mint = rewards_token_mint,
-        associated_token::authority = stake.authority,
-    )]
+    // #[account(
+    //     mut,
+    //     associated_token::mint = rewards_token_mint,
+    //     associated_token::authority = stake.authority,
+    // )]
     pub rewards_token_account: Account<'info, TokenAccount>,
     #[account(mut)]
     pub claim_fee_token_account: AccountInfo<'info>,
@@ -1072,7 +1080,7 @@ pub struct SunnyRedeem<'info> {
     pub vault_account: Box<Account<'info, VaultAccount>>,
     #[account(constraint = sunny_quarry_redeemer_program.key == &sunny::quarry_redeemer_program::ID)]
     pub sunny_quarry_redeemer_program: AccountInfo<'info>,
-    #[account(constraint = redeemer_program_id.key == &redeemer::program::Redeemer::ID)]
+    #[account(constraint = redeemer_program_id.key == &redeemer::ID)]
     pub redeemer_program_id: AccountInfo<'info>,
     #[account(
         constraint = redeem_saber.redeem_ctx.source_authority.key ==  vault_signer.key,
@@ -1096,7 +1104,7 @@ pub struct SaberRedeem<'info> {
     )]
     pub vault_signer: AccountInfo<'info>,
     pub vault_account: Account<'info, VaultAccount>,
-    #[account(constraint = redeemer_program_id.key == &redeemer::program::Redeemer::ID)]
+    #[account(constraint = redeemer_program_id.key == &redeemer::ID)]
     pub redeemer_program_id: AccountInfo<'info>,
     #[account(
         constraint = redeem.redeem_ctx.source_authority.key ==  vault_signer.key,
@@ -1143,17 +1151,17 @@ pub struct RedeemerRedeemTokens<'info> {
     pub redeemer: AccountInfo<'info>,
     pub tokens: RedeemerMutTokenPair<'info>,
     pub source_authority: AccountInfo<'info>,
-    #[account(
-        mut,
-        associated_token::mint = iou_source.mint,
-        associated_token::authority = source_authority,
-    )]
+    // #[account(
+    //     mut,
+    //     associated_token::mint = iou_source.mint,
+    //     associated_token::authority = source_authority,
+    // )]
     pub iou_source: Box<Account<'info, TokenAccount>>,
-    #[account(
-        mut,
-        associated_token::mint = redemption_destination.mint,
-        associated_token::authority = source_authority,
-    )]
+    // #[account(
+    //     mut,
+    //     associated_token::mint = redemption_destination.mint,
+    //     associated_token::authority = source_authority,
+    // )]
     pub redemption_destination: Box<Account<'info, TokenAccount>>,
 }
 
@@ -1199,17 +1207,17 @@ pub struct RaydiumSwap<'info> {
     )]
     pub vault_signer: AccountInfo<'info>,
     pub vault_account: Account<'info, VaultAccount>,
-    #[account(
-        mut,
-        associated_token::mint = vault_input_token_account.mint,
-        associated_token::authority = vault_signer,
-    )]
+    // #[account(
+    //     mut,
+    //     associated_token::mint = vault_input_token_account.mint,
+    //     associated_token::authority = vault_signer,
+    // )]
     pub vault_input_token_account: Box<Account<'info, TokenAccount>>,
-    #[account(
-        mut,
-        associated_token::mint = vault_account.input_mint_pubkey,
-        associated_token::authority = vault_signer,
-    )]
+    // #[account(
+    //     mut,
+    //     associated_token::mint = vault_account.input_mint_pubkey,
+    //     associated_token::authority = vault_signer,
+    // )]
     pub vault_output_token_account: Box<Account<'info, TokenAccount>>,
     #[account(constraint = raydium_amm_program_id.key == &swap::raydium_amm::ID)]
     pub raydium_amm_program_id: AccountInfo<'info>,
