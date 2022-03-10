@@ -40,8 +40,8 @@ pub mod best_apy {
             .vault_account
             .set_inner(VaultAccount::init(InitVaultAccountParams {
                 bump,
-                input_mint_pubkey: ctx.accounts.vault_lp_token_mint_pubkey.key(),
-                vault_lp_token_mint_pubkey: ctx.accounts.input_token_mint_address.key(),
+                input_mint_pubkey: ctx.accounts.input_token_mint_address.key(),
+                vault_lp_token_mint_pubkey: ctx.accounts.vault_lp_token_mint_pubkey.key(),
                 dao_treasury_lp_token_account: ctx.accounts.dao_treasury_lp_token_account.key(),
             }));
 
