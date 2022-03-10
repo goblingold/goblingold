@@ -137,38 +137,36 @@ impl VaultAccount {
     }
 
     /// Calculate amount to deposit in the given protocol
-    pub fn calculate_deposit(&self, protocol: Protocols, vault_amount: u64) -> Result<u64> {
-        let indx: usize = protocol as usize;
+    pub fn calculate_deposit(&self, protocol: Protocols, available_amount: u64) -> Result<u64> {
+        let protocol = &self.protocols[protocol as usize];
 
-        let amount: i128 = (self.current_tvl as i128)
-            .checked_mul(self.protocols[indx].weight as i128)
-            .ok_or(ErrorCode::MathOverflow)?
-            .checked_div(1000)
-            .ok_or(ErrorCode::MathOverflow)?
-            .checked_sub(self.protocols[indx].deposited.amount as i128)
-            .ok_or(ErrorCode::MathOverflow)?;
+        let deposited_amount = protocol.deposited.amount;
+        let target_amount = protocol.amount_should_be_deposited(self.current_tvl)?;
 
-        if amount <= 0 {
-            err!(ErrorCode::InvalidProtocolDeposit)
+        if target_amount > deposited_amount {
+            let amount = target_amount
+                .checked_sub(deposited_amount)
+                .ok_or(ErrorCode::MathOverflow)?;
+
+            Ok(cmp::min(amount, available_amount))
         } else {
-            Ok(cmp::min(vault_amount, amount as u64))
+            err!(ErrorCode::InvalidProtocolDeposit)
         }
     }
 
     /// Calculate amount to withdraw from the given protocol
     pub fn calculate_withdraw(&self, protocol: Protocols) -> Result<u64> {
-        let indx: usize = protocol as usize;
+        let protocol = &self.protocols[protocol as usize];
 
-        let amount: i128 = (self.current_tvl as i128)
-            .checked_mul(self.protocols[indx].weight as i128)
-            .ok_or(ErrorCode::MathOverflow)?
-            .checked_div(1000)
-            .ok_or(ErrorCode::MathOverflow)?
-            .checked_sub(self.protocols[indx].deposited.amount as i128)
-            .ok_or(ErrorCode::MathOverflow)?;
+        let deposited_amount = protocol.deposited.amount;
+        let target_amount = protocol.amount_should_be_deposited(self.current_tvl)?;
 
-        if amount <= 0 {
-            Ok(amount.abs() as u64)
+        if target_amount < deposited_amount {
+            let amount = deposited_amount
+                .checked_sub(target_amount)
+                .ok_or(ErrorCode::MathOverflow)?;
+
+            Ok(amount)
         } else {
             err!(ErrorCode::InvalidProtocolWithdraw)
         }
@@ -246,6 +244,18 @@ impl ProtocolData {
             .ok_or(ErrorCode::MathOverflow)?;
 
         Ok(())
+    }
+
+    /// Amount that should be deposited according to the weight
+    fn amount_should_be_deposited(&self, total_amount: u64) -> Result<u64> {
+        let amount: u64 = (total_amount as u128)
+            .checked_mul(self.weight as u128)
+            .ok_or(ErrorCode::MathOverflow)?
+            .checked_div(1000_u128)
+            .ok_or(ErrorCode::MathOverflow)?
+            .try_into()
+            .map_err(|_| ErrorCode::MathOverflow)?;
+        Ok(amount)
     }
 }
 
