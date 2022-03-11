@@ -18,6 +18,7 @@ declare_id!("z6QfgcpnNRCyG3M3Hsm7QhhtGL8QZtYC22Xj2Z2v1t7");
 
 pub const ALLOWED_DEPLOYER: &str = "8XhNoDjjNoLP5Rys1pBJKGdE8acEC1HJsWGkfkMt6JP1";
 pub const ALLOWED_RUNNER: &str = "DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod";
+const FEE: u64 = 10; // in per cent
 
 #[program]
 pub mod liq_mining {
@@ -26,9 +27,14 @@ pub mod liq_mining {
     pub fn initialize_strategy(ctx: Context<InitializeStrategy>, bump: u8) -> Result<()> {
         let vault_account = &mut ctx.accounts.vault_account;
         vault_account.bump = bump;
-        vault_account.dao_treasury_lp_token_account = *ctx
+        vault_account.dao_treasury_saber_token_account = *ctx
             .accounts
-            .dao_treasury_lp_token_account
+            .dao_treasury_saber_token_account
+            .to_account_info()
+            .key;
+            vault_account.dao_treasury_sunny_token_account = *ctx
+            .accounts
+            .dao_treasury_sunny_token_account
             .to_account_info()
             .key;
         vault_account.input_mint_pubkey = *ctx
@@ -301,32 +307,71 @@ pub mod liq_mining {
     }
 
     pub fn sunny_redeem(ctx: Context<SunnyRedeem>) -> Result<()> {
-        ctx.accounts.redeem()
-    }
+         // Fee
+        let saber_before = ctx.accounts.redeem_saber.redeem_ctx.redemption_destination.amount;
+        let sunny_before = ctx.accounts.redeem_sunny.redeem_ctx.redemption_destination.amount;
 
-    pub fn redeem(ctx: Context<SaberRedeem>) -> Result<()> {
-        let seeds = &[
-            ctx.accounts.vault_account.to_account_info().key.as_ref(),
-            &[ctx.accounts.vault_account.bump],
-        ];
-        let signer = &[&seeds[..]];
+        ctx.accounts.redeem()?;
 
-        let cpi_ctx: CpiContext<redeemer::cpi::accounts::RedeemTokensFromMintProxy> =
-            CpiContext::new_with_signer(
-                ctx.accounts.redeemer_program_id.to_account_info(),
-                ctx.accounts.redeem.to_cpi_accounts(),
-                signer,
-            );
+        ctx.accounts.redeem_saber.redeem_ctx.redemption_destination.reload()?;
+        ctx.accounts.redeem_sunny.redeem_ctx.redemption_destination.reload()?;
 
-        let amount = ctx.accounts.redeem.redeem_ctx.iou_source.amount;
-        redeemer::cpi::redeem_tokens_from_mint_proxy(cpi_ctx, amount)?;
+        let saber_fee = calculate_fee(ctx.accounts.redeem_saber.redeem_ctx.redemption_destination.amount.checked_sub(saber_before).ok_or(ErrorCode::MathOverflow)?)?;
+        let sunny_fee = calculate_fee(ctx.accounts.redeem_sunny.redeem_ctx.redemption_destination.amount.checked_sub(sunny_before).ok_or(ErrorCode::MathOverflow)?)?;
+
+        let cpi_accounts = Transfer {
+            from: ctx.accounts.redeem_saber.redeem_ctx.redemption_destination.to_account_info(),
+            to: ctx.accounts.dao_treasury_saber_token_account.to_account_info(),
+            authority: ctx.accounts.vault_signer.to_account_info(),
+        };
+        let cpi_program = ctx.accounts.token_program.to_account_info();
+        let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
+        token::transfer(cpi_ctx, saber_fee)?;
+
+        let cpi_accounts = Transfer {
+            from: ctx.accounts.redeem_sunny.redeem_ctx.redemption_destination.to_account_info(),
+            to: ctx.accounts.dao_treasury_sunny_token_account.to_account_info(),
+            authority: ctx.accounts.vault_signer.to_account_info(),
+        };
+        let cpi_program = ctx.accounts.token_program.to_account_info();
+        let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
+        token::transfer(cpi_ctx, sunny_fee)?;
 
         Ok(())
     }
 
+    // TODO REMOVE
+    // pub fn saber_redeem(ctx: Context<SaberRedeem>) -> Result<()> {
+    //     let seeds = &[
+    //         ctx.accounts.vault_account.to_account_info().key.as_ref(),
+    //         &[ctx.accounts.vault_account.bump],
+    //     ];
+    //     let signer = &[&seeds[..]];
+
+    //     let cpi_ctx: CpiContext<redeemer::cpi::accounts::RedeemTokensFromMintProxy> =
+    //         CpiContext::new_with_signer(
+    //             ctx.accounts.redeemer_program_id.to_account_info(),
+    //             ctx.accounts.redeem.to_cpi_accounts(),
+    //             signer,
+    //         );
+
+    //     let amount = ctx.accounts.redeem.redeem_ctx.iou_source.amount;
+    //     redeemer::cpi::redeem_tokens_from_mint_proxy(cpi_ctx, amount)?;
+
+    //     Ok(())
+    // }
+
     pub fn swap(ctx: Context<RaydiumSwap>) -> Result<()> {
         ctx.accounts.swap_rewards()
     }
+}
+
+pub fn calculate_fee(amount: u64) -> Result<u64>{
+    Ok(amount
+        .checked_mul(FEE)
+        .ok_or(ErrorCode::MathOverflow)?
+        .checked_div(100)
+        .ok_or(ErrorCode::MathOverflow)?)
 }
 
 #[account]
@@ -399,10 +444,15 @@ pub struct InitializeStrategy<'info> {
    )]
     pub vault_input_token_account: Account<'info, TokenAccount>,
     #[account(
-        constraint = dao_treasury_lp_token_account.owner == Pubkey::from_str(ALLOWED_DEPLOYER).unwrap(),
-        constraint = dao_treasury_lp_token_account.mint == vault_lp_token_mint_pubkey.key()
+        constraint = dao_treasury_saber_token_account.owner == Pubkey::from_str(ALLOWED_DEPLOYER).unwrap(),
+        constraint = dao_treasury_saber_token_account.mint == vault_lp_token_mint_pubkey.key()
     )]
-    pub dao_treasury_lp_token_account: Account<'info, TokenAccount>,
+    pub dao_treasury_saber_token_account: Box<Account<'info, TokenAccount>>,
+    #[account(
+        constraint = dao_treasury_sunny_token_account.owner == Pubkey::from_str(ALLOWED_DEPLOYER).unwrap(),
+        constraint = dao_treasury_sunny_token_account.mint == vault_lp_token_mint_pubkey.key()
+    )]
+    pub dao_treasury_sunny_token_account: Box<Account<'info, TokenAccount>>,
     pub associated_token_program: Program<'info, AssociatedToken>,
     pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,
@@ -460,7 +510,7 @@ pub struct InitializeSunnyMiner<'info> {
         bump = vault_account.bump
     )]
     pub vault_signer: AccountInfo<'info>,
-    pub vault_account: Account<'info, VaultAccount>,
+    pub vault_account: Box<Account<'info, VaultAccount>>,
     pub vault_sunny: AccountInfo<'info>,
     #[account(
         init,
@@ -1094,6 +1144,15 @@ pub struct SunnyRedeem<'info> {
         constraint = redeem_sunny.redeem_ctx.redemption_destination.owner == *vault_signer.key,
     )]
     pub redeem_sunny: SunnyRedeemTokensFromMintWrapper<'info>,
+    #[account(
+        constraint = dao_treasury_saber_token_account.owner == Pubkey::from_str(ALLOWED_DEPLOYER).unwrap(),
+    )]
+    pub dao_treasury_saber_token_account: Box<Account<'info, TokenAccount>>,
+    #[account(
+        constraint = dao_treasury_sunny_token_account.owner == Pubkey::from_str(ALLOWED_DEPLOYER).unwrap(),
+    )]
+    pub dao_treasury_sunny_token_account: Box<Account<'info, TokenAccount>>,
+    pub token_program: AccountInfo<'info>,
 }
 
 #[derive(Accounts)]
@@ -1266,8 +1325,10 @@ pub struct VaultAccount {
     pub vault_lp_token_mint_pubkey: Pubkey,
     /// Pool id from the stable swap program
     pub stable_swap_pool_id: Pubkey,
-    /// Destination fee account
-    pub dao_treasury_lp_token_account: Pubkey,
+    /// Saber Destination fee account
+    pub dao_treasury_saber_token_account: Pubkey,
+    /// Sunny Destination fee account
+    pub dao_treasury_sunny_token_account: Pubkey,
     /// Current TVL deposited in the strategy (considering deposits/withdraws)
     pub current_tvl: u64,
     /// Price of the LP token in the previous interval
