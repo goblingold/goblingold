@@ -57,13 +57,13 @@ impl<'info> RefreshRewardsWeights<'info> {
             minted_tokens: self.vault_lp_token_mint_pubkey.supply,
         };
 
-        self.mint_rewards_and_update_tvl()?;
+        self.mint_fees_and_update_tvl()?;
 
         Ok(())
     }
 
-    /// Mint LP tokens to the treasury account in order to take the rewards
-    pub fn mint_rewards_and_update_tvl(&mut self) -> Result<()> {
+    /// Mint LP tokens to the treasury account in order to take the fees
+    pub fn mint_fees_and_update_tvl(&mut self) -> Result<()> {
         let last_tvl = self
             .vault_account
             .protocols
