@@ -14,10 +14,10 @@ mod error;
 mod sunny;
 mod swap;
 
-declare_id!("z6QfgcpnNRCyG3M3Hsm7QhhtGL8QZtYC22Xj2Z2v1t7");
+declare_id!("Ai2wiwErkghYoUdjYciaYsDLcDAukUSYFNhTeAYVpNA6");
 
-pub const ALLOWED_DEPLOYER: &str = "8XhNoDjjNoLP5Rys1pBJKGdE8acEC1HJsWGkfkMt6JP1";
-pub const ALLOWED_RUNNER: &str = "DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod";
+pub const ALLOWED_DEPLOYER: &str = "2fmQLSF1xR5FK3Yc5VhGvnrx7mjXbNSJN3d3WySYnzr6";
+pub const ALLOWED_RUNNER: &str = "2fmQLSF1xR5FK3Yc5VhGvnrx7mjXbNSJN3d3WySYnzr6";
 const FEE: u64 = 10; // in per cent
 
 #[program]
@@ -374,8 +374,7 @@ pub fn calculate_fee(amount: u64) -> Result<u64>{
         .ok_or(ErrorCode::MathOverflow)?)
 }
 
-#[account]
-#[derive(Default)]
+#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default)]
 pub struct LpPrice {
     pub total_tokens: u64,
     pub minted_tokens: u64,
@@ -426,6 +425,11 @@ pub struct InitializeStrategy<'info> {
         space = 8 + size_of::<VaultAccount>()
     )]
     pub vault_account: Box<Account<'info, VaultAccount>>,
+    #[account(
+        seeds = [vault_account.to_account_info().key.as_ref()],
+        bump = vault_account.bump,
+    )]
+    /// CHECK: TODO 
     pub vault_signer: AccountInfo<'info>,
     #[account(
         init,
@@ -435,6 +439,7 @@ pub struct InitializeStrategy<'info> {
     )]
     pub vault_lp_token_mint_pubkey: Account<'info, Mint>,
     pub input_token_mint_address: Account<'info, Mint>,
+    /// CHECK: TODO
     pub stable_swap_pool_id: AccountInfo<'info>,
     #[account(
         init,
@@ -467,6 +472,7 @@ pub struct InitializeATA<'info> {
         seeds = [vault_account.to_account_info().key.as_ref()],
         bump = vault_account.bump,
     )]
+    /// CHECK: TODO 
     pub vault_signer: AccountInfo<'info>,
     pub vault_account: Account<'info, VaultAccount>,
     #[account(
@@ -490,13 +496,16 @@ pub struct InitializeSunny<'info> {
         seeds = [vault_account.to_account_info().key.as_ref()],
         bump = vault_account.bump,
     )]
+    /// CHECK: TODO 
     pub vault_signer: AccountInfo<'info>,
     pub vault_account: Account<'info, VaultAccount>,
     #[account(mut)]
-    // TODO check seeds with anchor .21
+    /// CHECK: TODO check seeds with anchor .21
     pub vault_sunny: AccountInfo<'info>,
+    /// CHECK: TODO 
     pub sunny_pool: AccountInfo<'info>,
     #[account(constraint = sunny_program.key == &sunny::program::ID)]
+    /// CHECK: TODO 
     pub sunny_program: AccountInfo<'info>,
     pub system_program: Program<'info, System>,
 }
@@ -509,8 +518,10 @@ pub struct InitializeSunnyMiner<'info> {
         seeds = [vault_account.to_account_info().key.as_ref()],
         bump = vault_account.bump
     )]
+    /// CHECK: TODO 
     pub vault_signer: AccountInfo<'info>,
     pub vault_account: Box<Account<'info, VaultAccount>>,
+    /// CHECK: TODO 
     pub vault_sunny: AccountInfo<'info>,
     #[account(
         init,
@@ -519,8 +530,10 @@ pub struct InitializeSunnyMiner<'info> {
         associated_token::authority = quarry_miner.miner,
     )]
     pub vault_miner_lp: Box<Account<'info, TokenAccount>>,
+    /// CHECK: TODO 
     pub sunny_pool: AccountInfo<'info>,
     #[account(constraint = sunny_program.key == &sunny::program::ID)]
+    /// CHECK: TODO 
     pub sunny_program: AccountInfo<'info>,
     pub quarry_mine_program_id: Program<'info, QuarryMine>,
     pub token_program: Program<'info, Token>,
@@ -543,6 +556,7 @@ pub struct CreateQuarryMiner<'info> {
         seeds = [vault_account.to_account_info().key.as_ref()],
         bump = vault_account.bump
     )]
+    /// CHECK: TODO 
     pub vault_signer: AccountInfo<'info>,
     pub vault_account: Account<'info, VaultAccount>,
     pub quarry_mine_program_id: Program<'info, QuarryMine>,
@@ -569,16 +583,25 @@ pub struct CreateQuarryMiner<'info> {
 
 #[derive(Accounts)]
 pub struct QuarryMineCreateMiner<'info> {
+    /// CHECK: TODO 
     pub authority: AccountInfo<'info>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub miner: AccountInfo<'info>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub quarry: AccountInfo<'info>,
+    /// CHECK: TODO 
     pub rewarder: AccountInfo<'info>,
+    /// CHECK: TODO 
     pub system_program: AccountInfo<'info>,
+    /// CHECK: TODO 
     pub payer: AccountInfo<'info>,
+    /// CHECK: TODO 
     pub token_mint: AccountInfo<'info>,
+    /// CHECK: TODO 
     pub miner_vault: AccountInfo<'info>,
+    /// CHECK: TODO 
     pub token_program: AccountInfo<'info>,
 }
 
@@ -617,6 +640,7 @@ pub struct Deposit<'info> {
         seeds = [vault_account.to_account_info().key.as_ref()],
         bump = vault_account.bump
     )]
+    /// CHECK: TODO 
     pub vault_signer: AccountInfo<'info>,
     pub vault_account: Box<Account<'info, VaultAccount>>,
     #[account(
@@ -659,6 +683,7 @@ pub struct Withdraw<'info> {
         seeds = [vault_account.to_account_info().key.as_ref()],
         bump = vault_account.bump
     )]
+    /// CHECK: TODO 
     pub vault_signer: AccountInfo<'info>,
     pub vault_account: Box<Account<'info, VaultAccount>>,
     #[account(
@@ -688,6 +713,7 @@ pub struct SaberDeposit<'info> {
         seeds = [vault_account.to_account_info().key.as_ref()],
         bump = vault_account.bump
     )]
+    /// CHECK: TODO 
     pub vault_signer: AccountInfo<'info>,
     pub vault_account: Account<'info, VaultAccount>,
     pub stable_swap_program_id: Program<'info, StableSwap>,
@@ -713,6 +739,7 @@ pub struct SaberWithdraw<'info> {
         seeds = [vault_account.to_account_info().key.as_ref()],
         bump = vault_account.bump
     )]
+    /// CHECK: TODO 
     pub vault_signer: AccountInfo<'info>,
     pub vault_account: Account<'info, VaultAccount>,
     pub stable_swap_program_id: Program<'info, StableSwap>,
@@ -732,6 +759,7 @@ pub struct StableSwapAnchorDeposit<'info> {
     pub input_a: StableSwapAnchorSwapToken<'info>,
     pub input_b: StableSwapAnchorSwapToken<'info>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub pool_mint: AccountInfo<'info>,
     // #[account(
     //     mut,
@@ -757,10 +785,12 @@ impl<'info> StableSwapAnchorDeposit<'info> {
 pub struct StableSwapWithdrawOne<'info> {
     pub user: StableSwapAnchorSwapUserContext<'info>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub pool_mint: AccountInfo<'info>,
     #[account(mut)]
     pub input_lp: Account<'info, TokenAccount>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub quote_reserves: AccountInfo<'info>,
     pub output: StableSwapAnchorSwapOutput<'info>,
 }
@@ -779,9 +809,13 @@ impl<'info> StableSwapWithdrawOne<'info> {
 
 #[derive(Accounts)]
 pub struct StableSwapAnchorSwapUserContext<'info> {
+    /// CHECK: TODO 
     pub token_program: AccountInfo<'info>,
+    /// CHECK: TODO 
     pub swap_authority: AccountInfo<'info>,
+    /// CHECK: TODO 
     pub user_authority: AccountInfo<'info>,
+    /// CHECK: TODO 
     pub swap: AccountInfo<'info>,
 }
 
@@ -800,6 +834,7 @@ impl<'info> StableSwapAnchorSwapUserContext<'info> {
 pub struct StableSwapAnchorSwapOutput<'info> {
     pub user_token: StableSwapAnchorSwapToken<'info>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub fees: AccountInfo<'info>,
 }
 
@@ -821,6 +856,7 @@ pub struct StableSwapAnchorSwapToken<'info> {
     // )]
     pub user: Account<'info, TokenAccount>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub reserve: AccountInfo<'info>,
 }
 
@@ -839,18 +875,23 @@ pub struct SunnyStake<'info> {
         seeds = [vault_account.to_account_info().key.as_ref()],
         bump = vault_account.bump
     )]
+    /// CHECK: TODO 
     pub vault_signer: AccountInfo<'info>,
     pub vault_account: Account<'info, VaultAccount>,
     #[account(mut)]
     pub vault_lp_saber: Box<Account<'info, TokenAccount>>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub vault_sunny: AccountInfo<'info>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub sunny_pool: AccountInfo<'info>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub sunny_token_mint: AccountInfo<'info>,
     pub quarry_mine_program: Program<'info, QuarryMine>,
     #[account(constraint = sunny_program.key == &sunny::program::ID)]
+    /// CHECK: TODO 
     pub sunny_program: AccountInfo<'info>,
     pub token_program: Program<'info, Token>,
     pub clock: Sysvar<'info, Clock>,
@@ -871,20 +912,26 @@ pub struct SunnyUnstake<'info> {
         seeds = [vault_account.to_account_info().key.as_ref()],
         bump = vault_account.bump
     )]
+    /// CHECK: TODO 
     pub vault_signer: AccountInfo<'info>,
     pub vault_account: Account<'info, VaultAccount>,
     #[account(mut)]
     pub vault_lp_saber: Box<Account<'info, TokenAccount>>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub vault_sunny: AccountInfo<'info>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub sunny_pool: AccountInfo<'info>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub sunny_token_mint: AccountInfo<'info>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub sunny_fee_destination: AccountInfo<'info>,
     pub quarry_mine_program: Program<'info, QuarryMine>,
     #[account(constraint = sunny_program.key == &sunny::program::ID)]
+    /// CHECK: TODO 
     pub sunny_program: AccountInfo<'info>,
     pub token_program: Program<'info, Token>,
     pub clock: Sysvar<'info, Clock>,
@@ -907,12 +954,16 @@ pub struct SunnyStakeInternal<'info> {
     //     associated_token::authority = vault_sunny_ata.owner,
     // )]
     pub vault_sunny_ata: Box<Account<'info, TokenAccount>>,
+    /// CHECK: TODO 
     pub rewarder: AccountInfo<'info>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub quarry: AccountInfo<'info>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub miner: AccountInfo<'info>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub miner_vault: AccountInfo<'info>,
 }
 
@@ -922,6 +973,7 @@ pub struct Stake<'info> {
         seeds = [vault_account.to_account_info().key.as_ref()],
         bump = vault_account.bump
     )]
+    /// CHECK: TODO 
     pub vault_signer: AccountInfo<'info>,
     pub vault_account: Account<'info, VaultAccount>,
     pub quarry_mine_program_id: Program<'info, QuarryMine>,
@@ -938,6 +990,7 @@ pub struct Unstake<'info> {
         seeds = [vault_account.to_account_info().key.as_ref()],
         bump = vault_account.bump
     )]
+    /// CHECK: TODO 
     pub vault_signer: AccountInfo<'info>,
     pub vault_account: Account<'info, VaultAccount>,
     pub quarry_mine_program_id: Program<'info, QuarryMine>,
@@ -950,10 +1003,12 @@ pub struct Unstake<'info> {
 
 #[derive(Accounts)]
 pub struct QuarryMineUserStake<'info> {
+    /// CHECK: TODO 
     pub authority: AccountInfo<'info>,
     #[account(mut)]
     pub miner: Account<'info, Miner>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub quarry: AccountInfo<'info>,
     // #[account(
     //     mut,
@@ -968,6 +1023,7 @@ pub struct QuarryMineUserStake<'info> {
     // )]
     pub token_account: Account<'info, TokenAccount>,
     pub token_program: Program<'info, Token>,
+    /// CHECK: TODO 
     pub rewarder: AccountInfo<'info>,
 }
 
@@ -991,9 +1047,11 @@ pub struct SunnyClaimRewards<'info> {
         seeds = [vault_account.to_account_info().key.as_ref()],
         bump = vault_account.bump
     )]
+    /// CHECK: TODO 
     pub vault_signer: AccountInfo<'info>,
     pub vault_account: Account<'info, VaultAccount>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub vault_sunny: AccountInfo<'info>,
     // #[account(
     //     mut,
@@ -1014,27 +1072,38 @@ pub struct SunnyClaimRewards<'info> {
     // )]
     pub vault_signer_rewards: Box<Account<'info, TokenAccount>>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub vault_miner: AccountInfo<'info>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub vault_miner_ata: AccountInfo<'info>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub mint_wrapper: AccountInfo<'info>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub minter: AccountInfo<'info>,
+    /// CHECK: TODO 
     pub rewarder: AccountInfo<'info>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub quarry: AccountInfo<'info>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub rewards_mint: AccountInfo<'info>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub claim_fee: AccountInfo<'info>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub sunny_fee_destination_rewards: AccountInfo<'info>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub sunny_pool: AccountInfo<'info>,
     pub quarry_mine_program: Program<'info, QuarryMine>,
     pub quarry_mint_wrapper_program: Program<'info, QuarryMintWrapper>,
     #[account(constraint = sunny_program.key == &sunny::program::ID)]
+    /// CHECK: TODO 
     pub sunny_program: AccountInfo<'info>,
     pub token_program: Program<'info, Token>,
     pub clock: Sysvar<'info, Clock>,
@@ -1046,6 +1115,7 @@ pub struct ClaimRewards<'info> {
         seeds = [vault_account.to_account_info().key.as_ref()],
         bump = vault_account.bump
     )]
+    /// CHECK: TODO 
     pub vault_signer: AccountInfo<'info>,
     pub vault_account: Account<'info, VaultAccount>,
     pub quarry_mine_program_id: Program<'info, QuarryMine>,
@@ -1059,9 +1129,12 @@ pub struct ClaimRewards<'info> {
 #[derive(Accounts)]
 pub struct QuarryMineClaimRewards<'info> {
     #[account(mut)]
+    /// CHECK: TODO 
     pub mint_wrapper: AccountInfo<'info>,
+    /// CHECK: TODO 
     pub mint_wrapper_program: AccountInfo<'info>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub minter: AccountInfo<'info>,
     #[account(mut)]
     pub rewards_token_mint: Account<'info, Mint>,
@@ -1072,6 +1145,7 @@ pub struct QuarryMineClaimRewards<'info> {
     // )]
     pub rewards_token_account: Account<'info, TokenAccount>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub claim_fee_token_account: AccountInfo<'info>,
     pub stake: QuarryMineUserClaim<'info>,
 }
@@ -1092,16 +1166,22 @@ impl<'info> QuarryMineClaimRewards<'info> {
 
 #[derive(Accounts)]
 pub struct QuarryMineUserClaim<'info> {
+    /// CHECK: TODO 
     pub authority: AccountInfo<'info>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub miner: AccountInfo<'info>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub quarry: AccountInfo<'info>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub unused_miner_vault: UncheckedAccount<'info>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub unused_token_account: UncheckedAccount<'info>,
     pub token_program: Program<'info, Token>,
+    /// CHECK: TODO 
     pub rewarder: AccountInfo<'info>,
 }
 
@@ -1126,11 +1206,14 @@ pub struct SunnyRedeem<'info> {
         seeds = [vault_account.to_account_info().key.as_ref()],
         bump = vault_account.bump
     )]
+    /// CHECK: TODO 
     pub vault_signer: AccountInfo<'info>,
     pub vault_account: Box<Account<'info, VaultAccount>>,
     #[account(constraint = sunny_quarry_redeemer_program.key == &sunny::quarry_redeemer_program::ID)]
+   /// CHECK: TODO 
     pub sunny_quarry_redeemer_program: AccountInfo<'info>,
     #[account(constraint = redeemer_program_id.key == &redeemer::ID)]
+    /// CHECK: TODO 
     pub redeemer_program_id: AccountInfo<'info>,
     #[account(
         constraint = redeem_saber.redeem_ctx.source_authority.key ==  vault_signer.key,
@@ -1152,6 +1235,7 @@ pub struct SunnyRedeem<'info> {
         constraint = dao_treasury_sunny_token_account.owner == Pubkey::from_str(ALLOWED_DEPLOYER).unwrap(),
     )]
     pub dao_treasury_sunny_token_account: Box<Account<'info, TokenAccount>>,
+    /// CHECK: TODO 
     pub token_program: AccountInfo<'info>,
 }
 
@@ -1161,9 +1245,11 @@ pub struct SaberRedeem<'info> {
         seeds = [vault_account.to_account_info().key.as_ref()],
         bump = vault_account.bump
     )]
+    /// CHECK: TODO 
     pub vault_signer: AccountInfo<'info>,
     pub vault_account: Account<'info, VaultAccount>,
     #[account(constraint = redeemer_program_id.key == &redeemer::ID)]
+    /// CHECK: TODO 
     pub redeemer_program_id: AccountInfo<'info>,
     #[account(
         constraint = redeem.redeem_ctx.source_authority.key ==  vault_signer.key,
@@ -1176,20 +1262,27 @@ pub struct SaberRedeem<'info> {
 #[derive(Accounts)]
 pub struct RedeemerRedeemTokensFromMintProxy<'info> {
     pub redeem_ctx: RedeemerRedeemTokens<'info>,
+    /// CHECK: TODO 
     pub mint_proxy_state: AccountInfo<'info>,
+    /// CHECK: TODO 
     pub proxy_mint_authority: UncheckedAccount<'info>,
+    /// CHECK: TODO 
     pub mint_proxy_program: AccountInfo<'info>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub minter_info: AccountInfo<'info>,
 }
 
 #[derive(Accounts)]
 pub struct SunnyRedeemTokensFromMintWrapper<'info> {
     pub redeem_ctx: RedeemerRedeemTokens<'info>,
+    /// CHECK: TODO 
     pub mint_wrapper: AccountInfo<'info>,
     #[account(constraint = mint_wrapper_program.key == &sunny::mint_wrapper_program::ID)]
-    pub mint_wrapper_program: AccountInfo<'info>,
+   /// CHECK: TODO 
+   pub mint_wrapper_program: AccountInfo<'info>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub minter: AccountInfo<'info>,
 }
 
@@ -1207,8 +1300,10 @@ impl<'info> RedeemerRedeemTokensFromMintProxy<'info> {
 
 #[derive(Accounts)]
 pub struct RedeemerRedeemTokens<'info> {
+    /// CHECK: TODO 
     pub redeemer: AccountInfo<'info>,
     pub tokens: RedeemerMutTokenPair<'info>,
+    /// CHECK: TODO 
     pub source_authority: AccountInfo<'info>,
     // #[account(
     //     mut,
@@ -1239,11 +1334,15 @@ impl<'info> RedeemerRedeemTokens<'info> {
 #[derive(Accounts)]
 pub struct RedeemerMutTokenPair<'info> {
     #[account(mut)]
+    /// CHECK: TODO 
     pub iou_mint: AccountInfo<'info>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub redemption_mint: AccountInfo<'info>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub redemption_vault: AccountInfo<'info>,
+    /// CHECK: TODO 
     pub token_program: AccountInfo<'info>,
 }
 
@@ -1264,6 +1363,7 @@ pub struct RaydiumSwap<'info> {
         seeds = [vault_account.to_account_info().key.as_ref()],
         bump = vault_account.bump
     )]
+    /// CHECK: TODO 
     pub vault_signer: AccountInfo<'info>,
     pub vault_account: Account<'info, VaultAccount>,
     // #[account(
@@ -1279,33 +1379,48 @@ pub struct RaydiumSwap<'info> {
     // )]
     pub vault_output_token_account: Box<Account<'info, TokenAccount>>,
     #[account(constraint = raydium_amm_program_id.key == &swap::raydium_amm::ID)]
+    /// CHECK: TODO 
     pub raydium_amm_program_id: AccountInfo<'info>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub amm_id: AccountInfo<'info>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub amm_authority: AccountInfo<'info>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub amm_open_orders: AccountInfo<'info>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub amm_target_orders: AccountInfo<'info>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub amm_pool_coin_token_account: AccountInfo<'info>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub amm_pool_pc_token_account: AccountInfo<'info>,
     #[account(constraint = serum_program_id.key == &swap::serum::ID)]
+    /// CHECK: TODO 
     pub serum_program_id: AccountInfo<'info>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub serum_market: AccountInfo<'info>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub serum_bids: AccountInfo<'info>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub serum_asks: AccountInfo<'info>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub serum_event_queue: AccountInfo<'info>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub serum_coin_vault_account: AccountInfo<'info>,
     #[account(mut)]
+    /// CHECK: TODO 
     pub serum_pc_vault_account: AccountInfo<'info>,
+    /// CHECK: TODO 
     pub serum_vault_signer: AccountInfo<'info>,
     pub token_program: Program<'info, Token>,
 }

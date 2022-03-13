@@ -1138,8 +1138,9 @@ dependencies = [
 
 [[package]]
 name = "mint-proxy"
-version = "1.0.12"
-source = "git+https://github.com/saber-hq/saber-periphery?rev=3ffb64b#3ffb64b293ef0c035dcd54bbd8c538dfc7e0b4cb"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8a41efca23765fb23bd9cb41cc7d06ae49f44d4fe16b849cf2c4b82090481c3b"
 dependencies = [
  "anchor-lang 0.22.1",
  "anchor-spl",
@@ -1462,8 +1463,9 @@ dependencies = [
 
 [[package]]
 name = "redeemer"
-version = "1.0.12"
-source = "git+https://github.com/saber-hq/saber-periphery?rev=3ffb64b#3ffb64b293ef0c035dcd54bbd8c538dfc7e0b4cb"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7a64f99dd866341a91c4c71dbcaca3a683e0e4b8ea3a2ff174a0a18e3fb2239a"
 dependencies = [
  "anchor-lang 0.22.1",
  "anchor-spl",
