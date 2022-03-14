@@ -33,7 +33,7 @@ impl<'info> RefreshRewardsWeights<'info> {
 
         if self.vault_account.last_refresh_slot != u64::default() {
             for protocol in self.vault_account.protocols.iter() {
-                let last_updated = protocol.tvl.slot;
+                let last_updated = protocol.rewards.last_slot;
                 require!(
                     self.clock
                         .slot
@@ -46,11 +46,23 @@ impl<'info> RefreshRewardsWeights<'info> {
         }
 
         self.vault_account.last_refresh_slot = self.clock.slot;
-        self.vault_account.update_protocol_weights(elapsed_slots)?;
+        self.vault_account.rewards = self
+            .vault_account
+            .protocols
+            .iter()
+            .try_fold(self.vault_account.rewards, |acc, protocol| {
+                acc.checked_add(protocol.rewards.amount)
+            })
+            .ok_or(ErrorCode::MathOverflow)?;
+
+        self.vault_account.update_protocol_weights()?;
         self.vault_account
             .protocols
             .iter_mut()
-            .for_each(|protocol| protocol.initialize_average());
+            .for_each(|protocol| {
+                protocol.update_tvl().unwrap();
+                protocol.rewards.reset_integral().unwrap();
+            });
 
         self.vault_account.previous_lp_price = LpPrice {
             total_tokens: self.vault_account.current_tvl,
@@ -64,19 +76,7 @@ impl<'info> RefreshRewardsWeights<'info> {
 
     /// Mint LP tokens to the treasury account in order to take the fees
     pub fn mint_fees_and_update_tvl(&mut self) -> Result<()> {
-        let last_tvl = self
-            .vault_account
-            .protocols
-            .iter()
-            .try_fold(self.vault_input_token_account.amount, |acc, &protocol| {
-                acc.checked_add(protocol.tvl.amount)
-            })
-            .ok_or(ErrorCode::MathOverflow)?;
-
-        let rewards = last_tvl
-            .checked_sub(self.vault_account.current_tvl)
-            .ok_or(ErrorCode::MathOverflow)?;
-
+        let rewards = self.vault_account.rewards;
         if rewards > 0 {
             let lp_fee = FEE
                 .checked_mul(rewards as u128)
@@ -113,7 +113,12 @@ impl<'info> RefreshRewardsWeights<'info> {
                 let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer);
                 token::mint_to(cpi_ctx, lp_fee)?;
 
-                self.vault_account.current_tvl = last_tvl;
+                self.vault_account.current_tvl = self
+                    .vault_account
+                    .current_tvl
+                    .checked_add(rewards)
+                    .ok_or(ErrorCode::MathOverflow)?;
+                self.vault_account.rewards = 0_u64;
             }
         }
 

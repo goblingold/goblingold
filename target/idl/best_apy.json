@@ -1700,6 +1700,10 @@
             }
           },
           {
+            "name": "rewards",
+            "type": "u64"
+          },
+          {
             "name": "protocols",
             "type": {
               "array": [
@@ -1725,31 +1729,43 @@
             "type": "u16"
           },
           {
+            "name": "tokens",
+            "type": {
+              "defined": "TokenBalances"
+            }
+          },
+          {
+            "name": "rewards",
+            "type": {
+              "defined": "AccumulatedRewards"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "TokenBalances",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
             "name": "lpAmount",
             "type": "u64"
-          },
-          {
-            "name": "deposited",
-            "type": {
-              "defined": "SlotAverage"
-            }
-          },
-          {
-            "name": "tvl",
-            "type": {
-              "defined": "UpdatedAmount"
-            }
           }
         ]
       }
     },
     {
-      "name": "SlotAverage",
+      "name": "AccumulatedRewards",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "slot",
+            "name": "lastSlot",
             "type": "u64"
           },
           {
@@ -1757,24 +1773,34 @@
             "type": "u64"
           },
           {
-            "name": "avgSum",
+            "name": "depositedAvg",
+            "type": "u64"
+          },
+          {
+            "name": "depositedIntegral",
+            "type": {
+              "defined": "SlotIntegrated"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "SlotIntegrated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "initialSlot",
+            "type": "u64"
+          },
+          {
+            "name": "lastSlot",
+            "type": "u64"
+          },
+          {
+            "name": "accumulator",
             "type": "u128"
-          }
-        ]
-      }
-    },
-    {
-      "name": "UpdatedAmount",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "slot",
-            "type": "u64"
-          },
-          {
-            "name": "amount",
-            "type": "u64"
           }
         ]
       }

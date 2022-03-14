@@ -3,7 +3,7 @@ use crate::error::ErrorCode;
 use crate::macros::generate_seeds;
 use crate::protocols::francium_lending_pool;
 use crate::protocols::Protocols;
-use crate::vault::{TokenBalances, UpdatedAmount, VaultAccount};
+use crate::vault::{TokenBalances, VaultAccount};
 use crate::PubkeyWrapper;
 use crate::ALLOWED_DEPLOYER;
 use crate::{
@@ -562,10 +562,14 @@ impl<'info> FranciumTVL<'info> {
     /// Update the protocol TVL
     pub fn update_tvl(&mut self) -> Result<()> {
         let slot = self.generic_accs.clock.slot;
-        let amount = self.max_withdrawable()?;
+        let tvl = self.max_withdrawable()?;
 
         let protocol = &mut self.generic_accs.vault_account.protocols[Protocols::Francium as usize];
-        protocol.tvl = UpdatedAmount { slot, amount };
+        let rewards = tvl
+            .checked_sub(protocol.tokens.amount)
+            .ok_or(ErrorCode::MathOverflow)?;
+
+        protocol.rewards.update(slot, rewards)?;
 
         Ok(())
     }
@@ -573,7 +577,7 @@ impl<'info> FranciumTVL<'info> {
     /// Calculate the max native units to withdraw
     fn max_withdrawable(&self) -> Result<u64> {
         let protocol = self.generic_accs.vault_account.protocols[Protocols::Francium as usize];
-        self.lp_to_liquidity(protocol.lp_amount)
+        self.lp_to_liquidity(protocol.tokens.lp_amount)
     }
 
     /// Convert reserve collateral to liquidity
