@@ -1700,7 +1700,7 @@
             }
           },
           {
-            "name": "rewards",
+            "name": "rewardsSum",
             "type": "u64"
           },
           {

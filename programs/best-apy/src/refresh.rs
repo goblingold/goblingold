@@ -46,11 +46,11 @@ impl<'info> RefreshRewardsWeights<'info> {
         }
 
         self.vault_account.last_refresh_slot = self.clock.slot;
-        self.vault_account.rewards = self
+        self.vault_account.rewards_sum = self
             .vault_account
             .protocols
             .iter()
-            .try_fold(self.vault_account.rewards, |acc, protocol| {
+            .try_fold(self.vault_account.rewards_sum, |acc, protocol| {
                 acc.checked_add(protocol.rewards.amount)
             })
             .ok_or(ErrorCode::MathOverflow)?;
@@ -76,7 +76,7 @@ impl<'info> RefreshRewardsWeights<'info> {
 
     /// Mint LP tokens to the treasury account in order to take the fees
     pub fn mint_fees_and_update_tvl(&mut self) -> Result<()> {
-        let rewards = self.vault_account.rewards;
+        let rewards = self.vault_account.rewards_sum;
         if rewards > 0 {
             let lp_fee = FEE
                 .checked_mul(rewards as u128)
@@ -118,7 +118,7 @@ impl<'info> RefreshRewardsWeights<'info> {
                     .current_tvl
                     .checked_add(rewards)
                     .ok_or(ErrorCode::MathOverflow)?;
-                self.vault_account.rewards = 0_u64;
+                self.vault_account.rewards_sum = 0_u64;
             }
         }
 

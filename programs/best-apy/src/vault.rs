@@ -21,8 +21,8 @@ pub struct VaultAccount {
     pub last_refresh_slot: u64,
     /// Price of the LP token in the previous interval
     pub previous_lp_price: LpPrice,
-    /// Rewards not yet acounted in current_tvl
-    pub rewards: u64,
+    /// Accumulated rewards until fee is minted (not accounted in current_tvl)
+    pub rewards_sum: u64,
     /// Protocol data
     pub protocols: [ProtocolData; PROTOCOLS_LEN],
     // TODO additional padding
