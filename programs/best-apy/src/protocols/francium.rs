@@ -213,8 +213,8 @@ impl<'info> FranciumDeposit<'info> {
         if is_first_ix {
             self.cpi_deposit(amount)?;
             Ok(TokenBalances {
+                base_amount: amount,
                 lp_amount: 0,
-                amount,
             })
         } else {
             let lp_before = self.francium_farming_pool_stake_token_account.amount;
@@ -233,8 +233,8 @@ impl<'info> FranciumDeposit<'info> {
             );
 
             Ok(TokenBalances {
+                base_amount: 0,
                 lp_amount,
-                amount: 0,
             })
         }
     }
@@ -433,8 +433,8 @@ impl<'info> FranciumWithdraw<'info> {
         if is_first_ix {
             self.cpi_withdraw_stake(lp_amount)?;
             Ok(TokenBalances {
+                base_amount: 0,
                 lp_amount: 0,
-                amount: 0,
             })
         } else {
             let amount_before = self.generic_accs.vault_input_token_account.amount;
@@ -449,8 +449,8 @@ impl<'info> FranciumWithdraw<'info> {
                 .ok_or(ErrorCode::MathOverflow)?;
 
             Ok(TokenBalances {
+                base_amount: amount_diff,
                 lp_amount,
-                amount: amount_diff,
             })
         }
     }
@@ -566,7 +566,7 @@ impl<'info> FranciumTVL<'info> {
 
         let protocol = &mut self.generic_accs.vault_account.protocols[Protocols::Francium as usize];
         let rewards = tvl
-            .checked_sub(protocol.tokens.amount)
+            .checked_sub(protocol.tokens.base_amount)
             .ok_or(ErrorCode::MathOverflow)?;
 
         protocol.rewards.update(slot, rewards)?;

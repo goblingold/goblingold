@@ -1749,7 +1749,7 @@
         "kind": "struct",
         "fields": [
           {
-            "name": "amount",
+            "name": "baseAmount",
             "type": "u64"
           },
           {

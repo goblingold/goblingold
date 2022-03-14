@@ -223,7 +223,10 @@ impl<'info> PortDeposit<'info> {
             .checked_sub(lp_before)
             .ok_or(ErrorCode::MathOverflow)?;
 
-        Ok(TokenBalances { lp_amount, amount })
+        Ok(TokenBalances {
+            base_amount: amount,
+            lp_amount,
+        })
     }
 
     /// CPI deposit call
@@ -348,8 +351,8 @@ impl<'info> PortWithdraw<'info> {
             .ok_or(ErrorCode::MathOverflow)?;
 
         Ok(TokenBalances {
+            base_amount: amount_diff,
             lp_amount,
-            amount: amount_diff,
         })
     }
 
@@ -432,7 +435,7 @@ impl<'info> PortTVL<'info> {
 
         let protocol = &mut self.generic_accs.vault_account.protocols[Protocols::Port as usize];
         let rewards = tvl
-            .checked_sub(protocol.tokens.amount)
+            .checked_sub(protocol.tokens.base_amount)
             .ok_or(ErrorCode::MathOverflow)?;
 
         protocol.rewards.update(slot, rewards)?;

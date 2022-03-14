@@ -109,8 +109,8 @@ impl<'info> MangoDeposit<'info> {
     fn deposit_and_get_balances(&mut self, amount: u64) -> Result<TokenBalances> {
         self.cpi_deposit(amount)?;
         Ok(TokenBalances {
+            base_amount: amount,
             lp_amount: 0,
-            amount,
         })
     }
 
@@ -195,8 +195,8 @@ impl<'info> MangoWithdraw<'info> {
     fn withdraw_and_get_balances(&mut self, amount: u64) -> Result<TokenBalances> {
         self.cpi_withdraw(amount)?;
         Ok(TokenBalances {
+            base_amount: amount,
             lp_amount: 0,
-            amount,
         })
     }
 
@@ -266,7 +266,7 @@ impl<'info> MangoTVL<'info> {
 
         let protocol = &mut self.generic_accs.vault_account.protocols[Protocols::Mango as usize];
         let rewards = tvl
-            .checked_sub(protocol.tokens.amount)
+            .checked_sub(protocol.tokens.base_amount)
             .ok_or(ErrorCode::MathOverflow)?;
 
         protocol.rewards.update(slot, rewards)?;

@@ -136,7 +136,7 @@ impl VaultAccount {
     pub fn calculate_deposit(&self, protocol: Protocols, available_amount: u64) -> Result<u64> {
         let protocol = &self.protocols[protocol as usize];
 
-        let deposited_amount = protocol.tokens.amount;
+        let deposited_amount = protocol.tokens.base_amount;
         let target_amount = protocol.amount_should_be_deposited(self.current_tvl)?;
 
         if target_amount > deposited_amount {
@@ -154,7 +154,7 @@ impl VaultAccount {
     pub fn calculate_withdraw(&self, protocol: Protocols) -> Result<u64> {
         let protocol = &self.protocols[protocol as usize];
 
-        let deposited_amount = protocol.tokens.amount;
+        let deposited_amount = protocol.tokens.base_amount;
         let target_amount = protocol.amount_should_be_deposited(self.current_tvl)?;
 
         if target_amount < deposited_amount {
@@ -207,9 +207,9 @@ impl ProtocolData {
 
     /// Update the protocol tvl with the generated rewards
     pub fn update_tvl(&mut self) -> Result<()> {
-        self.tokens.amount = self
+        self.tokens.base_amount = self
             .tokens
-            .amount
+            .base_amount
             .checked_add(self.rewards.amount)
             .ok_or(ErrorCode::MathOverflow)?;
         self.rewards.amount = 0_u64;
@@ -224,7 +224,7 @@ impl ProtocolData {
     ) -> Result<()> {
         self.rewards
             .deposited_integral
-            .accumulate(current_slot, self.tokens.amount)?;
+            .accumulate(current_slot, self.tokens.base_amount)?;
         self.tokens = self.tokens.add(balances)?;
         Ok(())
     }
@@ -237,7 +237,7 @@ impl ProtocolData {
     ) -> Result<()> {
         self.rewards
             .deposited_integral
-            .accumulate(current_slot, self.tokens.amount)?;
+            .accumulate(current_slot, self.tokens.base_amount)?;
         self.tokens = self.tokens.sub(balances)?;
         Ok(())
     }
@@ -247,16 +247,16 @@ impl ProtocolData {
 #[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default)]
 pub struct TokenBalances {
     /// Input tokens deposited in the protocol
-    pub amount: u64,
+    pub base_amount: u64,
     /// LP tokens returned by the protocol
     pub lp_amount: u64,
 }
 
 impl TokenBalances {
     pub fn add(&self, rhs: Self) -> Result<Self> {
-        let amount = self
-            .amount
-            .checked_add(rhs.amount)
+        let base_amount = self
+            .base_amount
+            .checked_add(rhs.base_amount)
             .ok_or(ErrorCode::MathOverflow)?;
 
         let lp_amount = self
@@ -264,13 +264,16 @@ impl TokenBalances {
             .checked_add(rhs.lp_amount)
             .ok_or(ErrorCode::MathOverflow)?;
 
-        Ok(Self { amount, lp_amount })
+        Ok(Self {
+            base_amount,
+            lp_amount,
+        })
     }
 
     pub fn sub(&self, rhs: Self) -> Result<Self> {
-        let amount = self
-            .amount
-            .checked_sub(rhs.amount)
+        let base_amount = self
+            .base_amount
+            .checked_sub(rhs.base_amount)
             .ok_or(ErrorCode::MathOverflow)?;
 
         let lp_amount = self
@@ -278,7 +281,10 @@ impl TokenBalances {
             .checked_sub(rhs.lp_amount)
             .ok_or(ErrorCode::MathOverflow)?;
 
-        Ok(Self { amount, lp_amount })
+        Ok(Self {
+            base_amount,
+            lp_amount,
+        })
     }
 }
 
