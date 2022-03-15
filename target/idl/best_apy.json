@@ -74,57 +74,6 @@
       ]
     },
     {
-      "name": "initializeAssociatedTokenAccount",
-      "accounts": [
-        {
-          "name": "userSigner",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "vaultSigner",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "vaultAccount",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "vaultSignerAta",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "mintAccount",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "tokenProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "associatedTokenProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "rent",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": []
-    },
-    {
       "name": "deposit",
       "accounts": [
         {

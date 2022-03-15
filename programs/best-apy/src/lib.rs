@@ -48,10 +48,6 @@ pub mod best_apy {
         Ok(())
     }
 
-    pub fn initialize_associated_token_account(_ctx: Context<InitializeATA>) -> Result<()> {
-        Ok(())
-    }
-
     //pub fn close_account(_ctx: Context<CloseAccount>) -> Result<()> {
     //    Ok(())
     //}
@@ -241,28 +237,6 @@ pub struct InitializeStrategy<'info> {
     pub system_program: Program<'info, System>,
     pub associated_token_program: Program<'info, AssociatedToken>,
     pub token_program: Program<'info, Token>,
-    pub rent: Sysvar<'info, Rent>,
-}
-
-#[derive(Accounts)]
-pub struct InitializeATA<'info> {
-    #[account(mut)]
-    pub user_signer: Signer<'info>,
-    #[account(seeds = [vault_account.to_account_info().key.as_ref()], bump = vault_account.bump)]
-    /// CHECK: only used as signing PDA
-    pub vault_signer: AccountInfo<'info>,
-    pub vault_account: Box<Account<'info, VaultAccount>>,
-    #[account(
-         init,
-         payer = user_signer,
-         associated_token::mint = mint_account,
-         associated_token::authority = vault_signer,
-    )]
-    pub vault_signer_ata: Account<'info, TokenAccount>,
-    pub mint_account: Account<'info, Mint>,
-    pub token_program: Program<'info, Token>,
-    pub associated_token_program: Program<'info, AssociatedToken>,
-    pub system_program: Program<'info, System>,
     pub rent: Sysvar<'info, Rent>,
 }
 
