@@ -33,7 +33,7 @@ impl<'info> Deposit<'info> {
             .vault_account
             .current_tvl
             .checked_add(amount)
-            .ok_or(ErrorCode::MathOverflow)?;
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
         let seeds = generate_seeds!(self.vault_account);
         let signer = &[&seeds[..]];

@@ -44,7 +44,7 @@ impl<'info> Withdraw<'info> {
             .vault_account
             .current_tvl
             .checked_sub(amount)
-            .ok_or(ErrorCode::MathOverflow)?;
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
         Ok(())
     }

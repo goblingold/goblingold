@@ -267,7 +267,7 @@ impl<'info> MangoTVL<'info> {
         let protocol = &mut self.generic_accs.vault_account.protocols[Protocols::Mango as usize];
         let rewards = tvl
             .checked_sub(protocol.tokens.base_amount)
-            .ok_or(ErrorCode::MathOverflow)?;
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
         protocol.rewards.update(slot, rewards)?;
 

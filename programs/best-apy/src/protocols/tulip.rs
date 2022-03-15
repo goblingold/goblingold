@@ -84,7 +84,7 @@ impl<'info> TulipDeposit<'info> {
         let lp_after = self.vault_tulip_collateral_token_account.amount;
         let lp_amount = lp_after
             .checked_sub(lp_before)
-            .ok_or(ErrorCode::MathOverflow)?;
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
         Ok(TokenBalances {
             base_amount: amount,
@@ -208,7 +208,7 @@ impl<'info> TulipWithdraw<'info> {
         let amount_after = self.generic_accs.vault_input_token_account.amount;
         let amount_diff = amount_after
             .checked_sub(amount_before)
-            .ok_or(ErrorCode::MathOverflow)?;
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
         Ok(TokenBalances {
             base_amount: amount_diff,
@@ -290,7 +290,7 @@ impl<'info> TulipTVL<'info> {
         let protocol = &mut self.generic_accs.vault_account.protocols[Protocols::Tulip as usize];
         let rewards = tvl
             .checked_sub(protocol.tokens.base_amount)
-            .ok_or(ErrorCode::MathOverflow)?;
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
         protocol.rewards.update(slot, rewards)?;
 

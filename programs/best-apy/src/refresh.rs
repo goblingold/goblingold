@@ -24,7 +24,7 @@ impl<'info> RefreshRewardsWeights<'info> {
             .clock
             .slot
             .checked_sub(self.vault_account.last_refresh_slot)
-            .ok_or(ErrorCode::MathOverflow)?;
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
         require!(
             elapsed_slots > MIN_ELAPSED_SLOTS_FOR_REFRESH,
@@ -38,7 +38,7 @@ impl<'info> RefreshRewardsWeights<'info> {
                     self.clock
                         .slot
                         .checked_sub(last_updated)
-                        .ok_or(ErrorCode::MathOverflow)?
+                        .ok_or_else(|| error!(ErrorCode::MathOverflow))?
                         < MAX_ELAPSED_SLOTS_FOR_TVL,
                     ErrorCode::StaleProtocolTVL
                 )
@@ -53,7 +53,7 @@ impl<'info> RefreshRewardsWeights<'info> {
             .try_fold(self.vault_account.rewards_sum, |acc, protocol| {
                 acc.checked_add(protocol.rewards.amount)
             })
-            .ok_or(ErrorCode::MathOverflow)?;
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
         self.vault_account.update_protocol_weights()?;
         self.vault_account
@@ -80,23 +80,23 @@ impl<'info> RefreshRewardsWeights<'info> {
         if rewards > 0 {
             let lp_fee = FEE
                 .checked_mul(rewards as u128)
-                .ok_or(ErrorCode::MathOverflow)?
+                .ok_or_else(|| error!(ErrorCode::MathOverflow))?
                 .checked_mul(self.vault_lp_token_mint_pubkey.supply as u128)
-                .ok_or(ErrorCode::MathOverflow)?
+                .ok_or_else(|| error!(ErrorCode::MathOverflow))?
                 .checked_div(
                     (self.vault_account.current_tvl as u128)
                         .checked_add(
                             (1000 - FEE)
                                 .checked_mul(rewards as u128)
-                                .ok_or(ErrorCode::MathOverflow)?
+                                .ok_or_else(|| error!(ErrorCode::MathOverflow))?
                                 .checked_div(1000)
-                                .ok_or(ErrorCode::MathOverflow)?,
+                                .ok_or_else(|| error!(ErrorCode::MathOverflow))?,
                         )
-                        .ok_or(ErrorCode::MathOverflow)?,
+                        .ok_or_else(|| error!(ErrorCode::MathOverflow))?,
                 )
-                .ok_or(ErrorCode::MathOverflow)?
+                .ok_or_else(|| error!(ErrorCode::MathOverflow))?
                 .checked_div(1000)
-                .ok_or(ErrorCode::MathOverflow)?
+                .ok_or_else(|| error!(ErrorCode::MathOverflow))?
                 .try_into()
                 .map_err(|_| ErrorCode::MathOverflow)?;
 
@@ -117,7 +117,7 @@ impl<'info> RefreshRewardsWeights<'info> {
                     .vault_account
                     .current_tvl
                     .checked_add(rewards)
-                    .ok_or(ErrorCode::MathOverflow)?;
+                    .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
                 self.vault_account.rewards_sum = 0_u64;
             }
         }
