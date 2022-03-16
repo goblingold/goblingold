@@ -21,6 +21,8 @@ pub struct VaultAccount {
     pub last_refresh_slot: u64,
     /// Price of the LP token in the previous interval
     pub previous_lp_price: LpPrice,
+    /// Accumulated rewards until fee is minted (not accounted in current_tvl)
+    pub rewards_sum: u64,
     /// Protocol data
     pub protocols: [ProtocolData; PROTOCOLS_LEN],
     // TODO additional padding
@@ -39,99 +41,99 @@ impl VaultAccount {
     }
 
     /// Update protocol weights
-    pub fn update_protocol_weights(&mut self, elapsed_slots: u64) -> Result<()> {
+    pub fn update_protocol_weights(&mut self) -> Result<()> {
         let mut deposit: Vec<u128> = self
             .protocols
             .iter()
-            .map(|protocol| protocol.deposited.get_average(elapsed_slots).unwrap())
+            .map(|protocol| protocol.rewards.deposited_avg as u128)
             .collect();
 
         let rewards: Vec<u128> = self
             .protocols
             .iter()
-            .zip(&deposit)
-            .map(|(protocol, &dep)| {
-                (protocol.tvl.amount as u128)
-                    .checked_sub(dep)
-                    .ok_or(ErrorCode::MathOverflow)
-                    .unwrap()
-            })
+            .map(|protocol| protocol.rewards.amount as u128)
             .collect();
 
         let total_deposit: u128 = deposit
             .iter()
             .try_fold(0u128, |acc, &x| acc.checked_add(x))
-            .ok_or(ErrorCode::MathOverflow)?;
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
         let total_rewards: u128 = rewards
             .iter()
             .try_fold(0u128, |acc, &x| acc.checked_add(x))
-            .ok_or(ErrorCode::MathOverflow)?;
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
-        if total_deposit == 0 || total_rewards == 0 {
-            self.protocols
-                .iter_mut()
-                .for_each(|protocol| protocol.weight = 1000 / (PROTOCOLS_LEN as u16));
-        } else {
-            for i in 0..PROTOCOLS_LEN {
+        for i in 0..PROTOCOLS_LEN {
+            if self.protocols[i].is_used() {
                 let rewards_wo_i: u128 = total_rewards
                     .checked_sub(rewards[i])
-                    .ok_or(ErrorCode::MathOverflow)?;
+                    .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
                 let deposit_wo_i: u128 = total_deposit
                     .checked_sub(deposit[i])
-                    .ok_or(ErrorCode::MathOverflow)?;
+                    .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
                 let num1: i128 = rewards[i]
                     .checked_mul(deposit_wo_i)
-                    .ok_or(ErrorCode::MathOverflow)? as i128;
+                    .ok_or_else(|| error!(ErrorCode::MathOverflow))?
+                    as i128;
                 let num2: i128 = deposit[i]
                     .checked_mul(rewards_wo_i)
-                    .ok_or(ErrorCode::MathOverflow)? as i128;
+                    .ok_or_else(|| error!(ErrorCode::MathOverflow))?
+                    as i128;
 
-                let delta: i128 = (num1.checked_sub(num2).ok_or(ErrorCode::MathOverflow)?)
-                    .checked_div(total_rewards as i128)
-                    .ok_or(ErrorCode::MathOverflow)?;
+                let delta: i128 = (num1
+                    .checked_sub(num2)
+                    .ok_or_else(|| error!(ErrorCode::MathOverflow))?)
+                .checked_div(total_rewards as i128)
+                .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
                 deposit[i] = (deposit[i] as i128)
                     .checked_add(delta)
-                    .ok_or(ErrorCode::MathOverflow)? as u128;
+                    .ok_or_else(|| error!(ErrorCode::MathOverflow))?
+                    as u128;
             }
+        }
 
-            // If one weight is zero, set to one so all protocols get deposited
-            #[allow(clippy::needless_range_loop)]
-            for i in 0..PROTOCOLS_LEN {
+        // If one of the non-zero weights is zero now, set to one so all the used protocols get
+        // deposited
+        #[allow(clippy::needless_range_loop)]
+        for i in 0..PROTOCOLS_LEN {
+            if self.protocols[i].is_used() {
                 self.protocols[i].weight = deposit[i]
                     .checked_mul(1000)
-                    .ok_or(ErrorCode::MathOverflow)?
+                    .ok_or_else(|| error!(ErrorCode::MathOverflow))?
                     .checked_div(total_deposit)
-                    .ok_or(ErrorCode::MathOverflow)?
+                    .ok_or_else(|| error!(ErrorCode::MathOverflow))?
                     as u16;
+
                 if self.protocols[i].weight == 0 {
                     self.protocols[i].weight = 1
                 }
             }
-
-            let (max_indx, max_protocol) = self
-                .protocols
-                .iter()
-                .enumerate()
-                .max_by_key(|&(_, protocol)| protocol.weight)
-                .unwrap();
-
-            let total_weights: u16 = self
-                .protocols
-                .iter()
-                .try_fold(0_u16, |acc, &protocol| acc.checked_add(protocol.weight))
-                .ok_or(ErrorCode::MathOverflow)?;
-
-            self.protocols[max_indx].weight = 1000_u16
-                .checked_sub(
-                    total_weights
-                        .checked_sub(max_protocol.weight)
-                        .ok_or(ErrorCode::MathOverflow)?,
-                )
-                .ok_or(ErrorCode::MathOverflow)?;
         }
+
+        // Renormalize the weights
+        let (max_indx, max_protocol) = self
+            .protocols
+            .iter()
+            .enumerate()
+            .max_by_key(|&(_, protocol)| protocol.weight)
+            .unwrap();
+
+        let weights_sum: u16 = self
+            .protocols
+            .iter()
+            .try_fold(0_u16, |acc, &protocol| acc.checked_add(protocol.weight))
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+
+        self.protocols[max_indx].weight = 1000_u16
+            .checked_sub(
+                weights_sum
+                    .checked_sub(max_protocol.weight)
+                    .ok_or_else(|| error!(ErrorCode::MathOverflow))?,
+            )
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
         Ok(())
     }
@@ -140,13 +142,13 @@ impl VaultAccount {
     pub fn calculate_deposit(&self, protocol: Protocols, available_amount: u64) -> Result<u64> {
         let protocol = &self.protocols[protocol as usize];
 
-        let deposited_amount = protocol.deposited.amount;
+        let deposited_amount = protocol.tokens.base_amount;
         let target_amount = protocol.amount_should_be_deposited(self.current_tvl)?;
 
         if target_amount > deposited_amount {
             let amount = target_amount
                 .checked_sub(deposited_amount)
-                .ok_or(ErrorCode::MathOverflow)?;
+                .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
             Ok(cmp::min(amount, available_amount))
         } else {
@@ -158,13 +160,13 @@ impl VaultAccount {
     pub fn calculate_withdraw(&self, protocol: Protocols) -> Result<u64> {
         let protocol = &self.protocols[protocol as usize];
 
-        let deposited_amount = protocol.deposited.amount;
+        let deposited_amount = protocol.tokens.base_amount;
         let target_amount = protocol.amount_should_be_deposited(self.current_tvl)?;
 
         if target_amount < deposited_amount {
             let amount = deposited_amount
                 .checked_sub(target_amount)
-                .ok_or(ErrorCode::MathOverflow)?;
+                .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
             Ok(amount)
         } else {
@@ -190,20 +192,39 @@ pub struct InitVaultAccountParams {
 pub struct ProtocolData {
     /// Percentage of the TVL that should be deposited in the protocol
     pub weight: u16,
-    /// Returned LP tokens
-    pub lp_amount: u64,
-    /// Time-average deposited amount
-    pub deposited: SlotAverage,
-    /// Slot-updated TVL
-    pub tvl: UpdatedAmount,
+    /// Token balances in the protocol
+    pub tokens: TokenBalances,
+    /// Accumulated rewards
+    pub rewards: AccumulatedRewards,
 }
 
 impl ProtocolData {
-    /// Initialize the average deposited amount
-    pub fn initialize_average(&mut self) {
-        self.deposited.slot = self.tvl.slot;
-        self.deposited.amount = self.tvl.amount;
-        self.deposited.avg_sum = 0_u128;
+    /// Check the protocol is used
+    pub fn is_used(&self) -> bool {
+        self.weight != u16::default()
+    }
+
+    /// Amount that should be deposited according to the weight
+    fn amount_should_be_deposited(&self, total_amount: u64) -> Result<u64> {
+        let amount: u64 = (total_amount as u128)
+            .checked_mul(self.weight as u128)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?
+            .checked_div(1000_u128)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?
+            .try_into()
+            .map_err(|_| ErrorCode::MathOverflow)?;
+        Ok(amount)
+    }
+
+    /// Update the protocol tvl with the generated rewards
+    pub fn update_tvl(&mut self) -> Result<()> {
+        self.tokens.base_amount = self
+            .tokens
+            .base_amount
+            .checked_add(self.rewards.amount)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+        self.rewards.amount = 0_u64;
+        Ok(())
     }
 
     /// Update token amounts after depositing in the protocol
@@ -212,17 +233,10 @@ impl ProtocolData {
         current_slot: u64,
         balances: TokenBalances,
     ) -> Result<()> {
-        self.deposited.update_average(current_slot)?;
-        self.deposited.amount = self
-            .deposited
-            .amount
-            .checked_add(balances.amount)
-            .ok_or(ErrorCode::MathOverflow)?;
-        self.lp_amount = self
-            .lp_amount
-            .checked_add(balances.lp_amount)
-            .ok_or(ErrorCode::MathOverflow)?;
-
+        self.rewards
+            .deposited_integral
+            .accumulate(current_slot, self.tokens.base_amount)?;
+        self.tokens = self.tokens.add(balances)?;
         Ok(())
     }
 
@@ -232,78 +246,151 @@ impl ProtocolData {
         current_slot: u64,
         balances: TokenBalances,
     ) -> Result<()> {
-        self.deposited.update_average(current_slot)?;
-        self.deposited.amount = self
-            .deposited
-            .amount
-            .checked_sub(balances.amount)
-            .ok_or(ErrorCode::MathOverflow)?;
-        self.lp_amount = self
+        self.rewards
+            .deposited_integral
+            .accumulate(current_slot, self.tokens.base_amount)?;
+        self.tokens = self.tokens.sub(balances)?;
+        Ok(())
+    }
+}
+
+/// Token balances in the protocol
+#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default)]
+pub struct TokenBalances {
+    /// Input tokens deposited in the protocol
+    pub base_amount: u64,
+    /// LP tokens returned by the protocol
+    pub lp_amount: u64,
+}
+
+impl TokenBalances {
+    pub fn add(&self, rhs: Self) -> Result<Self> {
+        let base_amount = self
+            .base_amount
+            .checked_add(rhs.base_amount)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+
+        let lp_amount = self
             .lp_amount
-            .checked_sub(balances.lp_amount)
-            .ok_or(ErrorCode::MathOverflow)?;
+            .checked_add(rhs.lp_amount)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+
+        Ok(Self {
+            base_amount,
+            lp_amount,
+        })
+    }
+
+    pub fn sub(&self, rhs: Self) -> Result<Self> {
+        let base_amount = self
+            .base_amount
+            .checked_sub(rhs.base_amount)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+
+        let lp_amount = self
+            .lp_amount
+            .checked_sub(rhs.lp_amount)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+
+        Ok(Self {
+            base_amount,
+            lp_amount,
+        })
+    }
+}
+
+/// Generated rewards
+#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default)]
+pub struct AccumulatedRewards {
+    /// Last slot the rewards were accumulated
+    pub last_slot: u64,
+    /// Last accumulated rewards
+    pub amount: u64,
+    /// Slot-average deposited amount that generates these rewards
+    pub deposited_avg: u64,
+    /// Slot-integrated deposited amount
+    pub deposited_integral: SlotIntegrated,
+}
+
+impl AccumulatedRewards {
+    /// Update the rewards
+    pub fn update(&mut self, current_slot: u64, rewards: u64) -> Result<()> {
+        self.last_slot = current_slot;
+        self.amount = rewards;
+        self.deposited_avg = self.deposited_integral.get_average(current_slot)?;
+        Ok(())
+    }
+
+    /// Reset the initegral from the last rewards values
+    pub fn reset_integral(&mut self) -> Result<()> {
+        let rewards_elapsed_slots = self
+            .last_slot
+            .checked_sub(self.deposited_integral.initial_slot)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+
+        let acc_at_rewards = (self.deposited_avg as u128)
+            .checked_mul(rewards_elapsed_slots as u128)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+
+        let acc_since_last_rewards = self
+            .deposited_integral
+            .accumulator
+            .checked_sub(acc_at_rewards)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+
+        self.deposited_integral.accumulator = acc_since_last_rewards;
+        self.deposited_integral.initial_slot = self.last_slot;
+
+        Ok(())
+    }
+}
+
+/// Slot-integrated quantities
+#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default)]
+pub struct SlotIntegrated {
+    /// Initial slot from which the integral starts
+    pub initial_slot: u64,
+    /// Last slot the integral was updated
+    pub last_slot: u64,
+    /// Summation accumulator
+    pub accumulator: u128,
+}
+
+impl SlotIntegrated {
+    /// Update the summation accumulator
+    pub fn accumulate(&mut self, current_slot: u64, amount: u64) -> Result<()> {
+        let elapsed_slots = current_slot
+            .checked_sub(self.last_slot)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+
+        let interval_avg: u128 = (elapsed_slots as u128)
+            .checked_mul(amount as u128)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+
+        self.accumulator = self
+            .accumulator
+            .checked_add(interval_avg)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+        self.last_slot = current_slot;
 
         Ok(())
     }
 
-    /// Amount that should be deposited according to the weight
-    fn amount_should_be_deposited(&self, total_amount: u64) -> Result<u64> {
-        let amount: u64 = (total_amount as u128)
-            .checked_mul(self.weight as u128)
-            .ok_or(ErrorCode::MathOverflow)?
-            .checked_div(1000_u128)
-            .ok_or(ErrorCode::MathOverflow)?
+    /// Compute the average value
+    pub fn get_average(&self, current_slot: u64) -> Result<u64> {
+        let elapsed_slots = current_slot
+            .checked_sub(self.initial_slot)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+
+        let avg: u64 = self
+            .accumulator
+            .checked_div(elapsed_slots as u128)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?
             .try_into()
             .map_err(|_| ErrorCode::MathOverflow)?;
-        Ok(amount)
+
+        Ok(avg)
     }
-}
-
-/// Time-average quantities
-#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default)]
-pub struct SlotAverage {
-    /// Last slot the average was updated
-    pub slot: u64,
-    /// Current amount
-    pub amount: u64,
-    /// Average summation
-    pub avg_sum: u128,
-}
-
-impl SlotAverage {
-    /// Update the average summation
-    pub fn update_average(&mut self, current_slot: u64) -> Result<()> {
-        let elapsed_slots = current_slot
-            .checked_sub(self.slot)
-            .ok_or(ErrorCode::MathOverflow)?;
-        let interval_avg: u128 = (elapsed_slots as u128)
-            .checked_mul(self.amount as u128)
-            .ok_or(ErrorCode::MathOverflow)?;
-
-        self.avg_sum = self
-            .avg_sum
-            .checked_add(interval_avg)
-            .ok_or(ErrorCode::MathOverflow)?;
-        self.slot = current_slot;
-        Ok(())
-    }
-
-    /// Compute the average vaule
-    pub fn get_average(&self, elapsed_slots: u64) -> Result<u128> {
-        Ok(self
-            .avg_sum
-            .checked_div(elapsed_slots as u128)
-            .ok_or(ErrorCode::MathOverflow)?)
-    }
-}
-
-/// Slot-updated amounts
-#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default)]
-pub struct UpdatedAmount {
-    /// Last slot the amount was updated
-    pub slot: u64,
-    /// Amount value
-    pub amount: u64,
 }
 
 /// Strategy LP token price
@@ -323,9 +410,9 @@ impl LpPrice {
         } else {
             Ok((amount as u128)
                 .checked_mul(self.minted_tokens as u128)
-                .ok_or(ErrorCode::MathOverflow)?
+                .ok_or_else(|| error!(ErrorCode::MathOverflow))?
                 .checked_div(self.total_tokens as u128)
-                .ok_or(ErrorCode::MathOverflow)?
+                .ok_or_else(|| error!(ErrorCode::MathOverflow))?
                 .try_into()
                 .map_err(|_| ErrorCode::MathOverflow)?)
         }
@@ -338,19 +425,11 @@ impl LpPrice {
         } else {
             Ok((lp_amount as u128)
                 .checked_mul(self.total_tokens as u128)
-                .ok_or(ErrorCode::MathOverflow)?
+                .ok_or_else(|| error!(ErrorCode::MathOverflow))?
                 .checked_div(self.minted_tokens as u128)
-                .ok_or(ErrorCode::MathOverflow)?
+                .ok_or_else(|| error!(ErrorCode::MathOverflow))?
                 .try_into()
                 .map_err(|_| ErrorCode::MathOverflow)?)
         }
     }
-}
-
-/// Token balances in the protocols
-pub struct TokenBalances {
-    /// Input tokens deposited in the protocol
-    pub amount: u64,
-    /// LP tokens returned by the protocol
-    pub lp_amount: u64,
 }

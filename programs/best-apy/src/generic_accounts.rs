@@ -71,7 +71,7 @@ impl<'info> GenericWithdrawAccounts<'info> {
             Ok(Some(
                 amount
                     .checked_sub(vault_token_amount)
-                    .ok_or(ErrorCode::MathOverflow)?,
+                    .ok_or_else(|| error!(ErrorCode::MathOverflow))?,
             ))
         } else {
             Ok(None)

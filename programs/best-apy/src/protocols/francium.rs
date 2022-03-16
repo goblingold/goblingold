@@ -3,7 +3,7 @@ use crate::error::ErrorCode;
 use crate::macros::generate_seeds;
 use crate::protocols::francium_lending_pool;
 use crate::protocols::Protocols;
-use crate::vault::{TokenBalances, UpdatedAmount, VaultAccount};
+use crate::vault::{TokenBalances, VaultAccount};
 use crate::PubkeyWrapper;
 use crate::ALLOWED_DEPLOYER;
 use crate::{
@@ -213,8 +213,8 @@ impl<'info> FranciumDeposit<'info> {
         if is_first_ix {
             self.cpi_deposit(amount)?;
             Ok(TokenBalances {
+                base_amount: amount,
                 lp_amount: 0,
-                amount,
             })
         } else {
             let lp_before = self.francium_farming_pool_stake_token_account.amount;
@@ -225,7 +225,7 @@ impl<'info> FranciumDeposit<'info> {
             let lp_after = self.francium_farming_pool_stake_token_account.amount;
             let lp_amount = lp_after
                 .checked_sub(lp_before)
-                .ok_or(ErrorCode::MathOverflow)?;
+                .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
             require!(
                 self.vault_francium_collateral_token_account.amount == lp_amount,
@@ -233,8 +233,8 @@ impl<'info> FranciumDeposit<'info> {
             );
 
             Ok(TokenBalances {
+                base_amount: 0,
                 lp_amount,
-                amount: 0,
             })
         }
     }
@@ -433,8 +433,8 @@ impl<'info> FranciumWithdraw<'info> {
         if is_first_ix {
             self.cpi_withdraw_stake(lp_amount)?;
             Ok(TokenBalances {
+                base_amount: 0,
                 lp_amount: 0,
-                amount: 0,
             })
         } else {
             let amount_before = self.generic_accs.vault_input_token_account.amount;
@@ -446,11 +446,11 @@ impl<'info> FranciumWithdraw<'info> {
             let amount_after = self.generic_accs.vault_input_token_account.amount;
             let amount_diff = amount_after
                 .checked_sub(amount_before)
-                .ok_or(ErrorCode::MathOverflow)?;
+                .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
             Ok(TokenBalances {
+                base_amount: amount_diff,
                 lp_amount,
-                amount: amount_diff,
             })
         }
     }
@@ -562,10 +562,14 @@ impl<'info> FranciumTVL<'info> {
     /// Update the protocol TVL
     pub fn update_tvl(&mut self) -> Result<()> {
         let slot = self.generic_accs.clock.slot;
-        let amount = self.max_withdrawable()?;
+        let tvl = self.max_withdrawable()?;
 
         let protocol = &mut self.generic_accs.vault_account.protocols[Protocols::Francium as usize];
-        protocol.tvl = UpdatedAmount { slot, amount };
+        let rewards = tvl
+            .checked_sub(protocol.tokens.base_amount)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+
+        protocol.rewards.update(slot, rewards)?;
 
         Ok(())
     }
@@ -573,7 +577,7 @@ impl<'info> FranciumTVL<'info> {
     /// Calculate the max native units to withdraw
     fn max_withdrawable(&self) -> Result<u64> {
         let protocol = self.generic_accs.vault_account.protocols[Protocols::Francium as usize];
-        self.lp_to_liquidity(protocol.lp_amount)
+        self.lp_to_liquidity(protocol.tokens.lp_amount)
     }
 
     /// Convert reserve collateral to liquidity

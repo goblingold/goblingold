@@ -24,7 +24,7 @@ impl<'info> RefreshRewardsWeights<'info> {
             .clock
             .slot
             .checked_sub(self.vault_account.last_refresh_slot)
-            .ok_or(ErrorCode::MathOverflow)?;
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
         require!(
             elapsed_slots > MIN_ELAPSED_SLOTS_FOR_REFRESH,
@@ -33,70 +33,72 @@ impl<'info> RefreshRewardsWeights<'info> {
 
         if self.vault_account.last_refresh_slot != u64::default() {
             for protocol in self.vault_account.protocols.iter() {
-                let last_updated = protocol.tvl.slot;
-                require!(
-                    self.clock
-                        .slot
-                        .checked_sub(last_updated)
-                        .ok_or(ErrorCode::MathOverflow)?
-                        < MAX_ELAPSED_SLOTS_FOR_TVL,
-                    ErrorCode::StaleProtocolTVL
-                )
+                if protocol.is_used() {
+                    let last_updated = protocol.rewards.last_slot;
+                    require!(
+                        self.clock
+                            .slot
+                            .checked_sub(last_updated)
+                            .ok_or_else(|| error!(ErrorCode::MathOverflow))?
+                            < MAX_ELAPSED_SLOTS_FOR_TVL,
+                        ErrorCode::StaleProtocolTVL
+                    )
+                }
             }
         }
 
         self.vault_account.last_refresh_slot = self.clock.slot;
-        self.vault_account.update_protocol_weights(elapsed_slots)?;
+        self.vault_account.rewards_sum = self
+            .vault_account
+            .protocols
+            .iter()
+            .try_fold(self.vault_account.rewards_sum, |acc, protocol| {
+                acc.checked_add(protocol.rewards.amount)
+            })
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+
+        self.vault_account.update_protocol_weights()?;
         self.vault_account
             .protocols
             .iter_mut()
-            .for_each(|protocol| protocol.initialize_average());
+            .for_each(|protocol| {
+                protocol.update_tvl().unwrap();
+                protocol.rewards.reset_integral().unwrap();
+            });
 
         self.vault_account.previous_lp_price = LpPrice {
             total_tokens: self.vault_account.current_tvl,
             minted_tokens: self.vault_lp_token_mint_pubkey.supply,
         };
 
-        self.mint_rewards_and_update_tvl()?;
+        self.mint_fees_and_update_tvl()?;
 
         Ok(())
     }
 
-    /// Mint LP tokens to the treasury account in order to take the rewards
-    pub fn mint_rewards_and_update_tvl(&mut self) -> Result<()> {
-        let last_tvl = self
-            .vault_account
-            .protocols
-            .iter()
-            .try_fold(self.vault_input_token_account.amount, |acc, &protocol| {
-                acc.checked_add(protocol.tvl.amount)
-            })
-            .ok_or(ErrorCode::MathOverflow)?;
-
-        let rewards = last_tvl
-            .checked_sub(self.vault_account.current_tvl)
-            .ok_or(ErrorCode::MathOverflow)?;
-
+    /// Mint LP tokens to the treasury account in order to take the fees
+    pub fn mint_fees_and_update_tvl(&mut self) -> Result<()> {
+        let rewards = self.vault_account.rewards_sum;
         if rewards > 0 {
             let lp_fee = FEE
                 .checked_mul(rewards as u128)
-                .ok_or(ErrorCode::MathOverflow)?
+                .ok_or_else(|| error!(ErrorCode::MathOverflow))?
                 .checked_mul(self.vault_lp_token_mint_pubkey.supply as u128)
-                .ok_or(ErrorCode::MathOverflow)?
+                .ok_or_else(|| error!(ErrorCode::MathOverflow))?
                 .checked_div(
                     (self.vault_account.current_tvl as u128)
                         .checked_add(
                             (1000 - FEE)
                                 .checked_mul(rewards as u128)
-                                .ok_or(ErrorCode::MathOverflow)?
+                                .ok_or_else(|| error!(ErrorCode::MathOverflow))?
                                 .checked_div(1000)
-                                .ok_or(ErrorCode::MathOverflow)?,
+                                .ok_or_else(|| error!(ErrorCode::MathOverflow))?,
                         )
-                        .ok_or(ErrorCode::MathOverflow)?,
+                        .ok_or_else(|| error!(ErrorCode::MathOverflow))?,
                 )
-                .ok_or(ErrorCode::MathOverflow)?
+                .ok_or_else(|| error!(ErrorCode::MathOverflow))?
                 .checked_div(1000)
-                .ok_or(ErrorCode::MathOverflow)?
+                .ok_or_else(|| error!(ErrorCode::MathOverflow))?
                 .try_into()
                 .map_err(|_| ErrorCode::MathOverflow)?;
 
@@ -113,7 +115,12 @@ impl<'info> RefreshRewardsWeights<'info> {
                 let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer);
                 token::mint_to(cpi_ctx, lp_fee)?;
 
-                self.vault_account.current_tvl = last_tvl;
+                self.vault_account.current_tvl = self
+                    .vault_account
+                    .current_tvl
+                    .checked_add(rewards)
+                    .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+                self.vault_account.rewards_sum = 0_u64;
             }
         }
 

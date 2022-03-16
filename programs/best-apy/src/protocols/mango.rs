@@ -1,7 +1,7 @@
 use crate::error::ErrorCode;
 use crate::macros::generate_seeds;
 use crate::protocols::Protocols;
-use crate::vault::{TokenBalances, UpdatedAmount, VaultAccount};
+use crate::vault::{TokenBalances, VaultAccount};
 use crate::ALLOWED_DEPLOYER;
 use crate::{
     generic_accounts_anchor_modules::*, GenericDepositAccounts, GenericTVLAccounts,
@@ -109,8 +109,8 @@ impl<'info> MangoDeposit<'info> {
     fn deposit_and_get_balances(&mut self, amount: u64) -> Result<TokenBalances> {
         self.cpi_deposit(amount)?;
         Ok(TokenBalances {
+            base_amount: amount,
             lp_amount: 0,
-            amount,
         })
     }
 
@@ -195,8 +195,8 @@ impl<'info> MangoWithdraw<'info> {
     fn withdraw_and_get_balances(&mut self, amount: u64) -> Result<TokenBalances> {
         self.cpi_withdraw(amount)?;
         Ok(TokenBalances {
+            base_amount: amount,
             lp_amount: 0,
-            amount,
         })
     }
 
@@ -262,10 +262,14 @@ impl<'info> MangoTVL<'info> {
     /// Update the protocol TVL
     pub fn update_tvl(&mut self) -> Result<()> {
         let slot = self.generic_accs.clock.slot;
-        let amount = self.max_withdrawable()?;
+        let tvl = self.max_withdrawable()?;
 
         let protocol = &mut self.generic_accs.vault_account.protocols[Protocols::Mango as usize];
-        protocol.tvl = UpdatedAmount { slot, amount };
+        let rewards = tvl
+            .checked_sub(protocol.tokens.base_amount)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+
+        protocol.rewards.update(slot, rewards)?;
 
         Ok(())
     }

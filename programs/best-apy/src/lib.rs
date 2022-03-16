@@ -23,7 +23,7 @@ mod refresh;
 mod vault;
 mod withdraw;
 
-declare_id!("PonzikUjnj49atvsgrUz3tfhHxbn8FH5jM2erw2bGBp");
+declare_id!("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 
 pub const ALLOWED_DEPLOYER: &str = "8XhNoDjjNoLP5Rys1pBJKGdE8acEC1HJsWGkfkMt6JP1";
 pub const ALLOWED_RUNNER: &str = "DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod";
@@ -48,7 +48,23 @@ pub mod best_apy {
         Ok(())
     }
 
-    pub fn initialize_associated_token_account(_ctx: Context<InitializeATA>) -> Result<()> {
+    // ACCESS RESTRICTED. ONLY ALLOWED_DEPLOYER
+    // TODO use PROTOCOLS_LEN when https://github.com/project-serum/anchor/issues/1623 is resolved
+    pub fn set_protocol_weights(ctx: Context<SetProtocolWeights>, weights: [u16; 5]) -> Result<()> {
+        let weights_sum = weights
+            .iter()
+            .try_fold(0_u16, |acc, &x| acc.checked_add(x))
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+
+        require!(weights_sum == 1000, ErrorCode::InvalidWeights);
+
+        ctx.accounts
+            .vault_account
+            .protocols
+            .iter_mut()
+            .zip(weights)
+            .for_each(|(protocol, weight)| protocol.weight = weight);
+
         Ok(())
     }
 
@@ -245,25 +261,15 @@ pub struct InitializeStrategy<'info> {
 }
 
 #[derive(Accounts)]
-pub struct InitializeATA<'info> {
-    #[account(mut)]
+pub struct SetProtocolWeights<'info> {
+    // Only deployer can modify weights
+    #[account(constraint = Pubkey::from_str(ALLOWED_DEPLOYER).unwrap()== *user_signer.key)]
     pub user_signer: Signer<'info>,
     #[account(seeds = [vault_account.to_account_info().key.as_ref()], bump = vault_account.bump)]
     /// CHECK: only used as signing PDA
     pub vault_signer: AccountInfo<'info>,
+    #[account(mut)]
     pub vault_account: Box<Account<'info, VaultAccount>>,
-    #[account(
-         init,
-         payer = user_signer,
-         associated_token::mint = mint_account,
-         associated_token::authority = vault_signer,
-    )]
-    pub vault_signer_ata: Account<'info, TokenAccount>,
-    pub mint_account: Account<'info, Mint>,
-    pub token_program: Program<'info, Token>,
-    pub associated_token_program: Program<'info, AssociatedToken>,
-    pub system_program: Program<'info, System>,
-    pub rent: Sysvar<'info, Rent>,
 }
 
 #[derive(Accounts)]

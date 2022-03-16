@@ -1,7 +1,7 @@
 use crate::error::ErrorCode;
 use crate::macros::generate_seeds;
 use crate::protocols::Protocols;
-use crate::vault::{TokenBalances, UpdatedAmount, VaultAccount};
+use crate::vault::{TokenBalances, VaultAccount};
 use crate::PubkeyWrapper;
 use crate::ALLOWED_DEPLOYER;
 use crate::{
@@ -162,9 +162,12 @@ impl<'info> SolendDeposit<'info> {
             .amount;
         let lp_amount = lp_after
             .checked_sub(lp_before)
-            .ok_or(ErrorCode::MathOverflow)?;
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
-        Ok(TokenBalances { lp_amount, amount })
+        Ok(TokenBalances {
+            base_amount: amount,
+            lp_amount,
+        })
     }
 
     /// CPI deposit call
@@ -289,11 +292,11 @@ impl<'info> SolendWithdraw<'info> {
         let amount_after = self.generic_accs.vault_input_token_account.amount;
         let amount_diff = amount_after
             .checked_sub(amount_before)
-            .ok_or(ErrorCode::MathOverflow)?;
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
         Ok(TokenBalances {
+            base_amount: amount_diff,
             lp_amount,
-            amount: amount_diff,
         })
     }
 
@@ -365,10 +368,14 @@ impl<'info> SolendTVL<'info> {
     /// Update the protocol TVL
     pub fn update_tvl(&mut self) -> Result<()> {
         let slot = self.generic_accs.clock.slot;
-        let amount = self.max_withdrawable()?;
+        let tvl = self.max_withdrawable()?;
 
         let protocol = &mut self.generic_accs.vault_account.protocols[Protocols::Solend as usize];
-        protocol.tvl = UpdatedAmount { slot, amount };
+        let rewards = tvl
+            .checked_sub(protocol.tokens.base_amount)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+
+        protocol.rewards.update(slot, rewards)?;
 
         Ok(())
     }
@@ -376,7 +383,7 @@ impl<'info> SolendTVL<'info> {
     /// Calculate the max native units to withdraw
     fn max_withdrawable(&self) -> Result<u64> {
         let protocol = self.generic_accs.vault_account.protocols[Protocols::Solend as usize];
-        self.lp_to_liquidity(protocol.lp_amount)
+        self.lp_to_liquidity(protocol.tokens.lp_amount)
     }
 
     /// Convert reserve collateral to liquidity
