@@ -23,7 +23,7 @@ mod refresh;
 mod vault;
 mod withdraw;
 
-declare_id!("PonzikUjnj49atvsgrUz3tfhHxbn8FH5jM2erw2bGBp");
+declare_id!("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 
 pub const ALLOWED_DEPLOYER: &str = "8XhNoDjjNoLP5Rys1pBJKGdE8acEC1HJsWGkfkMt6JP1";
 pub const ALLOWED_RUNNER: &str = "DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod";
