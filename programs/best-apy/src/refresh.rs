@@ -33,15 +33,17 @@ impl<'info> RefreshRewardsWeights<'info> {
 
         if self.vault_account.last_refresh_slot != u64::default() {
             for protocol in self.vault_account.protocols.iter() {
-                let last_updated = protocol.rewards.last_slot;
-                require!(
-                    self.clock
-                        .slot
-                        .checked_sub(last_updated)
-                        .ok_or_else(|| error!(ErrorCode::MathOverflow))?
-                        < MAX_ELAPSED_SLOTS_FOR_TVL,
-                    ErrorCode::StaleProtocolTVL
-                )
+                if protocol.weight != u16::default() {
+                    let last_updated = protocol.rewards.last_slot;
+                    require!(
+                        self.clock
+                            .slot
+                            .checked_sub(last_updated)
+                            .ok_or_else(|| error!(ErrorCode::MathOverflow))?
+                            < MAX_ELAPSED_SLOTS_FOR_TVL,
+                        ErrorCode::StaleProtocolTVL
+                    )
+                }
             }
         }
 

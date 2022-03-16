@@ -25,4 +25,6 @@ pub enum ErrorCode {
     InvalidInstructions,
     #[msg("Math operation overflow")]
     MathOverflow,
+    #[msg("Non-valid weights")]
+    InvalidWeights,
 }

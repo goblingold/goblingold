@@ -48,6 +48,26 @@ pub mod best_apy {
         Ok(())
     }
 
+    // ACCESS RESTRICTED. ONLY ALLOWED_DEPLOYER
+    // TODO use PROTOCOLS_LEN when https://github.com/project-serum/anchor/issues/1623 is resolved
+    pub fn set_protocol_weights(ctx: Context<SetProtocolWeights>, weights: [u16; 5]) -> Result<()> {
+        let weights_sum = weights
+            .iter()
+            .try_fold(0_u16, |acc, &x| acc.checked_add(x))
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+
+        require!(weights_sum == 1000, ErrorCode::InvalidWeights);
+
+        ctx.accounts
+            .vault_account
+            .protocols
+            .iter_mut()
+            .zip(weights)
+            .for_each(|(protocol, weight)| protocol.weight = weight);
+
+        Ok(())
+    }
+
     //pub fn close_account(_ctx: Context<CloseAccount>) -> Result<()> {
     //    Ok(())
     //}
@@ -238,6 +258,18 @@ pub struct InitializeStrategy<'info> {
     pub associated_token_program: Program<'info, AssociatedToken>,
     pub token_program: Program<'info, Token>,
     pub rent: Sysvar<'info, Rent>,
+}
+
+#[derive(Accounts)]
+pub struct SetProtocolWeights<'info> {
+    // Only deployer can modify weights
+    #[account(constraint = Pubkey::from_str(ALLOWED_DEPLOYER).unwrap()== *user_signer.key)]
+    pub user_signer: Signer<'info>,
+    #[account(seeds = [vault_account.to_account_info().key.as_ref()], bump = vault_account.bump)]
+    /// CHECK: only used as signing PDA
+    pub vault_signer: AccountInfo<'info>,
+    #[account(mut)]
+    pub vault_account: Box<Account<'info, VaultAccount>>,
 }
 
 #[derive(Accounts)]
