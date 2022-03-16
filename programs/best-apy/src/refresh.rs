@@ -33,7 +33,7 @@ impl<'info> RefreshRewardsWeights<'info> {
 
         if self.vault_account.last_refresh_slot != u64::default() {
             for protocol in self.vault_account.protocols.iter() {
-                if protocol.weight != u16::default() {
+                if protocol.is_used() {
                     let last_updated = protocol.rewards.last_slot;
                     require!(
                         self.clock
