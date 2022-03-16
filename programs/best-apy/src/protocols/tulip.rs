@@ -283,7 +283,7 @@ pub struct TulipTVL<'info> {
 
 impl<'info> TulipTVL<'info> {
     /// Update the protocol TVL
-    pub fn update_tvl(&mut self) -> Result<()> {
+    pub fn update_rewards(&mut self) -> Result<()> {
         let slot = self.generic_accs.clock.slot;
         let tvl = self.max_withdrawable()?;
 

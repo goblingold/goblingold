@@ -107,7 +107,7 @@ pub mod best_apy {
 
     /// Mango: Compute the TVL
     pub fn mango_tvl(ctx: Context<MangoTVL>) -> Result<()> {
-        ctx.accounts.update_tvl()
+        ctx.accounts.update_rewards()
     }
 
     /// Solend: Initialize protocol accounts
@@ -128,7 +128,7 @@ pub mod best_apy {
 
     /// Solend: Compute the TVL
     pub fn solend_tvl(ctx: Context<SolendTVL>) -> Result<()> {
-        ctx.accounts.update_tvl()
+        ctx.accounts.update_rewards()
     }
 
     /// Port: Initialize protocol accounts
@@ -149,7 +149,7 @@ pub mod best_apy {
 
     /// Port: Compute the TVL
     pub fn port_tvl(ctx: Context<PortTVL>) -> Result<()> {
-        ctx.accounts.update_tvl()
+        ctx.accounts.update_rewards()
     }
 
     /// Port: Claim rewards
@@ -169,7 +169,7 @@ pub mod best_apy {
 
     /// Tulip: Compute the TVL
     pub fn tulip_tvl(ctx: Context<TulipTVL>) -> Result<()> {
-        ctx.accounts.update_tvl()
+        ctx.accounts.update_rewards()
     }
 
     /// Francium: Initialize protocol accounts
@@ -190,7 +190,7 @@ pub mod best_apy {
 
     /// Francium: Compute the TVL
     pub fn francium_tvl(ctx: Context<FranciumTVL>) -> Result<()> {
-        ctx.accounts.update_tvl()
+        ctx.accounts.update_rewards()
     }
 }
 

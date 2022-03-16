@@ -323,13 +323,13 @@ impl AccumulatedRewards {
 
     /// Reset the initegral from the last rewards values
     pub fn reset_integral(&mut self) -> Result<()> {
-        let rewards_elapsed_slots = self
+        let elapsed_slots_while_rewards = self
             .last_slot
             .checked_sub(self.deposited_integral.initial_slot)
             .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
         let acc_at_rewards = (self.deposited_avg as u128)
-            .checked_mul(rewards_elapsed_slots as u128)
+            .checked_mul(elapsed_slots_while_rewards as u128)
             .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
         let acc_since_last_rewards = self
