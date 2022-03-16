@@ -74,6 +74,37 @@
       ]
     },
     {
+      "name": "setProtocolWeights",
+      "accounts": [
+        {
+          "name": "userSigner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "vaultSigner",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "vaultAccount",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "weights",
+          "type": {
+            "array": [
+              "u16",
+              5
+            ]
+          }
+        }
+      ]
+    },
+    {
       "name": "deposit",
       "accounts": [
         {
@@ -1849,6 +1880,11 @@
       "code": 6010,
       "name": "MathOverflow",
       "msg": "Math operation overflow"
+    },
+    {
+      "code": 6011,
+      "name": "InvalidWeights",
+      "msg": "Non-valid weights"
     }
   ]
 }

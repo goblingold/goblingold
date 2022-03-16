@@ -64,12 +64,8 @@ impl VaultAccount {
             .try_fold(0u128, |acc, &x| acc.checked_add(x))
             .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
-        if total_deposit == 0 || total_rewards == 0 {
-            self.protocols
-                .iter_mut()
-                .for_each(|protocol| protocol.weight = 1000 / (PROTOCOLS_LEN as u16));
-        } else {
-            for i in 0..PROTOCOLS_LEN {
+        for i in 0..PROTOCOLS_LEN {
+            if self.protocols[i].is_used() {
                 let rewards_wo_i: u128 = total_rewards
                     .checked_sub(rewards[i])
                     .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
@@ -97,42 +93,47 @@ impl VaultAccount {
                     .ok_or_else(|| error!(ErrorCode::MathOverflow))?
                     as u128;
             }
+        }
 
-            // If one weight is zero, set to one so all protocols get deposited
-            #[allow(clippy::needless_range_loop)]
-            for i in 0..PROTOCOLS_LEN {
+        // If one of the non-zero weights is zero now, set to one so all the used protocols get
+        // deposited
+        #[allow(clippy::needless_range_loop)]
+        for i in 0..PROTOCOLS_LEN {
+            if self.protocols[i].is_used() {
                 self.protocols[i].weight = deposit[i]
                     .checked_mul(1000)
                     .ok_or_else(|| error!(ErrorCode::MathOverflow))?
                     .checked_div(total_deposit)
                     .ok_or_else(|| error!(ErrorCode::MathOverflow))?
                     as u16;
+
                 if self.protocols[i].weight == 0 {
                     self.protocols[i].weight = 1
                 }
             }
-
-            let (max_indx, max_protocol) = self
-                .protocols
-                .iter()
-                .enumerate()
-                .max_by_key(|&(_, protocol)| protocol.weight)
-                .unwrap();
-
-            let total_weights: u16 = self
-                .protocols
-                .iter()
-                .try_fold(0_u16, |acc, &protocol| acc.checked_add(protocol.weight))
-                .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
-
-            self.protocols[max_indx].weight = 1000_u16
-                .checked_sub(
-                    total_weights
-                        .checked_sub(max_protocol.weight)
-                        .ok_or_else(|| error!(ErrorCode::MathOverflow))?,
-                )
-                .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
         }
+
+        // Renormalize the weights
+        let (max_indx, max_protocol) = self
+            .protocols
+            .iter()
+            .enumerate()
+            .max_by_key(|&(_, protocol)| protocol.weight)
+            .unwrap();
+
+        let weights_sum: u16 = self
+            .protocols
+            .iter()
+            .try_fold(0_u16, |acc, &protocol| acc.checked_add(protocol.weight))
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+
+        self.protocols[max_indx].weight = 1000_u16
+            .checked_sub(
+                weights_sum
+                    .checked_sub(max_protocol.weight)
+                    .ok_or_else(|| error!(ErrorCode::MathOverflow))?,
+            )
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
         Ok(())
     }
@@ -198,6 +199,11 @@ pub struct ProtocolData {
 }
 
 impl ProtocolData {
+    /// Check the protocol is used
+    pub fn is_used(&self) -> bool {
+        self.weight != u16::default()
+    }
+
     /// Amount that should be deposited according to the weight
     fn amount_should_be_deposited(&self, total_amount: u64) -> Result<u64> {
         let amount: u64 = (total_amount as u128)
