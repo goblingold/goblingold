@@ -192,9 +192,9 @@ impl<'info> FranciumDeposit<'info> {
         let is_last_deposit = is_last_of_duplicated_ixs(self.instructions.to_account_info())?;
 
         let amount: u64 = if is_last_deposit {
-            self.generic_accs.amount_to_deposit(Protocols::Francium)?
-        } else {
             0
+        } else {
+            self.generic_accs.amount_to_deposit(Protocols::Francium)?
         };
         let balances = self.deposit_and_get_balances(amount, !is_last_deposit)?;
 
