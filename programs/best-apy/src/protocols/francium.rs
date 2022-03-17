@@ -565,6 +565,7 @@ impl<'info> FranciumTVL<'info> {
         let tvl = self.max_withdrawable()?;
 
         let protocol = &mut self.generic_accs.vault_account.protocols[Protocols::Francium as usize];
+        msg!("Francium TVL {} and base_amount {}", tvl, protocol.tokens.base_amount);
         let rewards = tvl
             .checked_sub(protocol.tokens.base_amount)
             .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
