@@ -193,6 +193,7 @@ pub struct PortDeposit<'info> {
     pub port_lending_market_account: AccountInfo<'info>,
     /// CHECK: Port CPI
     pub port_lending_market_authority_account: AccountInfo<'info>,
+    #[account(mut)]
     pub port_destination_deposit_collateral_account: Account<'info, TokenAccount>,
     #[account(mut)]
     /// CHECK: Port CPI
