@@ -64,77 +64,78 @@ impl VaultAccount {
             .try_fold(0u128, |acc, &x| acc.checked_add(x))
             .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
-        for i in 0..PROTOCOLS_LEN {
-            if self.protocols[i].is_used() {
-                let rewards_wo_i: u128 = total_rewards
-                    .checked_sub(rewards[i])
+        if total_deposit != 0 && total_rewards != 0 {
+            for i in 0..PROTOCOLS_LEN {
+                if self.protocols[i].is_used() {
+                    let rewards_wo_i: u128 = total_rewards
+                        .checked_sub(rewards[i])
+                        .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+                    let deposit_wo_i: u128 = total_deposit
+                        .checked_sub(deposit[i])
+                        .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+
+                    let num1: i128 = rewards[i]
+                        .checked_mul(deposit_wo_i)
+                        .ok_or_else(|| error!(ErrorCode::MathOverflow))?
+                        as i128;
+                    let num2: i128 = deposit[i]
+                        .checked_mul(rewards_wo_i)
+                        .ok_or_else(|| error!(ErrorCode::MathOverflow))?
+                        as i128;
+
+                    let delta: i128 = (num1
+                        .checked_sub(num2)
+                        .ok_or_else(|| error!(ErrorCode::MathOverflow))?)
+                    .checked_div(total_rewards as i128)
                     .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
-                let deposit_wo_i: u128 = total_deposit
-                    .checked_sub(deposit[i])
-                    .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
-                let num1: i128 = rewards[i]
-                    .checked_mul(deposit_wo_i)
-                    .ok_or_else(|| error!(ErrorCode::MathOverflow))?
-                    as i128;
-                let num2: i128 = deposit[i]
-                    .checked_mul(rewards_wo_i)
-                    .ok_or_else(|| error!(ErrorCode::MathOverflow))?
-                    as i128;
-
-                let delta: i128 = (num1
-                    .checked_sub(num2)
-                    .ok_or_else(|| error!(ErrorCode::MathOverflow))?)
-                .checked_div(total_rewards as i128)
-                .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
-
-                deposit[i] = (deposit[i] as i128)
-                    .checked_add(delta)
-                    .ok_or_else(|| error!(ErrorCode::MathOverflow))?
-                    as u128;
-            }
-        }
-
-        // If one of the non-zero weights is zero now, set to one so all the used protocols get
-        // deposited
-        #[allow(clippy::needless_range_loop)]
-        for i in 0..PROTOCOLS_LEN {
-            if self.protocols[i].is_used() {
-                self.protocols[i].weight = deposit[i]
-                    .checked_mul(1000)
-                    .ok_or_else(|| error!(ErrorCode::MathOverflow))?
-                    .checked_div(total_deposit)
-                    .ok_or_else(|| error!(ErrorCode::MathOverflow))?
-                    as u16;
-
-                if self.protocols[i].weight == 0 {
-                    self.protocols[i].weight = 1
+                    deposit[i] = (deposit[i] as i128)
+                        .checked_add(delta)
+                        .ok_or_else(|| error!(ErrorCode::MathOverflow))?
+                        as u128;
                 }
             }
+
+            // If one of the non-zero weights is zero now, set to one so all the used protocols get
+            // deposited
+            #[allow(clippy::needless_range_loop)]
+            for i in 0..PROTOCOLS_LEN {
+                if self.protocols[i].is_used() {
+                    self.protocols[i].weight = deposit[i]
+                        .checked_mul(1000)
+                        .ok_or_else(|| error!(ErrorCode::MathOverflow))?
+                        .checked_div(total_deposit)
+                        .ok_or_else(|| error!(ErrorCode::MathOverflow))?
+                        as u16;
+
+                    if self.protocols[i].weight == 0 {
+                        self.protocols[i].weight = 1
+                    }
+                }
+            }
+
+            // Renormalize the weights
+            let (max_indx, max_protocol) = self
+                .protocols
+                .iter()
+                .enumerate()
+                .max_by_key(|&(_, protocol)| protocol.weight)
+                .unwrap();
+
+            let weights_sum: u16 = self
+                .protocols
+                .iter()
+                .try_fold(0_u16, |acc, &protocol| acc.checked_add(protocol.weight))
+                .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+
+            self.protocols[max_indx].weight = 1000_u16
+                .checked_sub(
+                    weights_sum
+                        .checked_sub(max_protocol.weight)
+                        .ok_or_else(|| error!(ErrorCode::MathOverflow))?,
+                )
+                .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
         }
-
-        // Renormalize the weights
-        let (max_indx, max_protocol) = self
-            .protocols
-            .iter()
-            .enumerate()
-            .max_by_key(|&(_, protocol)| protocol.weight)
-            .unwrap();
-
-        let weights_sum: u16 = self
-            .protocols
-            .iter()
-            .try_fold(0_u16, |acc, &protocol| acc.checked_add(protocol.weight))
-            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
-
-        self.protocols[max_indx].weight = 1000_u16
-            .checked_sub(
-                weights_sum
-                    .checked_sub(max_protocol.weight)
-                    .ok_or_else(|| error!(ErrorCode::MathOverflow))?,
-            )
-            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
-
         Ok(())
     }
 
