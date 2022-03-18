@@ -295,6 +295,7 @@ pub struct PortWithdraw<'info> {
     #[account(mut)]
     /// CHECK: Port CPI
     pub vault_port_staking_account: AccountInfo<'info>,
+    #[account(mut)]
     /// CHECK: Port CPI
     pub port_source_collateral_account: AccountInfo<'info>,
     #[account(mut)]

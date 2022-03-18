@@ -931,7 +931,7 @@
         },
         {
           "name": "portDestinationDepositCollateralAccount",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -1007,7 +1007,7 @@
         },
         {
           "name": "portSourceCollateralAccount",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
