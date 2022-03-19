@@ -350,7 +350,6 @@ pub struct RefreshRewardsWeights<'info> {
     #[account(mut, address = vault_account.dao_treasury_lp_token_account)]
     pub dao_treasury_lp_token_account: Account<'info, TokenAccount>,
     pub token_program: Program<'info, Token>,
-    pub clock: Sysvar<'info, Clock>,
 }
 
 #[derive(Accounts)]
