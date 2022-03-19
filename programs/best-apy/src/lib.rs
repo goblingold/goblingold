@@ -324,7 +324,6 @@ pub struct Withdraw<'info> {
     )]
     pub vault_input_token_account: Account<'info, TokenAccount>,
     pub token_program: Program<'info, Token>,
-    pub clock: Sysvar<'info, Clock>,
     #[account(address = sysvar::instructions::ID)]
     /// CHECK: address is checked
     pub instructions: AccountInfo<'info>,
