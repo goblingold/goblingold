@@ -297,7 +297,6 @@ pub struct Deposit<'info> {
     )]
     pub vault_input_token_account: Account<'info, TokenAccount>,
     pub token_program: Program<'info, Token>,
-    pub clock: Sysvar<'info, Clock>,
 }
 
 #[derive(Accounts)]
@@ -325,7 +324,6 @@ pub struct Withdraw<'info> {
     )]
     pub vault_input_token_account: Account<'info, TokenAccount>,
     pub token_program: Program<'info, Token>,
-    pub clock: Sysvar<'info, Clock>,
     #[account(address = sysvar::instructions::ID)]
     /// CHECK: address is checked
     pub instructions: AccountInfo<'info>,
@@ -352,7 +350,6 @@ pub struct RefreshRewardsWeights<'info> {
     #[account(mut, address = vault_account.dao_treasury_lp_token_account)]
     pub dao_treasury_lp_token_account: Account<'info, TokenAccount>,
     pub token_program: Program<'info, Token>,
-    pub clock: Sysvar<'info, Clock>,
 }
 
 #[derive(Accounts)]
@@ -399,7 +396,6 @@ pub struct GenericTVLAccounts<'info> {
     pub vault_signer: AccountInfo<'info>,
     #[account(mut)]
     pub vault_account: Box<Account<'info, VaultAccount>>,
-    pub clock: Sysvar<'info, Clock>,
 }
 
 /// Anchor generated modules required for using the GenericAccounts structs as fields of
