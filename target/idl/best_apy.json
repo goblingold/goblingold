@@ -465,11 +465,6 @@
               "name": "vaultAccount",
               "isMut": true,
               "isSigner": false
-            },
-            {
-              "name": "clock",
-              "isMut": false,
-              "isSigner": false
             }
           ]
         },
@@ -748,11 +743,6 @@
             {
               "name": "vaultAccount",
               "isMut": true,
-              "isSigner": false
-            },
-            {
-              "name": "clock",
-              "isMut": false,
               "isSigner": false
             }
           ]
@@ -1048,11 +1038,6 @@
               "name": "vaultAccount",
               "isMut": true,
               "isSigner": false
-            },
-            {
-              "name": "clock",
-              "isMut": false,
-              "isSigner": false
             }
           ]
         },
@@ -1286,11 +1271,6 @@
             {
               "name": "vaultAccount",
               "isMut": true,
-              "isSigner": false
-            },
-            {
-              "name": "clock",
-              "isMut": false,
               "isSigner": false
             }
           ]
@@ -1615,11 +1595,6 @@
             {
               "name": "vaultAccount",
               "isMut": true,
-              "isSigner": false
-            },
-            {
-              "name": "clock",
-              "isMut": false,
               "isSigner": false
             }
           ]

@@ -315,7 +315,8 @@ pub struct AccumulatedRewards {
 
 impl AccumulatedRewards {
     /// Update the rewards
-    pub fn update(&mut self, current_slot: u64, rewards: u64) -> Result<()> {
+    pub fn update(&mut self, rewards: u64) -> Result<()> {
+        let current_slot = Clock::get()?.slot;
         self.last_slot = current_slot;
         self.amount = rewards;
         self.deposited_avg = self.deposited_integral.get_average(current_slot)?;

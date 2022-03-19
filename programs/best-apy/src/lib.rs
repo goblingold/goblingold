@@ -397,7 +397,6 @@ pub struct GenericTVLAccounts<'info> {
     pub vault_signer: AccountInfo<'info>,
     #[account(mut)]
     pub vault_account: Box<Account<'info, VaultAccount>>,
-    pub clock: Sysvar<'info, Clock>,
 }
 
 /// Anchor generated modules required for using the GenericAccounts structs as fields of
