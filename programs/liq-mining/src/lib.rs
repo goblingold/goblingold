@@ -14,7 +14,7 @@ mod error;
 mod sunny;
 mod swap;
 
-declare_id!("Ai2wiwErkghYoUdjYciaYsDLcDAukUSYFNhTeAYVpNA6");
+declare_id!("4S9nmN6jtD6BCKAEkZsr3HaumVjWC6iSsYmMzNSxCM1j");
 
 pub const ALLOWED_DEPLOYER: &str = "2fmQLSF1xR5FK3Yc5VhGvnrx7mjXbNSJN3d3WySYnzr6";
 pub const ALLOWED_RUNNER: &str = "2fmQLSF1xR5FK3Yc5VhGvnrx7mjXbNSJN3d3WySYnzr6";
@@ -131,6 +131,7 @@ pub mod liq_mining {
         Ok(())
     }
 
+    // Before calling withdraw, call unstake_sunny
     pub fn withdraw(ctx: Context<Withdraw>, lp_amount: u64) -> Result<()> {
         let seeds = &[
             ctx.accounts.vault_account.to_account_info().key.as_ref(),
@@ -171,6 +172,76 @@ pub mod liq_mining {
 
         Ok(())
     }
+
+    pub fn stake_sunny(ctx: Context<SunnyStake>) -> Result<()> {
+        ctx.accounts.stake()
+    }
+
+    pub fn unstake_sunny(ctx: Context<SunnyUnstake>, amount: u64) -> Result<()> {
+        ctx.accounts.unstake(amount)
+    }
+
+    pub fn claim_rewards_sunny(ctx: Context<SunnyClaimRewards>) -> Result<()> {
+        ctx.accounts.claim_rewards()
+    }
+
+    pub fn claim_rewards_saber(ctx: Context<ClaimRewardsSaber>) -> Result<()> {
+        let seeds = &[
+            ctx.accounts.vault_account.to_account_info().key.as_ref(),
+            &[ctx.accounts.vault_account.bump],
+        ];
+        let signer = &[&seeds[..]];
+
+        let cpi_ctx: CpiContext<quarry_mine::cpi::accounts::ClaimRewards> =
+            CpiContext::new_with_signer(
+                ctx.accounts.quarry_mine_program_id.to_account_info(),
+                ctx.accounts.claim_rewards.to_cpi_accounts(),
+                signer,
+            );
+        quarry_mine::cpi::claim_rewards(cpi_ctx)?;
+
+        Ok(())
+    }
+
+    pub fn redeem_sunny(ctx: Context<SunnyRedeem>) -> Result<()> {
+         // Fee
+        let saber_before = ctx.accounts.redeem_saber.redeem_ctx.redemption_destination.amount;
+        let sunny_before = ctx.accounts.redeem_sunny.redeem_ctx.redemption_destination.amount;
+
+        ctx.accounts.redeem()?;
+
+        ctx.accounts.redeem_saber.redeem_ctx.redemption_destination.reload()?;
+        ctx.accounts.redeem_sunny.redeem_ctx.redemption_destination.reload()?;
+
+        let saber_fee = calculate_fee(ctx.accounts.redeem_saber.redeem_ctx.redemption_destination.amount.checked_sub(saber_before).ok_or(ErrorCode::MathOverflow)?)?;
+        let sunny_fee = calculate_fee(ctx.accounts.redeem_sunny.redeem_ctx.redemption_destination.amount.checked_sub(sunny_before).ok_or(ErrorCode::MathOverflow)?)?;
+
+        let cpi_accounts = Transfer {
+            from: ctx.accounts.redeem_saber.redeem_ctx.redemption_destination.to_account_info(),
+            to: ctx.accounts.dao_treasury_saber_token_account.to_account_info(),
+            authority: ctx.accounts.vault_signer.to_account_info(),
+        };
+        let cpi_program = ctx.accounts.token_program.to_account_info();
+        let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
+        token::transfer(cpi_ctx, saber_fee)?;
+
+        let cpi_accounts = Transfer {
+            from: ctx.accounts.redeem_sunny.redeem_ctx.redemption_destination.to_account_info(),
+            to: ctx.accounts.dao_treasury_sunny_token_account.to_account_info(),
+            authority: ctx.accounts.vault_signer.to_account_info(),
+        };
+        let cpi_program = ctx.accounts.token_program.to_account_info();
+        let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
+        token::transfer(cpi_ctx, sunny_fee)?;
+
+        Ok(())
+    }
+
+    pub fn swap(ctx: Context<RaydiumSwap>) -> Result<()> {
+        ctx.accounts.swap_rewards()
+    }
+
+    // --------- SABER FUNCTIONS  ------------
 
     pub fn deposit_saber(ctx: Context<SaberDeposit>) -> Result<()> {
         let seeds = &[
@@ -235,14 +306,6 @@ pub mod liq_mining {
         Ok(())
     }
 
-    pub fn stake_sunny(ctx: Context<SunnyStake>) -> Result<()> {
-        ctx.accounts.stake()
-    }
-
-    pub fn unstake_sunny(ctx: Context<SunnyUnstake>, amount: u64) -> Result<()> {
-        ctx.accounts.unstake(amount)
-    }
-
     pub fn stake(ctx: Context<Stake>) -> Result<()> {
         let seeds = &[
             ctx.accounts.vault_account.to_account_info().key.as_ref(),
@@ -284,85 +347,24 @@ pub mod liq_mining {
         Ok(())
     }
 
-    pub fn sunny_claim_rewards(ctx: Context<SunnyClaimRewards>) -> Result<()> {
-        ctx.accounts.claim_rewards()
-    }
-
-    pub fn claim_rewards(ctx: Context<ClaimRewards>) -> Result<()> {
+    pub fn redeem_saber(ctx: Context<SaberRedeem>) -> Result<()> {
         let seeds = &[
             ctx.accounts.vault_account.to_account_info().key.as_ref(),
             &[ctx.accounts.vault_account.bump],
         ];
         let signer = &[&seeds[..]];
 
-        let cpi_ctx: CpiContext<quarry_mine::cpi::accounts::ClaimRewards> =
+        let cpi_ctx: CpiContext<redeemer::cpi::accounts::RedeemTokensFromMintProxy> =
             CpiContext::new_with_signer(
-                ctx.accounts.quarry_mine_program_id.to_account_info(),
-                ctx.accounts.claim_rewards.to_cpi_accounts(),
+                ctx.accounts.redeemer_program_id.to_account_info(),
+                ctx.accounts.redeem.to_cpi_accounts(),
                 signer,
             );
-        quarry_mine::cpi::claim_rewards(cpi_ctx)?;
+
+        let amount = ctx.accounts.redeem.redeem_ctx.iou_source.amount;
+        redeemer::cpi::redeem_tokens_from_mint_proxy(cpi_ctx, amount)?;
 
         Ok(())
-    }
-
-    pub fn sunny_redeem(ctx: Context<SunnyRedeem>) -> Result<()> {
-         // Fee
-        let saber_before = ctx.accounts.redeem_saber.redeem_ctx.redemption_destination.amount;
-        let sunny_before = ctx.accounts.redeem_sunny.redeem_ctx.redemption_destination.amount;
-
-        ctx.accounts.redeem()?;
-
-        ctx.accounts.redeem_saber.redeem_ctx.redemption_destination.reload()?;
-        ctx.accounts.redeem_sunny.redeem_ctx.redemption_destination.reload()?;
-
-        let saber_fee = calculate_fee(ctx.accounts.redeem_saber.redeem_ctx.redemption_destination.amount.checked_sub(saber_before).ok_or(ErrorCode::MathOverflow)?)?;
-        let sunny_fee = calculate_fee(ctx.accounts.redeem_sunny.redeem_ctx.redemption_destination.amount.checked_sub(sunny_before).ok_or(ErrorCode::MathOverflow)?)?;
-
-        let cpi_accounts = Transfer {
-            from: ctx.accounts.redeem_saber.redeem_ctx.redemption_destination.to_account_info(),
-            to: ctx.accounts.dao_treasury_saber_token_account.to_account_info(),
-            authority: ctx.accounts.vault_signer.to_account_info(),
-        };
-        let cpi_program = ctx.accounts.token_program.to_account_info();
-        let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
-        token::transfer(cpi_ctx, saber_fee)?;
-
-        let cpi_accounts = Transfer {
-            from: ctx.accounts.redeem_sunny.redeem_ctx.redemption_destination.to_account_info(),
-            to: ctx.accounts.dao_treasury_sunny_token_account.to_account_info(),
-            authority: ctx.accounts.vault_signer.to_account_info(),
-        };
-        let cpi_program = ctx.accounts.token_program.to_account_info();
-        let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
-        token::transfer(cpi_ctx, sunny_fee)?;
-
-        Ok(())
-    }
-
-    // TODO REMOVE
-    // pub fn saber_redeem(ctx: Context<SaberRedeem>) -> Result<()> {
-    //     let seeds = &[
-    //         ctx.accounts.vault_account.to_account_info().key.as_ref(),
-    //         &[ctx.accounts.vault_account.bump],
-    //     ];
-    //     let signer = &[&seeds[..]];
-
-    //     let cpi_ctx: CpiContext<redeemer::cpi::accounts::RedeemTokensFromMintProxy> =
-    //         CpiContext::new_with_signer(
-    //             ctx.accounts.redeemer_program_id.to_account_info(),
-    //             ctx.accounts.redeem.to_cpi_accounts(),
-    //             signer,
-    //         );
-
-    //     let amount = ctx.accounts.redeem.redeem_ctx.iou_source.amount;
-    //     redeemer::cpi::redeem_tokens_from_mint_proxy(cpi_ctx, amount)?;
-
-    //     Ok(())
-    // }
-
-    pub fn swap(ctx: Context<RaydiumSwap>) -> Result<()> {
-        ctx.accounts.swap_rewards()
     }
 }
 
@@ -1110,7 +1112,7 @@ pub struct SunnyClaimRewards<'info> {
 }
 
 #[derive(Accounts)]
-pub struct ClaimRewards<'info> {
+pub struct ClaimRewardsSaber<'info> {
     #[account(
         seeds = [vault_account.to_account_info().key.as_ref()],
         bump = vault_account.bump
