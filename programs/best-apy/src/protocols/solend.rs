@@ -2,7 +2,6 @@ use crate::error::ErrorCode;
 use crate::macros::generate_seeds;
 use crate::protocols::Protocols;
 use crate::vault::{TokenBalances, VaultAccount};
-use crate::PubkeyWrapper;
 use crate::ALLOWED_DEPLOYER;
 use crate::{
     generic_accounts_anchor_modules::*, GenericDepositAccounts, GenericTVLAccounts,
@@ -105,7 +104,7 @@ pub struct SolendDeposit<'info> {
     pub solend_program_id: AccountInfo<'info>,
     #[account(
         mut,
-        associated_token::mint = PubkeyWrapper(vault_solend_destination_collateral_token_account.mint),
+        associated_token::mint = vault_solend_destination_collateral_token_account.mint,
         associated_token::authority = generic_accs.vault_signer,
     )]
     pub vault_solend_destination_collateral_token_account: Box<Account<'info, TokenAccount>>,
@@ -232,7 +231,7 @@ pub struct SolendWithdraw<'info> {
     pub solend_program_id: AccountInfo<'info>,
     #[account(
         mut,
-        associated_token::mint = PubkeyWrapper(vault_solend_destination_collateral_token_account.mint),
+        associated_token::mint = vault_solend_destination_collateral_token_account.mint,
         associated_token::authority = generic_accs.vault_signer,
     )]
     pub vault_solend_destination_collateral_token_account: Account<'info, TokenAccount>,

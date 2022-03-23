@@ -2,7 +2,6 @@ use crate::error::ErrorCode;
 use crate::macros::generate_seeds;
 use crate::protocols::Protocols;
 use crate::vault::{TokenBalances, VaultAccount};
-use crate::PubkeyWrapper;
 use crate::ALLOWED_DEPLOYER;
 use crate::{
     generic_accounts_anchor_modules::*, GenericDepositAccounts, GenericTVLAccounts,
@@ -170,7 +169,7 @@ pub struct PortDeposit<'info> {
     pub port_staking_program_id: AccountInfo<'info>,
     #[account(
         mut,
-        associated_token::mint = PubkeyWrapper(vault_port_collateral_token_account.mint),
+        associated_token::mint = vault_port_collateral_token_account.mint,
         associated_token::authority = generic_accs.vault_signer,
     )]
     pub vault_port_collateral_token_account: Box<Account<'info, TokenAccount>>,
@@ -285,7 +284,7 @@ pub struct PortWithdraw<'info> {
     pub port_staking_program_id: AccountInfo<'info>,
     #[account(
         mut,
-        associated_token::mint = PubkeyWrapper(vault_port_collateral_token_account.mint),
+        associated_token::mint = vault_port_collateral_token_account.mint,
         associated_token::authority = generic_accs.vault_signer,
     )]
     pub vault_port_collateral_token_account: Account<'info, TokenAccount>,
@@ -486,7 +485,7 @@ pub struct PortClaimRewards<'info> {
     pub vault_port_staking_account: AccountInfo<'info>,
     #[account(
         mut,
-        associated_token::mint = PubkeyWrapper(vault_port_rewards_account.mint),
+        associated_token::mint = vault_port_rewards_account.mint,
         associated_token::authority = dao_treasury_owner,
     )]
     pub vault_port_rewards_account: Account<'info, TokenAccount>,

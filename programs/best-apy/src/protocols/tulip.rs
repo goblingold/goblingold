@@ -3,7 +3,6 @@ use crate::macros::generate_seeds;
 use crate::protocols::tulip_reserve;
 use crate::protocols::Protocols;
 use crate::vault::TokenBalances;
-use crate::PubkeyWrapper;
 use crate::{
     generic_accounts_anchor_modules::*, GenericDepositAccounts, GenericTVLAccounts,
     GenericWithdrawAccounts,
@@ -43,7 +42,7 @@ pub struct TulipDeposit<'info> {
     pub tulip_program_id: AccountInfo<'info>,
     #[account(
         mut,
-        associated_token::mint = PubkeyWrapper(vault_tulip_collateral_token_account.mint),
+        associated_token::mint = vault_tulip_collateral_token_account.mint,
         associated_token::authority = generic_accs.vault_signer,
     )]
     pub vault_tulip_collateral_token_account: Account<'info, TokenAccount>,
@@ -156,7 +155,7 @@ pub struct TulipWithdraw<'info> {
     pub tulip_program_id: AccountInfo<'info>,
     #[account(
         mut,
-        associated_token::mint = PubkeyWrapper(vault_tulip_collateral_token_account.mint),
+        associated_token::mint = vault_tulip_collateral_token_account.mint,
         associated_token::authority = generic_accs.vault_signer,
     )]
     pub vault_tulip_collateral_token_account: Account<'info, TokenAccount>,

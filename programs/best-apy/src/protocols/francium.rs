@@ -4,7 +4,6 @@ use crate::macros::generate_seeds;
 use crate::protocols::francium_lending_pool;
 use crate::protocols::Protocols;
 use crate::vault::{TokenBalances, VaultAccount};
-use crate::PubkeyWrapper;
 use crate::ALLOWED_DEPLOYER;
 use crate::{
     generic_accounts_anchor_modules::*, GenericDepositAccounts, GenericTVLAccounts,
@@ -52,7 +51,7 @@ pub struct FranciumInitialize<'info> {
     pub vault_account: Box<Account<'info, VaultAccount>>,
     #[account(
         mut,
-        associated_token::mint = PubkeyWrapper(vault_francium_collateral_token_account.mint),
+        associated_token::mint = vault_francium_collateral_token_account.mint,
         associated_token::authority = vault_signer,
     )]
     pub vault_francium_collateral_token_account: Account<'info, TokenAccount>,
@@ -67,13 +66,13 @@ pub struct FranciumInitialize<'info> {
     pub vault_francium_farming_account: AccountInfo<'info>,
     #[account(
         mut,
-        associated_token::mint = PubkeyWrapper(vault_francium_account_mint_rewards.mint),
+        associated_token::mint = vault_francium_account_mint_rewards.mint,
         associated_token::authority = vault_signer,
     )]
     pub vault_francium_account_mint_rewards: Account<'info, TokenAccount>,
     #[account(
         mut,
-        associated_token::mint = PubkeyWrapper(vault_francium_account_mint_b_rewards.mint),
+        associated_token::mint = vault_francium_account_mint_b_rewards.mint,
         associated_token::authority = vault_signer,
     )]
     pub vault_francium_account_mint_b_rewards: Account<'info, TokenAccount>,
@@ -135,19 +134,19 @@ pub struct FranciumDeposit<'info> {
     pub francium_lending_reward_program_id: AccountInfo<'info>,
     #[account(
         mut,
-        associated_token::mint = PubkeyWrapper(vault_francium_collateral_token_account.mint),
+        associated_token::mint = vault_francium_collateral_token_account.mint,
         associated_token::authority = generic_accs.vault_signer,
     )]
     pub vault_francium_collateral_token_account: Box<Account<'info, TokenAccount>>,
     #[account(
         mut,
-        associated_token::mint = PubkeyWrapper(vault_francium_account_mint_rewards.mint),
+        associated_token::mint = vault_francium_account_mint_rewards.mint,
         associated_token::authority = generic_accs.vault_signer,
     )]
     pub vault_francium_account_mint_rewards: Box<Account<'info, TokenAccount>>,
     #[account(
         mut,
-        associated_token::mint = PubkeyWrapper(vault_francium_account_mint_b_rewards.mint),
+        associated_token::mint = vault_francium_account_mint_b_rewards.mint,
         associated_token::authority = generic_accs.vault_signer,
     )]
     pub vault_francium_account_mint_b_rewards: Box<Account<'info, TokenAccount>>,
@@ -344,13 +343,13 @@ pub struct FranciumWithdraw<'info> {
     pub francium_lending_reward_program_id: AccountInfo<'info>,
     #[account(
         mut,
-        associated_token::mint = PubkeyWrapper(vault_francium_collateral_token_account.mint),
+        associated_token::mint = vault_francium_collateral_token_account.mint,
         associated_token::authority = generic_accs.vault_signer,
     )]
     pub vault_francium_collateral_token_account: Box<Account<'info, TokenAccount>>,
     #[account(
         mut,
-        associated_token::mint = PubkeyWrapper(vault_francium_account_mint_rewards.mint),
+        associated_token::mint = vault_francium_account_mint_rewards.mint,
         associated_token::authority = generic_accs.vault_signer,
     )]
     pub vault_francium_account_mint_rewards: Box<Account<'info, TokenAccount>>,
