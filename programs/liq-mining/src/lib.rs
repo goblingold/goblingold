@@ -427,10 +427,6 @@ pub struct InitializeStrategy<'info> {
         space = 8 + size_of::<VaultAccount>()
     )]
     pub vault_account: Box<Account<'info, VaultAccount>>,
-    #[account(
-        seeds = [vault_account.to_account_info().key.as_ref()],
-        bump = vault_account.bump,
-    )]
     /// CHECK: TODO 
     pub vault_signer: AccountInfo<'info>,
     #[account(
@@ -452,12 +448,10 @@ pub struct InitializeStrategy<'info> {
     pub vault_input_token_account: Account<'info, TokenAccount>,
     #[account(
         constraint = dao_treasury_saber_token_account.owner == Pubkey::from_str(ALLOWED_DEPLOYER).unwrap(),
-        constraint = dao_treasury_saber_token_account.mint == vault_lp_token_mint_pubkey.key()
     )]
     pub dao_treasury_saber_token_account: Box<Account<'info, TokenAccount>>,
     #[account(
         constraint = dao_treasury_sunny_token_account.owner == Pubkey::from_str(ALLOWED_DEPLOYER).unwrap(),
-        constraint = dao_treasury_sunny_token_account.mint == vault_lp_token_mint_pubkey.key()
     )]
     pub dao_treasury_sunny_token_account: Box<Account<'info, TokenAccount>>,
     pub associated_token_program: Program<'info, AssociatedToken>,
