@@ -1793,56 +1793,61 @@
     },
     {
       "code": 6001,
+      "name": "InvalidLpPrice",
+      "msg": "Invalid lp price"
+    },
+    {
+      "code": 6002,
       "name": "ForbiddenRefresh",
       "msg": "Can not refresh weights yet, not enough slots since last refresh"
     },
     {
-      "code": 6002,
+      "code": 6003,
       "name": "StaleProtocolTVL",
       "msg": "A protocol TVL is stale and must be refreshed"
     },
     {
-      "code": 6003,
+      "code": 6004,
       "name": "InvalidProtocolDeposit",
       "msg": "Invalid amount to deposit"
     },
     {
-      "code": 6004,
+      "code": 6005,
       "name": "InvalidProtocolWithdraw",
       "msg": "Invalid amount to withdraw"
     },
     {
-      "code": 6005,
+      "code": 6006,
       "name": "InvalidDepositAmount",
       "msg": "Invalid deposited amount. Please deposit more than 100 lamports"
     },
     {
-      "code": 6006,
+      "code": 6007,
       "name": "InvalidOwner",
       "msg": "Invalid owner"
     },
     {
-      "code": 6007,
+      "code": 6008,
       "name": "InvalidMint",
       "msg": "Invalid mint"
     },
     {
-      "code": 6008,
+      "code": 6009,
       "name": "OnPaused",
       "msg": "Deposits and withdraws aren't allowed on PAUSE"
     },
     {
-      "code": 6009,
+      "code": 6010,
       "name": "InvalidInstructions",
       "msg": "The instructions provided are invalid"
     },
     {
-      "code": 6010,
+      "code": 6011,
       "name": "MathOverflow",
       "msg": "Math operation overflow"
     },
     {
-      "code": 6011,
+      "code": 6012,
       "name": "InvalidWeights",
       "msg": "Non-valid weights"
     }

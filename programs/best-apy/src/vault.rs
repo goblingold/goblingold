@@ -396,7 +396,7 @@ impl SlotIntegrated {
 }
 
 /// Strategy LP token price
-#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default)]
+#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default, Debug)]
 pub struct LpPrice {
     /// Total amount of tokens to be distributed
     pub total_tokens: u64,
@@ -433,5 +433,16 @@ impl LpPrice {
                 .try_into()
                 .map_err(|_| ErrorCode::MathOverflow)?)
         }
+    }
+
+    /// Returns true if self price > previous_price
+    pub fn greater_than(&self, previous_price: LpPrice) -> Result<bool> {
+        let lhs = (self.total_tokens as u128)
+            .checked_mul(previous_price.minted_tokens as u128)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+        let lhr = (previous_price.total_tokens as u128)
+            .checked_mul(self.minted_tokens as u128)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+        Ok(lhs > lhr)
     }
 }
