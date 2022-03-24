@@ -8,7 +8,7 @@ use anchor_lang::solana_program::{program_option::COption, pubkey::Pubkey, sysva
 use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token::{Mint, Token, TokenAccount};
 use error::ErrorCode;
-use protocols::{francium::*, mango::*, port::*, solend::*, tulip::*};
+use protocols::{francium::*, mango::*, port::*, solend::*, tulip::*, PROTOCOLS_LEN};
 use std::mem::size_of;
 use std::str::FromStr;
 use vault::{InitVaultAccountParams, VaultAccount};
@@ -49,8 +49,10 @@ pub mod best_apy {
     }
 
     // ACCESS RESTRICTED. ONLY ALLOWED_DEPLOYER
-    // TODO use PROTOCOLS_LEN when https://github.com/project-serum/anchor/issues/1623 is resolved
-    pub fn set_protocol_weights(ctx: Context<SetProtocolWeights>, weights: [u16; 5]) -> Result<()> {
+    pub fn set_protocol_weights(
+        ctx: Context<SetProtocolWeights>,
+        weights: [u16; PROTOCOLS_LEN],
+    ) -> Result<()> {
         let weights_sum = weights
             .iter()
             .try_fold(0_u16, |acc, &x| acc.checked_add(x))
@@ -200,21 +202,6 @@ fn program_not_paused() -> Result<()> {
     Ok(())
 }
 
-// Temporary wrapper until https://github.com/project-serum/anchor/issues/1416 is resolved
-pub struct PubkeyWrapper(Pubkey);
-
-impl Key for PubkeyWrapper {
-    fn key(&self) -> Pubkey {
-        self.0
-    }
-}
-
-impl From<Pubkey> for PubkeyWrapper {
-    fn from(p: Pubkey) -> Self {
-        PubkeyWrapper(p)
-    }
-}
-
 #[derive(Accounts)]
 pub struct InitializeStrategy<'info> {
     // Only deployer can initialize
@@ -292,12 +279,11 @@ pub struct Deposit<'info> {
     pub vault_lp_token_mint_pubkey: Account<'info, Mint>,
     #[account(
         mut,
-        associated_token::mint = PubkeyWrapper::from(vault_account.input_mint_pubkey),
+        associated_token::mint = vault_account.input_mint_pubkey,
         associated_token::authority = vault_signer,
     )]
     pub vault_input_token_account: Account<'info, TokenAccount>,
     pub token_program: Program<'info, Token>,
-    pub clock: Sysvar<'info, Clock>,
 }
 
 #[derive(Accounts)]
@@ -320,12 +306,11 @@ pub struct Withdraw<'info> {
     pub vault_lp_token_mint_pubkey: Account<'info, Mint>,
     #[account(
         mut,
-        associated_token::mint = PubkeyWrapper::from(vault_account.input_mint_pubkey),
+        associated_token::mint = vault_account.input_mint_pubkey,
         associated_token::authority = vault_signer,
     )]
     pub vault_input_token_account: Account<'info, TokenAccount>,
     pub token_program: Program<'info, Token>,
-    pub clock: Sysvar<'info, Clock>,
     #[account(address = sysvar::instructions::ID)]
     /// CHECK: address is checked
     pub instructions: AccountInfo<'info>,
@@ -339,7 +324,7 @@ pub struct RefreshRewardsWeights<'info> {
     #[account(mut)]
     pub vault_account: Box<Account<'info, VaultAccount>>,
     #[account(
-        associated_token::mint = PubkeyWrapper::from(vault_account.input_mint_pubkey),
+        associated_token::mint = vault_account.input_mint_pubkey,
         associated_token::authority = vault_signer,
     )]
     pub vault_input_token_account: Account<'info, TokenAccount>,
@@ -352,7 +337,6 @@ pub struct RefreshRewardsWeights<'info> {
     #[account(mut, address = vault_account.dao_treasury_lp_token_account)]
     pub dao_treasury_lp_token_account: Account<'info, TokenAccount>,
     pub token_program: Program<'info, Token>,
-    pub clock: Sysvar<'info, Clock>,
 }
 
 #[derive(Accounts)]
@@ -364,7 +348,7 @@ pub struct GenericDepositAccounts<'info> {
     pub vault_signer: AccountInfo<'info>,
     #[account(
         mut,
-        associated_token::mint = PubkeyWrapper::from(vault_account.input_mint_pubkey),
+        associated_token::mint = vault_account.input_mint_pubkey,
         associated_token::authority = vault_signer,
     )]
     pub vault_input_token_account: Account<'info, TokenAccount>,
@@ -381,7 +365,7 @@ pub struct GenericWithdrawAccounts<'info> {
     pub vault_account: Box<Account<'info, VaultAccount>>,
     #[account(
         mut,
-        associated_token::mint = PubkeyWrapper::from(vault_account.input_mint_pubkey),
+        associated_token::mint = vault_account.input_mint_pubkey,
         associated_token::authority = vault_signer,
     )]
     pub vault_input_token_account: Account<'info, TokenAccount>,
@@ -399,7 +383,6 @@ pub struct GenericTVLAccounts<'info> {
     pub vault_signer: AccountInfo<'info>,
     #[account(mut)]
     pub vault_account: Box<Account<'info, VaultAccount>>,
-    pub clock: Sysvar<'info, Clock>,
 }
 
 /// Anchor generated modules required for using the GenericAccounts structs as fields of

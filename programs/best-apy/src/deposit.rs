@@ -32,7 +32,7 @@ impl<'info> Deposit<'info> {
             .previous_lp_price
             .lp_to_token(lp_amount)?;
         require!(
-            lp_amount_previous_price < lp_amount,
+            lp_amount < lp_amount_previous_price,
             ErrorCode::InvalidLpPrice
         );
 

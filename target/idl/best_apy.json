@@ -1,0 +1,1855 @@
+{
+  "version": "0.1.0",
+  "name": "best_apy",
+  "instructions": [
+    {
+      "name": "initializeStrategy",
+      "accounts": [
+        {
+          "name": "userSigner",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "inputTokenMintAddress",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "vaultSigner",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "vaultAccount",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "vaultInputTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultLpTokenMintPubkey",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "daoTreasuryLpTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "daoTreasuryOwner",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "associatedTokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bump",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "setProtocolWeights",
+      "accounts": [
+        {
+          "name": "userSigner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "vaultSigner",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "vaultAccount",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "weights",
+          "type": {
+            "array": [
+              "u16",
+              5
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "deposit",
+      "accounts": [
+        {
+          "name": "userSigner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "userInputTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "userLpTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultSigner",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "vaultLpTokenMintPubkey",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultInputTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "withdraw",
+      "accounts": [
+        {
+          "name": "userSigner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "userInputTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "userLpTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultSigner",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultLpTokenMintPubkey",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultInputTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "instructions",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "lpAmount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "refreshRewardsWeights",
+      "accounts": [
+        {
+          "name": "vaultSigner",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "vaultAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultInputTokenAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "vaultLpTokenMintPubkey",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "daoTreasuryLpTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "mangoInitialize",
+      "accounts": [
+        {
+          "name": "userSigner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "vaultSigner",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "vaultAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "vaultMangoAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "mangoProgramId",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "mangoGroupAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "mangoDeposit",
+      "accounts": [
+        {
+          "name": "genericAccs",
+          "accounts": [
+            {
+              "name": "vaultAccount",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "vaultSigner",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "vaultInputTokenAccount",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "tokenProgram",
+              "isMut": false,
+              "isSigner": false
+            },
+            {
+              "name": "clock",
+              "isMut": false,
+              "isSigner": false
+            }
+          ]
+        },
+        {
+          "name": "mangoProgramId",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "vaultMangoAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "mangoGroupAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "mangoCacheAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "mangoRootBankAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "mangoNodeBankAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "mangoVaultAccount",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "mangoWithdraw",
+      "accounts": [
+        {
+          "name": "genericAccs",
+          "accounts": [
+            {
+              "name": "vaultSigner",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "vaultAccount",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "vaultInputTokenAccount",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "tokenProgram",
+              "isMut": false,
+              "isSigner": false
+            },
+            {
+              "name": "clock",
+              "isMut": false,
+              "isSigner": false
+            },
+            {
+              "name": "instructions",
+              "isMut": false,
+              "isSigner": false
+            }
+          ]
+        },
+        {
+          "name": "mangoProgramId",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "vaultMangoAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "mangoCacheAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "mangoGroupAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "mangoGroupSignerAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "mangoRootBankAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "mangoNodeBankAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "mangoVaultAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "mangoTvl",
+      "accounts": [
+        {
+          "name": "genericAccs",
+          "accounts": [
+            {
+              "name": "vaultSigner",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "vaultAccount",
+              "isMut": true,
+              "isSigner": false
+            }
+          ]
+        },
+        {
+          "name": "vaultMangoAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "mangoGroupAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "mangoCacheAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "mangoRootBankAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "defaultPubkey",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "solendInitialize",
+      "accounts": [
+        {
+          "name": "userSigner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "vaultSolendObligationAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "solendLendingMarketAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "vaultAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "vaultSigner",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "solendProgramId",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "clock",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "solendDeposit",
+      "accounts": [
+        {
+          "name": "genericAccs",
+          "accounts": [
+            {
+              "name": "vaultAccount",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "vaultSigner",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "vaultInputTokenAccount",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "tokenProgram",
+              "isMut": false,
+              "isSigner": false
+            },
+            {
+              "name": "clock",
+              "isMut": false,
+              "isSigner": false
+            }
+          ]
+        },
+        {
+          "name": "solendProgramId",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "vaultSolendDestinationCollateralTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultSolendObligationAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "solendReserveAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "solendReserveLiquiditySupplySplTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "solendReserveCollateralSplTokenMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "solendLendingMarketAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "solendDerivedLendingMarketAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "solendDestinationDepositReserveCollateralSupplySplTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "solendPythPriceOracleAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "solendSwitchboardPriceFeedOracleAccount",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "solendWithdraw",
+      "accounts": [
+        {
+          "name": "genericAccs",
+          "accounts": [
+            {
+              "name": "vaultSigner",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "vaultAccount",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "vaultInputTokenAccount",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "tokenProgram",
+              "isMut": false,
+              "isSigner": false
+            },
+            {
+              "name": "clock",
+              "isMut": false,
+              "isSigner": false
+            },
+            {
+              "name": "instructions",
+              "isMut": false,
+              "isSigner": false
+            }
+          ]
+        },
+        {
+          "name": "solendProgramId",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "vaultSolendDestinationCollateralTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultSolendObligationAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "solendSourceWithdrawReserveCollateralSupplySplTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "solendWithdrawReserveAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "solendLendingMarketAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "solendDerivedLendingMarketAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "solendReserveCollateralSplTokenMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "solendReserveLiquiditySupplySplTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "solendTvl",
+      "accounts": [
+        {
+          "name": "genericAccs",
+          "accounts": [
+            {
+              "name": "vaultSigner",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "vaultAccount",
+              "isMut": true,
+              "isSigner": false
+            }
+          ]
+        },
+        {
+          "name": "reserve",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "portInitialize",
+      "accounts": [
+        {
+          "name": "userSigner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "vaultSigner",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "vaultAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "vaultPortObligationAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "portLendingMarketAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "vaultPortStakingAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "portLendingProgramId",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "portStakingProgramId",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "portStakingPoolAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "clock",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "portDeposit",
+      "accounts": [
+        {
+          "name": "genericAccs",
+          "accounts": [
+            {
+              "name": "vaultAccount",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "vaultSigner",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "vaultInputTokenAccount",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "tokenProgram",
+              "isMut": false,
+              "isSigner": false
+            },
+            {
+              "name": "clock",
+              "isMut": false,
+              "isSigner": false
+            }
+          ]
+        },
+        {
+          "name": "portLendingProgramId",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "portStakingProgramId",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "vaultPortCollateralTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultPortObligationAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultPortStakingAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "portReserveAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "portReserveLiquiditySupplyAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "portReserveCollateralMintAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "portLendingMarketAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "portLendingMarketAuthorityAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "portDestinationDepositCollateralAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "portStakingPoolAccount",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "portWithdraw",
+      "accounts": [
+        {
+          "name": "genericAccs",
+          "accounts": [
+            {
+              "name": "vaultSigner",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "vaultAccount",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "vaultInputTokenAccount",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "tokenProgram",
+              "isMut": false,
+              "isSigner": false
+            },
+            {
+              "name": "clock",
+              "isMut": false,
+              "isSigner": false
+            },
+            {
+              "name": "instructions",
+              "isMut": false,
+              "isSigner": false
+            }
+          ]
+        },
+        {
+          "name": "portLendingProgramId",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "portStakingProgramId",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "vaultPortCollateralTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultPortObligationAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultPortStakingAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "portSourceCollateralAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "portReserveAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "portLendingMarketAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "portLendingMarketAuthorityAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "portReserveLiquiditySupplyAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "portReserveCollateralMintAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "portStakingPoolAccount",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "portTvl",
+      "accounts": [
+        {
+          "name": "genericAccs",
+          "accounts": [
+            {
+              "name": "vaultSigner",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "vaultAccount",
+              "isMut": true,
+              "isSigner": false
+            }
+          ]
+        },
+        {
+          "name": "reserve",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "portClaimRewards",
+      "accounts": [
+        {
+          "name": "vaultSigner",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "daoTreasuryOwner",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "portStakingProgramId",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "vaultPortStakingAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultPortRewardsAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "portStakingPoolAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "portRewardsTokenPool",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "portRewardsAccountAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "clock",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "tulipDeposit",
+      "accounts": [
+        {
+          "name": "genericAccs",
+          "accounts": [
+            {
+              "name": "vaultAccount",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "vaultSigner",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "vaultInputTokenAccount",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "tokenProgram",
+              "isMut": false,
+              "isSigner": false
+            },
+            {
+              "name": "clock",
+              "isMut": false,
+              "isSigner": false
+            }
+          ]
+        },
+        {
+          "name": "tulipProgramId",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "vaultTulipCollateralTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tulipReserveAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tulipReserveLiquiditySupplyTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tulipReserveCollateralTokenMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tulipLendingMarketAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tulipReserveAuthority",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "tulipWithdraw",
+      "accounts": [
+        {
+          "name": "genericAccs",
+          "accounts": [
+            {
+              "name": "vaultSigner",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "vaultAccount",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "vaultInputTokenAccount",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "tokenProgram",
+              "isMut": false,
+              "isSigner": false
+            },
+            {
+              "name": "clock",
+              "isMut": false,
+              "isSigner": false
+            },
+            {
+              "name": "instructions",
+              "isMut": false,
+              "isSigner": false
+            }
+          ]
+        },
+        {
+          "name": "tulipProgramId",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "vaultTulipCollateralTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tulipReserveAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tulipReserveLiquiditySupplyTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tulipReserveCollateralTokenMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tulipLendingMarketAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tulipReserveAuthority",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "tulipTvl",
+      "accounts": [
+        {
+          "name": "genericAccs",
+          "accounts": [
+            {
+              "name": "vaultSigner",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "vaultAccount",
+              "isMut": true,
+              "isSigner": false
+            }
+          ]
+        },
+        {
+          "name": "reserve",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "franciumInitialize",
+      "accounts": [
+        {
+          "name": "userSigner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "vaultSigner",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "vaultFranciumCollateralTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "franciumLendingRewardProgramId",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "franciumFarmingPoolAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultFranciumFarmingAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultFranciumAccountMintRewards",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultFranciumAccountMintBRewards",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "franciumDeposit",
+      "accounts": [
+        {
+          "name": "genericAccs",
+          "accounts": [
+            {
+              "name": "vaultAccount",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "vaultSigner",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "vaultInputTokenAccount",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "tokenProgram",
+              "isMut": false,
+              "isSigner": false
+            },
+            {
+              "name": "clock",
+              "isMut": false,
+              "isSigner": false
+            }
+          ]
+        },
+        {
+          "name": "instructions",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "franciumLendingProgramId",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "franciumLendingRewardProgramId",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "vaultFranciumCollateralTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultFranciumAccountMintRewards",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultFranciumAccountMintBRewards",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultFranciumFarmingAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "franciumLendingPoolInfoAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "franciumLendingPoolTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "franciumFarmingPoolStakeTokenMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "franciumMarketInfoAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "franciumLendingMarketAuthority",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "franciumFarmingPoolAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "franciumFarmingPoolAuthority",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "franciumFarmingPoolStakeTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "franciumFarmingPoolRewardsTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "franciumFarmingPoolRewardsBTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "franciumWithdraw",
+      "accounts": [
+        {
+          "name": "genericAccs",
+          "accounts": [
+            {
+              "name": "vaultSigner",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "vaultAccount",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "vaultInputTokenAccount",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "tokenProgram",
+              "isMut": false,
+              "isSigner": false
+            },
+            {
+              "name": "clock",
+              "isMut": false,
+              "isSigner": false
+            },
+            {
+              "name": "instructions",
+              "isMut": false,
+              "isSigner": false
+            }
+          ]
+        },
+        {
+          "name": "franciumLendingProgramId",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "franciumLendingRewardProgramId",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "vaultFranciumCollateralTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultFranciumAccountMintRewards",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultFranciumFarmingAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "franciumFarmingPoolStakeTokenMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "franciumFarmingPoolAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "franciumFarmingPoolAuthority",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "franciumFarmingPoolStakeTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "franciumFarmingPoolRewardsTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "franciumFarmingPoolRewardsBTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "franciumMarketInfoAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "franciumLendingPoolInfoAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "franciumLendingPoolTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "franciumLendingMarketAuthority",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "franciumTvl",
+      "accounts": [
+        {
+          "name": "genericAccs",
+          "accounts": [
+            {
+              "name": "vaultSigner",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "vaultAccount",
+              "isMut": true,
+              "isSigner": false
+            }
+          ]
+        },
+        {
+          "name": "lendingPool",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [
+    {
+      "name": "VaultAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "inputMintPubkey",
+            "type": "publicKey"
+          },
+          {
+            "name": "vaultLpTokenMintPubkey",
+            "type": "publicKey"
+          },
+          {
+            "name": "daoTreasuryLpTokenAccount",
+            "type": "publicKey"
+          },
+          {
+            "name": "currentTvl",
+            "type": "u64"
+          },
+          {
+            "name": "lastRefreshSlot",
+            "type": "u64"
+          },
+          {
+            "name": "previousLpPrice",
+            "type": {
+              "defined": "LpPrice"
+            }
+          },
+          {
+            "name": "rewardsSum",
+            "type": "u64"
+          },
+          {
+            "name": "protocols",
+            "type": {
+              "array": [
+                {
+                  "defined": "ProtocolData"
+                },
+                5
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "types": [
+    {
+      "name": "ProtocolData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "weight",
+            "type": "u16"
+          },
+          {
+            "name": "tokens",
+            "type": {
+              "defined": "TokenBalances"
+            }
+          },
+          {
+            "name": "rewards",
+            "type": {
+              "defined": "AccumulatedRewards"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "TokenBalances",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "baseAmount",
+            "type": "u64"
+          },
+          {
+            "name": "lpAmount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AccumulatedRewards",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "lastSlot",
+            "type": "u64"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "depositedAvg",
+            "type": "u64"
+          },
+          {
+            "name": "depositedIntegral",
+            "type": {
+              "defined": "SlotIntegrated"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "SlotIntegrated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "initialSlot",
+            "type": "u64"
+          },
+          {
+            "name": "lastSlot",
+            "type": "u64"
+          },
+          {
+            "name": "accumulator",
+            "type": "u128"
+          }
+        ]
+      }
+    },
+    {
+      "name": "LpPrice",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "totalTokens",
+            "type": "u64"
+          },
+          {
+            "name": "mintedTokens",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Protocols",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Mango"
+          },
+          {
+            "name": "Solend"
+          },
+          {
+            "name": "Port"
+          },
+          {
+            "name": "Tulip"
+          },
+          {
+            "name": "Francium"
+          }
+        ]
+      }
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "InvalidZeroWithdraw",
+      "msg": "Invalid withdraw. Amount cannot be cero"
+    },
+    {
+      "code": 6001,
+      "name": "InvalidLpPrice",
+      "msg": "Invalid lp price"
+    },
+    {
+      "code": 6002,
+      "name": "ForbiddenRefresh",
+      "msg": "Can not refresh weights yet, not enough slots since last refresh"
+    },
+    {
+      "code": 6003,
+      "name": "StaleProtocolTVL",
+      "msg": "A protocol TVL is stale and must be refreshed"
+    },
+    {
+      "code": 6004,
+      "name": "InvalidProtocolDeposit",
+      "msg": "Invalid amount to deposit"
+    },
+    {
+      "code": 6005,
+      "name": "InvalidProtocolWithdraw",
+      "msg": "Invalid amount to withdraw"
+    },
+    {
+      "code": 6006,
+      "name": "InvalidDepositAmount",
+      "msg": "Invalid deposited amount. Please deposit more than 100 lamports"
+    },
+    {
+      "code": 6007,
+      "name": "InvalidOwner",
+      "msg": "Invalid owner"
+    },
+    {
+      "code": 6008,
+      "name": "InvalidMint",
+      "msg": "Invalid mint"
+    },
+    {
+      "code": 6009,
+      "name": "OnPaused",
+      "msg": "Deposits and withdraws aren't allowed on PAUSE"
+    },
+    {
+      "code": 6010,
+      "name": "InvalidInstructions",
+      "msg": "The instructions provided are invalid"
+    },
+    {
+      "code": 6011,
+      "name": "MathOverflow",
+      "msg": "Math operation overflow"
+    },
+    {
+      "code": 6012,
+      "name": "InvalidWeights",
+      "msg": "Non-valid weights"
+    }
+  ]
+}

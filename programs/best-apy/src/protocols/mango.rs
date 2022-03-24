@@ -261,7 +261,6 @@ pub struct MangoTVL<'info> {
 impl<'info> MangoTVL<'info> {
     /// Update the protocol TVL
     pub fn update_rewards(&mut self) -> Result<()> {
-        let slot = self.generic_accs.clock.slot;
         let tvl = self.max_withdrawable()?;
 
         let protocol = &mut self.generic_accs.vault_account.protocols[Protocols::Mango as usize];
@@ -269,7 +268,7 @@ impl<'info> MangoTVL<'info> {
             .checked_sub(protocol.tokens.base_amount)
             .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
-        protocol.rewards.update(slot, rewards)?;
+        protocol.rewards.update(rewards)?;
 
         Ok(())
     }

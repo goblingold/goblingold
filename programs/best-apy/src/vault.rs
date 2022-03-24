@@ -315,7 +315,8 @@ pub struct AccumulatedRewards {
 
 impl AccumulatedRewards {
     /// Update the rewards
-    pub fn update(&mut self, current_slot: u64, rewards: u64) -> Result<()> {
+    pub fn update(&mut self, rewards: u64) -> Result<()> {
+        let current_slot = Clock::get()?.slot;
         self.last_slot = current_slot;
         self.amount = rewards;
         self.deposited_avg = self.deposited_integral.get_average(current_slot)?;
@@ -395,7 +396,7 @@ impl SlotIntegrated {
 }
 
 /// Strategy LP token price
-#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default)]
+#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default, Debug)]
 pub struct LpPrice {
     /// Total amount of tokens to be distributed
     pub total_tokens: u64,
@@ -435,13 +436,13 @@ impl LpPrice {
     }
 
     /// Returns true if self price > previous_price
-    pub fn greater_than_previous_price(&self, previous_price: LpPrice) -> Result<bool> {
-        let current = (self.total_tokens as u128)
+    pub fn greater_than(&self, previous_price: LpPrice) -> Result<bool> {
+        let lhs = (self.total_tokens as u128)
             .checked_mul(previous_price.minted_tokens as u128)
             .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
-        let previous = (previous_price.total_tokens as u128)
+        let lhr = (previous_price.total_tokens as u128)
             .checked_mul(self.minted_tokens as u128)
             .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
-        Ok(current > previous)
+        Ok(lhs > lhr)
     }
 }

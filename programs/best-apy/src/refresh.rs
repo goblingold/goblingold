@@ -20,9 +20,9 @@ impl<'info> RefreshRewardsWeights<'info> {
     pub fn refresh(&mut self) -> Result<()> {
         msg!("GoblinGold: Refresh weights");
 
-        let elapsed_slots = self
-            .clock
-            .slot
+        let current_slot = Clock::get()?.slot;
+
+        let elapsed_slots = current_slot
             .checked_sub(self.vault_account.last_refresh_slot)
             .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
@@ -36,8 +36,7 @@ impl<'info> RefreshRewardsWeights<'info> {
                 if protocol.is_used() {
                     let last_updated = protocol.rewards.last_slot;
                     require!(
-                        self.clock
-                            .slot
+                        current_slot
                             .checked_sub(last_updated)
                             .ok_or_else(|| error!(ErrorCode::MathOverflow))?
                             < MAX_ELAPSED_SLOTS_FOR_TVL,
@@ -47,7 +46,7 @@ impl<'info> RefreshRewardsWeights<'info> {
             }
         }
 
-        self.vault_account.last_refresh_slot = self.clock.slot;
+        self.vault_account.last_refresh_slot = current_slot;
         self.vault_account.rewards_sum = self
             .vault_account
             .protocols
@@ -127,11 +126,11 @@ impl<'info> RefreshRewardsWeights<'info> {
                     total_tokens: self.vault_account.current_tvl,
                     minted_tokens: self.vault_lp_token_mint_pubkey.supply,
                 };
-                require!(
+                if
                     current_lp_price
-                        .greater_than_previous_price(self.vault_account.previous_lp_price)?,
-                    ErrorCode::InvalidLpPrice
-                )
+                        .greater_than(self.vault_account.previous_lp_price)?{
+                            msg!("GoblinGold:WARN price became inconsistent: previous {:?}, new  {:?}", self.vault_account.previous_lp_price, current_lp_price)
+                        }
             }
         }
 

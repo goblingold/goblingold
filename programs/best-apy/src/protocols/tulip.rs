@@ -3,7 +3,6 @@ use crate::macros::generate_seeds;
 use crate::protocols::tulip_reserve;
 use crate::protocols::Protocols;
 use crate::vault::TokenBalances;
-use crate::PubkeyWrapper;
 use crate::{
     generic_accounts_anchor_modules::*, GenericDepositAccounts, GenericTVLAccounts,
     GenericWithdrawAccounts,
@@ -43,7 +42,7 @@ pub struct TulipDeposit<'info> {
     pub tulip_program_id: AccountInfo<'info>,
     #[account(
         mut,
-        associated_token::mint = PubkeyWrapper(vault_tulip_collateral_token_account.mint),
+        associated_token::mint = vault_tulip_collateral_token_account.mint,
         associated_token::authority = generic_accs.vault_signer,
     )]
     pub vault_tulip_collateral_token_account: Account<'info, TokenAccount>,
@@ -156,7 +155,7 @@ pub struct TulipWithdraw<'info> {
     pub tulip_program_id: AccountInfo<'info>,
     #[account(
         mut,
-        associated_token::mint = PubkeyWrapper(vault_tulip_collateral_token_account.mint),
+        associated_token::mint = vault_tulip_collateral_token_account.mint,
         associated_token::authority = generic_accs.vault_signer,
     )]
     pub vault_tulip_collateral_token_account: Account<'info, TokenAccount>,
@@ -284,7 +283,6 @@ pub struct TulipTVL<'info> {
 impl<'info> TulipTVL<'info> {
     /// Update the protocol TVL
     pub fn update_rewards(&mut self) -> Result<()> {
-        let slot = self.generic_accs.clock.slot;
         let tvl = self.max_withdrawable()?;
 
         let protocol = &mut self.generic_accs.vault_account.protocols[Protocols::Tulip as usize];
@@ -292,7 +290,7 @@ impl<'info> TulipTVL<'info> {
             .checked_sub(protocol.tokens.base_amount)
             .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
-        protocol.rewards.update(slot, rewards)?;
+        protocol.rewards.update(rewards)?;
 
         Ok(())
     }
