@@ -27,6 +27,14 @@ impl<'info> Deposit<'info> {
             minted_tokens: self.vault_lp_token_mint_pubkey.supply,
         }
         .token_to_lp(amount)?;
+        let lp_amount_previous_price = self
+            .vault_account
+            .previous_lp_price
+            .lp_to_token(lp_amount)?;
+        require!(
+            lp_amount_previous_price < lp_amount,
+            ErrorCode::InvalidLpPrice
+        );
 
         // Update total deposited amounts
         self.vault_account.current_tvl = self

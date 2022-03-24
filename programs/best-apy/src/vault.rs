@@ -433,4 +433,15 @@ impl LpPrice {
                 .map_err(|_| ErrorCode::MathOverflow)?)
         }
     }
+
+    /// Returns true if self price > previous_price
+    pub fn greater_than_previous_price(&self, previous_price: LpPrice) -> Result<bool> {
+        let current = (self.total_tokens as u128)
+            .checked_mul(previous_price.minted_tokens as u128)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+        let previous = (previous_price.total_tokens as u128)
+            .checked_mul(self.minted_tokens as u128)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+        Ok(current > previous)
+    }
 }

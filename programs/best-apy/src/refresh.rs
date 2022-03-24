@@ -121,6 +121,17 @@ impl<'info> RefreshRewardsWeights<'info> {
                     .checked_add(rewards)
                     .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
                 self.vault_account.rewards_sum = 0_u64;
+
+                // Check price always goes up
+                let current_lp_price = LpPrice {
+                    total_tokens: self.vault_account.current_tvl,
+                    minted_tokens: self.vault_lp_token_mint_pubkey.supply,
+                };
+                require!(
+                    current_lp_price
+                        .greater_than_previous_price(self.vault_account.previous_lp_price)?,
+                    ErrorCode::InvalidLpPrice
+                )
             }
         }
 
