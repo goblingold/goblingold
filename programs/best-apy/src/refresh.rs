@@ -126,11 +126,13 @@ impl<'info> RefreshRewardsWeights<'info> {
                     total_tokens: self.vault_account.current_tvl,
                     minted_tokens: self.vault_lp_token_mint_pubkey.supply,
                 };
-                if
-                    current_lp_price
-                        .greater_than(self.vault_account.previous_lp_price)?{
-                            msg!("GoblinGold:WARN price became inconsistent: previous {:?}, new  {:?}", self.vault_account.previous_lp_price, current_lp_price)
-                        }
+                if current_lp_price.greater_than(self.vault_account.previous_lp_price)? {
+                    msg!(
+                        "GoblinGold:WARN price became inconsistent: previous {:?}, new  {:?}",
+                        self.vault_account.previous_lp_price,
+                        current_lp_price
+                    )
+                }
             }
         }
 
