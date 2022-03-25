@@ -1,7 +1,7 @@
 use crate::error::ErrorCode;
 use crate::macros::generate_seeds;
 use crate::protocols::Protocols;
-use crate::vault::{TokenBalances, VaultAccount};
+use crate::vault::{hash_pub_keys, TokenBalances, VaultAccount};
 use crate::ALLOWED_DEPLOYER;
 use crate::{
     generic_accounts_anchor_modules::*, GenericDepositAccounts, GenericTVLAccounts,
@@ -148,6 +148,22 @@ impl<'info> MangoDeposit<'info> {
 
         Ok(())
     }
+
+    pub fn check_hash(&self) -> Result<()> {
+        let has_keys = hash_pub_keys(&[
+            self.vault_mango_account.key,
+            self.mango_group_account.key,
+            self.mango_cache_account.key,
+            self.mango_root_bank_account.key,
+            self.mango_node_bank_account.key,
+            self.mango_vault_account.key,
+        ])?;
+        require!(
+            has_keys == self.generic_accs.vault_account.hash_deposit[Protocols::Mango as usize],
+            ErrorCode::InvalidHash
+        );
+        Ok(())
+    }
 }
 
 #[derive(Accounts)]
@@ -240,6 +256,23 @@ impl<'info> MangoWithdraw<'info> {
 
         Ok(())
     }
+
+    pub fn check_hash(&self) -> Result<()> {
+        let has_keys = hash_pub_keys(&[
+            self.vault_mango_account.key,
+            self.mango_cache_account.key,
+            self.mango_group_account.key,
+            self.mango_group_signer_account.key,
+            self.mango_root_bank_account.key,
+            self.mango_node_bank_account.key,
+            self.mango_vault_account.key,
+        ])?;
+        require!(
+            has_keys == self.generic_accs.vault_account.hash_withdraw[Protocols::Mango as usize],
+            ErrorCode::InvalidHash
+        );
+        Ok(())
+    }
 }
 
 #[derive(Accounts)]
@@ -318,5 +351,19 @@ impl<'info> MangoTVL<'info> {
             .unwrap();
 
         Ok(tvl)
+    }
+
+    pub fn check_hash(&self) -> Result<()> {
+        let has_keys = hash_pub_keys(&[
+            self.vault_mango_account.key,
+            self.mango_group_account.key,
+            self.mango_cache_account.key,
+            self.mango_root_bank_account.key,
+        ])?;
+        require!(
+            has_keys == self.generic_accs.vault_account.hash_tvl[Protocols::Mango as usize],
+            ErrorCode::InvalidHash
+        );
+        Ok(())
     }
 }

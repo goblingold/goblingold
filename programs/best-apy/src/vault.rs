@@ -2,6 +2,7 @@ use crate::error::ErrorCode;
 use crate::protocols::{Protocols, PROTOCOLS_LEN};
 use anchor_lang::prelude::*;
 use std::{cmp, convert::TryInto};
+//use solana_program::hash::hash;
 
 /// Strategy vault account
 #[account]
@@ -25,7 +26,24 @@ pub struct VaultAccount {
     pub rewards_sum: u64,
     /// Protocol data
     pub protocols: [ProtocolData; PROTOCOLS_LEN],
+    /// Hash of important accounts for each protocol on deposit
+    pub hash_deposit: [[u8; 8]; PROTOCOLS_LEN],
+    /// Hash of important accounts for each protocol on withdraw
+    pub hash_withdraw: [[u8; 8]; PROTOCOLS_LEN],
+    /// Hash of important accounts for each protocol on tvl
+    pub hash_tvl: [[u8; 8]; PROTOCOLS_LEN],
     // TODO additional padding
+}
+
+pub fn hash_pub_keys(keys: &[&Pubkey]) -> Result<[u8; 8]> {
+    // let by = keys[0].to_bytes();
+    // let le = keys.len();
+    // let oo: [u8;le]= [0; le];
+    // let arr: Vec<u8> = vec![0; le];
+    // let u = keys.iter().flat_map(|s| arr.push(s.to_bytes().iter())).collect();
+    // let l = hash(u);
+    let xs: [u8; 8] = [1, 2, 3, 4, 5, 6, 7, 8];
+    Ok(xs)
 }
 
 impl VaultAccount {

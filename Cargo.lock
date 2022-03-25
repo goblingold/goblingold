@@ -419,6 +419,7 @@ dependencies = [
  "arrayref",
  "mango",
  "port-anchor-adaptor",
+ "solana-program",
  "solend-token-lending",
  "spl-token-lending",
 ]
