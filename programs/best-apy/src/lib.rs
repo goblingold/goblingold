@@ -11,7 +11,7 @@ use error::ErrorCode;
 use protocols::{francium::*, mango::*, port::*, solend::*, tulip::*, PROTOCOLS_LEN};
 use std::mem::size_of;
 use std::str::FromStr;
-use vault::{InitVaultAccountParams, VaultAccount};
+use vault::{Bumps, InitVaultAccountParams, VaultAccount};
 
 mod deposit;
 mod duplicated_ixs;
@@ -26,6 +26,7 @@ mod withdraw;
 declare_id!("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 
 pub const VAULT_ACCOUNT_SEED: &[u8; 5] = b"vault";
+pub const VAULT_LP_TOKEN_MINT_SEED: &[u8; 4] = b"mint";
 
 pub const ALLOWED_DEPLOYER: &str = "8XhNoDjjNoLP5Rys1pBJKGdE8acEC1HJsWGkfkMt6JP1";
 pub const ALLOWED_RUNNER: &str = "DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod";
@@ -41,9 +42,11 @@ pub mod best_apy {
         ctx.accounts
             .vault_account
             .set_inner(VaultAccount::init(InitVaultAccountParams {
-                bump: *ctx.bumps.get("vault_account").unwrap(),
+                bumps: Bumps {
+                    vault: *ctx.bumps.get("vault_account").unwrap(),
+                    lp_token_mint: *ctx.bumps.get("vault_lp_token_mint_pubkey").unwrap(),
+                },
                 input_mint_pubkey: ctx.accounts.input_token_mint_address.key(),
-                vault_lp_token_mint_pubkey: ctx.accounts.vault_lp_token_mint_pubkey.key(),
                 dao_treasury_lp_token_account: ctx.accounts.dao_treasury_lp_token_account.key(),
             }));
 
@@ -231,10 +234,10 @@ pub struct InitializeStrategy<'info> {
     #[account(
         init,
         payer = user_signer,
-        constraint = vault_lp_token_mint_pubkey.mint_authority == COption::Some(vault_account.key()),
-        constraint = vault_lp_token_mint_pubkey.supply == 0,
         mint::decimals = input_token_mint_address.decimals,
         mint::authority = vault_account.key(),
+        seeds = [VAULT_LP_TOKEN_MINT_SEED, vault_account.key().as_ref()],
+        bump,
     )]
     pub vault_lp_token_mint_pubkey: Account<'info, Mint>,
     #[account(
@@ -261,7 +264,7 @@ pub struct SetProtocolWeights<'info> {
     #[account(
         mut,
         seeds = [VAULT_ACCOUNT_SEED, vault_account.input_mint_pubkey.as_ref()],
-        bump = vault_account.bump
+        bump = vault_account.bumps.vault
     )]
     pub vault_account: Box<Account<'info, VaultAccount>>,
 }
@@ -276,13 +279,14 @@ pub struct Deposit<'info> {
     #[account(
         mut,
         seeds = [VAULT_ACCOUNT_SEED, vault_account.input_mint_pubkey.as_ref()],
-        bump = vault_account.bump
+        bump = vault_account.bumps.vault
     )]
     pub vault_account: Box<Account<'info, VaultAccount>>,
     #[account(
         mut,
         constraint = vault_lp_token_mint_pubkey.mint_authority == COption::Some(vault_account.key()),
-        constraint = vault_lp_token_mint_pubkey.key() == vault_account.vault_lp_token_mint_pubkey,
+        seeds = [VAULT_LP_TOKEN_MINT_SEED, vault_account.key().as_ref()],
+        bump = vault_account.bumps.lp_token_mint
     )]
     pub vault_lp_token_mint_pubkey: Account<'info, Mint>,
     #[account(
@@ -304,13 +308,14 @@ pub struct Withdraw<'info> {
     #[account(
         mut,
         seeds = [VAULT_ACCOUNT_SEED, vault_account.input_mint_pubkey.as_ref()],
-        bump = vault_account.bump
+        bump = vault_account.bumps.vault
     )]
     pub vault_account: Box<Account<'info, VaultAccount>>,
     #[account(
         mut,
         constraint = vault_lp_token_mint_pubkey.mint_authority == COption::Some(vault_account.key()),
-        constraint = vault_lp_token_mint_pubkey.key() == vault_account.vault_lp_token_mint_pubkey,
+        seeds = [VAULT_LP_TOKEN_MINT_SEED, vault_account.key().as_ref()],
+        bump = vault_account.bumps.lp_token_mint
     )]
     pub vault_lp_token_mint_pubkey: Account<'info, Mint>,
     #[account(
@@ -330,7 +335,7 @@ pub struct RefreshRewardsWeights<'info> {
     #[account(
         mut,
         seeds = [VAULT_ACCOUNT_SEED, vault_account.input_mint_pubkey.as_ref()],
-        bump = vault_account.bump
+        bump = vault_account.bumps.vault
     )]
     pub vault_account: Box<Account<'info, VaultAccount>>,
     #[account(
@@ -341,7 +346,8 @@ pub struct RefreshRewardsWeights<'info> {
     #[account(
         mut,
         constraint = vault_lp_token_mint_pubkey.mint_authority == COption::Some(vault_account.key()),
-        constraint = vault_lp_token_mint_pubkey.key() == vault_account.vault_lp_token_mint_pubkey,
+        seeds = [VAULT_LP_TOKEN_MINT_SEED, vault_account.key().as_ref()],
+        bump = vault_account.bumps.lp_token_mint
     )]
     pub vault_lp_token_mint_pubkey: Account<'info, Mint>,
     #[account(mut, address = vault_account.dao_treasury_lp_token_account)]
@@ -354,7 +360,7 @@ pub struct GenericDepositAccounts<'info> {
     #[account(
         mut,
         seeds = [VAULT_ACCOUNT_SEED, vault_account.input_mint_pubkey.as_ref()],
-        bump = vault_account.bump
+        bump = vault_account.bumps.vault
     )]
     pub vault_account: Box<Account<'info, VaultAccount>>,
     #[account(
@@ -372,7 +378,7 @@ pub struct GenericWithdrawAccounts<'info> {
     #[account(
         mut,
         seeds = [VAULT_ACCOUNT_SEED, vault_account.input_mint_pubkey.as_ref()],
-        bump = vault_account.bump
+        bump = vault_account.bumps.vault
     )]
     pub vault_account: Box<Account<'info, VaultAccount>>,
     #[account(
@@ -393,7 +399,7 @@ pub struct GenericTVLAccounts<'info> {
     #[account(
         mut,
         seeds = [VAULT_ACCOUNT_SEED, vault_account.input_mint_pubkey.as_ref()],
-        bump = vault_account.bump
+        bump = vault_account.bumps.vault
     )]
     pub vault_account: Box<Account<'info, VaultAccount>>,
 }

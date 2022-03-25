@@ -32,7 +32,7 @@ pub struct PortInitialize<'info> {
     pub user_signer: Signer<'info>,
     #[account(
         seeds = [VAULT_ACCOUNT_SEED, vault_account.input_mint_pubkey.as_ref()],
-        bump = vault_account.bump
+        bump = vault_account.bumps.vault
     )]
     pub vault_account: Box<Account<'info, VaultAccount>>,
     #[account(mut)]
@@ -473,7 +473,7 @@ pub struct PortClaimRewards<'info> {
     #[account(
         mut,
         seeds = [VAULT_ACCOUNT_SEED, vault_account.input_mint_pubkey.as_ref()],
-        bump = vault_account.bump
+        bump = vault_account.bumps.vault
     )]
     pub vault_account: Box<Account<'info, VaultAccount>>,
     #[account(constraint = dao_treasury_owner.key == &Pubkey::from_str(ALLOWED_DEPLOYER).unwrap())]

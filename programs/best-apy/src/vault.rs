@@ -7,12 +7,10 @@ use std::{cmp, convert::TryInto};
 #[account]
 #[derive(Default)]
 pub struct VaultAccount {
-    /// PDA bump seed
-    pub bump: u8,
+    /// PDA bump seeds
+    pub bumps: Bumps,
     /// Strategy input token mint address
     pub input_mint_pubkey: Pubkey,
-    /// Strategy LP token mint address
-    pub vault_lp_token_mint_pubkey: Pubkey,
     /// Destination fee account
     pub dao_treasury_lp_token_account: Pubkey,
     /// Current TVL deposited in the strategy (considering deposits/withdraws)
@@ -32,9 +30,8 @@ impl VaultAccount {
     /// Initialize a new vault
     pub fn init(params: InitVaultAccountParams) -> Self {
         Self {
-            bump: params.bump,
+            bumps: params.bumps,
             input_mint_pubkey: params.input_mint_pubkey,
-            vault_lp_token_mint_pubkey: params.vault_lp_token_mint_pubkey,
             dao_treasury_lp_token_account: params.dao_treasury_lp_token_account,
             ..Self::default()
         }
@@ -178,14 +175,19 @@ impl VaultAccount {
 
 /// Initialize a new vault
 pub struct InitVaultAccountParams {
-    /// PDA bump seed
-    pub bump: u8,
+    /// PDA bump seeds
+    pub bumps: Bumps,
     /// Strategy input token mint address
     pub input_mint_pubkey: Pubkey,
-    /// Strategy LP token mint address
-    pub vault_lp_token_mint_pubkey: Pubkey,
     /// Destination fee account
     pub dao_treasury_lp_token_account: Pubkey,
+}
+
+/// PDA bump seeds
+#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default)]
+pub struct Bumps {
+    pub vault: u8,
+    pub lp_token_mint: u8,
 }
 
 /// Protocol data

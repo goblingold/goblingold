@@ -28,7 +28,7 @@
         {
           "name": "vaultLpTokenMintPubkey",
           "isMut": true,
-          "isSigner": true
+          "isSigner": false
         },
         {
           "name": "daoTreasuryLpTokenAccount",
@@ -1480,15 +1480,13 @@
         "kind": "struct",
         "fields": [
           {
-            "name": "bump",
-            "type": "u8"
+            "name": "bumps",
+            "type": {
+              "defined": "Bumps"
+            }
           },
           {
             "name": "inputMintPubkey",
-            "type": "publicKey"
-          },
-          {
-            "name": "vaultLpTokenMintPubkey",
             "type": "publicKey"
           },
           {
@@ -1529,6 +1527,22 @@
     }
   ],
   "types": [
+    {
+      "name": "Bumps",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "vault",
+            "type": "u8"
+          },
+          {
+            "name": "lpTokenMint",
+            "type": "u8"
+          }
+        ]
+      }
+    },
     {
       "name": "ProtocolData",
       "type": {

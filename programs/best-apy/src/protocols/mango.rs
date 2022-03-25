@@ -26,7 +26,7 @@ pub struct MangoInitialize<'info> {
     pub user_signer: Signer<'info>,
     #[account(
         seeds = [VAULT_ACCOUNT_SEED, vault_account.input_mint_pubkey.as_ref()],
-        bump = vault_account.bump
+        bump = vault_account.bumps.vault
     )]
     pub vault_account: Box<Account<'info, VaultAccount>>,
     #[account(mut)]
