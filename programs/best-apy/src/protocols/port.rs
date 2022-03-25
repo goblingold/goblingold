@@ -425,7 +425,8 @@ impl<'info> PortWithdraw<'info> {
 #[derive(Accounts)]
 pub struct PortTVL<'info> {
     pub generic_accs: GenericTVLAccounts<'info>,
-    /// CHECK: Port CPI
+    #[account(owner = port_lending_program_id::ID)]
+    /// CHECK: owner and mint data field are checked
     pub reserve: AccountInfo<'info>,
 }
 
