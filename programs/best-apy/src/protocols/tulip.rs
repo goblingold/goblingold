@@ -43,7 +43,7 @@ pub struct TulipDeposit<'info> {
     #[account(
         mut,
         associated_token::mint = vault_tulip_collateral_token_account.mint,
-        associated_token::authority = generic_accs.vault_signer,
+        associated_token::authority = generic_accs.vault_account,
     )]
     pub vault_tulip_collateral_token_account: Account<'info, TokenAccount>,
     #[account(mut)]
@@ -118,14 +118,14 @@ impl<'info> TulipDeposit<'info> {
             self.tulip_reserve_collateral_token_mint.to_account_info(),
             self.tulip_lending_market_account.to_account_info(),
             self.tulip_reserve_authority.to_account_info(),
-            self.generic_accs.vault_signer.to_account_info(),
+            self.generic_accs.vault_account.to_account_info(),
             self.generic_accs.clock.to_account_info(),
             self.generic_accs.token_program.to_account_info(),
         ];
         let account_metas = accounts
             .iter()
             .map(|acc| {
-                if acc.key == self.generic_accs.vault_signer.key {
+                if acc.key == &self.generic_accs.vault_account.key() {
                     AccountMeta::new_readonly(*acc.key, true)
                 } else if acc.is_writable {
                     AccountMeta::new(*acc.key, false)
@@ -156,7 +156,7 @@ pub struct TulipWithdraw<'info> {
     #[account(
         mut,
         associated_token::mint = vault_tulip_collateral_token_account.mint,
-        associated_token::authority = generic_accs.vault_signer,
+        associated_token::authority = generic_accs.vault_account,
     )]
     pub vault_tulip_collateral_token_account: Account<'info, TokenAccount>,
     #[account(mut)]
@@ -242,14 +242,14 @@ impl<'info> TulipWithdraw<'info> {
                 .to_account_info(),
             self.tulip_lending_market_account.to_account_info(),
             self.tulip_reserve_authority.to_account_info(),
-            self.generic_accs.vault_signer.to_account_info(),
+            self.generic_accs.vault_account.to_account_info(),
             self.generic_accs.clock.to_account_info(),
             self.generic_accs.token_program.to_account_info(),
         ];
         let account_metas = accounts
             .iter()
             .map(|acc| {
-                if acc.key == self.generic_accs.vault_signer.key {
+                if acc.key == &self.generic_accs.vault_account.key() {
                     AccountMeta::new_readonly(*acc.key, true)
                 } else if acc.is_writable {
                     AccountMeta::new(*acc.key, false)

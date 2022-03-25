@@ -40,7 +40,7 @@ impl<'info> Withdraw<'info> {
         let cpi_accounts = Transfer {
             from: self.vault_input_token_account.to_account_info(),
             to: self.user_input_token_account.to_account_info(),
-            authority: self.vault_signer.to_account_info(),
+            authority: self.vault_account.to_account_info(),
         };
         let cpi_program = self.token_program.to_account_info();
         let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer);

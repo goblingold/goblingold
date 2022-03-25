@@ -11,7 +11,7 @@ use error::ErrorCode;
 use protocols::{francium::*, mango::*, port::*, solend::*, tulip::*, PROTOCOLS_LEN};
 use std::mem::size_of;
 use std::str::FromStr;
-use vault::{InitVaultAccountParams, VaultAccount};
+use vault::{Bumps, InitVaultAccountParams, VaultAccount};
 
 mod deposit;
 mod duplicated_ixs;
@@ -25,6 +25,9 @@ mod withdraw;
 
 declare_id!("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 
+pub const VAULT_ACCOUNT_SEED: &[u8; 5] = b"vault";
+pub const VAULT_LP_TOKEN_MINT_SEED: &[u8; 4] = b"mint";
+
 pub const ALLOWED_DEPLOYER: &str = "8XhNoDjjNoLP5Rys1pBJKGdE8acEC1HJsWGkfkMt6JP1";
 pub const ALLOWED_RUNNER: &str = "DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod";
 const PAUSED: bool = false;
@@ -35,13 +38,15 @@ pub mod best_apy {
 
     /// Initialize the vault account and its fields
     // ACCESS RESTRICTED. ONLY ALLOWED_DEPLOYER
-    pub fn initialize_strategy(ctx: Context<InitializeStrategy>, bump: u8) -> Result<()> {
+    pub fn initialize_strategy(ctx: Context<InitializeStrategy>) -> Result<()> {
         ctx.accounts
             .vault_account
             .set_inner(VaultAccount::init(InitVaultAccountParams {
-                bump,
+                bumps: Bumps {
+                    vault: *ctx.bumps.get("vault_account").unwrap(),
+                    lp_token_mint: *ctx.bumps.get("vault_lp_token_mint_pubkey").unwrap(),
+                },
                 input_mint_pubkey: ctx.accounts.input_token_mint_address.key(),
-                vault_lp_token_mint_pubkey: ctx.accounts.vault_lp_token_mint_pubkey.key(),
                 dao_treasury_lp_token_account: ctx.accounts.dao_treasury_lp_token_account.key(),
             }));
 
@@ -211,24 +216,28 @@ pub struct InitializeStrategy<'info> {
     )]
     pub user_signer: Signer<'info>,
     pub input_token_mint_address: Account<'info, Mint>,
-    /// CHECK: only used as signing PDA
-    pub vault_signer: AccountInfo<'info>,
-    #[account(init, payer = user_signer, space = 8 + size_of::<VaultAccount>())]
+    #[account(
+        init,
+        payer = user_signer,
+        space = 8 + size_of::<VaultAccount>(),
+        seeds = [VAULT_ACCOUNT_SEED, input_token_mint_address.key().as_ref()],
+        bump,
+    )]
     pub vault_account: Box<Account<'info, VaultAccount>>,
     #[account(
         init,
         payer = user_signer,
         associated_token::mint = input_token_mint_address,
-        associated_token::authority = vault_signer,
+        associated_token::authority = vault_account,
     )]
     pub vault_input_token_account: Account<'info, TokenAccount>,
     #[account(
         init,
         payer = user_signer,
-        constraint = vault_lp_token_mint_pubkey.mint_authority == COption::Some(*vault_signer.key),
-        constraint = vault_lp_token_mint_pubkey.supply == 0,
         mint::decimals = input_token_mint_address.decimals,
-        mint::authority = vault_signer,
+        mint::authority = vault_account.key(),
+        seeds = [VAULT_LP_TOKEN_MINT_SEED, vault_account.key().as_ref()],
+        bump,
     )]
     pub vault_lp_token_mint_pubkey: Account<'info, Mint>,
     #[account(
@@ -252,10 +261,11 @@ pub struct SetProtocolWeights<'info> {
     // Only deployer can modify weights
     #[account(constraint = Pubkey::from_str(ALLOWED_DEPLOYER).unwrap()== *user_signer.key)]
     pub user_signer: Signer<'info>,
-    #[account(seeds = [vault_account.to_account_info().key.as_ref()], bump = vault_account.bump)]
-    /// CHECK: only used as signing PDA
-    pub vault_signer: AccountInfo<'info>,
-    #[account(mut)]
+    #[account(
+        mut,
+        seeds = [VAULT_ACCOUNT_SEED, vault_account.input_mint_pubkey.as_ref()],
+        bump = vault_account.bumps.vault
+    )]
     pub vault_account: Box<Account<'info, VaultAccount>>,
 }
 
@@ -266,21 +276,23 @@ pub struct Deposit<'info> {
     pub user_input_token_account: Account<'info, TokenAccount>,
     #[account(mut, constraint = user_lp_token_account.owner == *user_signer.key)]
     pub user_lp_token_account: Account<'info, TokenAccount>,
-    #[account(mut)]
-    pub vault_account: Box<Account<'info, VaultAccount>>,
-    #[account(seeds = [vault_account.to_account_info().key.as_ref()], bump = vault_account.bump)]
-    /// CHECK: only used as signing PDA
-    pub vault_signer: AccountInfo<'info>,
     #[account(
         mut,
-        constraint = vault_lp_token_mint_pubkey.mint_authority == COption::Some(*vault_signer.key),
-        constraint = vault_lp_token_mint_pubkey.key() == vault_account.vault_lp_token_mint_pubkey,
+        seeds = [VAULT_ACCOUNT_SEED, vault_account.input_mint_pubkey.as_ref()],
+        bump = vault_account.bumps.vault
+    )]
+    pub vault_account: Box<Account<'info, VaultAccount>>,
+    #[account(
+        mut,
+        constraint = vault_lp_token_mint_pubkey.mint_authority == COption::Some(vault_account.key()),
+        seeds = [VAULT_LP_TOKEN_MINT_SEED, vault_account.key().as_ref()],
+        bump = vault_account.bumps.lp_token_mint
     )]
     pub vault_lp_token_mint_pubkey: Account<'info, Mint>,
     #[account(
         mut,
         associated_token::mint = vault_account.input_mint_pubkey,
-        associated_token::authority = vault_signer,
+        associated_token::authority = vault_account,
     )]
     pub vault_input_token_account: Account<'info, TokenAccount>,
     pub token_program: Program<'info, Token>,
@@ -293,21 +305,23 @@ pub struct Withdraw<'info> {
     pub user_input_token_account: Account<'info, TokenAccount>,
     #[account(mut, constraint = user_lp_token_account.owner == *user_signer.key)]
     pub user_lp_token_account: Account<'info, TokenAccount>,
-    #[account(mut, seeds = [vault_account.to_account_info().key.as_ref()], bump = vault_account.bump)]
-    /// CHECK: only used as signing PDA
-    pub vault_signer: AccountInfo<'info>,
-    #[account(mut)]
+    #[account(
+        mut,
+        seeds = [VAULT_ACCOUNT_SEED, vault_account.input_mint_pubkey.as_ref()],
+        bump = vault_account.bumps.vault
+    )]
     pub vault_account: Box<Account<'info, VaultAccount>>,
     #[account(
         mut,
-        constraint = vault_lp_token_mint_pubkey.mint_authority == COption::Some(*vault_signer.key),
-        constraint = vault_lp_token_mint_pubkey.key() == vault_account.vault_lp_token_mint_pubkey,
+        constraint = vault_lp_token_mint_pubkey.mint_authority == COption::Some(vault_account.key()),
+        seeds = [VAULT_LP_TOKEN_MINT_SEED, vault_account.key().as_ref()],
+        bump = vault_account.bumps.lp_token_mint
     )]
     pub vault_lp_token_mint_pubkey: Account<'info, Mint>,
     #[account(
         mut,
         associated_token::mint = vault_account.input_mint_pubkey,
-        associated_token::authority = vault_signer,
+        associated_token::authority = vault_account,
     )]
     pub vault_input_token_account: Account<'info, TokenAccount>,
     pub token_program: Program<'info, Token>,
@@ -318,20 +332,22 @@ pub struct Withdraw<'info> {
 
 #[derive(Accounts)]
 pub struct RefreshRewardsWeights<'info> {
-    #[account(seeds = [vault_account.to_account_info().key.as_ref()], bump = vault_account.bump)]
-    /// CHECK: only used as signing PDA
-    pub vault_signer: AccountInfo<'info>,
-    #[account(mut)]
+    #[account(
+        mut,
+        seeds = [VAULT_ACCOUNT_SEED, vault_account.input_mint_pubkey.as_ref()],
+        bump = vault_account.bumps.vault
+    )]
     pub vault_account: Box<Account<'info, VaultAccount>>,
     #[account(
         associated_token::mint = vault_account.input_mint_pubkey,
-        associated_token::authority = vault_signer,
+        associated_token::authority = vault_account,
     )]
     pub vault_input_token_account: Account<'info, TokenAccount>,
     #[account(
         mut,
-        constraint = vault_lp_token_mint_pubkey.mint_authority == COption::Some(*vault_signer.key),
-        constraint = vault_lp_token_mint_pubkey.key() == vault_account.vault_lp_token_mint_pubkey,
+        constraint = vault_lp_token_mint_pubkey.mint_authority == COption::Some(vault_account.key()),
+        seeds = [VAULT_LP_TOKEN_MINT_SEED, vault_account.key().as_ref()],
+        bump = vault_account.bumps.lp_token_mint
     )]
     pub vault_lp_token_mint_pubkey: Account<'info, Mint>,
     #[account(mut, address = vault_account.dao_treasury_lp_token_account)]
@@ -341,15 +357,16 @@ pub struct RefreshRewardsWeights<'info> {
 
 #[derive(Accounts)]
 pub struct GenericDepositAccounts<'info> {
-    #[account(mut)]
+    #[account(
+        mut,
+        seeds = [VAULT_ACCOUNT_SEED, vault_account.input_mint_pubkey.as_ref()],
+        bump = vault_account.bumps.vault
+    )]
     pub vault_account: Box<Account<'info, VaultAccount>>,
-    #[account(mut, seeds = [vault_account.to_account_info().key.as_ref()], bump = vault_account.bump)]
-    /// CHECK: only used as signing PDA
-    pub vault_signer: AccountInfo<'info>,
     #[account(
         mut,
         associated_token::mint = vault_account.input_mint_pubkey,
-        associated_token::authority = vault_signer,
+        associated_token::authority = vault_account,
     )]
     pub vault_input_token_account: Account<'info, TokenAccount>,
     pub token_program: Program<'info, Token>,
@@ -358,15 +375,16 @@ pub struct GenericDepositAccounts<'info> {
 
 #[derive(Accounts)]
 pub struct GenericWithdrawAccounts<'info> {
-    #[account(mut, seeds = [vault_account.to_account_info().key.as_ref()], bump = vault_account.bump)]
-    /// CHECK: only used as signing PDA
-    pub vault_signer: AccountInfo<'info>,
-    #[account(mut)]
+    #[account(
+        mut,
+        seeds = [VAULT_ACCOUNT_SEED, vault_account.input_mint_pubkey.as_ref()],
+        bump = vault_account.bumps.vault
+    )]
     pub vault_account: Box<Account<'info, VaultAccount>>,
     #[account(
         mut,
         associated_token::mint = vault_account.input_mint_pubkey,
-        associated_token::authority = vault_signer,
+        associated_token::authority = vault_account,
     )]
     pub vault_input_token_account: Account<'info, TokenAccount>,
     pub token_program: Program<'info, Token>,
@@ -378,10 +396,11 @@ pub struct GenericWithdrawAccounts<'info> {
 
 #[derive(Accounts)]
 pub struct GenericTVLAccounts<'info> {
-    #[account(mut, seeds = [vault_account.to_account_info().key.as_ref()], bump = vault_account.bump)]
-    /// CHECK: only used as signing PDA
-    pub vault_signer: AccountInfo<'info>,
-    #[account(mut)]
+    #[account(
+        mut,
+        seeds = [VAULT_ACCOUNT_SEED, vault_account.input_mint_pubkey.as_ref()],
+        bump = vault_account.bumps.vault
+    )]
     pub vault_account: Box<Account<'info, VaultAccount>>,
 }
 
@@ -400,8 +419,8 @@ pub mod generic_accounts_anchor_modules {
 //pub struct CloseAccount<'info> {
 //    #[account(constraint = Pubkey::from_str(ALLOWED_DEPLOYER).unwrap()== *user_signer.key)]
 //    pub user_signer: Signer<'info>,
-//    #[account(mut, close = vault_signer)]
+//    #[account(mut, close = vault_account)]
 //    pub vault_account: Account<'info, VaultAccount>,
 //    #[account(mut)]
-//    pub vault_signer: AccountInfo<'info>,
+//    pub vault_account: AccountInfo<'info>,
 //}
