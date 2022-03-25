@@ -4,11 +4,11 @@ use crate::macros::generate_seeds;
 use crate::protocols::francium_lending_pool;
 use crate::protocols::Protocols;
 use crate::vault::{TokenBalances, VaultAccount};
-use crate::ALLOWED_DEPLOYER;
 use crate::{
     generic_accounts_anchor_modules::*, GenericDepositAccounts, GenericTVLAccounts,
     GenericWithdrawAccounts,
 };
+use crate::{ALLOWED_DEPLOYER, VAULT_ACCOUNT_SEED};
 use anchor_lang::prelude::borsh::{BorshDeserialize, BorshSerialize};
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::{
@@ -45,14 +45,16 @@ pub struct InstructionAmountData {
 pub struct FranciumInitialize<'info> {
     #[account(constraint = Pubkey::from_str(ALLOWED_DEPLOYER).unwrap()== *user_signer.key)]
     pub user_signer: Signer<'info>,
-    #[account(mut, seeds = [vault_account.to_account_info().key.as_ref()], bump = vault_account.bump)]
-    /// CHECK: only used as signing PDA
-    pub vault_signer: AccountInfo<'info>,
+    #[account(
+        mut,
+        seeds = [VAULT_ACCOUNT_SEED, vault_account.input_mint_pubkey.as_ref()],
+        bump = vault_account.bump
+    )]
     pub vault_account: Box<Account<'info, VaultAccount>>,
     #[account(
         mut,
         associated_token::mint = vault_francium_collateral_token_account.mint,
-        associated_token::authority = vault_signer,
+        associated_token::authority = vault_account,
     )]
     pub vault_francium_collateral_token_account: Account<'info, TokenAccount>,
     #[account(constraint = francium_lending_reward_program_id.key == &francium_lending_reward_program_id::ID)]
@@ -67,13 +69,13 @@ pub struct FranciumInitialize<'info> {
     #[account(
         mut,
         associated_token::mint = vault_francium_account_mint_rewards.mint,
-        associated_token::authority = vault_signer,
+        associated_token::authority = vault_account,
     )]
     pub vault_francium_account_mint_rewards: Account<'info, TokenAccount>,
     #[account(
         mut,
         associated_token::mint = vault_francium_account_mint_b_rewards.mint,
-        associated_token::authority = vault_signer,
+        associated_token::authority = vault_account,
     )]
     pub vault_francium_account_mint_b_rewards: Account<'info, TokenAccount>,
     pub system_program: Program<'info, System>,
@@ -87,7 +89,7 @@ impl<'info> FranciumInitialize<'info> {
         let signer = &[&seeds[..]];
 
         let accounts = [
-            self.vault_signer.to_account_info(),
+            self.vault_account.to_account_info(),
             self.vault_francium_farming_account.to_account_info(),
             self.francium_farming_pool_account.to_account_info(),
             self.vault_francium_collateral_token_account
@@ -100,7 +102,7 @@ impl<'info> FranciumInitialize<'info> {
         let accounts_metas = accounts
             .iter()
             .map(|acc| {
-                if acc.key == self.vault_signer.key {
+                if acc.key == &self.vault_account.key() {
                     AccountMeta::new(*acc.key, true)
                 } else if acc.is_writable {
                     AccountMeta::new(*acc.key, false)
@@ -135,19 +137,19 @@ pub struct FranciumDeposit<'info> {
     #[account(
         mut,
         associated_token::mint = vault_francium_collateral_token_account.mint,
-        associated_token::authority = generic_accs.vault_signer,
+        associated_token::authority = generic_accs.vault_account,
     )]
     pub vault_francium_collateral_token_account: Box<Account<'info, TokenAccount>>,
     #[account(
         mut,
         associated_token::mint = vault_francium_account_mint_rewards.mint,
-        associated_token::authority = generic_accs.vault_signer,
+        associated_token::authority = generic_accs.vault_account,
     )]
     pub vault_francium_account_mint_rewards: Box<Account<'info, TokenAccount>>,
     #[account(
         mut,
         associated_token::mint = vault_francium_account_mint_b_rewards.mint,
-        associated_token::authority = generic_accs.vault_signer,
+        associated_token::authority = generic_accs.vault_account,
     )]
     pub vault_francium_account_mint_b_rewards: Box<Account<'info, TokenAccount>>,
     #[account(mut)]
@@ -256,14 +258,14 @@ impl<'info> FranciumDeposit<'info> {
                 .to_account_info(),
             self.francium_market_info_account.to_account_info(),
             self.francium_lending_market_authority.to_account_info(),
-            self.generic_accs.vault_signer.to_account_info(),
+            self.generic_accs.vault_account.to_account_info(),
             self.generic_accs.clock.to_account_info(),
             self.generic_accs.token_program.to_account_info(),
         ];
         let account_metas = accounts
             .iter()
             .map(|acc| {
-                if acc.key == self.generic_accs.vault_signer.key {
+                if acc.key == &self.generic_accs.vault_account.key() {
                     AccountMeta::new(*acc.key, true)
                 } else if acc.is_writable {
                     AccountMeta::new(*acc.key, false)
@@ -290,7 +292,7 @@ impl<'info> FranciumDeposit<'info> {
         let signer = &[&seeds[..]];
 
         let accounts = [
-            self.generic_accs.vault_signer.to_account_info(),
+            self.generic_accs.vault_account.to_account_info(),
             self.vault_francium_farming_account.to_account_info(),
             self.vault_francium_collateral_token_account
                 .to_account_info(),
@@ -310,7 +312,7 @@ impl<'info> FranciumDeposit<'info> {
         let account_metas = accounts
             .iter()
             .map(|acc| {
-                if acc.key == self.generic_accs.vault_signer.key {
+                if acc.key == &self.generic_accs.vault_account.key() {
                     AccountMeta::new(*acc.key, true)
                 } else if acc.is_writable {
                     AccountMeta::new(*acc.key, false)
@@ -344,13 +346,13 @@ pub struct FranciumWithdraw<'info> {
     #[account(
         mut,
         associated_token::mint = vault_francium_collateral_token_account.mint,
-        associated_token::authority = generic_accs.vault_signer,
+        associated_token::authority = generic_accs.vault_account,
     )]
     pub vault_francium_collateral_token_account: Box<Account<'info, TokenAccount>>,
     #[account(
         mut,
         associated_token::mint = vault_francium_account_mint_rewards.mint,
-        associated_token::authority = generic_accs.vault_signer,
+        associated_token::authority = generic_accs.vault_account,
     )]
     pub vault_francium_account_mint_rewards: Box<Account<'info, TokenAccount>>,
     #[account(mut)]
@@ -460,7 +462,7 @@ impl<'info> FranciumWithdraw<'info> {
         let signer = &[&seeds[..]];
 
         let accounts = [
-            self.generic_accs.vault_signer.to_account_info(),
+            self.generic_accs.vault_account.to_account_info(),
             self.vault_francium_farming_account.to_account_info(),
             self.vault_francium_collateral_token_account
                 .to_account_info(),
@@ -480,7 +482,7 @@ impl<'info> FranciumWithdraw<'info> {
         let account_metas = accounts
             .iter()
             .map(|acc| {
-                if acc.key == self.generic_accs.vault_signer.key {
+                if acc.key == &self.generic_accs.vault_account.key() {
                     AccountMeta::new(*acc.key, true)
                 } else if acc.is_writable {
                     AccountMeta::new(*acc.key, false)
@@ -520,14 +522,14 @@ impl<'info> FranciumWithdraw<'info> {
             self.francium_lending_pool_token_account.to_account_info(),
             self.francium_market_info_account.to_account_info(),
             self.francium_lending_market_authority.to_account_info(),
-            self.generic_accs.vault_signer.to_account_info(),
+            self.generic_accs.vault_account.to_account_info(),
             self.generic_accs.clock.to_account_info(),
             self.generic_accs.token_program.to_account_info(),
         ];
         let account_metas = accounts
             .iter()
             .map(|acc| {
-                if acc.key == self.generic_accs.vault_signer.key {
+                if acc.key == &self.generic_accs.vault_account.key() {
                     AccountMeta::new(*acc.key, true)
                 } else if acc.is_writable {
                     AccountMeta::new(*acc.key, false)

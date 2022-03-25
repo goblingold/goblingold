@@ -16,14 +16,9 @@
           "isSigner": false
         },
         {
-          "name": "vaultSigner",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
           "name": "vaultAccount",
           "isMut": true,
-          "isSigner": true
+          "isSigner": false
         },
         {
           "name": "vaultInputTokenAccount",
@@ -66,12 +61,7 @@
           "isSigner": false
         }
       ],
-      "args": [
-        {
-          "name": "bump",
-          "type": "u8"
-        }
-      ]
+      "args": []
     },
     {
       "name": "setProtocolWeights",
@@ -80,11 +70,6 @@
           "name": "userSigner",
           "isMut": false,
           "isSigner": true
-        },
-        {
-          "name": "vaultSigner",
-          "isMut": false,
-          "isSigner": false
         },
         {
           "name": "vaultAccount",
@@ -125,11 +110,6 @@
         {
           "name": "vaultAccount",
           "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "vaultSigner",
-          "isMut": false,
           "isSigner": false
         },
         {
@@ -174,11 +154,6 @@
           "isSigner": false
         },
         {
-          "name": "vaultSigner",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
           "name": "vaultAccount",
           "isMut": true,
           "isSigner": false
@@ -214,11 +189,6 @@
     {
       "name": "refreshRewardsWeights",
       "accounts": [
-        {
-          "name": "vaultSigner",
-          "isMut": false,
-          "isSigner": false
-        },
         {
           "name": "vaultAccount",
           "isMut": true,
@@ -256,11 +226,6 @@
           "isSigner": true
         },
         {
-          "name": "vaultSigner",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
           "name": "vaultAccount",
           "isMut": false,
           "isSigner": false
@@ -296,11 +261,6 @@
           "accounts": [
             {
               "name": "vaultAccount",
-              "isMut": true,
-              "isSigner": false
-            },
-            {
-              "name": "vaultSigner",
               "isMut": true,
               "isSigner": false
             },
@@ -365,11 +325,6 @@
         {
           "name": "genericAccs",
           "accounts": [
-            {
-              "name": "vaultSigner",
-              "isMut": true,
-              "isSigner": false
-            },
             {
               "name": "vaultAccount",
               "isMut": true,
@@ -452,11 +407,6 @@
           "name": "genericAccs",
           "accounts": [
             {
-              "name": "vaultSigner",
-              "isMut": true,
-              "isSigner": false
-            },
-            {
               "name": "vaultAccount",
               "isMut": true,
               "isSigner": false
@@ -500,22 +450,17 @@
           "isSigner": true
         },
         {
+          "name": "vaultAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "vaultSolendObligationAccount",
           "isMut": true,
           "isSigner": false
         },
         {
           "name": "solendLendingMarketAccount",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "vaultAccount",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "vaultSigner",
           "isMut": false,
           "isSigner": false
         },
@@ -555,11 +500,6 @@
           "accounts": [
             {
               "name": "vaultAccount",
-              "isMut": true,
-              "isSigner": false
-            },
-            {
-              "name": "vaultSigner",
               "isMut": true,
               "isSigner": false
             },
@@ -645,11 +585,6 @@
           "name": "genericAccs",
           "accounts": [
             {
-              "name": "vaultSigner",
-              "isMut": true,
-              "isSigner": false
-            },
-            {
               "name": "vaultAccount",
               "isMut": true,
               "isSigner": false
@@ -731,11 +666,6 @@
           "name": "genericAccs",
           "accounts": [
             {
-              "name": "vaultSigner",
-              "isMut": true,
-              "isSigner": false
-            },
-            {
               "name": "vaultAccount",
               "isMut": true,
               "isSigner": false
@@ -757,11 +687,6 @@
           "name": "userSigner",
           "isMut": false,
           "isSigner": true
-        },
-        {
-          "name": "vaultSigner",
-          "isMut": false,
-          "isSigner": false
         },
         {
           "name": "vaultAccount",
@@ -829,11 +754,6 @@
           "accounts": [
             {
               "name": "vaultAccount",
-              "isMut": true,
-              "isSigner": false
-            },
-            {
-              "name": "vaultSigner",
               "isMut": true,
               "isSigner": false
             },
@@ -923,11 +843,6 @@
         {
           "name": "genericAccs",
           "accounts": [
-            {
-              "name": "vaultSigner",
-              "isMut": true,
-              "isSigner": false
-            },
             {
               "name": "vaultAccount",
               "isMut": true,
@@ -1025,11 +940,6 @@
           "name": "genericAccs",
           "accounts": [
             {
-              "name": "vaultSigner",
-              "isMut": true,
-              "isSigner": false
-            },
-            {
               "name": "vaultAccount",
               "isMut": true,
               "isSigner": false
@@ -1047,11 +957,6 @@
     {
       "name": "portClaimRewards",
       "accounts": [
-        {
-          "name": "vaultSigner",
-          "isMut": true,
-          "isSigner": false
-        },
         {
           "name": "vaultAccount",
           "isMut": true,
@@ -1117,11 +1022,6 @@
               "isSigner": false
             },
             {
-              "name": "vaultSigner",
-              "isMut": true,
-              "isSigner": false
-            },
-            {
               "name": "vaultInputTokenAccount",
               "isMut": true,
               "isSigner": false
@@ -1182,11 +1082,6 @@
         {
           "name": "genericAccs",
           "accounts": [
-            {
-              "name": "vaultSigner",
-              "isMut": true,
-              "isSigner": false
-            },
             {
               "name": "vaultAccount",
               "isMut": true,
@@ -1259,11 +1154,6 @@
           "name": "genericAccs",
           "accounts": [
             {
-              "name": "vaultSigner",
-              "isMut": true,
-              "isSigner": false
-            },
-            {
               "name": "vaultAccount",
               "isMut": true,
               "isSigner": false
@@ -1287,13 +1177,8 @@
           "isSigner": true
         },
         {
-          "name": "vaultSigner",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
           "name": "vaultAccount",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -1347,11 +1232,6 @@
           "accounts": [
             {
               "name": "vaultAccount",
-              "isMut": true,
-              "isSigner": false
-            },
-            {
-              "name": "vaultSigner",
               "isMut": true,
               "isSigner": false
             },
@@ -1467,11 +1347,6 @@
           "name": "genericAccs",
           "accounts": [
             {
-              "name": "vaultSigner",
-              "isMut": true,
-              "isSigner": false
-            },
-            {
               "name": "vaultAccount",
               "isMut": true,
               "isSigner": false
@@ -1582,11 +1457,6 @@
         {
           "name": "genericAccs",
           "accounts": [
-            {
-              "name": "vaultSigner",
-              "isMut": true,
-              "isSigner": false
-            },
             {
               "name": "vaultAccount",
               "isMut": true,
