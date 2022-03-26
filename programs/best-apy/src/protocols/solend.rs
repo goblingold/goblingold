@@ -360,7 +360,8 @@ impl<'info> SolendWithdraw<'info> {
 #[derive(Accounts)]
 pub struct SolendTVL<'info> {
     pub generic_accs: GenericTVLAccounts<'info>,
-    /// CHECK: Solend CPI
+    #[account(owner = solend_program_id::ID)]
+    /// CHECK: owner and mint data field are checked
     pub reserve: AccountInfo<'info>,
 }
 

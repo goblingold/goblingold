@@ -555,7 +555,8 @@ impl<'info> FranciumWithdraw<'info> {
 #[derive(Accounts)]
 pub struct FranciumTVL<'info> {
     pub generic_accs: GenericTVLAccounts<'info>,
-    /// CHECK: Francium CPI
+    #[account(owner = francium_lending_program_id::ID)]
+    /// CHECK: owner and mint data field are checked
     pub lending_pool: AccountInfo<'info>,
 }
 

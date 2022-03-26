@@ -276,7 +276,8 @@ impl<'info> TulipWithdraw<'info> {
 #[derive(Accounts)]
 pub struct TulipTVL<'info> {
     pub generic_accs: GenericTVLAccounts<'info>,
-    /// CHECK: Tulip CPI
+    #[account(owner = tulip_program_id::ID)]
+    /// CHECK: owner and mint data field are checked
     pub reserve: AccountInfo<'info>,
 }
 
