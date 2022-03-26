@@ -225,7 +225,7 @@ impl<'info> SolendDeposit<'info> {
 
     pub fn check_hash(&self) -> Result<()> {
         let has_keys = hash_pub_keys(&[
-            &self
+            self
                 .vault_solend_destination_collateral_token_account
                 .key()
                 .as_ref(),
@@ -237,7 +237,7 @@ impl<'info> SolendDeposit<'info> {
             self.solend_reserve_collateral_spl_token_mint.key.as_ref(),
             self.solend_lending_market_account.key.as_ref(),
             self.solend_derived_lending_market_authority.key.as_ref(),
-            &self
+            self
                 .solend_destination_deposit_reserve_collateral_supply_spl_token_account
                 .key()
                 .as_ref(),
@@ -391,7 +391,7 @@ impl<'info> SolendWithdraw<'info> {
 
     pub fn check_hash(&self) -> Result<()> {
         let has_keys = hash_pub_keys(&[
-            &self
+            self
                 .vault_solend_destination_collateral_token_account
                 .key()
                 .as_ref(),

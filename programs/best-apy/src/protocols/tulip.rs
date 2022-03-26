@@ -148,7 +148,7 @@ impl<'info> TulipDeposit<'info> {
 
     pub fn check_hash(&self) -> Result<()> {
         let has_keys = hash_pub_keys(&[
-            &self.vault_tulip_collateral_token_account.key().as_ref(),
+            self.vault_tulip_collateral_token_account.key().as_ref(),
             self.tulip_reserve_account.key.as_ref(),
             self.tulip_reserve_liquidity_supply_token_account
                 .key
@@ -296,7 +296,7 @@ impl<'info> TulipWithdraw<'info> {
 
     pub fn check_hash(&self) -> Result<()> {
         let has_keys = hash_pub_keys(&[
-            &self.vault_tulip_collateral_token_account.key().as_ref(),
+            self.vault_tulip_collateral_token_account.key().as_ref(),
             self.tulip_reserve_account.key.as_ref(),
             self.tulip_reserve_liquidity_supply_token_account
                 .key

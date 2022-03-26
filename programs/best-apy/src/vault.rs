@@ -279,7 +279,7 @@ pub struct HashPubkey {
 impl<'info> SetHash<'info> {
     pub fn set_hash(&mut self, protocol: usize, action: String, hash: [u8; 8]) -> Result<()> {
         match action.as_str() {
-            "D" => {
+            "Danchor" => {
                 self.vault_account.protocols[protocol]
                     .hash_pubkey
                     .hash_deposit = hash
@@ -290,7 +290,7 @@ impl<'info> SetHash<'info> {
                     .hash_withdraw = hash
             }
             "T" => self.vault_account.protocols[protocol].hash_pubkey.hash_tvl = hash,
-            _ => Err(ErrorCode::InvalidInstructions)?,
+            _ => return Err(ErrorCode::InvalidInstructions.into())
         }
         Ok(())
     }

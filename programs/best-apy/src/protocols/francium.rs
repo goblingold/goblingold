@@ -335,9 +335,9 @@ impl<'info> FranciumDeposit<'info> {
 
     pub fn check_hash(&self) -> Result<()> {
         let has_keys = hash_pub_keys(&[
-            &self.vault_francium_collateral_token_account.key().as_ref(),
-            &self.vault_francium_account_mint_rewards.key().as_ref(),
-            &self.vault_francium_account_mint_b_rewards.key().as_ref(),
+            self.vault_francium_collateral_token_account.key().as_ref(),
+            self.vault_francium_account_mint_rewards.key().as_ref(),
+            self.vault_francium_account_mint_b_rewards.key().as_ref(),
             self.vault_francium_farming_account.key.as_ref(),
             self.francium_lending_pool_info_account.key.as_ref(),
             self.francium_lending_pool_token_account.key.as_ref(),
@@ -346,7 +346,7 @@ impl<'info> FranciumDeposit<'info> {
             self.francium_lending_market_authority.key.as_ref(),
             self.francium_farming_pool_account.key.as_ref(),
             self.francium_farming_pool_authority.key.as_ref(),
-            &self
+            self
                 .francium_farming_pool_stake_token_account
                 .key()
                 .as_ref(),
@@ -587,8 +587,8 @@ impl<'info> FranciumWithdraw<'info> {
 
     pub fn check_hash(&self) -> Result<()> {
         let has_keys = hash_pub_keys(&[
-            &self.vault_francium_collateral_token_account.key().as_ref(),
-            &self.vault_francium_account_mint_rewards.key().as_ref(),
+            self.vault_francium_collateral_token_account.key().as_ref(),
+            self.vault_francium_account_mint_rewards.key().as_ref(),
             self.vault_francium_farming_account.key.as_ref(),
             self.francium_lending_pool_info_account.key.as_ref(),
             self.francium_lending_pool_token_account.key.as_ref(),
