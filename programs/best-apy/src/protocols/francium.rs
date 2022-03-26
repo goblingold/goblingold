@@ -349,7 +349,7 @@ impl<'info> FranciumDeposit<'info> {
             self.francium_farming_pool_rewards_b_token_account.key,
         ])?;
         require!(
-            has_keys == self.generic_accs.vault_account.hash_deposit[Protocols::Francium as usize],
+            has_keys == self.generic_accs.vault_account.protocols[Protocols::Francium as usize].hash_pubkey.hash_deposit,
             ErrorCode::InvalidHash
         );
         Ok(())
@@ -591,7 +591,7 @@ impl<'info> FranciumWithdraw<'info> {
         ])?;
 
         require!(
-            has_keys == self.generic_accs.vault_account.hash_withdraw[Protocols::Francium as usize],
+            has_keys == self.generic_accs.vault_account.protocols[Protocols::Francium as usize].hash_pubkey.hash_withdraw,
             ErrorCode::InvalidHash
         );
         Ok(())
@@ -645,7 +645,7 @@ impl<'info> FranciumTVL<'info> {
     pub fn check_hash(&self) -> Result<()> {
         let has_keys = hash_pub_keys(&[self.lending_pool.key])?;
         require!(
-            has_keys == self.generic_accs.vault_account.hash_tvl[Protocols::Francium as usize],
+            has_keys == self.generic_accs.vault_account.protocols[Protocols::Francium as usize].hash_pubkey.hash_tvl,
             ErrorCode::InvalidHash
         );
         Ok(())

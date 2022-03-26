@@ -1,3 +1,4 @@
+use anchor_lang::prelude::*;
 pub mod francium;
 pub mod francium_lending_pool;
 pub mod mango;
@@ -10,7 +11,7 @@ pub const PROTOCOLS_LEN: usize = 5;
 
 /// List of supported protocols
 #[repr(usize)]
-#[derive(Copy, Clone, Debug)]
+#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Debug)]
 pub enum Protocols {
     Mango = 0,
     Solend = 1,

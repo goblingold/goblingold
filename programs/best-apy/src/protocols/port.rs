@@ -286,7 +286,7 @@ impl<'info> PortDeposit<'info> {
             self.port_staking_pool_account.key,
         ])?;
         require!(
-            has_keys == self.generic_accs.vault_account.hash_deposit[Protocols::Port as usize],
+            has_keys == self.generic_accs.vault_account.protocols[Protocols::Port as usize].hash_pubkey.hash_deposit,
             ErrorCode::InvalidHash
         );
         Ok(())
@@ -454,7 +454,7 @@ impl<'info> PortWithdraw<'info> {
             self.port_staking_pool_account.key,
         ])?;
         require!(
-            has_keys == self.generic_accs.vault_account.hash_withdraw[Protocols::Port as usize],
+            has_keys == self.generic_accs.vault_account.protocols[Protocols::Port as usize].hash_pubkey.hash_withdraw,
             ErrorCode::InvalidHash
         );
         Ok(())
@@ -509,7 +509,7 @@ impl<'info> PortTVL<'info> {
     pub fn check_hash(&self) -> Result<()> {
         let has_keys = hash_pub_keys(&[self.reserve.key])?;
         require!(
-            has_keys == self.generic_accs.vault_account.hash_tvl[Protocols::Port as usize],
+            has_keys == self.generic_accs.vault_account.protocols[Protocols::Port as usize].hash_pubkey.hash_tvl,
             ErrorCode::InvalidHash
         );
         Ok(())

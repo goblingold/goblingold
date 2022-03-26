@@ -159,7 +159,7 @@ impl<'info> MangoDeposit<'info> {
             self.mango_vault_account.key,
         ])?;
         require!(
-            has_keys == self.generic_accs.vault_account.hash_deposit[Protocols::Mango as usize],
+            has_keys == self.generic_accs.vault_account.protocols[Protocols::Mango as usize].hash_pubkey.hash_deposit,
             ErrorCode::InvalidHash
         );
         Ok(())
@@ -268,7 +268,7 @@ impl<'info> MangoWithdraw<'info> {
             self.mango_vault_account.key,
         ])?;
         require!(
-            has_keys == self.generic_accs.vault_account.hash_withdraw[Protocols::Mango as usize],
+            has_keys == self.generic_accs.vault_account.protocols[Protocols::Mango as usize].hash_pubkey.hash_withdraw,
             ErrorCode::InvalidHash
         );
         Ok(())
@@ -361,7 +361,7 @@ impl<'info> MangoTVL<'info> {
             self.mango_root_bank_account.key,
         ])?;
         require!(
-            has_keys == self.generic_accs.vault_account.hash_tvl[Protocols::Mango as usize],
+            has_keys == self.generic_accs.vault_account.protocols[Protocols::Mango as usize].hash_pubkey.hash_tvl,
             ErrorCode::InvalidHash
         );
         Ok(())

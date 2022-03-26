@@ -1,8 +1,9 @@
 use crate::error::ErrorCode;
 use crate::protocols::{Protocols, PROTOCOLS_LEN};
+use crate::SetHash;
 use anchor_lang::prelude::*;
 use std::{cmp, convert::TryInto};
-//use solana_program::hash::hash;
+use anchor_lang::solana_program::hash::hash;
 
 /// Strategy vault account
 #[account]
@@ -26,21 +27,12 @@ pub struct VaultAccount {
     pub rewards_sum: u64,
     /// Protocol data
     pub protocols: [ProtocolData; PROTOCOLS_LEN],
-    /// Hash of important accounts for each protocol on deposit
-    pub hash_deposit: [[u8; 8]; PROTOCOLS_LEN],
-    /// Hash of important accounts for each protocol on withdraw
-    pub hash_withdraw: [[u8; 8]; PROTOCOLS_LEN],
-    /// Hash of important accounts for each protocol on tvl
-    pub hash_tvl: [[u8; 8]; PROTOCOLS_LEN],
-    // TODO additional padding
 }
 
 pub fn hash_pub_keys(keys: &[&Pubkey]) -> Result<[u8; 8]> {
-    // let by = keys[0].to_bytes();
-    // let le = keys.len();
-    // let oo: [u8;le]= [0; le];
-    // let arr: Vec<u8> = vec![0; le];
-    // let u = keys.iter().flat_map(|s| arr.push(s.to_bytes().iter())).collect();
+    // let arr: Vec<u8> = vec![0; keys.len()];
+    // let iter = keys.iter().map(|key|  key.as_ref());
+    // iter.chain()
     // let l = hash(u);
     let xs: [u8; 8] = [1, 2, 3, 4, 5, 6, 7, 8];
     Ok(xs)
@@ -215,6 +207,8 @@ pub struct ProtocolData {
     pub tokens: TokenBalances,
     /// Accumulated rewards
     pub rewards: AccumulatedRewards,
+    /// Hashes of Pubkey
+    pub hash_pubkey: HashPubkey,
 }
 
 impl ProtocolData {
@@ -269,6 +263,29 @@ impl ProtocolData {
             .deposited_integral
             .accumulate(current_slot, self.tokens.base_amount)?;
         self.tokens = self.tokens.sub(balances)?;
+        Ok(())
+    }
+}
+
+#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default)]
+pub struct HashPubkey{
+    /// Hash of important accounts for each protocol on deposit
+    pub hash_deposit: [u8; 8],
+    /// Hash of important accounts for each protocol on withdraw
+    pub hash_withdraw: [u8; 8],
+    /// Hash of important accounts for each protocol on tvl
+    pub hash_tvl: [u8; 8],
+    // TODO additional padding
+}
+
+impl<'info> SetHash<'info> {
+    pub fn set_hash(&mut self, protocol: Protocols, action: u8, hash: [u8; 8]) -> Result<()> {
+        match action {
+            0 => self.vault_account.protocols[protocol as usize].hash_pubkey.hash_deposit = hash,
+            1 => self.vault_account.protocols[protocol as usize].hash_pubkey.hash_withdraw = hash,
+            2 => self.vault_account.protocols[protocol as usize].hash_pubkey.hash_tvl = hash,
+            _ => Err(ErrorCode::InvalidInstructions)?,
+        }
         Ok(())
     }
 }
