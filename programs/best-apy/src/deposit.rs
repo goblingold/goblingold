@@ -49,7 +49,7 @@ impl<'info> Deposit<'info> {
         let cpi_accounts = MintTo {
             mint: self.vault_lp_token_mint_pubkey.to_account_info(),
             to: self.user_lp_token_account.to_account_info(),
-            authority: self.vault_signer.clone(),
+            authority: self.vault_account.to_account_info(),
         };
         let cpi_program = self.token_program.to_account_info();
         let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer);

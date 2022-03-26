@@ -2,11 +2,11 @@ use crate::error::ErrorCode;
 use crate::macros::generate_seeds;
 use crate::protocols::Protocols;
 use crate::vault::{hash_pub_keys, TokenBalances, VaultAccount};
-use crate::ALLOWED_DEPLOYER;
 use crate::{
     generic_accounts_anchor_modules::*, GenericDepositAccounts, GenericTVLAccounts,
     GenericWithdrawAccounts,
 };
+use crate::{ALLOWED_DEPLOYER, VAULT_ACCOUNT_SEED};
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::{
     instruction::Instruction, program::invoke_signed, program_pack::Pack, pubkey::Pubkey,
@@ -28,15 +28,16 @@ pub mod solend_program_id {
 pub struct SolendInitialize<'info> {
     #[account(constraint = Pubkey::from_str(ALLOWED_DEPLOYER).unwrap()== *user_signer.key)]
     pub user_signer: Signer<'info>,
+    #[account(
+        seeds = [VAULT_ACCOUNT_SEED, vault_account.input_mint_pubkey.as_ref()],
+        bump = vault_account.bumps.vault
+    )]
+    pub vault_account: Box<Account<'info, VaultAccount>>,
     #[account(mut)]
     /// CHECK: Solend CPI
     pub vault_solend_obligation_account: AccountInfo<'info>,
     /// CHECK: Solend CPI
     pub solend_lending_market_account: AccountInfo<'info>,
-    pub vault_account: Box<Account<'info, VaultAccount>>,
-    #[account(seeds = [vault_account.to_account_info().key.as_ref()], bump = vault_account.bump)]
-    /// CHECK: only used as signing PDA
-    pub vault_signer: AccountInfo<'info>,
     #[account(constraint = solend_program_id.key == &solend_program_id::ID)]
     /// CHECK: Solend CPI
     pub solend_program_id: AccountInfo<'info>,
@@ -57,7 +58,7 @@ impl<'info> SolendInitialize<'info> {
             let ix = system_instruction::create_account_with_seed(
                 self.user_signer.key,
                 self.vault_solend_obligation_account.key,
-                self.vault_signer.key,
+                &self.vault_account.key(),
                 &self.solend_lending_market_account.key.to_string()[..32],
                 Rent::default().minimum_balance(account_size),
                 account_size as u64,
@@ -67,7 +68,7 @@ impl<'info> SolendInitialize<'info> {
                 &ix,
                 &[
                     self.user_signer.to_account_info(),
-                    self.vault_signer.to_account_info(),
+                    self.vault_account.to_account_info(),
                     self.vault_solend_obligation_account.to_account_info(),
                 ],
                 signer,
@@ -79,12 +80,12 @@ impl<'info> SolendInitialize<'info> {
                 solend_program_id::ID,
                 *self.vault_solend_obligation_account.key,
                 *self.solend_lending_market_account.key,
-                *self.vault_signer.key,
+                self.vault_account.key(),
             );
             let accounts = [
                 self.vault_solend_obligation_account.to_account_info(),
                 self.solend_lending_market_account.to_account_info(),
-                self.vault_signer.to_account_info(),
+                self.vault_account.to_account_info(),
                 self.clock.to_account_info(),
                 self.rent.to_account_info(),
                 self.token_program.to_account_info(),
@@ -105,7 +106,7 @@ pub struct SolendDeposit<'info> {
     #[account(
         mut,
         associated_token::mint = vault_solend_destination_collateral_token_account.mint,
-        associated_token::authority = generic_accs.vault_signer,
+        associated_token::authority = generic_accs.vault_account,
     )]
     pub vault_solend_destination_collateral_token_account: Box<Account<'info, TokenAccount>>,
     #[account(mut)]
@@ -187,10 +188,10 @@ impl<'info> SolendDeposit<'info> {
                 self.solend_destination_deposit_reserve_collateral_supply_spl_token_account
                     .key(),
                 *self.vault_solend_obligation_account.key,
-                *self.generic_accs.vault_signer.key,
+                self.generic_accs.vault_account.key(),
                 *self.solend_pyth_price_oracle_account.key,
                 *self.solend_switchboard_price_feed_oracle_account.key,
-                *self.generic_accs.vault_signer.key,
+                self.generic_accs.vault_account.key(),
             );
         let accounts = [
             self.generic_accs
@@ -209,11 +210,11 @@ impl<'info> SolendDeposit<'info> {
             self.solend_destination_deposit_reserve_collateral_supply_spl_token_account
                 .to_account_info(),
             self.vault_solend_obligation_account.to_account_info(),
-            self.generic_accs.vault_signer.to_account_info(),
+            self.generic_accs.vault_account.to_account_info(),
             self.solend_pyth_price_oracle_account.to_account_info(),
             self.solend_switchboard_price_feed_oracle_account
                 .to_account_info(),
-            self.generic_accs.vault_signer.to_account_info(),
+            self.generic_accs.vault_account.to_account_info(),
             self.generic_accs.clock.to_account_info(),
             self.generic_accs.token_program.to_account_info(),
         ];
@@ -265,7 +266,7 @@ pub struct SolendWithdraw<'info> {
     #[account(
         mut,
         associated_token::mint = vault_solend_destination_collateral_token_account.mint,
-        associated_token::authority = generic_accs.vault_signer,
+        associated_token::authority = generic_accs.vault_account,
     )]
     pub vault_solend_destination_collateral_token_account: Account<'info, TokenAccount>,
     #[account(mut)]
@@ -356,15 +357,15 @@ impl<'info> SolendWithdraw<'info> {
                 .to_account_info(),
             self.solend_reserve_liquidity_supply_spl_token_account
                 .to_account_info(),
-            self.generic_accs.vault_signer.to_account_info(),
-            self.generic_accs.vault_signer.to_account_info(),
+            self.generic_accs.vault_account.to_account_info(),
+            self.generic_accs.vault_account.to_account_info(),
             self.generic_accs.clock.to_account_info(),
             self.generic_accs.token_program.to_account_info(),
         ];
         let account_metas = accounts
             .iter()
             .map(|acc| {
-                if acc.key == self.generic_accs.vault_signer.key {
+                if acc.key == &self.generic_accs.vault_account.key() {
                     AccountMeta::new_readonly(*acc.key, true)
                 } else if acc.is_writable {
                     AccountMeta::new(*acc.key, false)
@@ -420,7 +421,8 @@ impl<'info> SolendWithdraw<'info> {
 #[derive(Accounts)]
 pub struct SolendTVL<'info> {
     pub generic_accs: GenericTVLAccounts<'info>,
-    /// CHECK: Solend CPI
+    #[account(owner = solend_program_id::ID)]
+    /// CHECK: owner and mint data field are checked
     pub reserve: AccountInfo<'info>,
 }
 
