@@ -136,7 +136,7 @@ pub struct SolendDeposit<'info> {
 impl<'info> SolendDeposit<'info> {
     /// Deposit into protocol
     pub fn deposit(&mut self) -> Result<()> {
-       let amount = self.generic_accs.amount_to_deposit(Protocols::Solend)?;
+        let amount = self.generic_accs.amount_to_deposit(Protocols::Solend)?;
         let balances = self.deposit_and_get_balances(amount)?;
 
         self.generic_accs.vault_account.protocols[Protocols::Solend as usize]
@@ -224,21 +224,32 @@ impl<'info> SolendDeposit<'info> {
 
     pub fn check_hash(&self) -> Result<()> {
         let has_keys = hash_pub_keys(&[
-            &self.vault_solend_destination_collateral_token_account.key(),
-            self.vault_solend_obligation_account.key,
-            self.solend_reserve_account.key,
-            self.solend_reserve_liquidity_supply_spl_token_account.key,
-            self.solend_reserve_collateral_spl_token_mint.key,
-            self.solend_lending_market_account.key,
-            self.solend_derived_lending_market_authority.key,
+            &self
+                .vault_solend_destination_collateral_token_account
+                .key()
+                .as_ref(),
+            self.vault_solend_obligation_account.key.as_ref(),
+            self.solend_reserve_account.key.as_ref(),
+            self.solend_reserve_liquidity_supply_spl_token_account
+                .key
+                .as_ref(),
+            self.solend_reserve_collateral_spl_token_mint.key.as_ref(),
+            self.solend_lending_market_account.key.as_ref(),
+            self.solend_derived_lending_market_authority.key.as_ref(),
             &self
                 .solend_destination_deposit_reserve_collateral_supply_spl_token_account
-                .key(),
-            self.solend_pyth_price_oracle_account.key,
-            self.solend_switchboard_price_feed_oracle_account.key,
+                .key()
+                .as_ref(),
+            self.solend_pyth_price_oracle_account.key.as_ref(),
+            self.solend_switchboard_price_feed_oracle_account
+                .key
+                .as_ref(),
         ])?;
         require!(
-            has_keys == self.generic_accs.vault_account.protocols[Protocols::Solend as usize].hash_pubkey.hash_deposit,
+            has_keys
+                == self.generic_accs.vault_account.protocols[Protocols::Solend as usize]
+                    .hash_pubkey
+                    .hash_deposit,
             ErrorCode::InvalidHash
         );
         Ok(())
@@ -379,18 +390,27 @@ impl<'info> SolendWithdraw<'info> {
 
     pub fn check_hash(&self) -> Result<()> {
         let has_keys = hash_pub_keys(&[
-            &self.vault_solend_destination_collateral_token_account.key(),
-            self.vault_solend_obligation_account.key,
+            &self
+                .vault_solend_destination_collateral_token_account
+                .key()
+                .as_ref(),
+            self.vault_solend_obligation_account.key.as_ref(),
             self.solend_source_withdraw_reserve_collateral_supply_spl_token_account
-                .key,
-            self.solend_withdraw_reserve_account.key,
-            self.solend_lending_market_account.key,
-            self.solend_derived_lending_market_authority.key,
-            self.solend_reserve_collateral_spl_token_mint.key,
-            self.solend_reserve_liquidity_supply_spl_token_account.key,
+                .key
+                .as_ref(),
+            self.solend_withdraw_reserve_account.key.as_ref(),
+            self.solend_lending_market_account.key.as_ref(),
+            self.solend_derived_lending_market_authority.key.as_ref(),
+            self.solend_reserve_collateral_spl_token_mint.key.as_ref(),
+            self.solend_reserve_liquidity_supply_spl_token_account
+                .key
+                .as_ref(),
         ])?;
         require!(
-            has_keys == self.generic_accs.vault_account.protocols[Protocols::Solend as usize].hash_pubkey.hash_withdraw,
+            has_keys
+                == self.generic_accs.vault_account.protocols[Protocols::Solend as usize]
+                    .hash_pubkey
+                    .hash_withdraw,
             ErrorCode::InvalidHash
         );
         Ok(())
@@ -442,9 +462,12 @@ impl<'info> SolendTVL<'info> {
     }
 
     pub fn check_hash(&self) -> Result<()> {
-        let has_keys = hash_pub_keys(&[self.reserve.key])?;
+        let has_keys = hash_pub_keys(&[self.reserve.key.as_ref()])?;
         require!(
-            has_keys == self.generic_accs.vault_account.protocols[Protocols::Solend as usize].hash_pubkey.hash_tvl,
+            has_keys
+                == self.generic_accs.vault_account.protocols[Protocols::Solend as usize]
+                    .hash_pubkey
+                    .hash_tvl,
             ErrorCode::InvalidHash
         );
         Ok(())

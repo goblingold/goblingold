@@ -2,8 +2,8 @@ use crate::error::ErrorCode;
 use crate::protocols::{Protocols, PROTOCOLS_LEN};
 use crate::SetHash;
 use anchor_lang::prelude::*;
+use anchor_lang::solana_program::hash::hashv;
 use std::{cmp, convert::TryInto};
-use anchor_lang::solana_program::hash::hash;
 
 /// Strategy vault account
 #[account]
@@ -29,13 +29,9 @@ pub struct VaultAccount {
     pub protocols: [ProtocolData; PROTOCOLS_LEN],
 }
 
-pub fn hash_pub_keys(keys: &[&Pubkey]) -> Result<[u8; 8]> {
-    // let arr: Vec<u8> = vec![0; keys.len()];
-    // let iter = keys.iter().map(|key|  key.as_ref());
-    // iter.chain()
-    // let l = hash(u);
-    let xs: [u8; 8] = [1, 2, 3, 4, 5, 6, 7, 8];
-    Ok(xs)
+pub fn hash_pub_keys(keys: &[&[u8]]) -> Result<[u8; 8]> {
+    let hash = hashv(keys).to_bytes();
+    Ok(hash[0..8].try_into().map_err(|_| ErrorCode::MathOverflow)?)
 }
 
 impl VaultAccount {
@@ -268,7 +264,7 @@ impl ProtocolData {
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default)]
-pub struct HashPubkey{
+pub struct HashPubkey {
     /// Hash of important accounts for each protocol on deposit
     pub hash_deposit: [u8; 8],
     /// Hash of important accounts for each protocol on withdraw
@@ -279,11 +275,19 @@ pub struct HashPubkey{
 }
 
 impl<'info> SetHash<'info> {
-    pub fn set_hash(&mut self, protocol: Protocols, action: u8, hash: [u8; 8]) -> Result<()> {
-        match action {
-            0 => self.vault_account.protocols[protocol as usize].hash_pubkey.hash_deposit = hash,
-            1 => self.vault_account.protocols[protocol as usize].hash_pubkey.hash_withdraw = hash,
-            2 => self.vault_account.protocols[protocol as usize].hash_pubkey.hash_tvl = hash,
+    pub fn set_hash(&mut self, protocol: usize, action: String, hash: [u8; 8]) -> Result<()> {
+        match action.as_str() {
+            "D" => {
+                self.vault_account.protocols[protocol]
+                    .hash_pubkey
+                    .hash_deposit = hash
+            }
+            "W" => {
+                self.vault_account.protocols[protocol]
+                    .hash_pubkey
+                    .hash_withdraw = hash
+            }
+            "T" => self.vault_account.protocols[protocol].hash_pubkey.hash_tvl = hash,
             _ => Err(ErrorCode::InvalidInstructions)?,
         }
         Ok(())

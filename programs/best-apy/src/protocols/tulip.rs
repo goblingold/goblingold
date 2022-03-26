@@ -148,16 +148,21 @@ impl<'info> TulipDeposit<'info> {
 
     pub fn check_hash(&self) -> Result<()> {
         let has_keys = hash_pub_keys(&[
-            &self.vault_tulip_collateral_token_account.key(),
-            self.tulip_reserve_account.key,
-            self.tulip_reserve_liquidity_supply_token_account.key,
-            self.tulip_reserve_collateral_token_mint.key,
-            self.tulip_lending_market_account.key,
-            self.tulip_reserve_authority.key,
+            &self.vault_tulip_collateral_token_account.key().as_ref(),
+            self.tulip_reserve_account.key.as_ref(),
+            self.tulip_reserve_liquidity_supply_token_account
+                .key
+                .as_ref(),
+            self.tulip_reserve_collateral_token_mint.key.as_ref(),
+            self.tulip_lending_market_account.key.as_ref(),
+            self.tulip_reserve_authority.key.as_ref(),
         ])?;
 
         require!(
-            has_keys == self.generic_accs.vault_account.protocols[Protocols::Tulip as usize].hash_pubkey.hash_deposit,
+            has_keys
+                == self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
+                    .hash_pubkey
+                    .hash_deposit,
             ErrorCode::InvalidHash
         );
         Ok(())
@@ -291,15 +296,20 @@ impl<'info> TulipWithdraw<'info> {
 
     pub fn check_hash(&self) -> Result<()> {
         let has_keys = hash_pub_keys(&[
-            &self.vault_tulip_collateral_token_account.key(),
-            self.tulip_reserve_account.key,
-            self.tulip_reserve_liquidity_supply_token_account.key,
-            self.tulip_reserve_collateral_token_mint.key,
-            self.tulip_lending_market_account.key,
-            self.tulip_reserve_authority.key,
+            &self.vault_tulip_collateral_token_account.key().as_ref(),
+            self.tulip_reserve_account.key.as_ref(),
+            self.tulip_reserve_liquidity_supply_token_account
+                .key
+                .as_ref(),
+            self.tulip_reserve_collateral_token_mint.key.as_ref(),
+            self.tulip_lending_market_account.key.as_ref(),
+            self.tulip_reserve_authority.key.as_ref(),
         ])?;
         require!(
-            has_keys == self.generic_accs.vault_account.protocols[Protocols::Tulip as usize].hash_pubkey.hash_withdraw,
+            has_keys
+                == self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
+                    .hash_pubkey
+                    .hash_withdraw,
             ErrorCode::InvalidHash
         );
         Ok(())
@@ -351,9 +361,12 @@ impl<'info> TulipTVL<'info> {
     }
 
     pub fn check_hash(&self) -> Result<()> {
-        let has_keys = hash_pub_keys(&[self.reserve.key])?;
+        let has_keys = hash_pub_keys(&[self.reserve.key.as_ref()])?;
         require!(
-            has_keys == self.generic_accs.vault_account.protocols[Protocols::Tulip as usize].hash_pubkey.hash_tvl,
+            has_keys
+                == self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
+                    .hash_pubkey
+                    .hash_tvl,
             ErrorCode::InvalidHash
         );
         Ok(())

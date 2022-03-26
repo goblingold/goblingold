@@ -12,7 +12,6 @@ use protocols::{francium::*, mango::*, port::*, solend::*, tulip::*, PROTOCOLS_L
 use std::mem::size_of;
 use std::str::FromStr;
 use vault::{InitVaultAccountParams, VaultAccount};
-use crate::protocols::{Protocols};
 
 mod deposit;
 mod duplicated_ixs;
@@ -94,7 +93,12 @@ pub mod best_apy {
 
     // ACCESS RESTRICTED. ONLY ALLOWED_DEPLOYER
     /// Set hash of a protocol for a specific action
-    pub fn set_hash(ctx: Context<SetHash>, protocol: Protocols, action: u8, hash: [u8; 8])-> Result<()> {
+    pub fn set_hash(
+        ctx: Context<SetHash>,
+        protocol: usize,
+        action: String,
+        hash: [u8; 8],
+    ) -> Result<()> {
         ctx.accounts.set_hash(protocol, action, hash)
     }
 
@@ -366,7 +370,6 @@ pub struct RefreshRewardsWeights<'info> {
     pub token_program: Program<'info, Token>,
 }
 
-
 #[derive(Accounts)]
 pub struct SetHash<'info> {
     #[account(constraint = Pubkey::from_str(ALLOWED_DEPLOYER).unwrap()== *user_signer.key)]
@@ -375,7 +378,7 @@ pub struct SetHash<'info> {
     /// CHECK: only used as signing PDA
     pub vault_signer: AccountInfo<'info>,
     #[account(mut)]
-    pub vault_account: Account<'info, VaultAccount>
+    pub vault_account: Account<'info, VaultAccount>,
 }
 
 #[derive(Accounts)]
