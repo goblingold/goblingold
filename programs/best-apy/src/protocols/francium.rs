@@ -334,31 +334,33 @@ impl<'info> FranciumDeposit<'info> {
     }
 
     pub fn check_hash(&self) -> Result<()> {
-        let has_keys = check_hash_pub_keys(&[
-            self.vault_francium_collateral_token_account.key().as_ref(),
-            self.vault_francium_account_mint_rewards.key().as_ref(),
-            self.vault_francium_account_mint_b_rewards.key().as_ref(),
-            self.vault_francium_farming_account.key.as_ref(),
-            self.francium_lending_pool_info_account.key.as_ref(),
-            self.francium_lending_pool_token_account.key.as_ref(),
-            self.francium_farming_pool_stake_token_mint.key.as_ref(),
-            self.francium_market_info_account.key.as_ref(),
-            self.francium_lending_market_authority.key.as_ref(),
-            self.francium_farming_pool_account.key.as_ref(),
-            self.francium_farming_pool_authority.key.as_ref(),
-            self
-                .francium_farming_pool_stake_token_account
-                .key()
-                .as_ref(),
-            self.francium_farming_pool_rewards_token_account
-                .key
-                .as_ref(),
-            self.francium_farming_pool_rewards_b_token_account
-                .key
-                .as_ref(),
-        ],self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
-        .hash_pubkey
-        .hash_deposit)?;
+        check_hash_pub_keys(
+            &[
+                self.vault_francium_collateral_token_account.key().as_ref(),
+                self.vault_francium_account_mint_rewards.key().as_ref(),
+                self.vault_francium_account_mint_b_rewards.key().as_ref(),
+                self.vault_francium_farming_account.key.as_ref(),
+                self.francium_lending_pool_info_account.key.as_ref(),
+                self.francium_lending_pool_token_account.key.as_ref(),
+                self.francium_farming_pool_stake_token_mint.key.as_ref(),
+                self.francium_market_info_account.key.as_ref(),
+                self.francium_lending_market_authority.key.as_ref(),
+                self.francium_farming_pool_account.key.as_ref(),
+                self.francium_farming_pool_authority.key.as_ref(),
+                self.francium_farming_pool_stake_token_account
+                    .key()
+                    .as_ref(),
+                self.francium_farming_pool_rewards_token_account
+                    .key
+                    .as_ref(),
+                self.francium_farming_pool_rewards_b_token_account
+                    .key
+                    .as_ref(),
+            ],
+            self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
+                .hash_pubkey
+                .hash_deposit,
+        )?;
         Ok(())
     }
 }
@@ -581,27 +583,30 @@ impl<'info> FranciumWithdraw<'info> {
     }
 
     pub fn check_hash(&self) -> Result<()> {
-        let has_keys = check_hash_pub_keys(&[
-            self.vault_francium_collateral_token_account.key().as_ref(),
-            self.vault_francium_account_mint_rewards.key().as_ref(),
-            self.vault_francium_farming_account.key.as_ref(),
-            self.francium_lending_pool_info_account.key.as_ref(),
-            self.francium_lending_pool_token_account.key.as_ref(),
-            self.francium_farming_pool_stake_token_mint.key.as_ref(),
-            self.francium_market_info_account.key.as_ref(),
-            self.francium_lending_market_authority.key.as_ref(),
-            self.francium_farming_pool_account.key.as_ref(),
-            self.francium_farming_pool_authority.key.as_ref(),
-            self.francium_farming_pool_stake_token_account.key.as_ref(),
-            self.francium_farming_pool_rewards_token_account
-                .key
-                .as_ref(),
-            self.francium_farming_pool_rewards_b_token_account
-                .key
-                .as_ref(),
-        ],self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
-        .hash_pubkey
-        .hash_withdraw)?;
+        check_hash_pub_keys(
+            &[
+                self.vault_francium_collateral_token_account.key().as_ref(),
+                self.vault_francium_account_mint_rewards.key().as_ref(),
+                self.vault_francium_farming_account.key.as_ref(),
+                self.francium_lending_pool_info_account.key.as_ref(),
+                self.francium_lending_pool_token_account.key.as_ref(),
+                self.francium_farming_pool_stake_token_mint.key.as_ref(),
+                self.francium_market_info_account.key.as_ref(),
+                self.francium_lending_market_authority.key.as_ref(),
+                self.francium_farming_pool_account.key.as_ref(),
+                self.francium_farming_pool_authority.key.as_ref(),
+                self.francium_farming_pool_stake_token_account.key.as_ref(),
+                self.francium_farming_pool_rewards_token_account
+                    .key
+                    .as_ref(),
+                self.francium_farming_pool_rewards_b_token_account
+                    .key
+                    .as_ref(),
+            ],
+            self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
+                .hash_pubkey
+                .hash_withdraw,
+        )?;
         Ok(())
     }
 }
@@ -652,9 +657,12 @@ impl<'info> FranciumTVL<'info> {
         Ok(tvl)
     }
     pub fn check_hash(&self) -> Result<()> {
-        let has_keys = check_hash_pub_keys(&[self.lending_pool.key.as_ref()],self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
-        .hash_pubkey
-        .hash_tvl)?;
+        check_hash_pub_keys(
+            &[self.lending_pool.key.as_ref()],
+            self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
+                .hash_pubkey
+                .hash_tvl,
+        )?;
         Ok(())
     }
 }

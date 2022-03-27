@@ -1816,6 +1816,11 @@
       "code": 6013,
       "name": "InvalidHash",
       "msg": "Invalid hash from provided pubkeys"
+    },
+    {
+      "code": 6014,
+      "name": "InvalidArraySize",
+      "msg": "Invalid size for array"
     }
   ]
 }

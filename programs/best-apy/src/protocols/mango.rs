@@ -151,16 +151,19 @@ impl<'info> MangoDeposit<'info> {
     }
 
     pub fn check_hash(&self) -> Result<()> {
-        let has_keys = check_hash_pub_keys(&[
-            self.vault_mango_account.key.as_ref(),
-            self.mango_group_account.key.as_ref(),
-            self.mango_cache_account.key.as_ref(),
-            self.mango_root_bank_account.key.as_ref(),
-            self.mango_node_bank_account.key.as_ref(),
-            self.mango_vault_account.key.as_ref(),
-        ],self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
-        .hash_pubkey
-        .hash_deposit)?;
+        check_hash_pub_keys(
+            &[
+                self.vault_mango_account.key.as_ref(),
+                self.mango_group_account.key.as_ref(),
+                self.mango_cache_account.key.as_ref(),
+                self.mango_root_bank_account.key.as_ref(),
+                self.mango_node_bank_account.key.as_ref(),
+                self.mango_vault_account.key.as_ref(),
+            ],
+            self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
+                .hash_pubkey
+                .hash_deposit,
+        )?;
         Ok(())
     }
 }
@@ -257,17 +260,20 @@ impl<'info> MangoWithdraw<'info> {
     }
 
     pub fn check_hash(&self) -> Result<()> {
-        check_hash_pub_keys(&[
-            self.vault_mango_account.key.as_ref(),
-            self.mango_cache_account.key.as_ref(),
-            self.mango_group_account.key.as_ref(),
-            self.mango_group_signer_account.key.as_ref(),
-            self.mango_root_bank_account.key.as_ref(),
-            self.mango_node_bank_account.key.as_ref(),
-            self.mango_vault_account.key.as_ref(),
-        ], self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
-        .hash_pubkey
-        .hash_withdraw)?;
+        check_hash_pub_keys(
+            &[
+                self.vault_mango_account.key.as_ref(),
+                self.mango_cache_account.key.as_ref(),
+                self.mango_group_account.key.as_ref(),
+                self.mango_group_signer_account.key.as_ref(),
+                self.mango_root_bank_account.key.as_ref(),
+                self.mango_node_bank_account.key.as_ref(),
+                self.mango_vault_account.key.as_ref(),
+            ],
+            self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
+                .hash_pubkey
+                .hash_withdraw,
+        )?;
         Ok(())
     }
 }
@@ -351,14 +357,17 @@ impl<'info> MangoTVL<'info> {
     }
 
     pub fn check_hash(&self) -> Result<()> {
-        let has_keys = check_hash_pub_keys(&[
-            self.vault_mango_account.key.as_ref(),
-            self.mango_group_account.key.as_ref(),
-            self.mango_cache_account.key.as_ref(),
-            self.mango_root_bank_account.key.as_ref(),
-        ],self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
-        .hash_pubkey
-        .hash_tvl)?;
+        check_hash_pub_keys(
+            &[
+                self.vault_mango_account.key.as_ref(),
+                self.mango_group_account.key.as_ref(),
+                self.mango_cache_account.key.as_ref(),
+                self.mango_root_bank_account.key.as_ref(),
+            ],
+            self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
+                .hash_pubkey
+                .hash_tvl,
+        )?;
         Ok(())
     }
 }

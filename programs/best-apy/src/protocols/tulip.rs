@@ -147,18 +147,21 @@ impl<'info> TulipDeposit<'info> {
     }
 
     pub fn check_hash(&self) -> Result<()> {
-        let has_keys = check_hash_pub_keys(&[
-            self.vault_tulip_collateral_token_account.key().as_ref(),
-            self.tulip_reserve_account.key.as_ref(),
-            self.tulip_reserve_liquidity_supply_token_account
-                .key
-                .as_ref(),
-            self.tulip_reserve_collateral_token_mint.key.as_ref(),
-            self.tulip_lending_market_account.key.as_ref(),
-            self.tulip_reserve_authority.key.as_ref(),
-        ], self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
-        .hash_pubkey
-        .hash_deposit)?;
+        check_hash_pub_keys(
+            &[
+                self.vault_tulip_collateral_token_account.key().as_ref(),
+                self.tulip_reserve_account.key.as_ref(),
+                self.tulip_reserve_liquidity_supply_token_account
+                    .key
+                    .as_ref(),
+                self.tulip_reserve_collateral_token_mint.key.as_ref(),
+                self.tulip_lending_market_account.key.as_ref(),
+                self.tulip_reserve_authority.key.as_ref(),
+            ],
+            self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
+                .hash_pubkey
+                .hash_deposit,
+        )?;
         Ok(())
     }
 }
@@ -289,18 +292,21 @@ impl<'info> TulipWithdraw<'info> {
     }
 
     pub fn check_hash(&self) -> Result<()> {
-        let has_keys = check_hash_pub_keys(&[
-            self.vault_tulip_collateral_token_account.key().as_ref(),
-            self.tulip_reserve_account.key.as_ref(),
-            self.tulip_reserve_liquidity_supply_token_account
-                .key
-                .as_ref(),
-            self.tulip_reserve_collateral_token_mint.key.as_ref(),
-            self.tulip_lending_market_account.key.as_ref(),
-            self.tulip_reserve_authority.key.as_ref(),
-        ],self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
-        .hash_pubkey
-        .hash_withdraw)?;
+        check_hash_pub_keys(
+            &[
+                self.vault_tulip_collateral_token_account.key().as_ref(),
+                self.tulip_reserve_account.key.as_ref(),
+                self.tulip_reserve_liquidity_supply_token_account
+                    .key
+                    .as_ref(),
+                self.tulip_reserve_collateral_token_mint.key.as_ref(),
+                self.tulip_lending_market_account.key.as_ref(),
+                self.tulip_reserve_authority.key.as_ref(),
+            ],
+            self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
+                .hash_pubkey
+                .hash_withdraw,
+        )?;
         Ok(())
     }
 }
@@ -351,9 +357,12 @@ impl<'info> TulipTVL<'info> {
     }
 
     pub fn check_hash(&self) -> Result<()> {
-        let has_keys = check_hash_pub_keys(&[self.reserve.key.as_ref()],self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
-        .hash_pubkey
-        .hash_tvl)?;
+        check_hash_pub_keys(
+            &[self.reserve.key.as_ref()],
+            self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
+                .hash_pubkey
+                .hash_tvl,
+        )?;
         Ok(())
     }
 }

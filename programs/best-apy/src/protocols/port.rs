@@ -274,23 +274,25 @@ impl<'info> PortDeposit<'info> {
     }
 
     pub fn check_hash(&self) -> Result<()> {
-        let has_keys = check_hash_pub_keys(&[
-            self.vault_port_collateral_token_account.key().as_ref(),
-            self.vault_port_obligation_account.key.as_ref(),
-            self.vault_port_staking_account.key.as_ref(),
-            self.port_reserve_account.key.as_ref(),
-            self.port_reserve_liquidity_supply_account.key.as_ref(),
-            self.port_reserve_collateral_mint_account.key.as_ref(),
-            self.port_lending_market_account.key.as_ref(),
-            self.port_lending_market_authority_account.key.as_ref(),
-            self
-                .port_destination_deposit_collateral_account
-                .key()
-                .as_ref(),
-            self.port_staking_pool_account.key.as_ref(),
-        ],self.generic_accs.vault_account.protocols[Protocols::Port as usize]
-        .hash_pubkey
-        .hash_deposit)?;
+        check_hash_pub_keys(
+            &[
+                self.vault_port_collateral_token_account.key().as_ref(),
+                self.vault_port_obligation_account.key.as_ref(),
+                self.vault_port_staking_account.key.as_ref(),
+                self.port_reserve_account.key.as_ref(),
+                self.port_reserve_liquidity_supply_account.key.as_ref(),
+                self.port_reserve_collateral_mint_account.key.as_ref(),
+                self.port_lending_market_account.key.as_ref(),
+                self.port_lending_market_authority_account.key.as_ref(),
+                self.port_destination_deposit_collateral_account
+                    .key()
+                    .as_ref(),
+                self.port_staking_pool_account.key.as_ref(),
+            ],
+            self.generic_accs.vault_account.protocols[Protocols::Port as usize]
+                .hash_pubkey
+                .hash_deposit,
+        )?;
         Ok(())
     }
 }
@@ -443,20 +445,23 @@ impl<'info> PortWithdraw<'info> {
     }
 
     pub fn check_hash(&self) -> Result<()> {
-        let has_keys = check_hash_pub_keys(&[
-            self.vault_port_collateral_token_account.key().as_ref(),
-            self.vault_port_obligation_account.key.as_ref(),
-            self.vault_port_staking_account.key.as_ref(),
-            self.port_source_collateral_account.key.as_ref(),
-            self.port_reserve_account.key.as_ref(),
-            self.port_reserve_liquidity_supply_account.key.as_ref(),
-            self.port_reserve_collateral_mint_account.key.as_ref(),
-            self.port_lending_market_account.key.as_ref(),
-            self.port_lending_market_authority_account.key.as_ref(),
-            self.port_staking_pool_account.key.as_ref(),
-        ],self.generic_accs.vault_account.protocols[Protocols::Port as usize]
-        .hash_pubkey
-        .hash_withdraw)?;
+        check_hash_pub_keys(
+            &[
+                self.vault_port_collateral_token_account.key().as_ref(),
+                self.vault_port_obligation_account.key.as_ref(),
+                self.vault_port_staking_account.key.as_ref(),
+                self.port_source_collateral_account.key.as_ref(),
+                self.port_reserve_account.key.as_ref(),
+                self.port_reserve_liquidity_supply_account.key.as_ref(),
+                self.port_reserve_collateral_mint_account.key.as_ref(),
+                self.port_lending_market_account.key.as_ref(),
+                self.port_lending_market_authority_account.key.as_ref(),
+                self.port_staking_pool_account.key.as_ref(),
+            ],
+            self.generic_accs.vault_account.protocols[Protocols::Port as usize]
+                .hash_pubkey
+                .hash_withdraw,
+        )?;
         Ok(())
     }
 }
@@ -508,9 +513,12 @@ impl<'info> PortTVL<'info> {
     }
 
     pub fn check_hash(&self) -> Result<()> {
-        let has_keys = check_hash_pub_keys(&[self.reserve.key.as_ref()], self.generic_accs.vault_account.protocols[Protocols::Port as usize]
-        .hash_pubkey
-        .hash_tvl)?;
+        check_hash_pub_keys(
+            &[self.reserve.key.as_ref()],
+            self.generic_accs.vault_account.protocols[Protocols::Port as usize]
+                .hash_pubkey
+                .hash_tvl,
+        )?;
         Ok(())
     }
 }

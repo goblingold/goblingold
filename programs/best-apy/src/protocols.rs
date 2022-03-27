@@ -1,4 +1,3 @@
-use anchor_lang::prelude::*;
 pub mod francium;
 pub mod francium_lending_pool;
 pub mod mango;

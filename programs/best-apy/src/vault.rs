@@ -286,15 +286,17 @@ impl<'info> SetHash<'info> {
                     .hash_withdraw = hash
             }
             "T" => self.vault_account.protocols[protocol].hash_pubkey.hash_tvl = hash,
-            _ => return Err(ErrorCode::InvalidInstructions.into())
+            _ => return Err(ErrorCode::InvalidInstructions.into()),
         }
         Ok(())
     }
 }
 
 pub fn check_hash_pub_keys(keys: &[&[u8]], target_hash: [u8; 8]) -> Result<()> {
-    let hash = hashv(keys).to_bytes();
-    require!(target_hash ==  hash[0..8].try_into().map_err(|_| ErrorCode::InvalidArraySize)?,  ErrorCode::InvalidHash);
+    require!(
+        target_hash == hashv(keys).to_bytes()[0..8],
+        ErrorCode::InvalidHash
+    );
     Ok(())
 }
 
