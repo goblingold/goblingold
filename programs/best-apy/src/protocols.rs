@@ -11,7 +11,7 @@ pub const PROTOCOLS_LEN: usize = 5;
 
 /// List of supported protocols
 #[repr(usize)]
-#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug)]
 pub enum Protocols {
     Mango = 0,
     Solend = 1,

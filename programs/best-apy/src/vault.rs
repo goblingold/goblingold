@@ -25,12 +25,7 @@ pub struct VaultAccount {
     pub rewards_sum: u64,
     /// Protocol data
     pub protocols: [ProtocolData; PROTOCOLS_LEN],
-}
-
-pub fn check_hash_pub_keys(keys: &[&[u8]], target_hash: [u8; 8]) -> Result<()> {
-    let hash = hashv(keys).to_bytes();
-    require!(target_hash ==  hash[0..8].try_into().map_err(|_| ErrorCode::InvalidArraySize)?,  ErrorCode::InvalidHash);
-    Ok(())
+    // TODO additional padding
 }
 
 impl VaultAccount {
@@ -295,6 +290,12 @@ impl<'info> SetHash<'info> {
         }
         Ok(())
     }
+}
+
+pub fn check_hash_pub_keys(keys: &[&[u8]], target_hash: [u8; 8]) -> Result<()> {
+    let hash = hashv(keys).to_bytes();
+    require!(target_hash ==  hash[0..8].try_into().map_err(|_| ErrorCode::InvalidArraySize)?,  ErrorCode::InvalidHash);
+    Ok(())
 }
 
 /// Token balances in the protocol
