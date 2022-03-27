@@ -27,9 +27,10 @@ pub struct VaultAccount {
     pub protocols: [ProtocolData; PROTOCOLS_LEN],
 }
 
-pub fn hash_pub_keys(keys: &[&[u8]]) -> Result<[u8; 8]> {
+pub fn check_hash_pub_keys(keys: &[&[u8]], target_hash: [u8; 8]) -> Result<()> {
     let hash = hashv(keys).to_bytes();
-    Ok(hash[0..8].try_into().map_err(|_| ErrorCode::MathOverflow)?)
+    require!(target_hash ==  hash[0..8].try_into().map_err(|_| ErrorCode::InvalidArraySize)?,  ErrorCode::InvalidHash);
+    Ok(())
 }
 
 impl VaultAccount {
@@ -279,7 +280,7 @@ pub struct HashPubkey {
 impl<'info> SetHash<'info> {
     pub fn set_hash(&mut self, protocol: usize, action: String, hash: [u8; 8]) -> Result<()> {
         match action.as_str() {
-            "Danchor" => {
+            "D" => {
                 self.vault_account.protocols[protocol]
                     .hash_pubkey
                     .hash_deposit = hash

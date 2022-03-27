@@ -1,7 +1,7 @@
 use crate::error::ErrorCode;
 use crate::macros::generate_seeds;
 use crate::protocols::Protocols;
-use crate::vault::{hash_pub_keys, TokenBalances, VaultAccount};
+use crate::vault::{check_hash_pub_keys, TokenBalances, VaultAccount};
 use crate::{
     generic_accounts_anchor_modules::*, GenericDepositAccounts, GenericTVLAccounts,
     GenericWithdrawAccounts,
@@ -274,7 +274,7 @@ impl<'info> PortDeposit<'info> {
     }
 
     pub fn check_hash(&self) -> Result<()> {
-        let has_keys = hash_pub_keys(&[
+        let has_keys = check_hash_pub_keys(&[
             self.vault_port_collateral_token_account.key().as_ref(),
             self.vault_port_obligation_account.key.as_ref(),
             self.vault_port_staking_account.key.as_ref(),
@@ -288,14 +288,9 @@ impl<'info> PortDeposit<'info> {
                 .key()
                 .as_ref(),
             self.port_staking_pool_account.key.as_ref(),
-        ])?;
-        require!(
-            has_keys
-                == self.generic_accs.vault_account.protocols[Protocols::Port as usize]
-                    .hash_pubkey
-                    .hash_deposit,
-            ErrorCode::InvalidHash
-        );
+        ],self.generic_accs.vault_account.protocols[Protocols::Port as usize]
+        .hash_pubkey
+        .hash_deposit)?;
         Ok(())
     }
 }
@@ -448,7 +443,7 @@ impl<'info> PortWithdraw<'info> {
     }
 
     pub fn check_hash(&self) -> Result<()> {
-        let has_keys = hash_pub_keys(&[
+        let has_keys = check_hash_pub_keys(&[
             self.vault_port_collateral_token_account.key().as_ref(),
             self.vault_port_obligation_account.key.as_ref(),
             self.vault_port_staking_account.key.as_ref(),
@@ -459,14 +454,9 @@ impl<'info> PortWithdraw<'info> {
             self.port_lending_market_account.key.as_ref(),
             self.port_lending_market_authority_account.key.as_ref(),
             self.port_staking_pool_account.key.as_ref(),
-        ])?;
-        require!(
-            has_keys
-                == self.generic_accs.vault_account.protocols[Protocols::Port as usize]
-                    .hash_pubkey
-                    .hash_withdraw,
-            ErrorCode::InvalidHash
-        );
+        ],self.generic_accs.vault_account.protocols[Protocols::Port as usize]
+        .hash_pubkey
+        .hash_withdraw)?;
         Ok(())
     }
 }
@@ -518,14 +508,9 @@ impl<'info> PortTVL<'info> {
     }
 
     pub fn check_hash(&self) -> Result<()> {
-        let has_keys = hash_pub_keys(&[self.reserve.key.as_ref()])?;
-        require!(
-            has_keys
-                == self.generic_accs.vault_account.protocols[Protocols::Port as usize]
-                    .hash_pubkey
-                    .hash_tvl,
-            ErrorCode::InvalidHash
-        );
+        let has_keys = check_hash_pub_keys(&[self.reserve.key.as_ref()], self.generic_accs.vault_account.protocols[Protocols::Port as usize]
+        .hash_pubkey
+        .hash_tvl)?;
         Ok(())
     }
 }

@@ -3,7 +3,7 @@ use crate::error::ErrorCode;
 use crate::macros::generate_seeds;
 use crate::protocols::francium_lending_pool;
 use crate::protocols::Protocols;
-use crate::vault::{hash_pub_keys, TokenBalances, VaultAccount};
+use crate::vault::{check_hash_pub_keys, TokenBalances, VaultAccount};
 use crate::{
     generic_accounts_anchor_modules::*, GenericDepositAccounts, GenericTVLAccounts,
     GenericWithdrawAccounts,
@@ -334,7 +334,7 @@ impl<'info> FranciumDeposit<'info> {
     }
 
     pub fn check_hash(&self) -> Result<()> {
-        let has_keys = hash_pub_keys(&[
+        let has_keys = check_hash_pub_keys(&[
             self.vault_francium_collateral_token_account.key().as_ref(),
             self.vault_francium_account_mint_rewards.key().as_ref(),
             self.vault_francium_account_mint_b_rewards.key().as_ref(),
@@ -356,14 +356,9 @@ impl<'info> FranciumDeposit<'info> {
             self.francium_farming_pool_rewards_b_token_account
                 .key
                 .as_ref(),
-        ])?;
-        require!(
-            has_keys
-                == self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
-                    .hash_pubkey
-                    .hash_deposit,
-            ErrorCode::InvalidHash
-        );
+        ],self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
+        .hash_pubkey
+        .hash_deposit)?;
         Ok(())
     }
 }
@@ -586,7 +581,7 @@ impl<'info> FranciumWithdraw<'info> {
     }
 
     pub fn check_hash(&self) -> Result<()> {
-        let has_keys = hash_pub_keys(&[
+        let has_keys = check_hash_pub_keys(&[
             self.vault_francium_collateral_token_account.key().as_ref(),
             self.vault_francium_account_mint_rewards.key().as_ref(),
             self.vault_francium_farming_account.key.as_ref(),
@@ -604,15 +599,9 @@ impl<'info> FranciumWithdraw<'info> {
             self.francium_farming_pool_rewards_b_token_account
                 .key
                 .as_ref(),
-        ])?;
-
-        require!(
-            has_keys
-                == self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
-                    .hash_pubkey
-                    .hash_withdraw,
-            ErrorCode::InvalidHash
-        );
+        ],self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
+        .hash_pubkey
+        .hash_withdraw)?;
         Ok(())
     }
 }
@@ -663,14 +652,9 @@ impl<'info> FranciumTVL<'info> {
         Ok(tvl)
     }
     pub fn check_hash(&self) -> Result<()> {
-        let has_keys = hash_pub_keys(&[self.lending_pool.key.as_ref()])?;
-        require!(
-            has_keys
-                == self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
-                    .hash_pubkey
-                    .hash_tvl,
-            ErrorCode::InvalidHash
-        );
+        let has_keys = check_hash_pub_keys(&[self.lending_pool.key.as_ref()],self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
+        .hash_pubkey
+        .hash_tvl)?;
         Ok(())
     }
 }

@@ -1,7 +1,7 @@
 use crate::error::ErrorCode;
 use crate::macros::generate_seeds;
 use crate::protocols::Protocols;
-use crate::vault::{hash_pub_keys, TokenBalances, VaultAccount};
+use crate::vault::{check_hash_pub_keys, TokenBalances, VaultAccount};
 use crate::{
     generic_accounts_anchor_modules::*, GenericDepositAccounts, GenericTVLAccounts,
     GenericWithdrawAccounts,
@@ -151,21 +151,16 @@ impl<'info> MangoDeposit<'info> {
     }
 
     pub fn check_hash(&self) -> Result<()> {
-        let has_keys = hash_pub_keys(&[
+        let has_keys = check_hash_pub_keys(&[
             self.vault_mango_account.key.as_ref(),
             self.mango_group_account.key.as_ref(),
             self.mango_cache_account.key.as_ref(),
             self.mango_root_bank_account.key.as_ref(),
             self.mango_node_bank_account.key.as_ref(),
             self.mango_vault_account.key.as_ref(),
-        ])?;
-        require!(
-            has_keys
-                == self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
-                    .hash_pubkey
-                    .hash_deposit,
-            ErrorCode::InvalidHash
-        );
+        ],self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
+        .hash_pubkey
+        .hash_deposit)?;
         Ok(())
     }
 }
@@ -262,7 +257,7 @@ impl<'info> MangoWithdraw<'info> {
     }
 
     pub fn check_hash(&self) -> Result<()> {
-        let has_keys = hash_pub_keys(&[
+        check_hash_pub_keys(&[
             self.vault_mango_account.key.as_ref(),
             self.mango_cache_account.key.as_ref(),
             self.mango_group_account.key.as_ref(),
@@ -270,14 +265,9 @@ impl<'info> MangoWithdraw<'info> {
             self.mango_root_bank_account.key.as_ref(),
             self.mango_node_bank_account.key.as_ref(),
             self.mango_vault_account.key.as_ref(),
-        ])?;
-        require!(
-            has_keys
-                == self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
-                    .hash_pubkey
-                    .hash_withdraw,
-            ErrorCode::InvalidHash
-        );
+        ], self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
+        .hash_pubkey
+        .hash_withdraw)?;
         Ok(())
     }
 }
@@ -361,19 +351,14 @@ impl<'info> MangoTVL<'info> {
     }
 
     pub fn check_hash(&self) -> Result<()> {
-        let has_keys = hash_pub_keys(&[
+        let has_keys = check_hash_pub_keys(&[
             self.vault_mango_account.key.as_ref(),
             self.mango_group_account.key.as_ref(),
             self.mango_cache_account.key.as_ref(),
             self.mango_root_bank_account.key.as_ref(),
-        ])?;
-        require!(
-            has_keys
-                == self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
-                    .hash_pubkey
-                    .hash_tvl,
-            ErrorCode::InvalidHash
-        );
+        ],self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
+        .hash_pubkey
+        .hash_tvl)?;
         Ok(())
     }
 }

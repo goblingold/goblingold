@@ -2,7 +2,7 @@ use crate::error::ErrorCode;
 use crate::macros::generate_seeds;
 use crate::protocols::tulip_reserve;
 use crate::protocols::Protocols;
-use crate::vault::{hash_pub_keys, TokenBalances};
+use crate::vault::{check_hash_pub_keys, TokenBalances};
 use crate::{
     generic_accounts_anchor_modules::*, GenericDepositAccounts, GenericTVLAccounts,
     GenericWithdrawAccounts,
@@ -147,7 +147,7 @@ impl<'info> TulipDeposit<'info> {
     }
 
     pub fn check_hash(&self) -> Result<()> {
-        let has_keys = hash_pub_keys(&[
+        let has_keys = check_hash_pub_keys(&[
             self.vault_tulip_collateral_token_account.key().as_ref(),
             self.tulip_reserve_account.key.as_ref(),
             self.tulip_reserve_liquidity_supply_token_account
@@ -156,15 +156,9 @@ impl<'info> TulipDeposit<'info> {
             self.tulip_reserve_collateral_token_mint.key.as_ref(),
             self.tulip_lending_market_account.key.as_ref(),
             self.tulip_reserve_authority.key.as_ref(),
-        ])?;
-
-        require!(
-            has_keys
-                == self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
-                    .hash_pubkey
-                    .hash_deposit,
-            ErrorCode::InvalidHash
-        );
+        ], self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
+        .hash_pubkey
+        .hash_deposit)?;
         Ok(())
     }
 }
@@ -295,7 +289,7 @@ impl<'info> TulipWithdraw<'info> {
     }
 
     pub fn check_hash(&self) -> Result<()> {
-        let has_keys = hash_pub_keys(&[
+        let has_keys = check_hash_pub_keys(&[
             self.vault_tulip_collateral_token_account.key().as_ref(),
             self.tulip_reserve_account.key.as_ref(),
             self.tulip_reserve_liquidity_supply_token_account
@@ -304,14 +298,9 @@ impl<'info> TulipWithdraw<'info> {
             self.tulip_reserve_collateral_token_mint.key.as_ref(),
             self.tulip_lending_market_account.key.as_ref(),
             self.tulip_reserve_authority.key.as_ref(),
-        ])?;
-        require!(
-            has_keys
-                == self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
-                    .hash_pubkey
-                    .hash_withdraw,
-            ErrorCode::InvalidHash
-        );
+        ],self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
+        .hash_pubkey
+        .hash_withdraw)?;
         Ok(())
     }
 }
@@ -362,14 +351,9 @@ impl<'info> TulipTVL<'info> {
     }
 
     pub fn check_hash(&self) -> Result<()> {
-        let has_keys = hash_pub_keys(&[self.reserve.key.as_ref()])?;
-        require!(
-            has_keys
-                == self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
-                    .hash_pubkey
-                    .hash_tvl,
-            ErrorCode::InvalidHash
-        );
+        let has_keys = check_hash_pub_keys(&[self.reserve.key.as_ref()],self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
+        .hash_pubkey
+        .hash_tvl)?;
         Ok(())
     }
 }

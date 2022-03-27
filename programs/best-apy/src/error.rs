@@ -31,4 +31,6 @@ pub enum ErrorCode {
     InvalidWeights,
     #[msg("Invalid hash from provided pubkeys")]
     InvalidHash,
+    #[msg("Invalid size for array")]
+    InvalidArraySize,
 }
