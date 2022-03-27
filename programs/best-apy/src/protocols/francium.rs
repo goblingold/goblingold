@@ -360,8 +360,7 @@ impl<'info> FranciumDeposit<'info> {
             self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
                 .hash_pubkey
                 .hash_deposit,
-        )?;
-        Ok(())
+        )
     }
 }
 
@@ -606,8 +605,7 @@ impl<'info> FranciumWithdraw<'info> {
             self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
                 .hash_pubkey
                 .hash_withdraw,
-        )?;
-        Ok(())
+        )
     }
 }
 
@@ -662,7 +660,6 @@ impl<'info> FranciumTVL<'info> {
             self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
                 .hash_pubkey
                 .hash_tvl,
-        )?;
-        Ok(())
+        )
     }
 }

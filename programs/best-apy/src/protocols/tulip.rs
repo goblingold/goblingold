@@ -161,8 +161,7 @@ impl<'info> TulipDeposit<'info> {
             self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
                 .hash_pubkey
                 .hash_deposit,
-        )?;
-        Ok(())
+        )
     }
 }
 
@@ -306,8 +305,7 @@ impl<'info> TulipWithdraw<'info> {
             self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
                 .hash_pubkey
                 .hash_withdraw,
-        )?;
-        Ok(())
+        )
     }
 }
 
@@ -362,7 +360,6 @@ impl<'info> TulipTVL<'info> {
             self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
                 .hash_pubkey
                 .hash_tvl,
-        )?;
-        Ok(())
+        )
     }
 }

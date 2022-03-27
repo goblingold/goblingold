@@ -292,8 +292,7 @@ impl<'info> PortDeposit<'info> {
             self.generic_accs.vault_account.protocols[Protocols::Port as usize]
                 .hash_pubkey
                 .hash_deposit,
-        )?;
-        Ok(())
+        )
     }
 }
 
@@ -461,8 +460,7 @@ impl<'info> PortWithdraw<'info> {
             self.generic_accs.vault_account.protocols[Protocols::Port as usize]
                 .hash_pubkey
                 .hash_withdraw,
-        )?;
-        Ok(())
+        )
     }
 }
 
@@ -518,8 +516,7 @@ impl<'info> PortTVL<'info> {
             self.generic_accs.vault_account.protocols[Protocols::Port as usize]
                 .hash_pubkey
                 .hash_tvl,
-        )?;
-        Ok(())
+        )
     }
 }
 
