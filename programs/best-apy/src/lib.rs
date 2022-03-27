@@ -96,6 +96,17 @@ pub mod best_apy {
         ctx.accounts.refresh()
     }
 
+    // ACCESS RESTRICTED. ONLY ALLOWED_DEPLOYER
+    /// Set hash of a protocol for a specific action
+    pub fn set_hash(
+        ctx: Context<SetHash>,
+        protocol: usize,
+        action: String,
+        hash: [u8; 8],
+    ) -> Result<()> {
+        ctx.accounts.set_hash(protocol, action, hash)
+    }
+
     /// Mango: Initialize protocol accounts
     // ACCESS RESTRICTED. ONLY ALLOWED_DEPLOYER
     pub fn mango_initialize(ctx: Context<MangoInitialize>) -> Result<()> {
@@ -103,16 +114,19 @@ pub mod best_apy {
     }
 
     /// Mango: Deposit from the vault account
+    #[access_control(ctx.accounts.check_hash())]
     pub fn mango_deposit(ctx: Context<MangoDeposit>) -> Result<()> {
         ctx.accounts.deposit()
     }
 
     /// Mango: Withdraw to the vault account
+    #[access_control(ctx.accounts.check_hash())]
     pub fn mango_withdraw(ctx: Context<MangoWithdraw>) -> Result<()> {
         ctx.accounts.withdraw()
     }
 
     /// Mango: Compute the TVL
+    #[access_control(ctx.accounts.check_hash())]
     pub fn mango_tvl(ctx: Context<MangoTVL>) -> Result<()> {
         ctx.accounts.update_rewards()
     }
@@ -124,16 +138,19 @@ pub mod best_apy {
     }
 
     /// Solend: Deposit from the vault account
+    #[access_control(ctx.accounts.check_hash())]
     pub fn solend_deposit(ctx: Context<SolendDeposit>) -> Result<()> {
         ctx.accounts.deposit()
     }
 
     /// Solend: Withdraw to the vault account
+    #[access_control(ctx.accounts.check_hash())]
     pub fn solend_withdraw(ctx: Context<SolendWithdraw>) -> Result<()> {
         ctx.accounts.withdraw()
     }
 
     /// Solend: Compute the TVL
+    #[access_control(ctx.accounts.check_hash())]
     pub fn solend_tvl(ctx: Context<SolendTVL>) -> Result<()> {
         ctx.accounts.update_rewards()
     }
@@ -145,16 +162,19 @@ pub mod best_apy {
     }
 
     /// Port: Deposit from the vault account
+    #[access_control(ctx.accounts.check_hash())]
     pub fn port_deposit(ctx: Context<PortDeposit>) -> Result<()> {
         ctx.accounts.deposit()
     }
 
     /// Port: Withdraw to the vault account
+    #[access_control(ctx.accounts.check_hash())]
     pub fn port_withdraw(ctx: Context<PortWithdraw>) -> Result<()> {
         ctx.accounts.withdraw()
     }
 
     /// Port: Compute the TVL
+    #[access_control(ctx.accounts.check_hash())]
     pub fn port_tvl(ctx: Context<PortTVL>) -> Result<()> {
         ctx.accounts.update_rewards()
     }
@@ -165,16 +185,19 @@ pub mod best_apy {
     }
 
     /// Tulip: Deposit from the vault account
+    #[access_control(ctx.accounts.check_hash())]
     pub fn tulip_deposit(ctx: Context<TulipDeposit>) -> Result<()> {
         ctx.accounts.deposit()
     }
 
     /// Tulip: Withdraw to the vault account
+    #[access_control(ctx.accounts.check_hash())]
     pub fn tulip_withdraw(ctx: Context<TulipWithdraw>) -> Result<()> {
         ctx.accounts.withdraw()
     }
 
     /// Tulip: Compute the TVL
+    #[access_control(ctx.accounts.check_hash())]
     pub fn tulip_tvl(ctx: Context<TulipTVL>) -> Result<()> {
         ctx.accounts.update_rewards()
     }
@@ -186,19 +209,27 @@ pub mod best_apy {
     }
 
     /// Francium: Deposit from the vault account
+    #[access_control(ctx.accounts.check_hash())]
     pub fn francium_deposit(ctx: Context<FranciumDeposit>) -> Result<()> {
         ctx.accounts.deposit()
     }
 
     /// Francium: Withdraw to the vault account
+    #[access_control(ctx.accounts.check_hash())]
     pub fn francium_withdraw(ctx: Context<FranciumWithdraw>) -> Result<()> {
         ctx.accounts.withdraw()
     }
 
     /// Francium: Compute the TVL
+    #[access_control(ctx.accounts.check_hash())]
     pub fn francium_tvl(ctx: Context<FranciumTVL>) -> Result<()> {
         ctx.accounts.update_rewards()
     }
+}
+
+/// Trait to check the validity of a hash of the accounts passed
+pub trait CheckHash<'info> {
+    fn check_hash(&self) -> Result<()>;
 }
 
 /// Check if the program is paused
@@ -353,6 +384,18 @@ pub struct RefreshRewardsWeights<'info> {
     #[account(mut, address = vault_account.dao_treasury_lp_token_account)]
     pub dao_treasury_lp_token_account: Account<'info, TokenAccount>,
     pub token_program: Program<'info, Token>,
+}
+
+#[derive(Accounts)]
+pub struct SetHash<'info> {
+    #[account(constraint = Pubkey::from_str(ALLOWED_DEPLOYER).unwrap()== *user_signer.key)]
+    pub user_signer: Signer<'info>,
+    #[account(
+        mut,
+        seeds = [VAULT_ACCOUNT_SEED, vault_account.input_mint_pubkey.as_ref()],
+        bump = vault_account.bumps.vault
+    )]
+    pub vault_account: Account<'info, VaultAccount>,
 }
 
 #[derive(Accounts)]

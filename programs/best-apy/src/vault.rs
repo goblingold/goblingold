@@ -1,6 +1,8 @@
 use crate::error::ErrorCode;
 use crate::protocols::{Protocols, PROTOCOLS_LEN};
+use crate::SetHash;
 use anchor_lang::prelude::*;
+use anchor_lang::solana_program::hash::hashv;
 use std::{cmp, convert::TryInto};
 
 /// Strategy vault account
@@ -199,6 +201,8 @@ pub struct ProtocolData {
     pub tokens: TokenBalances,
     /// Accumulated rewards
     pub rewards: AccumulatedRewards,
+    /// Hashes of Pubkey
+    pub hash_pubkey: HashPubkey,
 }
 
 impl ProtocolData {
@@ -255,6 +259,45 @@ impl ProtocolData {
         self.tokens = self.tokens.sub(balances)?;
         Ok(())
     }
+}
+
+#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default)]
+pub struct HashPubkey {
+    /// Hash of important accounts for each protocol on deposit
+    pub hash_deposit: [u8; 8],
+    /// Hash of important accounts for each protocol on withdraw
+    pub hash_withdraw: [u8; 8],
+    /// Hash of important accounts for each protocol on tvl
+    pub hash_tvl: [u8; 8],
+    // TODO additional padding
+}
+
+impl<'info> SetHash<'info> {
+    pub fn set_hash(&mut self, protocol: usize, action: String, hash: [u8; 8]) -> Result<()> {
+        match action.as_str() {
+            "D" => {
+                self.vault_account.protocols[protocol]
+                    .hash_pubkey
+                    .hash_deposit = hash
+            }
+            "W" => {
+                self.vault_account.protocols[protocol]
+                    .hash_pubkey
+                    .hash_withdraw = hash
+            }
+            "T" => self.vault_account.protocols[protocol].hash_pubkey.hash_tvl = hash,
+            _ => return Err(ErrorCode::InvalidInstructions.into()),
+        }
+        Ok(())
+    }
+}
+
+pub fn check_hash_pub_keys(keys: &[&[u8]], target_hash: [u8; 8]) -> Result<()> {
+    require!(
+        target_hash == hashv(keys).to_bytes()[0..8],
+        ErrorCode::InvalidHash
+    );
+    Ok(())
 }
 
 /// Token balances in the protocol

@@ -1,7 +1,7 @@
 use crate::error::ErrorCode;
 use crate::macros::generate_seeds;
 use crate::protocols::Protocols;
-use crate::vault::{TokenBalances, VaultAccount};
+use crate::vault::{check_hash_pub_keys, TokenBalances, VaultAccount};
 use crate::{
     generic_accounts_anchor_modules::*, GenericDepositAccounts, GenericTVLAccounts,
     GenericWithdrawAccounts,
@@ -272,6 +272,28 @@ impl<'info> PortDeposit<'info> {
 
         Ok(())
     }
+
+    pub fn check_hash(&self) -> Result<()> {
+        check_hash_pub_keys(
+            &[
+                self.vault_port_collateral_token_account.key().as_ref(),
+                self.vault_port_obligation_account.key.as_ref(),
+                self.vault_port_staking_account.key.as_ref(),
+                self.port_reserve_account.key.as_ref(),
+                self.port_reserve_liquidity_supply_account.key.as_ref(),
+                self.port_reserve_collateral_mint_account.key.as_ref(),
+                self.port_lending_market_account.key.as_ref(),
+                self.port_lending_market_authority_account.key.as_ref(),
+                self.port_destination_deposit_collateral_account
+                    .key()
+                    .as_ref(),
+                self.port_staking_pool_account.key.as_ref(),
+            ],
+            self.generic_accs.vault_account.protocols[Protocols::Port as usize]
+                .hash_pubkey
+                .hash_deposit,
+        )
+    }
 }
 
 #[derive(Accounts)]
@@ -301,16 +323,16 @@ pub struct PortWithdraw<'info> {
     #[account(mut)]
     /// CHECK: Port CPI
     pub port_reserve_account: AccountInfo<'info>,
-    /// CHECK: Port CPI
-    pub port_lending_market_account: AccountInfo<'info>,
-    /// CHECK: Port CPI
-    pub port_lending_market_authority_account: AccountInfo<'info>,
     #[account(mut)]
     /// CHECK: Port CPI
     pub port_reserve_liquidity_supply_account: AccountInfo<'info>,
     #[account(mut)]
     /// CHECK: Port CPI
     pub port_reserve_collateral_mint_account: AccountInfo<'info>,
+    /// CHECK: Port CPI
+    pub port_lending_market_account: AccountInfo<'info>,
+    /// CHECK: Port CPI
+    pub port_lending_market_authority_account: AccountInfo<'info>,
     #[account(mut)]
     /// CHECK: Port CPI
     pub port_staking_pool_account: AccountInfo<'info>,
@@ -420,6 +442,26 @@ impl<'info> PortWithdraw<'info> {
 
         Ok(())
     }
+
+    pub fn check_hash(&self) -> Result<()> {
+        check_hash_pub_keys(
+            &[
+                self.vault_port_collateral_token_account.key().as_ref(),
+                self.vault_port_obligation_account.key.as_ref(),
+                self.vault_port_staking_account.key.as_ref(),
+                self.port_source_collateral_account.key.as_ref(),
+                self.port_reserve_account.key.as_ref(),
+                self.port_reserve_liquidity_supply_account.key.as_ref(),
+                self.port_reserve_collateral_mint_account.key.as_ref(),
+                self.port_lending_market_account.key.as_ref(),
+                self.port_lending_market_authority_account.key.as_ref(),
+                self.port_staking_pool_account.key.as_ref(),
+            ],
+            self.generic_accs.vault_account.protocols[Protocols::Port as usize]
+                .hash_pubkey
+                .hash_withdraw,
+        )
+    }
 }
 
 #[derive(Accounts)]
@@ -466,6 +508,15 @@ impl<'info> PortTVL<'info> {
             .collateral_to_liquidity(lp_amount)?;
 
         Ok(tvl)
+    }
+
+    pub fn check_hash(&self) -> Result<()> {
+        check_hash_pub_keys(
+            &[self.reserve.key.as_ref()],
+            self.generic_accs.vault_account.protocols[Protocols::Port as usize]
+                .hash_pubkey
+                .hash_tvl,
+        )
     }
 }
 

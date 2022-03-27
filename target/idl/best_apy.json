@@ -218,6 +218,42 @@
       "args": []
     },
     {
+      "name": "setHash",
+      "accounts": [
+        {
+          "name": "userSigner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "vaultAccount",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "protocol",
+          "type": {
+            "defined": "usize"
+          }
+        },
+        {
+          "name": "action",
+          "type": "string"
+        },
+        {
+          "name": "hash",
+          "type": {
+            "array": [
+              "u8",
+              8
+            ]
+          }
+        }
+      ]
+    },
+    {
       "name": "mangoInitialize",
       "accounts": [
         {
@@ -906,16 +942,6 @@
           "isSigner": false
         },
         {
-          "name": "portLendingMarketAccount",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "portLendingMarketAuthorityAccount",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
           "name": "portReserveLiquiditySupplyAccount",
           "isMut": true,
           "isSigner": false
@@ -923,6 +949,16 @@
         {
           "name": "portReserveCollateralMintAccount",
           "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "portLendingMarketAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "portLendingMarketAuthorityAccount",
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -1399,7 +1435,27 @@
           "isSigner": false
         },
         {
+          "name": "franciumLendingPoolInfoAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "franciumLendingPoolTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "franciumFarmingPoolStakeTokenMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "franciumMarketInfoAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "franciumLendingMarketAuthority",
           "isMut": true,
           "isSigner": false
         },
@@ -1425,26 +1481,6 @@
         },
         {
           "name": "franciumFarmingPoolRewardsBTokenAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "franciumMarketInfoAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "franciumLendingPoolInfoAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "franciumLendingPoolTokenAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "franciumLendingMarketAuthority",
           "isMut": true,
           "isSigner": false
         }
@@ -1562,6 +1598,47 @@
             "name": "rewards",
             "type": {
               "defined": "AccumulatedRewards"
+            }
+          },
+          {
+            "name": "hashPubkey",
+            "type": {
+              "defined": "HashPubkey"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "HashPubkey",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "hashDeposit",
+            "type": {
+              "array": [
+                "u8",
+                8
+              ]
+            }
+          },
+          {
+            "name": "hashWithdraw",
+            "type": {
+              "array": [
+                "u8",
+                8
+              ]
+            }
+          },
+          {
+            "name": "hashTvl",
+            "type": {
+              "array": [
+                "u8",
+                8
+              ]
             }
           }
         ]
@@ -1734,6 +1811,16 @@
       "code": 6012,
       "name": "InvalidWeights",
       "msg": "Non-valid weights"
+    },
+    {
+      "code": 6013,
+      "name": "InvalidHash",
+      "msg": "Invalid hash from provided pubkeys"
+    },
+    {
+      "code": 6014,
+      "name": "InvalidArraySize",
+      "msg": "Invalid size for array"
     }
   ]
 }

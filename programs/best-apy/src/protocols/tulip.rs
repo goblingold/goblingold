@@ -2,7 +2,7 @@ use crate::error::ErrorCode;
 use crate::macros::generate_seeds;
 use crate::protocols::tulip_reserve;
 use crate::protocols::Protocols;
-use crate::vault::TokenBalances;
+use crate::vault::{check_hash_pub_keys, TokenBalances};
 use crate::{
     generic_accounts_anchor_modules::*, GenericDepositAccounts, GenericTVLAccounts,
     GenericWithdrawAccounts,
@@ -145,6 +145,24 @@ impl<'info> TulipDeposit<'info> {
         invoke_signed(&ix, &accounts, signer)?;
         Ok(())
     }
+
+    pub fn check_hash(&self) -> Result<()> {
+        check_hash_pub_keys(
+            &[
+                self.vault_tulip_collateral_token_account.key().as_ref(),
+                self.tulip_reserve_account.key.as_ref(),
+                self.tulip_reserve_liquidity_supply_token_account
+                    .key
+                    .as_ref(),
+                self.tulip_reserve_collateral_token_mint.key.as_ref(),
+                self.tulip_lending_market_account.key.as_ref(),
+                self.tulip_reserve_authority.key.as_ref(),
+            ],
+            self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
+                .hash_pubkey
+                .hash_deposit,
+        )
+    }
 }
 
 #[derive(Accounts)]
@@ -271,6 +289,24 @@ impl<'info> TulipWithdraw<'info> {
 
         Ok(())
     }
+
+    pub fn check_hash(&self) -> Result<()> {
+        check_hash_pub_keys(
+            &[
+                self.vault_tulip_collateral_token_account.key().as_ref(),
+                self.tulip_reserve_account.key.as_ref(),
+                self.tulip_reserve_liquidity_supply_token_account
+                    .key
+                    .as_ref(),
+                self.tulip_reserve_collateral_token_mint.key.as_ref(),
+                self.tulip_lending_market_account.key.as_ref(),
+                self.tulip_reserve_authority.key.as_ref(),
+            ],
+            self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
+                .hash_pubkey
+                .hash_withdraw,
+        )
+    }
 }
 
 #[derive(Accounts)]
@@ -316,5 +352,14 @@ impl<'info> TulipTVL<'info> {
             .collateral_to_liquidity(lp_amount)?;
 
         Ok(tvl)
+    }
+
+    pub fn check_hash(&self) -> Result<()> {
+        check_hash_pub_keys(
+            &[self.reserve.key.as_ref()],
+            self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
+                .hash_pubkey
+                .hash_tvl,
+        )
     }
 }

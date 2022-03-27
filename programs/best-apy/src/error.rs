@@ -29,4 +29,8 @@ pub enum ErrorCode {
     MathOverflow,
     #[msg("Non-valid weights")]
     InvalidWeights,
+    #[msg("Invalid hash from provided pubkeys")]
+    InvalidHash,
+    #[msg("Invalid size for array")]
+    InvalidArraySize,
 }
