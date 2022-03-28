@@ -2,7 +2,7 @@ use crate::error::ErrorCode;
 use crate::macros::generate_seeds;
 use crate::protocols::Protocols;
 use crate::protocols::{francium_farming_user, francium_lending_pool};
-use crate::vault::{check_hash_pub_keys, TokenBalances, VaultAccount};
+use crate::vault::{check_hash_pub_keys, VaultAccount};
 use crate::{
     generic_accounts_anchor_modules::*, GenericDepositAccounts, GenericTVLAccounts,
     GenericWithdrawAccounts,
@@ -186,30 +186,13 @@ impl<'info> FranciumDeposit<'info> {
     /// Deposit into protocol
     pub fn deposit(&mut self) -> Result<()> {
         let amount = self.generic_accs.amount_to_deposit(Protocols::Francium)?;
-        let balances = self.deposit_and_get_balances(amount)?;
-
-        self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
-            .update_after_deposit(self.generic_accs.clock.slot, balances)?;
-
-        Ok(())
-    }
-
-    /// Deposit into the protocol and get the true token balances
-    fn deposit_and_get_balances(&mut self, amount: u64) -> Result<TokenBalances> {
-        let lp_before = self.francium_farming_pool_stake_token_account.amount;
 
         self.cpi_deposit(amount)?;
-        self.francium_farming_pool_stake_token_account.reload()?;
 
-        let lp_after = self.francium_farming_pool_stake_token_account.amount;
-        let lp_amount = lp_after
-            .checked_sub(lp_before)
-            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+        self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
+            .update_after_deposit(self.generic_accs.clock.slot, amount)?;
 
-        Ok(TokenBalances {
-            base_amount: amount,
-            lp_amount,
-        })
+        Ok(())
     }
 
     /// CPI deposit call
@@ -394,10 +377,10 @@ impl<'info> FranciumWithdraw<'info> {
     /// Withdraw from the protocol
     pub fn withdraw(&mut self) -> Result<()> {
         let amount = self.generic_accs.amount_to_withdraw(Protocols::Port)?;
-        let balances = self.withdraw_and_get_balances(amount)?;
+        let amount_withdrawn = self.withdraw_and_get_balance(amount)?;
 
         self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
-            .update_after_withdraw(self.generic_accs.clock.slot, balances)?;
+            .update_after_withdraw(self.generic_accs.clock.slot, amount_withdrawn)?;
 
         Ok(())
     }
@@ -415,8 +398,8 @@ impl<'info> FranciumWithdraw<'info> {
         Ok(lp_amount)
     }
 
-    /// Withdraw from the protocol and get the true token balances
-    fn withdraw_and_get_balances(&mut self, amount: u64) -> Result<TokenBalances> {
+    /// Withdraw from the protocol and get the true token balance
+    fn withdraw_and_get_balance(&mut self, amount: u64) -> Result<u64> {
         let lp_amount = self.liquidity_to_collateral(amount)?;
         let amount_before = self.generic_accs.vault_input_token_account.amount;
 
@@ -428,10 +411,7 @@ impl<'info> FranciumWithdraw<'info> {
             .checked_sub(amount_before)
             .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
-        Ok(TokenBalances {
-            base_amount: amount_diff,
-            lp_amount,
-        })
+        Ok(amount_diff)
     }
 
     /// CPI withdraw call from stake
@@ -571,7 +551,7 @@ impl<'info> FranciumTVL<'info> {
         let tvl = self.max_withdrawable()?;
 
         let protocol = &mut self.generic_accs.vault_account.protocols[Protocols::Francium as usize];
-        let rewards = tvl.saturating_sub(protocol.tokens.base_amount);
+        let rewards = tvl.saturating_sub(protocol.amount);
 
         protocol.rewards.update(rewards)?;
 

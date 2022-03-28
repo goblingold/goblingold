@@ -1,7 +1,7 @@
 use crate::error::ErrorCode;
 use crate::macros::generate_seeds;
 use crate::protocols::Protocols;
-use crate::vault::{check_hash_pub_keys, TokenBalances, VaultAccount};
+use crate::vault::{check_hash_pub_keys, VaultAccount};
 use crate::{
     generic_accounts_anchor_modules::*, GenericDepositAccounts, GenericTVLAccounts,
     GenericWithdrawAccounts,
@@ -98,21 +98,13 @@ impl<'info> MangoDeposit<'info> {
     /// Deposit into protocol
     pub fn deposit(&mut self) -> Result<()> {
         let amount = self.generic_accs.amount_to_deposit(Protocols::Mango)?;
-        let balances = self.deposit_and_get_balances(amount)?;
+
+        self.cpi_deposit(amount)?;
 
         self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
-            .update_after_deposit(self.generic_accs.clock.slot, balances)?;
-        Ok(())
-    }
+            .update_after_deposit(self.generic_accs.clock.slot, amount)?;
 
-    /// Deposit into the protocol and get the true token balances. Mango does not give back any LP
-    /// token, but the same logic than for other protocols is implemented here.
-    fn deposit_and_get_balances(&mut self, amount: u64) -> Result<TokenBalances> {
-        self.cpi_deposit(amount)?;
-        Ok(TokenBalances {
-            base_amount: amount,
-            lp_amount: 0,
-        })
+        Ok(())
     }
 
     /// CPI deposit call
@@ -199,22 +191,19 @@ impl<'info> MangoWithdraw<'info> {
     /// Withdraw from the protocol
     pub fn withdraw(&mut self) -> Result<()> {
         let amount = self.generic_accs.amount_to_withdraw(Protocols::Mango)?;
-        let balances = self.withdraw_and_get_balances(amount)?;
+        let amount_withdrawn = self.withdraw_and_get_balance(amount)?;
 
         self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
-            .update_after_withdraw(self.generic_accs.clock.slot, balances)?;
+            .update_after_withdraw(self.generic_accs.clock.slot, amount_withdrawn)?;
 
         Ok(())
     }
 
-    /// Withdraw from the protocol and get the true token balances. Mango does not give back any LP
+    /// Withdraw from the protocol and get the true token balance. Mango does not give back any LP
     /// token, but the same logic than for other protocols is implemented here.
-    fn withdraw_and_get_balances(&mut self, amount: u64) -> Result<TokenBalances> {
+    fn withdraw_and_get_balance(&mut self, amount: u64) -> Result<u64> {
         self.cpi_withdraw(amount)?;
-        Ok(TokenBalances {
-            base_amount: amount,
-            lp_amount: 0,
-        })
+        Ok(amount)
     }
 
     /// CPI withdraw call
@@ -298,7 +287,7 @@ impl<'info> MangoTVL<'info> {
         let tvl = self.max_withdrawable()?;
 
         let protocol = &mut self.generic_accs.vault_account.protocols[Protocols::Mango as usize];
-        let rewards = tvl.saturating_sub(protocol.tokens.base_amount);
+        let rewards = tvl.saturating_sub(protocol.amount);
 
         protocol.rewards.update(rewards)?;
 
