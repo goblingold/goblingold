@@ -14,7 +14,7 @@ mod error;
 mod sunny;
 mod swap;
 
-declare_id!("4S9nmN6jtD6BCKAEkZsr3HaumVjWC6iSsYmMzNSxCM1j");
+declare_id!("BGWxArsLbrQh7BXQ1fV8byZ9yM1BZ1HXkwXyGuSQafyX");
 
 pub const ALLOWED_DEPLOYER: &str = "2fmQLSF1xR5FK3Yc5VhGvnrx7mjXbNSJN3d3WySYnzr6";
 pub const ALLOWED_RUNNER: &str = "2fmQLSF1xR5FK3Yc5VhGvnrx7mjXbNSJN3d3WySYnzr6";
@@ -39,10 +39,10 @@ pub mod liq_mining {
             .key;
         vault_account.input_mint_pubkey = *ctx
             .accounts
-            .vault_lp_token_mint_pubkey
+            .input_token_mint_address
             .to_account_info()
             .key;
-        vault_account.input_mint_pubkey = *ctx
+        vault_account.vault_lp_token_mint_pubkey = *ctx
             .accounts
             .vault_lp_token_mint_pubkey
             .to_account_info()
@@ -628,7 +628,7 @@ pub struct Deposit<'info> {
     pub user_input_token_account: Account<'info, TokenAccount>,
     #[account(
         mut,
-        constraint = user_lp_token_account.mint == vault_account.input_mint_pubkey,
+        constraint = user_lp_token_account.mint == vault_account.vault_lp_token_mint_pubkey,
         constraint = user_lp_token_account.owner == *user_signer.key,
     )]
     pub user_lp_token_account: Account<'info, TokenAccount>,
@@ -641,7 +641,7 @@ pub struct Deposit<'info> {
     pub vault_account: Box<Account<'info, VaultAccount>>,
     #[account(
         mut,
-        constraint = vault_lp_token_mint_address.key() == vault_account.input_mint_pubkey,
+        constraint = vault_lp_token_mint_address.key() == vault_account.vault_lp_token_mint_pubkey,
         constraint = vault_lp_token_mint_address.mint_authority == COption::Some(*vault_signer.key),
     )]
     pub vault_lp_token_mint_address: Account<'info, Mint>,
@@ -671,7 +671,7 @@ pub struct Withdraw<'info> {
     pub user_input_token_account: Account<'info, TokenAccount>,
     #[account(
         mut,
-        constraint = user_lp_token_account.mint == vault_account.input_mint_pubkey,
+        constraint = user_lp_token_account.mint == vault_account.vault_lp_token_mint_pubkey,
         constraint = user_lp_token_account.owner == *user_signer.key,
     )]
     pub user_lp_token_account: Account<'info, TokenAccount>,
@@ -690,7 +690,7 @@ pub struct Withdraw<'info> {
     pub vault_lp_token_mint_pubkey: Account<'info, Mint>,
     #[account(
         mut,
-        constraint = vault_lp_token_mint_address.key() == vault_account.input_mint_pubkey,
+        constraint = vault_lp_token_mint_address.key() == vault_account.vault_lp_token_mint_pubkey,
         constraint = vault_lp_token_mint_address.mint_authority == COption::Some(*vault_signer.key),
     )]
     pub vault_lp_token_mint_address: Account<'info, Mint>,
