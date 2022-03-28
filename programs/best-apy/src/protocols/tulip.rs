@@ -196,9 +196,23 @@ impl<'info> TulipWithdraw<'info> {
         Ok(lp_amount)
     }
 
+    /// Convert collateral to reserve liquidity
+    fn collateral_to_liquidity(&self, lp_amount: u64) -> Result<u64> {
+        let reserve = tulip_reserve::Reserve::unpack(&self.tulip_reserve_account.data.borrow())?;
+        let amount = reserve
+            .collateral_exchange_rate()?
+            .collateral_to_liquidity(lp_amount)?;
+        Ok(amount)
+    }
+
     /// Withdraw from the protocol and get the true token balances
     fn withdraw_and_get_balances(&mut self, amount: u64) -> Result<TokenBalances> {
-        let lp_amount = self.liquidity_to_collateral(amount)?;
+        let mut lp_amount = self.liquidity_to_collateral(amount)?;
+        let conservative_amount = self.collateral_to_liquidity(lp_amount)?;
+        if conservative_amount < amount {
+            lp_amount = lp_amount + 1;
+        }
+
         let amount_before = self.generic_accs.vault_input_token_account.amount;
 
         self.cpi_withdraw(lp_amount)?;
@@ -288,9 +302,12 @@ impl<'info> TulipTVL<'info> {
         let tvl = self.max_withdrawable()?;
 
         let protocol = &mut self.generic_accs.vault_account.protocols[Protocols::Tulip as usize];
-        msg!("Tulip TVL {} and base_amount {}", tvl, protocol.tokens.base_amount);
-        let rewards = tvl
-        .saturating_sub(protocol.tokens.base_amount);
+        msg!(
+            "Tulip TVL {} and base_amount {}",
+            tvl,
+            protocol.tokens.base_amount
+        );
+        let rewards = tvl.saturating_sub(protocol.tokens.base_amount);
 
         protocol.rewards.update(slot, rewards)?;
 

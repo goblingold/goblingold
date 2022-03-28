@@ -371,9 +371,12 @@ impl<'info> SolendTVL<'info> {
         let tvl = self.max_withdrawable()?;
 
         let protocol = &mut self.generic_accs.vault_account.protocols[Protocols::Solend as usize];
-        msg!("Solend TVL {} and base_amount {}", tvl, protocol.tokens.base_amount);
-        let rewards = tvl
-        .saturating_sub(protocol.tokens.base_amount);
+        msg!(
+            "Solend TVL {} and base_amount {}",
+            tvl,
+            protocol.tokens.base_amount
+        );
+        let rewards = tvl.saturating_sub(protocol.tokens.base_amount);
 
         protocol.rewards.update(slot, rewards)?;
 

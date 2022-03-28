@@ -29,7 +29,12 @@ impl<'info> Withdraw<'info> {
         let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
         token::burn(cpi_ctx, lp_amount)?;
 
-        msg!("lp_amount  {} and amount {} but vault has {}", lp_amount, amount, self.vault_input_token_account.amount);
+        msg!(
+            "lp_amount  {} and amount {} but vault has {}",
+            lp_amount,
+            amount,
+            self.vault_input_token_account.amount
+        );
         // Transfer tokens back to user
         let cpi_accounts = Transfer {
             from: self.vault_input_token_account.to_account_info(),
