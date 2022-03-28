@@ -14,7 +14,6 @@ use std::str::FromStr;
 use vault::{Bumps, InitVaultAccountParams, VaultAccount};
 
 mod deposit;
-mod duplicated_ixs;
 mod error;
 mod generic_accounts;
 mod macros;

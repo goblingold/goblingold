@@ -1,4 +1,3 @@
-use crate::duplicated_ixs::is_last_of_duplicated_ixs;
 use crate::error::ErrorCode;
 use crate::macros::generate_seeds;
 use crate::protocols::francium_lending_pool;
@@ -12,7 +11,7 @@ use crate::{ALLOWED_DEPLOYER, VAULT_ACCOUNT_SEED};
 use anchor_lang::prelude::borsh::{BorshDeserialize, BorshSerialize};
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::{
-    instruction::Instruction, program::invoke_signed, program_pack::Pack, sysvar,
+    instruction::Instruction, program::invoke_signed, program_pack::Pack,
 };
 use anchor_spl::token::TokenAccount;
 use std::str::FromStr;
@@ -125,9 +124,6 @@ impl<'info> FranciumInitialize<'info> {
 #[derive(Accounts)]
 pub struct FranciumDeposit<'info> {
     pub generic_accs: GenericDepositAccounts<'info>,
-    #[account(address = sysvar::instructions::ID)]
-    /// CHECK: address is checked
-    pub instructions: AccountInfo<'info>,
     #[account(constraint = francium_lending_program_id.key == &francium_lending_program_id::ID)]
     /// CHECK: Francium CPI
     pub francium_lending_program_id: AccountInfo<'info>,
@@ -187,17 +183,10 @@ pub struct FranciumDeposit<'info> {
 }
 
 impl<'info> FranciumDeposit<'info> {
-    /// Deposit into protocol. It should be called in two different instructions in the same tx.
-    /// Otherwise it would exceed max compute budget for one instruction.
+    /// Deposit into protocol
     pub fn deposit(&mut self) -> Result<()> {
-        let is_last_deposit = is_last_of_duplicated_ixs(self.instructions.to_account_info())?;
-
-        let amount: u64 = if is_last_deposit {
-            0
-        } else {
-            self.generic_accs.amount_to_deposit(Protocols::Francium)?
-        };
-        let balances = self.deposit_and_get_balances(amount, !is_last_deposit)?;
+        let amount = self.generic_accs.amount_to_deposit(Protocols::Francium)?;
+        let balances = self.deposit_and_get_balances(amount)?;
 
         self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
             .update_after_deposit(self.generic_accs.clock.slot, balances)?;
@@ -205,131 +194,112 @@ impl<'info> FranciumDeposit<'info> {
         Ok(())
     }
 
-    /// Deposit into the protocol and get the true token balances in two ixs
-    fn deposit_and_get_balances(
-        &mut self,
-        amount: u64,
-        is_first_ix: bool,
-    ) -> Result<TokenBalances> {
-        if is_first_ix {
-            self.cpi_deposit(amount)?;
-            Ok(TokenBalances {
-                base_amount: amount,
-                lp_amount: 0,
-            })
-        } else {
-            let lp_before = self.francium_farming_pool_stake_token_account.amount;
+    /// Deposit into the protocol and get the true token balances
+    fn deposit_and_get_balances(&mut self, amount: u64) -> Result<TokenBalances> {
+        let lp_before = self.francium_farming_pool_stake_token_account.amount;
 
-            self.cpi_deposit_stake()?;
-            self.francium_farming_pool_stake_token_account.reload()?;
+        self.cpi_deposit(amount)?;
+        self.francium_farming_pool_stake_token_account.reload()?;
 
-            let lp_after = self.francium_farming_pool_stake_token_account.amount;
-            let lp_amount = lp_after
-                .checked_sub(lp_before)
-                .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+        let lp_after = self.francium_farming_pool_stake_token_account.amount;
+        let lp_amount = lp_after
+            .checked_sub(lp_before)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
-            require!(
-                self.vault_francium_collateral_token_account.amount == lp_amount,
-                ErrorCode::InvalidDepositAmount
-            );
-
-            Ok(TokenBalances {
-                base_amount: 0,
-                lp_amount,
-            })
-        }
+        Ok(TokenBalances {
+            base_amount: amount,
+            lp_amount,
+        })
     }
 
-    /// CPI deposit call into lending (first ixs)
+    /// CPI deposit call
     fn cpi_deposit(&self, amount: u64) -> Result<()> {
         let seeds = generate_seeds!(self.generic_accs.vault_account);
         let signer = &[&seeds[..]];
 
-        // Deposit Lending
-        let accounts = [
-            self.generic_accs
-                .vault_input_token_account
-                .to_account_info(),
-            self.vault_francium_collateral_token_account
-                .to_account_info(),
-            self.francium_lending_pool_info_account.to_account_info(),
-            self.francium_lending_pool_token_account.to_account_info(),
-            self.francium_farming_pool_stake_token_mint
-                .to_account_info(),
-            self.francium_market_info_account.to_account_info(),
-            self.francium_lending_market_authority.to_account_info(),
-            self.generic_accs.vault_account.to_account_info(),
-            self.generic_accs.clock.to_account_info(),
-            self.generic_accs.token_program.to_account_info(),
-        ];
-        let account_metas = accounts
-            .iter()
-            .map(|acc| {
-                if acc.key == &self.generic_accs.vault_account.key() {
-                    AccountMeta::new(*acc.key, true)
-                } else if acc.is_writable {
-                    AccountMeta::new(*acc.key, false)
-                } else {
-                    AccountMeta::new_readonly(*acc.key, false)
-                }
-            })
-            .collect::<Vec<_>>();
-        let ix = Instruction::new_with_borsh(
-            francium_lending_program_id::ID,
-            &InstructionAmountData {
-                instruction: 4,
-                amount,
-            },
-            account_metas,
-        );
-        invoke_signed(&ix, &accounts, signer)?;
-        Ok(())
-    }
+        {
+            // Deposit Lending
+            let accounts = [
+                self.generic_accs
+                    .vault_input_token_account
+                    .to_account_info(),
+                self.vault_francium_collateral_token_account
+                    .to_account_info(),
+                self.francium_lending_pool_info_account.to_account_info(),
+                self.francium_lending_pool_token_account.to_account_info(),
+                self.francium_farming_pool_stake_token_mint
+                    .to_account_info(),
+                self.francium_market_info_account.to_account_info(),
+                self.francium_lending_market_authority.to_account_info(),
+                self.generic_accs.vault_account.to_account_info(),
+                self.generic_accs.clock.to_account_info(),
+                self.generic_accs.token_program.to_account_info(),
+            ];
+            let account_metas = accounts
+                .iter()
+                .map(|acc| {
+                    if acc.key == &self.generic_accs.vault_account.key() {
+                        AccountMeta::new(*acc.key, true)
+                    } else if acc.is_writable {
+                        AccountMeta::new(*acc.key, false)
+                    } else {
+                        AccountMeta::new_readonly(*acc.key, false)
+                    }
+                })
+                .collect::<Vec<_>>();
+            let ix = Instruction::new_with_borsh(
+                francium_lending_program_id::ID,
+                &InstructionAmountData {
+                    instruction: 4,
+                    amount,
+                },
+                account_metas,
+            );
+            invoke_signed(&ix, &accounts, signer)?;
+        }
 
-    /// CPI deposit call into stake (second ixs)
-    fn cpi_deposit_stake(&self) -> Result<()> {
-        let seeds = generate_seeds!(self.generic_accs.vault_account);
-        let signer = &[&seeds[..]];
-
-        let accounts = [
-            self.generic_accs.vault_account.to_account_info(),
-            self.vault_francium_farming_account.to_account_info(),
-            self.vault_francium_collateral_token_account
-                .to_account_info(),
-            self.vault_francium_account_mint_rewards.to_account_info(),
-            self.vault_francium_account_mint_b_rewards.to_account_info(),
-            self.francium_farming_pool_account.to_account_info(),
-            self.francium_farming_pool_authority.to_account_info(),
-            self.francium_farming_pool_stake_token_account
-                .to_account_info(),
-            self.francium_farming_pool_rewards_token_account
-                .to_account_info(),
-            self.francium_farming_pool_rewards_b_token_account
-                .to_account_info(),
-            self.generic_accs.token_program.to_account_info(),
-            self.generic_accs.clock.to_account_info(),
-        ];
-        let account_metas = accounts
-            .iter()
-            .map(|acc| {
-                if acc.key == &self.generic_accs.vault_account.key() {
-                    AccountMeta::new(*acc.key, true)
-                } else if acc.is_writable {
-                    AccountMeta::new(*acc.key, false)
-                } else {
-                    AccountMeta::new_readonly(*acc.key, false)
-                }
-            })
-            .collect::<Vec<_>>();
-        let ix = Instruction::new_with_borsh(
-            francium_lending_reward_program_id::ID,
-            &InstructionAmountData {
-                instruction: 3,
-                amount: 0,
-            },
-            account_metas,
-        );
-        invoke_signed(&ix, &accounts, signer)?;
+        {
+            // Deposit stake
+            let accounts = [
+                self.generic_accs.vault_account.to_account_info(),
+                self.vault_francium_farming_account.to_account_info(),
+                self.vault_francium_collateral_token_account
+                    .to_account_info(),
+                self.vault_francium_account_mint_rewards.to_account_info(),
+                self.vault_francium_account_mint_b_rewards.to_account_info(),
+                self.francium_farming_pool_account.to_account_info(),
+                self.francium_farming_pool_authority.to_account_info(),
+                self.francium_farming_pool_stake_token_account
+                    .to_account_info(),
+                self.francium_farming_pool_rewards_token_account
+                    .to_account_info(),
+                self.francium_farming_pool_rewards_b_token_account
+                    .to_account_info(),
+                self.generic_accs.token_program.to_account_info(),
+                self.generic_accs.clock.to_account_info(),
+            ];
+            let account_metas = accounts
+                .iter()
+                .map(|acc| {
+                    if acc.key == &self.generic_accs.vault_account.key() {
+                        AccountMeta::new(*acc.key, true)
+                    } else if acc.is_writable {
+                        AccountMeta::new(*acc.key, false)
+                    } else {
+                        AccountMeta::new_readonly(*acc.key, false)
+                    }
+                })
+                .collect::<Vec<_>>();
+            let ix = Instruction::new_with_borsh(
+                francium_lending_reward_program_id::ID,
+                &InstructionAmountData {
+                    instruction: 3,
+                    amount: 0,
+                },
+                account_metas,
+            );
+            invoke_signed(&ix, &accounts, signer)?;
+        }
         Ok(())
     }
 
@@ -421,22 +391,14 @@ pub struct FranciumWithdraw<'info> {
 }
 
 impl<'info> FranciumWithdraw<'info> {
-    /// Withdraw from the protocol in two instructions so the computer budget is not exceeded
+    /// Withdraw from the protocol
     pub fn withdraw(&mut self) -> Result<()> {
-        // Francium has 2 instructions for withdraw
-        let is_last_withdraw =
-            is_last_of_duplicated_ixs(self.generic_accs.instructions.to_account_info())?;
-        let target_ix: usize = if is_last_withdraw { 1 } else { 2 };
+        let amount = self.generic_accs.amount_to_withdraw(Protocols::Port)?;
+        let balances = self.withdraw_and_get_balances(amount)?;
 
-        let amount = self
-            .generic_accs
-            .amount_to_withdraw_in_n_txs(Protocols::Francium, target_ix)?;
-        let balances = self.withdraw_and_get_balances(amount, !is_last_withdraw)?;
+        self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
+            .update_after_withdraw(self.generic_accs.clock.slot, balances)?;
 
-        if is_last_withdraw {
-            self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
-                .update_after_withdraw(self.generic_accs.clock.slot, balances)?;
-        }
         Ok(())
     }
 
@@ -453,130 +415,113 @@ impl<'info> FranciumWithdraw<'info> {
         Ok(lp_amount)
     }
 
-    /// Withdraw from the protocol and get the true token balances in two ixs
-    fn withdraw_and_get_balances(
-        &mut self,
-        amount: u64,
-        is_first_ix: bool,
-    ) -> Result<TokenBalances> {
+    /// Withdraw from the protocol and get the true token balances
+    fn withdraw_and_get_balances(&mut self, amount: u64) -> Result<TokenBalances> {
         let lp_amount = self.liquidity_to_collateral(amount)?;
+        let amount_before = self.generic_accs.vault_input_token_account.amount;
 
-        if is_first_ix {
-            self.cpi_withdraw_stake(lp_amount)?;
-            Ok(TokenBalances {
-                base_amount: 0,
-                lp_amount: 0,
-            })
-        } else {
-            let amount_before = self.generic_accs.vault_input_token_account.amount;
+        self.cpi_withdraw(lp_amount)?;
+        self.generic_accs.vault_input_token_account.reload()?;
 
-            self.cpi_withdraw(lp_amount)?;
+        let amount_after = self.generic_accs.vault_input_token_account.amount;
+        let amount_diff = amount_after
+            .checked_sub(amount_before)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
-            self.generic_accs.vault_input_token_account.reload()?;
-
-            let amount_after = self.generic_accs.vault_input_token_account.amount;
-            let amount_diff = amount_after
-                .checked_sub(amount_before)
-                .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
-
-            Ok(TokenBalances {
-                base_amount: amount_diff,
-                lp_amount,
-            })
-        }
+        Ok(TokenBalances {
+            base_amount: amount_diff,
+            lp_amount,
+        })
     }
 
-    /// CPI withdraw call from stake (first ixs)
-    fn cpi_withdraw_stake(&self, amount: u64) -> Result<()> {
-        let seeds = generate_seeds!(self.generic_accs.vault_account);
-        let signer = &[&seeds[..]];
-
-        let accounts = [
-            self.generic_accs.vault_account.to_account_info(),
-            self.vault_francium_farming_account.to_account_info(),
-            self.vault_francium_collateral_token_account
-                .to_account_info(),
-            self.vault_francium_account_mint_rewards.to_account_info(),
-            self.vault_francium_account_mint_rewards.to_account_info(),
-            self.francium_farming_pool_account.to_account_info(),
-            self.francium_farming_pool_authority.to_account_info(),
-            self.francium_farming_pool_stake_token_account
-                .to_account_info(),
-            self.francium_farming_pool_rewards_token_account
-                .to_account_info(),
-            self.francium_farming_pool_rewards_b_token_account
-                .to_account_info(),
-            self.generic_accs.token_program.to_account_info(),
-            self.generic_accs.clock.to_account_info(),
-        ];
-        let account_metas = accounts
-            .iter()
-            .map(|acc| {
-                if acc.key == &self.generic_accs.vault_account.key() {
-                    AccountMeta::new(*acc.key, true)
-                } else if acc.is_writable {
-                    AccountMeta::new(*acc.key, false)
-                } else {
-                    AccountMeta::new_readonly(*acc.key, false)
-                }
-            })
-            .collect::<Vec<_>>();
-        let ix = Instruction::new_with_borsh(
-            francium_lending_reward_program_id::ID,
-            &InstructionAmountData {
-                instruction: 4,
-                amount,
-            },
-            account_metas,
-        );
-        invoke_signed(&ix, &accounts, signer)?;
-
-        Ok(())
-    }
-
-    /// CPI withdraw call from lending (second ixs)
+    /// CPI withdraw call from stake
     fn cpi_withdraw(&self, amount: u64) -> Result<()> {
         let seeds = generate_seeds!(self.generic_accs.vault_account);
         let signer = &[&seeds[..]];
 
-        // Withdraw Lending
-        let accounts = [
-            self.vault_francium_collateral_token_account
-                .to_account_info(),
-            self.generic_accs
-                .vault_input_token_account
-                .to_account_info(),
-            self.francium_lending_pool_info_account.to_account_info(),
-            self.francium_farming_pool_stake_token_mint
-                .to_account_info(),
-            self.francium_lending_pool_token_account.to_account_info(),
-            self.francium_market_info_account.to_account_info(),
-            self.francium_lending_market_authority.to_account_info(),
-            self.generic_accs.vault_account.to_account_info(),
-            self.generic_accs.clock.to_account_info(),
-            self.generic_accs.token_program.to_account_info(),
-        ];
-        let account_metas = accounts
-            .iter()
-            .map(|acc| {
-                if acc.key == &self.generic_accs.vault_account.key() {
-                    AccountMeta::new(*acc.key, true)
-                } else if acc.is_writable {
-                    AccountMeta::new(*acc.key, false)
-                } else {
-                    AccountMeta::new_readonly(*acc.key, false)
-                }
-            })
-            .collect::<Vec<_>>();
-        let ix = Instruction::new_with_borsh(
-            francium_lending_program_id::ID,
-            &InstructionAmountData {
-                instruction: 5,
-                amount,
-            },
-            account_metas,
-        );
-        invoke_signed(&ix, &accounts, signer)?;
+        {
+            // Unstake
+            let accounts = [
+                self.generic_accs.vault_account.to_account_info(),
+                self.vault_francium_farming_account.to_account_info(),
+                self.vault_francium_collateral_token_account
+                    .to_account_info(),
+                self.vault_francium_account_mint_rewards.to_account_info(),
+                self.vault_francium_account_mint_rewards.to_account_info(),
+                self.francium_farming_pool_account.to_account_info(),
+                self.francium_farming_pool_authority.to_account_info(),
+                self.francium_farming_pool_stake_token_account
+                    .to_account_info(),
+                self.francium_farming_pool_rewards_token_account
+                    .to_account_info(),
+                self.francium_farming_pool_rewards_b_token_account
+                    .to_account_info(),
+                self.generic_accs.token_program.to_account_info(),
+                self.generic_accs.clock.to_account_info(),
+            ];
+            let account_metas = accounts
+                .iter()
+                .map(|acc| {
+                    if acc.key == &self.generic_accs.vault_account.key() {
+                        AccountMeta::new(*acc.key, true)
+                    } else if acc.is_writable {
+                        AccountMeta::new(*acc.key, false)
+                    } else {
+                        AccountMeta::new_readonly(*acc.key, false)
+                    }
+                })
+                .collect::<Vec<_>>();
+            let ix = Instruction::new_with_borsh(
+                francium_lending_reward_program_id::ID,
+                &InstructionAmountData {
+                    instruction: 4,
+                    amount,
+                },
+                account_metas,
+            );
+            invoke_signed(&ix, &accounts, signer)?;
+        }
+
+        {
+            // Withdraw Lending
+            let accounts = [
+                self.vault_francium_collateral_token_account
+                    .to_account_info(),
+                self.generic_accs
+                    .vault_input_token_account
+                    .to_account_info(),
+                self.francium_lending_pool_info_account.to_account_info(),
+                self.francium_farming_pool_stake_token_mint
+                    .to_account_info(),
+                self.francium_lending_pool_token_account.to_account_info(),
+                self.francium_market_info_account.to_account_info(),
+                self.francium_lending_market_authority.to_account_info(),
+                self.generic_accs.vault_account.to_account_info(),
+                self.generic_accs.clock.to_account_info(),
+                self.generic_accs.token_program.to_account_info(),
+            ];
+            let account_metas = accounts
+                .iter()
+                .map(|acc| {
+                    if acc.key == &self.generic_accs.vault_account.key() {
+                        AccountMeta::new(*acc.key, true)
+                    } else if acc.is_writable {
+                        AccountMeta::new(*acc.key, false)
+                    } else {
+                        AccountMeta::new_readonly(*acc.key, false)
+                    }
+                })
+                .collect::<Vec<_>>();
+            let ix = Instruction::new_with_borsh(
+                francium_lending_program_id::ID,
+                &InstructionAmountData {
+                    instruction: 5,
+                    amount,
+                },
+                account_metas,
+            );
+            invoke_signed(&ix, &accounts, signer)?;
+        }
 
         Ok(())
     }

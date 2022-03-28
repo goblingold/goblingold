@@ -1289,11 +1289,6 @@
           ]
         },
         {
-          "name": "instructions",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
           "name": "franciumLendingProgramId",
           "isMut": false,
           "isSigner": false
@@ -1822,8 +1817,5 @@
       "name": "InvalidArraySize",
       "msg": "Invalid size for array"
     }
-  ],
-  "metadata": {
-    "address": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-  }
+  ]
 }
