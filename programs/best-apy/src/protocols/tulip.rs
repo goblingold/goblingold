@@ -313,8 +313,14 @@ impl<'info> TulipWithdraw<'info> {
 pub struct TulipTVL<'info> {
     pub generic_accs: GenericTVLAccounts<'info>,
     #[account(owner = tulip_program_id::ID)]
-    /// CHECK: owner and mint data field are checked
+    /// CHECK: hash, owner and mint & collateral data fields are checked
     pub reserve: AccountInfo<'info>,
+    #[account(
+        mut,
+        associated_token::mint = vault_tulip_collateral_token_account.mint,
+        associated_token::authority = generic_accs.vault_account,
+    )]
+    pub vault_tulip_collateral_token_account: Account<'info, TokenAccount>,
 }
 
 impl<'info> TulipTVL<'info> {
@@ -332,12 +338,6 @@ impl<'info> TulipTVL<'info> {
 
     /// Calculate the max native units to withdraw
     fn max_withdrawable(&self) -> Result<u64> {
-        let protocol = self.generic_accs.vault_account.protocols[Protocols::Tulip as usize];
-        self.lp_to_liquidity(protocol.tokens.lp_amount)
-    }
-
-    /// Convert reserve collateral to liquidity
-    fn lp_to_liquidity(&self, lp_amount: u64) -> Result<u64> {
         let reserve = tulip_reserve::Reserve::unpack(&self.reserve.data.borrow())?;
 
         require!(
@@ -345,6 +345,12 @@ impl<'info> TulipTVL<'info> {
             ErrorCode::InvalidMint
         );
 
+        require!(
+            reserve.collateral.mint_pubkey == self.vault_tulip_collateral_token_account.key(),
+            ErrorCode::InvalidMint
+        );
+
+        let lp_amount = self.vault_tulip_collateral_token_account.amount;
         let tvl = reserve
             .collateral_exchange_rate()?
             .collateral_to_liquidity(lp_amount)?;

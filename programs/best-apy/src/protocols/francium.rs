@@ -1,7 +1,7 @@
 use crate::error::ErrorCode;
 use crate::macros::generate_seeds;
-use crate::protocols::francium_lending_pool;
 use crate::protocols::Protocols;
+use crate::protocols::{francium_farming_user, francium_lending_pool};
 use crate::vault::{check_hash_pub_keys, TokenBalances, VaultAccount};
 use crate::{
     generic_accounts_anchor_modules::*, GenericDepositAccounts, GenericTVLAccounts,
@@ -560,6 +560,9 @@ pub struct FranciumTVL<'info> {
     #[account(owner = francium_lending_program_id::ID)]
     /// CHECK: owner and mint data field are checked
     pub lending_pool: AccountInfo<'info>,
+    #[account(owner = francium_lending_program_id::ID)]
+    /// CHECK: owner and owner data field are checked
+    pub farming_user: AccountInfo<'info>,
 }
 
 impl<'info> FranciumTVL<'info> {
@@ -577,21 +580,21 @@ impl<'info> FranciumTVL<'info> {
 
     /// Calculate the max native units to withdraw
     fn max_withdrawable(&self) -> Result<u64> {
-        let protocol = self.generic_accs.vault_account.protocols[Protocols::Francium as usize];
-        self.lp_to_liquidity(protocol.tokens.lp_amount)
-    }
-
-    /// Convert reserve collateral to liquidity
-    fn lp_to_liquidity(&self, lp_amount: u64) -> Result<u64> {
-        let lending_pool =
-            francium_lending_pool::LendingPool::unpack(&self.lending_pool.data.borrow())?;
+        let lending = francium_lending_pool::LendingPool::unpack(&self.lending_pool.data.borrow())?;
+        let farming = francium_farming_user::FarmingUser::unpack(&self.farming_user.data.borrow())?;
 
         require!(
-            lending_pool.liquidity.mint_pubkey == self.generic_accs.vault_account.input_mint_pubkey,
+            lending.liquidity.mint_pubkey == self.generic_accs.vault_account.input_mint_pubkey,
             ErrorCode::InvalidMint
         );
 
-        let tvl = lending_pool
+        require!(
+            farming.user_main == self.generic_accs.vault_account.key(),
+            ErrorCode::InvalidObligationOwner
+        );
+
+        let lp_amount = farming.staked_amount;
+        let tvl = lending
             .collateral_exchange_rate()?
             .collateral_to_liquidity(lp_amount)?;
 

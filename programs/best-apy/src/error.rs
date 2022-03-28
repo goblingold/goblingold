@@ -33,4 +33,8 @@ pub enum ErrorCode {
     InvalidHash,
     #[msg("Invalid size for array")]
     InvalidArraySize,
+    #[msg("Invalid obligation account owner")]
+    InvalidObligationOwner,
+    #[msg("Invalid obligation reserve account")]
+    InvalidObligationReserve,
 }

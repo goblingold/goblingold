@@ -413,8 +413,11 @@ impl<'info> SolendWithdraw<'info> {
 pub struct SolendTVL<'info> {
     pub generic_accs: GenericTVLAccounts<'info>,
     #[account(owner = solend_program_id::ID)]
-    /// CHECK: owner and mint data field are checked
+    /// CHECK: hash, owner and mint data field are checked
     pub reserve: AccountInfo<'info>,
+    #[account(owner = solend_program_id::ID)]
+    /// CHECK: hash, owner and reserve & owner fields are checked
+    pub obligation: AccountInfo<'info>,
 }
 
 impl<'info> SolendTVL<'info> {
@@ -432,19 +435,26 @@ impl<'info> SolendTVL<'info> {
 
     /// Calculate the max native units to withdraw
     fn max_withdrawable(&self) -> Result<u64> {
-        let protocol = self.generic_accs.vault_account.protocols[Protocols::Solend as usize];
-        self.lp_to_liquidity(protocol.tokens.lp_amount)
-    }
-
-    /// Convert reserve collateral to liquidity
-    fn lp_to_liquidity(&self, lp_amount: u64) -> Result<u64> {
         let reserve = solend_token_lending::state::Reserve::unpack(&self.reserve.data.borrow())?;
+        let obligation =
+            solend_token_lending::state::Obligation::unpack(&self.obligation.data.borrow())?;
 
         require!(
             reserve.liquidity.mint_pubkey == self.generic_accs.vault_account.input_mint_pubkey,
             ErrorCode::InvalidMint
         );
 
+        require!(
+            obligation.owner == self.generic_accs.vault_account.key(),
+            ErrorCode::InvalidObligationOwner
+        );
+
+        require!(
+            obligation.deposits[0].deposit_reserve == *self.reserve.key,
+            ErrorCode::InvalidObligationReserve
+        );
+
+        let lp_amount = obligation.deposits[0].deposited_amount;
         let tvl = reserve
             .collateral_exchange_rate()?
             .collateral_to_liquidity(lp_amount)?;
