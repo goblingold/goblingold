@@ -1,12 +1,12 @@
 use crate::error::ErrorCode;
 use crate::macros::generate_seeds;
 use crate::protocols::Protocols;
-use crate::vault::{TokenBalances, VaultAccount};
-use crate::ALLOWED_DEPLOYER;
+use crate::vault::{check_hash_pub_keys, TokenBalances, VaultAccount};
 use crate::{
     generic_accounts_anchor_modules::*, GenericDepositAccounts, GenericTVLAccounts,
     GenericWithdrawAccounts,
 };
+use crate::{ALLOWED_DEPLOYER, VAULT_ACCOUNT_SEED};
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::{program::invoke_signed, pubkey::Pubkey};
 use std::str::FromStr;
@@ -24,9 +24,10 @@ pub mod mango_program_id {
 pub struct MangoInitialize<'info> {
     #[account(constraint = Pubkey::from_str(ALLOWED_DEPLOYER).unwrap()== *user_signer.key)]
     pub user_signer: Signer<'info>,
-    #[account(seeds = [vault_account.to_account_info().key.as_ref()], bump = vault_account.bump)]
-    /// CHECK: only used as signing PDA
-    pub vault_signer: AccountInfo<'info>,
+    #[account(
+        seeds = [VAULT_ACCOUNT_SEED, vault_account.input_mint_pubkey.as_ref()],
+        bump = vault_account.bumps.vault
+    )]
     pub vault_account: Box<Account<'info, VaultAccount>>,
     #[account(mut)]
     /// CHECK: Mango CPI
@@ -51,7 +52,7 @@ impl<'info> MangoInitialize<'info> {
             &mango_program_id::ID,
             self.mango_group_account.key,
             self.vault_mango_account.key,
-            self.vault_signer.key,
+            &self.vault_account.key(),
             self.system_program.key,
             self.user_signer.key,
             account_num,
@@ -59,7 +60,7 @@ impl<'info> MangoInitialize<'info> {
         let accounts = [
             self.mango_group_account.to_account_info(),
             self.vault_mango_account.to_account_info(),
-            self.vault_signer.to_account_info(),
+            self.vault_account.to_account_info(),
             self.system_program.to_account_info(),
             self.user_signer.to_account_info(),
         ];
@@ -123,7 +124,7 @@ impl<'info> MangoDeposit<'info> {
             &mango_program_id::ID,
             self.mango_group_account.key,
             self.vault_mango_account.key,
-            self.generic_accs.vault_signer.key,
+            &self.generic_accs.vault_account.key(),
             self.mango_cache_account.key,
             self.mango_root_bank_account.key,
             self.mango_node_bank_account.key,
@@ -134,7 +135,7 @@ impl<'info> MangoDeposit<'info> {
         let accounts = [
             self.mango_group_account.to_account_info(),
             self.vault_mango_account.to_account_info(),
-            self.generic_accs.vault_signer.to_account_info(),
+            self.generic_accs.vault_account.to_account_info(),
             self.mango_cache_account.to_account_info(),
             self.mango_root_bank_account.to_account_info(),
             self.mango_node_bank_account.to_account_info(),
@@ -147,6 +148,22 @@ impl<'info> MangoDeposit<'info> {
         invoke_signed(&ix, &accounts, signer)?;
 
         Ok(())
+    }
+
+    pub fn check_hash(&self) -> Result<()> {
+        check_hash_pub_keys(
+            &[
+                self.vault_mango_account.key.as_ref(),
+                self.mango_group_account.key.as_ref(),
+                self.mango_cache_account.key.as_ref(),
+                self.mango_root_bank_account.key.as_ref(),
+                self.mango_node_bank_account.key.as_ref(),
+                self.mango_vault_account.key.as_ref(),
+            ],
+            self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
+                .hash_pubkey
+                .hash_deposit,
+        )
     }
 }
 
@@ -211,7 +228,7 @@ impl<'info> MangoWithdraw<'info> {
             &mango_program_id::ID,
             self.mango_group_account.key,
             self.vault_mango_account.key,
-            self.generic_accs.vault_signer.key,
+            &self.generic_accs.vault_account.key(),
             self.mango_cache_account.key,
             self.mango_root_bank_account.key,
             self.mango_node_bank_account.key,
@@ -225,7 +242,7 @@ impl<'info> MangoWithdraw<'info> {
         let accounts = vec![
             self.mango_group_account.to_account_info(),
             self.vault_mango_account.to_account_info(),
-            self.generic_accs.vault_signer.to_account_info(),
+            self.generic_accs.vault_account.to_account_info(),
             self.mango_cache_account.to_account_info(),
             self.mango_root_bank_account.to_account_info(),
             self.mango_node_bank_account.to_account_info(),
@@ -239,6 +256,23 @@ impl<'info> MangoWithdraw<'info> {
         invoke_signed(&ix, &accounts, signer)?;
 
         Ok(())
+    }
+
+    pub fn check_hash(&self) -> Result<()> {
+        check_hash_pub_keys(
+            &[
+                self.vault_mango_account.key.as_ref(),
+                self.mango_cache_account.key.as_ref(),
+                self.mango_group_account.key.as_ref(),
+                self.mango_group_signer_account.key.as_ref(),
+                self.mango_root_bank_account.key.as_ref(),
+                self.mango_node_bank_account.key.as_ref(),
+                self.mango_vault_account.key.as_ref(),
+            ],
+            self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
+                .hash_pubkey
+                .hash_withdraw,
+        )
     }
 }
 
@@ -261,7 +295,6 @@ pub struct MangoTVL<'info> {
 impl<'info> MangoTVL<'info> {
     /// Update the protocol TVL
     pub fn update_rewards(&mut self) -> Result<()> {
-        let slot = self.generic_accs.clock.slot;
         let tvl = self.max_withdrawable()?;
 
         let protocol = &mut self.generic_accs.vault_account.protocols[Protocols::Mango as usize];
@@ -272,7 +305,7 @@ impl<'info> MangoTVL<'info> {
         );
         let rewards = tvl.saturating_sub(protocol.tokens.base_amount);
 
-        protocol.rewards.update(slot, rewards)?;
+        protocol.rewards.update(rewards)?;
 
         Ok(())
     }
@@ -287,7 +320,7 @@ impl<'info> MangoTVL<'info> {
         .unwrap();
 
         require!(
-            &mango_account.owner == self.generic_accs.vault_signer.key,
+            mango_account.owner == self.generic_accs.vault_account.key(),
             ErrorCode::InvalidOwner,
         );
 
@@ -322,5 +355,19 @@ impl<'info> MangoTVL<'info> {
             .unwrap();
 
         Ok(tvl)
+    }
+
+    pub fn check_hash(&self) -> Result<()> {
+        check_hash_pub_keys(
+            &[
+                self.vault_mango_account.key.as_ref(),
+                self.mango_group_account.key.as_ref(),
+                self.mango_cache_account.key.as_ref(),
+                self.mango_root_bank_account.key.as_ref(),
+            ],
+            self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
+                .hash_pubkey
+                .hash_tvl,
+        )
     }
 }

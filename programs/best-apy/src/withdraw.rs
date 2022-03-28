@@ -1,5 +1,6 @@
 use crate::error::ErrorCode;
 use crate::macros::generate_seeds;
+use crate::vault::LpPrice;
 use crate::Withdraw;
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Burn, Transfer};
@@ -14,7 +15,13 @@ impl<'info> Withdraw<'info> {
             .vault_account
             .previous_lp_price
             .lp_to_token(lp_amount)?;
+        let amount_current_price = LpPrice {
+            total_tokens: self.vault_account.current_tvl,
+            minted_tokens: self.vault_lp_token_mint_pubkey.supply,
+        }
+        .lp_to_token(amount)?;
         require!(amount > 0, ErrorCode::InvalidZeroWithdraw);
+        require!(amount < amount_current_price, ErrorCode::InvalidLpPrice);
 
         let seeds = generate_seeds!(self.vault_account);
         let signer = &[&seeds[..]];
@@ -39,7 +46,7 @@ impl<'info> Withdraw<'info> {
         let cpi_accounts = Transfer {
             from: self.vault_input_token_account.to_account_info(),
             to: self.user_input_token_account.to_account_info(),
-            authority: self.vault_signer.to_account_info(),
+            authority: self.vault_account.to_account_info(),
         };
         let cpi_program = self.token_program.to_account_info();
         let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer);

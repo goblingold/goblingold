@@ -1,18 +1,18 @@
 use crate::error::ErrorCode;
 use crate::protocols::{Protocols, PROTOCOLS_LEN};
+use crate::SetHash;
 use anchor_lang::prelude::*;
+use anchor_lang::solana_program::hash::hashv;
 use std::{cmp, convert::TryInto};
 
 /// Strategy vault account
 #[account]
 #[derive(Default)]
 pub struct VaultAccount {
-    /// PDA bump seed
-    pub bump: u8,
+    /// PDA bump seeds
+    pub bumps: Bumps,
     /// Strategy input token mint address
     pub input_mint_pubkey: Pubkey,
-    /// Strategy LP token mint address
-    pub vault_lp_token_mint_pubkey: Pubkey,
     /// Destination fee account
     pub dao_treasury_lp_token_account: Pubkey,
     /// Current TVL deposited in the strategy (considering deposits/withdraws)
@@ -32,9 +32,8 @@ impl VaultAccount {
     /// Initialize a new vault
     pub fn init(params: InitVaultAccountParams) -> Self {
         Self {
-            bump: params.bump,
+            bumps: params.bumps,
             input_mint_pubkey: params.input_mint_pubkey,
-            vault_lp_token_mint_pubkey: params.vault_lp_token_mint_pubkey,
             dao_treasury_lp_token_account: params.dao_treasury_lp_token_account,
             ..Self::default()
         }
@@ -178,14 +177,19 @@ impl VaultAccount {
 
 /// Initialize a new vault
 pub struct InitVaultAccountParams {
-    /// PDA bump seed
-    pub bump: u8,
+    /// PDA bump seeds
+    pub bumps: Bumps,
     /// Strategy input token mint address
     pub input_mint_pubkey: Pubkey,
-    /// Strategy LP token mint address
-    pub vault_lp_token_mint_pubkey: Pubkey,
     /// Destination fee account
     pub dao_treasury_lp_token_account: Pubkey,
+}
+
+/// PDA bump seeds
+#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default)]
+pub struct Bumps {
+    pub vault: u8,
+    pub lp_token_mint: u8,
 }
 
 /// Protocol data
@@ -197,6 +201,8 @@ pub struct ProtocolData {
     pub tokens: TokenBalances,
     /// Accumulated rewards
     pub rewards: AccumulatedRewards,
+    /// Hashes of Pubkey
+    pub hash_pubkey: HashPubkey,
 }
 
 impl ProtocolData {
@@ -253,6 +259,45 @@ impl ProtocolData {
         self.tokens = self.tokens.sub(balances)?;
         Ok(())
     }
+}
+
+#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default)]
+pub struct HashPubkey {
+    /// Hash of important accounts for each protocol on deposit
+    pub hash_deposit: [u8; 8],
+    /// Hash of important accounts for each protocol on withdraw
+    pub hash_withdraw: [u8; 8],
+    /// Hash of important accounts for each protocol on tvl
+    pub hash_tvl: [u8; 8],
+    // TODO additional padding
+}
+
+impl<'info> SetHash<'info> {
+    pub fn set_hash(&mut self, protocol: usize, action: String, hash: [u8; 8]) -> Result<()> {
+        match action.as_str() {
+            "D" => {
+                self.vault_account.protocols[protocol]
+                    .hash_pubkey
+                    .hash_deposit = hash
+            }
+            "W" => {
+                self.vault_account.protocols[protocol]
+                    .hash_pubkey
+                    .hash_withdraw = hash
+            }
+            "T" => self.vault_account.protocols[protocol].hash_pubkey.hash_tvl = hash,
+            _ => return Err(ErrorCode::InvalidInstructions.into()),
+        }
+        Ok(())
+    }
+}
+
+pub fn check_hash_pub_keys(keys: &[&[u8]], target_hash: [u8; 8]) -> Result<()> {
+    require!(
+        target_hash == hashv(keys).to_bytes()[0..8],
+        ErrorCode::InvalidHash
+    );
+    Ok(())
 }
 
 /// Token balances in the protocol
@@ -315,7 +360,8 @@ pub struct AccumulatedRewards {
 
 impl AccumulatedRewards {
     /// Update the rewards
-    pub fn update(&mut self, current_slot: u64, rewards: u64) -> Result<()> {
+    pub fn update(&mut self, rewards: u64) -> Result<()> {
+        let current_slot = Clock::get()?.slot;
         self.last_slot = current_slot;
         self.amount = rewards;
         self.deposited_avg = self.deposited_integral.get_average(current_slot)?;
@@ -395,7 +441,7 @@ impl SlotIntegrated {
 }
 
 /// Strategy LP token price
-#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default)]
+#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default, Debug)]
 pub struct LpPrice {
     /// Total amount of tokens to be distributed
     pub total_tokens: u64,
@@ -432,5 +478,16 @@ impl LpPrice {
                 .try_into()
                 .map_err(|_| ErrorCode::MathOverflow)?)
         }
+    }
+
+    /// Returns true if self price > previous_price
+    pub fn greater_than(&self, previous_price: LpPrice) -> Result<bool> {
+        let lhs = (self.total_tokens as u128)
+            .checked_mul(previous_price.minted_tokens as u128)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+        let lhr = (previous_price.total_tokens as u128)
+            .checked_mul(self.minted_tokens as u128)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+        Ok(lhs > lhr)
     }
 }

@@ -5,6 +5,8 @@ use anchor_lang::prelude::*;
 pub enum ErrorCode {
     #[msg("Invalid withdraw. Amount cannot be cero")]
     InvalidZeroWithdraw,
+    #[msg("Invalid lp price")]
+    InvalidLpPrice,
     #[msg("Can not refresh weights yet, not enough slots since last refresh")]
     ForbiddenRefresh,
     #[msg("A protocol TVL is stale and must be refreshed")]
@@ -27,4 +29,8 @@ pub enum ErrorCode {
     MathOverflow,
     #[msg("Non-valid weights")]
     InvalidWeights,
+    #[msg("Invalid hash from provided pubkeys")]
+    InvalidHash,
+    #[msg("Invalid size for array")]
+    InvalidArraySize,
 }

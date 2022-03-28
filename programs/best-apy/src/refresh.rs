@@ -20,9 +20,9 @@ impl<'info> RefreshRewardsWeights<'info> {
     pub fn refresh(&mut self) -> Result<()> {
         msg!("GoblinGold: Refresh weights");
 
-        let elapsed_slots = self
-            .clock
-            .slot
+        let current_slot = Clock::get()?.slot;
+
+        let elapsed_slots = current_slot
             .checked_sub(self.vault_account.last_refresh_slot)
             .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
@@ -36,8 +36,7 @@ impl<'info> RefreshRewardsWeights<'info> {
                 if protocol.is_used() {
                     let last_updated = protocol.rewards.last_slot;
                     require!(
-                        self.clock
-                            .slot
+                        current_slot
                             .checked_sub(last_updated)
                             .ok_or_else(|| error!(ErrorCode::MathOverflow))?
                             < MAX_ELAPSED_SLOTS_FOR_TVL,
@@ -47,7 +46,7 @@ impl<'info> RefreshRewardsWeights<'info> {
             }
         }
 
-        self.vault_account.last_refresh_slot = self.clock.slot;
+        self.vault_account.last_refresh_slot = current_slot;
         self.vault_account.rewards_sum = self
             .vault_account
             .protocols
@@ -109,7 +108,7 @@ impl<'info> RefreshRewardsWeights<'info> {
                 let cpi_accounts = MintTo {
                     mint: self.vault_lp_token_mint_pubkey.to_account_info(),
                     to: self.dao_treasury_lp_token_account.to_account_info(),
-                    authority: self.vault_signer.clone(),
+                    authority: self.vault_account.to_account_info(),
                 };
                 let cpi_program = self.token_program.to_account_info();
                 let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer);
@@ -121,6 +120,19 @@ impl<'info> RefreshRewardsWeights<'info> {
                     .checked_add(rewards)
                     .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
                 self.vault_account.rewards_sum = 0_u64;
+
+                // Check price always goes up
+                let current_lp_price = LpPrice {
+                    total_tokens: self.vault_account.current_tvl,
+                    minted_tokens: self.vault_lp_token_mint_pubkey.supply,
+                };
+                if current_lp_price.greater_than(self.vault_account.previous_lp_price)? {
+                    msg!(
+                        "GoblinGold:WARN price became inconsistent: previous {:?}, new  {:?}",
+                        self.vault_account.previous_lp_price,
+                        current_lp_price
+                    )
+                }
             }
         }
 

@@ -1,13 +1,12 @@
 use crate::error::ErrorCode;
 use crate::macros::generate_seeds;
 use crate::protocols::Protocols;
-use crate::vault::{TokenBalances, VaultAccount};
-use crate::PubkeyWrapper;
-use crate::ALLOWED_DEPLOYER;
+use crate::vault::{check_hash_pub_keys, TokenBalances, VaultAccount};
 use crate::{
     generic_accounts_anchor_modules::*, GenericDepositAccounts, GenericTVLAccounts,
     GenericWithdrawAccounts,
 };
+use crate::{ALLOWED_DEPLOYER, VAULT_ACCOUNT_SEED};
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::{program::invoke_signed, pubkey::Pubkey, system_instruction};
 use anchor_spl::token::{Token, TokenAccount};
@@ -31,9 +30,10 @@ pub mod port_staking_program_id {
 pub struct PortInitialize<'info> {
     #[account(constraint = Pubkey::from_str(ALLOWED_DEPLOYER).unwrap()== *user_signer.key)]
     pub user_signer: Signer<'info>,
-    #[account(seeds = [vault_account.to_account_info().key.as_ref()], bump = vault_account.bump)]
-    /// CHECK: only used as signing PDA
-    pub vault_signer: AccountInfo<'info>,
+    #[account(
+        seeds = [VAULT_ACCOUNT_SEED, vault_account.input_mint_pubkey.as_ref()],
+        bump = vault_account.bumps.vault
+    )]
     pub vault_account: Box<Account<'info, VaultAccount>>,
     #[account(mut)]
     /// CHECK: Port CPI
@@ -75,7 +75,7 @@ impl<'info> PortInitialize<'info> {
             let ix = system_instruction::create_account_with_seed(
                 self.user_signer.key,
                 self.vault_port_obligation_account.key,
-                self.vault_signer.key,
+                &self.vault_account.key(),
                 "port",
                 Rent::default().minimum_balance(account_size),
                 account_size as u64,
@@ -85,7 +85,7 @@ impl<'info> PortInitialize<'info> {
                 &ix,
                 &[
                     self.user_signer.to_account_info(),
-                    self.vault_signer.to_account_info(),
+                    self.vault_account.to_account_info(),
                     self.vault_port_obligation_account.to_account_info(),
                     self.system_program.to_account_info(),
                 ],
@@ -99,7 +99,7 @@ impl<'info> PortInitialize<'info> {
                 port_anchor_adaptor::InitObligation {
                     obligation: self.vault_port_obligation_account.to_account_info(),
                     lending_market: self.port_lending_market_account.to_account_info(),
-                    obligation_owner: self.vault_signer.to_account_info(),
+                    obligation_owner: self.vault_account.to_account_info(),
                     clock: self.clock.to_account_info(),
                     rent: self.rent.to_account_info(),
                     spl_token_id: self.token_program.to_account_info(),
@@ -122,7 +122,7 @@ impl<'info> PortInitialize<'info> {
             let ix = system_instruction::create_account_with_seed(
                 self.user_signer.key,
                 self.vault_port_staking_account.key,
-                self.vault_signer.key,
+                &self.vault_account.key(),
                 "port",
                 Rent::default().minimum_balance(account_size),
                 account_size as u64,
@@ -132,7 +132,7 @@ impl<'info> PortInitialize<'info> {
                 &ix,
                 &[
                     self.user_signer.to_account_info(),
-                    self.vault_signer.to_account_info(),
+                    self.vault_account.to_account_info(),
                     self.vault_account.to_account_info(),
                     self.vault_port_staking_account.to_account_info(),
                     self.system_program.to_account_info(),
@@ -147,7 +147,7 @@ impl<'info> PortInitialize<'info> {
                 port_anchor_adaptor::CreateStakeAccount {
                     stake_account: self.vault_port_staking_account.to_account_info(),
                     staking_pool: self.port_staking_pool_account.to_account_info(),
-                    owner: self.vault_signer.to_account_info(),
+                    owner: self.vault_account.to_account_info(),
                     rent: self.rent.to_account_info(),
                 },
                 signer,
@@ -170,8 +170,8 @@ pub struct PortDeposit<'info> {
     pub port_staking_program_id: AccountInfo<'info>,
     #[account(
         mut,
-        associated_token::mint = PubkeyWrapper(vault_port_collateral_token_account.mint),
-        associated_token::authority = generic_accs.vault_signer,
+        associated_token::mint = vault_port_collateral_token_account.mint,
+        associated_token::authority = generic_accs.vault_account,
     )]
     pub vault_port_collateral_token_account: Box<Account<'info, TokenAccount>>,
     #[account(mut)]
@@ -258,8 +258,8 @@ impl<'info> PortDeposit<'info> {
                     .port_destination_deposit_collateral_account
                     .to_account_info(),
                 obligation: self.vault_port_obligation_account.to_account_info(),
-                obligation_owner: self.generic_accs.vault_signer.to_account_info(),
-                transfer_authority: self.generic_accs.vault_signer.to_account_info(),
+                obligation_owner: self.generic_accs.vault_account.to_account_info(),
+                transfer_authority: self.generic_accs.vault_account.to_account_info(),
                 clock: self.generic_accs.clock.to_account_info(),
                 token_program: self.generic_accs.token_program.to_account_info(),
                 stake_account: self.vault_port_staking_account.to_account_info(),
@@ -271,6 +271,28 @@ impl<'info> PortDeposit<'info> {
         port_anchor_adaptor::deposit_and_collateralize(cpi_ctx, amount)?;
 
         Ok(())
+    }
+
+    pub fn check_hash(&self) -> Result<()> {
+        check_hash_pub_keys(
+            &[
+                self.vault_port_collateral_token_account.key().as_ref(),
+                self.vault_port_obligation_account.key.as_ref(),
+                self.vault_port_staking_account.key.as_ref(),
+                self.port_reserve_account.key.as_ref(),
+                self.port_reserve_liquidity_supply_account.key.as_ref(),
+                self.port_reserve_collateral_mint_account.key.as_ref(),
+                self.port_lending_market_account.key.as_ref(),
+                self.port_lending_market_authority_account.key.as_ref(),
+                self.port_destination_deposit_collateral_account
+                    .key()
+                    .as_ref(),
+                self.port_staking_pool_account.key.as_ref(),
+            ],
+            self.generic_accs.vault_account.protocols[Protocols::Port as usize]
+                .hash_pubkey
+                .hash_deposit,
+        )
     }
 }
 
@@ -285,8 +307,8 @@ pub struct PortWithdraw<'info> {
     pub port_staking_program_id: AccountInfo<'info>,
     #[account(
         mut,
-        associated_token::mint = PubkeyWrapper(vault_port_collateral_token_account.mint),
-        associated_token::authority = generic_accs.vault_signer,
+        associated_token::mint = vault_port_collateral_token_account.mint,
+        associated_token::authority = generic_accs.vault_account,
     )]
     pub vault_port_collateral_token_account: Account<'info, TokenAccount>,
     #[account(mut)]
@@ -301,16 +323,16 @@ pub struct PortWithdraw<'info> {
     #[account(mut)]
     /// CHECK: Port CPI
     pub port_reserve_account: AccountInfo<'info>,
-    /// CHECK: Port CPI
-    pub port_lending_market_account: AccountInfo<'info>,
-    /// CHECK: Port CPI
-    pub port_lending_market_authority_account: AccountInfo<'info>,
     #[account(mut)]
     /// CHECK: Port CPI
     pub port_reserve_liquidity_supply_account: AccountInfo<'info>,
     #[account(mut)]
     /// CHECK: Port CPI
     pub port_reserve_collateral_mint_account: AccountInfo<'info>,
+    /// CHECK: Port CPI
+    pub port_lending_market_account: AccountInfo<'info>,
+    /// CHECK: Port CPI
+    pub port_lending_market_authority_account: AccountInfo<'info>,
     #[account(mut)]
     /// CHECK: Port CPI
     pub port_staking_pool_account: AccountInfo<'info>,
@@ -377,7 +399,7 @@ impl<'info> PortWithdraw<'info> {
                     lending_market_authority: self
                         .port_lending_market_authority_account
                         .to_account_info(),
-                    obligation_owner: self.generic_accs.vault_signer.to_account_info(),
+                    obligation_owner: self.generic_accs.vault_account.to_account_info(),
                     clock: self.generic_accs.clock.to_account_info(),
                     token_program: self.generic_accs.token_program.to_account_info(),
                     stake_account: self.vault_port_staking_account.to_account_info(),
@@ -409,7 +431,7 @@ impl<'info> PortWithdraw<'info> {
                     lending_market_authority: self
                         .port_lending_market_authority_account
                         .to_account_info(),
-                    transfer_authority: self.generic_accs.vault_signer.to_account_info(),
+                    transfer_authority: self.generic_accs.vault_account.to_account_info(),
                     clock: self.generic_accs.clock.to_account_info(),
                     token_program: self.generic_accs.token_program.to_account_info(),
                 },
@@ -420,19 +442,39 @@ impl<'info> PortWithdraw<'info> {
 
         Ok(())
     }
+
+    pub fn check_hash(&self) -> Result<()> {
+        check_hash_pub_keys(
+            &[
+                self.vault_port_collateral_token_account.key().as_ref(),
+                self.vault_port_obligation_account.key.as_ref(),
+                self.vault_port_staking_account.key.as_ref(),
+                self.port_source_collateral_account.key.as_ref(),
+                self.port_reserve_account.key.as_ref(),
+                self.port_reserve_liquidity_supply_account.key.as_ref(),
+                self.port_reserve_collateral_mint_account.key.as_ref(),
+                self.port_lending_market_account.key.as_ref(),
+                self.port_lending_market_authority_account.key.as_ref(),
+                self.port_staking_pool_account.key.as_ref(),
+            ],
+            self.generic_accs.vault_account.protocols[Protocols::Port as usize]
+                .hash_pubkey
+                .hash_withdraw,
+        )
+    }
 }
 
 #[derive(Accounts)]
 pub struct PortTVL<'info> {
     pub generic_accs: GenericTVLAccounts<'info>,
-    /// CHECK: Port CPI
+    #[account(owner = port_lending_program_id::ID)]
+    /// CHECK: owner and mint data field are checked
     pub reserve: AccountInfo<'info>,
 }
 
 impl<'info> PortTVL<'info> {
     /// Update the protocol TVL
     pub fn update_rewards(&mut self) -> Result<()> {
-        let slot = self.generic_accs.clock.slot;
         let tvl = self.max_withdrawable()?;
 
         let protocol = &mut self.generic_accs.vault_account.protocols[Protocols::Port as usize];
@@ -443,7 +485,7 @@ impl<'info> PortTVL<'info> {
         );
         let rewards = tvl.saturating_sub(protocol.tokens.base_amount);
 
-        protocol.rewards.update(slot, rewards)?;
+        protocol.rewards.update(rewards)?;
 
         Ok(())
     }
@@ -470,14 +512,24 @@ impl<'info> PortTVL<'info> {
 
         Ok(tvl)
     }
+
+    pub fn check_hash(&self) -> Result<()> {
+        check_hash_pub_keys(
+            &[self.reserve.key.as_ref()],
+            self.generic_accs.vault_account.protocols[Protocols::Port as usize]
+                .hash_pubkey
+                .hash_tvl,
+        )
+    }
 }
 
 #[derive(Accounts)]
 pub struct PortClaimRewards<'info> {
-    #[account(mut, seeds = [vault_account.to_account_info().key.as_ref()], bump = vault_account.bump)]
-    /// CHECK: only used as signing PDA
-    pub vault_signer: AccountInfo<'info>,
-    #[account(mut)]
+    #[account(
+        mut,
+        seeds = [VAULT_ACCOUNT_SEED, vault_account.input_mint_pubkey.as_ref()],
+        bump = vault_account.bumps.vault
+    )]
     pub vault_account: Box<Account<'info, VaultAccount>>,
     #[account(constraint = dao_treasury_owner.key == &Pubkey::from_str(ALLOWED_DEPLOYER).unwrap())]
     /// CHECKED: address is checked
@@ -490,7 +542,7 @@ pub struct PortClaimRewards<'info> {
     pub vault_port_staking_account: AccountInfo<'info>,
     #[account(
         mut,
-        associated_token::mint = PubkeyWrapper(vault_port_rewards_account.mint),
+        associated_token::mint = vault_port_rewards_account.mint,
         associated_token::authority = dao_treasury_owner,
     )]
     pub vault_port_rewards_account: Account<'info, TokenAccount>,
@@ -515,7 +567,7 @@ impl<'info> PortClaimRewards<'info> {
         let cpi_ctx = CpiContext::new_with_signer(
             self.port_staking_program_id.to_account_info(),
             port_anchor_adaptor::ClaimReward {
-                stake_account_owner: self.vault_signer.to_account_info(),
+                stake_account_owner: self.vault_account.to_account_info(),
                 stake_account: self.vault_port_staking_account.to_account_info(),
                 staking_pool: self.port_staking_pool_account.to_account_info(),
                 reward_token_pool: self.port_rewards_token_pool.to_account_info(),

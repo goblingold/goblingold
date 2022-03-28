@@ -2,8 +2,7 @@ use crate::error::ErrorCode;
 use crate::macros::generate_seeds;
 use crate::protocols::tulip_reserve;
 use crate::protocols::Protocols;
-use crate::vault::TokenBalances;
-use crate::PubkeyWrapper;
+use crate::vault::{check_hash_pub_keys, TokenBalances};
 use crate::{
     generic_accounts_anchor_modules::*, GenericDepositAccounts, GenericTVLAccounts,
     GenericWithdrawAccounts,
@@ -43,8 +42,8 @@ pub struct TulipDeposit<'info> {
     pub tulip_program_id: AccountInfo<'info>,
     #[account(
         mut,
-        associated_token::mint = PubkeyWrapper(vault_tulip_collateral_token_account.mint),
-        associated_token::authority = generic_accs.vault_signer,
+        associated_token::mint = vault_tulip_collateral_token_account.mint,
+        associated_token::authority = generic_accs.vault_account,
     )]
     pub vault_tulip_collateral_token_account: Account<'info, TokenAccount>,
     #[account(mut)]
@@ -119,14 +118,14 @@ impl<'info> TulipDeposit<'info> {
             self.tulip_reserve_collateral_token_mint.to_account_info(),
             self.tulip_lending_market_account.to_account_info(),
             self.tulip_reserve_authority.to_account_info(),
-            self.generic_accs.vault_signer.to_account_info(),
+            self.generic_accs.vault_account.to_account_info(),
             self.generic_accs.clock.to_account_info(),
             self.generic_accs.token_program.to_account_info(),
         ];
         let account_metas = accounts
             .iter()
             .map(|acc| {
-                if acc.key == self.generic_accs.vault_signer.key {
+                if acc.key == &self.generic_accs.vault_account.key() {
                     AccountMeta::new_readonly(*acc.key, true)
                 } else if acc.is_writable {
                     AccountMeta::new(*acc.key, false)
@@ -146,6 +145,24 @@ impl<'info> TulipDeposit<'info> {
         invoke_signed(&ix, &accounts, signer)?;
         Ok(())
     }
+
+    pub fn check_hash(&self) -> Result<()> {
+        check_hash_pub_keys(
+            &[
+                self.vault_tulip_collateral_token_account.key().as_ref(),
+                self.tulip_reserve_account.key.as_ref(),
+                self.tulip_reserve_liquidity_supply_token_account
+                    .key
+                    .as_ref(),
+                self.tulip_reserve_collateral_token_mint.key.as_ref(),
+                self.tulip_lending_market_account.key.as_ref(),
+                self.tulip_reserve_authority.key.as_ref(),
+            ],
+            self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
+                .hash_pubkey
+                .hash_deposit,
+        )
+    }
 }
 
 #[derive(Accounts)]
@@ -156,8 +173,8 @@ pub struct TulipWithdraw<'info> {
     pub tulip_program_id: AccountInfo<'info>,
     #[account(
         mut,
-        associated_token::mint = PubkeyWrapper(vault_tulip_collateral_token_account.mint),
-        associated_token::authority = generic_accs.vault_signer,
+        associated_token::mint = vault_tulip_collateral_token_account.mint,
+        associated_token::authority = generic_accs.vault_account,
     )]
     pub vault_tulip_collateral_token_account: Account<'info, TokenAccount>,
     #[account(mut)]
@@ -257,14 +274,14 @@ impl<'info> TulipWithdraw<'info> {
                 .to_account_info(),
             self.tulip_lending_market_account.to_account_info(),
             self.tulip_reserve_authority.to_account_info(),
-            self.generic_accs.vault_signer.to_account_info(),
+            self.generic_accs.vault_account.to_account_info(),
             self.generic_accs.clock.to_account_info(),
             self.generic_accs.token_program.to_account_info(),
         ];
         let account_metas = accounts
             .iter()
             .map(|acc| {
-                if acc.key == self.generic_accs.vault_signer.key {
+                if acc.key == &self.generic_accs.vault_account.key() {
                     AccountMeta::new_readonly(*acc.key, true)
                 } else if acc.is_writable {
                     AccountMeta::new(*acc.key, false)
@@ -286,19 +303,37 @@ impl<'info> TulipWithdraw<'info> {
 
         Ok(())
     }
+
+    pub fn check_hash(&self) -> Result<()> {
+        check_hash_pub_keys(
+            &[
+                self.vault_tulip_collateral_token_account.key().as_ref(),
+                self.tulip_reserve_account.key.as_ref(),
+                self.tulip_reserve_liquidity_supply_token_account
+                    .key
+                    .as_ref(),
+                self.tulip_reserve_collateral_token_mint.key.as_ref(),
+                self.tulip_lending_market_account.key.as_ref(),
+                self.tulip_reserve_authority.key.as_ref(),
+            ],
+            self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
+                .hash_pubkey
+                .hash_withdraw,
+        )
+    }
 }
 
 #[derive(Accounts)]
 pub struct TulipTVL<'info> {
     pub generic_accs: GenericTVLAccounts<'info>,
-    /// CHECK: Tulip CPI
+    #[account(owner = tulip_program_id::ID)]
+    /// CHECK: owner and mint data field are checked
     pub reserve: AccountInfo<'info>,
 }
 
 impl<'info> TulipTVL<'info> {
     /// Update the protocol TVL
     pub fn update_rewards(&mut self) -> Result<()> {
-        let slot = self.generic_accs.clock.slot;
         let tvl = self.max_withdrawable()?;
 
         let protocol = &mut self.generic_accs.vault_account.protocols[Protocols::Tulip as usize];
@@ -309,7 +344,7 @@ impl<'info> TulipTVL<'info> {
         );
         let rewards = tvl.saturating_sub(protocol.tokens.base_amount);
 
-        protocol.rewards.update(slot, rewards)?;
+        protocol.rewards.update(rewards)?;
 
         Ok(())
     }
@@ -334,5 +369,14 @@ impl<'info> TulipTVL<'info> {
             .collateral_to_liquidity(lp_amount)?;
 
         Ok(tvl)
+    }
+
+    pub fn check_hash(&self) -> Result<()> {
+        check_hash_pub_keys(
+            &[self.reserve.key.as_ref()],
+            self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
+                .hash_pubkey
+                .hash_tvl,
+        )
     }
 }

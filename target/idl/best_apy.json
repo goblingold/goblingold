@@ -16,14 +16,9 @@
           "isSigner": false
         },
         {
-          "name": "vaultSigner",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
           "name": "vaultAccount",
           "isMut": true,
-          "isSigner": true
+          "isSigner": false
         },
         {
           "name": "vaultInputTokenAccount",
@@ -33,7 +28,7 @@
         {
           "name": "vaultLpTokenMintPubkey",
           "isMut": true,
-          "isSigner": true
+          "isSigner": false
         },
         {
           "name": "daoTreasuryLpTokenAccount",
@@ -66,12 +61,7 @@
           "isSigner": false
         }
       ],
-      "args": [
-        {
-          "name": "bump",
-          "type": "u8"
-        }
-      ]
+      "args": []
     },
     {
       "name": "setProtocolWeights",
@@ -80,11 +70,6 @@
           "name": "userSigner",
           "isMut": false,
           "isSigner": true
-        },
-        {
-          "name": "vaultSigner",
-          "isMut": false,
-          "isSigner": false
         },
         {
           "name": "vaultAccount",
@@ -128,11 +113,6 @@
           "isSigner": false
         },
         {
-          "name": "vaultSigner",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
           "name": "vaultLpTokenMintPubkey",
           "isMut": true,
           "isSigner": false
@@ -144,11 +124,6 @@
         },
         {
           "name": "tokenProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "clock",
           "isMut": false,
           "isSigner": false
         }
@@ -179,11 +154,6 @@
           "isSigner": false
         },
         {
-          "name": "vaultSigner",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
           "name": "vaultAccount",
           "isMut": true,
           "isSigner": false
@@ -204,11 +174,6 @@
           "isSigner": false
         },
         {
-          "name": "clock",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
           "name": "instructions",
           "isMut": false,
           "isSigner": false
@@ -224,11 +189,6 @@
     {
       "name": "refreshRewardsWeights",
       "accounts": [
-        {
-          "name": "vaultSigner",
-          "isMut": false,
-          "isSigner": false
-        },
         {
           "name": "vaultAccount",
           "isMut": true,
@@ -253,14 +213,45 @@
           "name": "tokenProgram",
           "isMut": false,
           "isSigner": false
-        },
-        {
-          "name": "clock",
-          "isMut": false,
-          "isSigner": false
         }
       ],
       "args": []
+    },
+    {
+      "name": "setHash",
+      "accounts": [
+        {
+          "name": "userSigner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "vaultAccount",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "protocol",
+          "type": {
+            "defined": "usize"
+          }
+        },
+        {
+          "name": "action",
+          "type": "string"
+        },
+        {
+          "name": "hash",
+          "type": {
+            "array": [
+              "u8",
+              8
+            ]
+          }
+        }
+      ]
     },
     {
       "name": "mangoInitialize",
@@ -269,11 +260,6 @@
           "name": "userSigner",
           "isMut": false,
           "isSigner": true
-        },
-        {
-          "name": "vaultSigner",
-          "isMut": false,
-          "isSigner": false
         },
         {
           "name": "vaultAccount",
@@ -311,11 +297,6 @@
           "accounts": [
             {
               "name": "vaultAccount",
-              "isMut": true,
-              "isSigner": false
-            },
-            {
-              "name": "vaultSigner",
               "isMut": true,
               "isSigner": false
             },
@@ -380,11 +361,6 @@
         {
           "name": "genericAccs",
           "accounts": [
-            {
-              "name": "vaultSigner",
-              "isMut": true,
-              "isSigner": false
-            },
             {
               "name": "vaultAccount",
               "isMut": true,
@@ -467,18 +443,8 @@
           "name": "genericAccs",
           "accounts": [
             {
-              "name": "vaultSigner",
-              "isMut": true,
-              "isSigner": false
-            },
-            {
               "name": "vaultAccount",
               "isMut": true,
-              "isSigner": false
-            },
-            {
-              "name": "clock",
-              "isMut": false,
               "isSigner": false
             }
           ]
@@ -520,22 +486,17 @@
           "isSigner": true
         },
         {
+          "name": "vaultAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "vaultSolendObligationAccount",
           "isMut": true,
           "isSigner": false
         },
         {
           "name": "solendLendingMarketAccount",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "vaultAccount",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "vaultSigner",
           "isMut": false,
           "isSigner": false
         },
@@ -575,11 +536,6 @@
           "accounts": [
             {
               "name": "vaultAccount",
-              "isMut": true,
-              "isSigner": false
-            },
-            {
-              "name": "vaultSigner",
               "isMut": true,
               "isSigner": false
             },
@@ -665,11 +621,6 @@
           "name": "genericAccs",
           "accounts": [
             {
-              "name": "vaultSigner",
-              "isMut": true,
-              "isSigner": false
-            },
-            {
               "name": "vaultAccount",
               "isMut": true,
               "isSigner": false
@@ -751,18 +702,8 @@
           "name": "genericAccs",
           "accounts": [
             {
-              "name": "vaultSigner",
-              "isMut": true,
-              "isSigner": false
-            },
-            {
               "name": "vaultAccount",
               "isMut": true,
-              "isSigner": false
-            },
-            {
-              "name": "clock",
-              "isMut": false,
               "isSigner": false
             }
           ]
@@ -782,11 +723,6 @@
           "name": "userSigner",
           "isMut": false,
           "isSigner": true
-        },
-        {
-          "name": "vaultSigner",
-          "isMut": false,
-          "isSigner": false
         },
         {
           "name": "vaultAccount",
@@ -854,11 +790,6 @@
           "accounts": [
             {
               "name": "vaultAccount",
-              "isMut": true,
-              "isSigner": false
-            },
-            {
-              "name": "vaultSigner",
               "isMut": true,
               "isSigner": false
             },
@@ -949,11 +880,6 @@
           "name": "genericAccs",
           "accounts": [
             {
-              "name": "vaultSigner",
-              "isMut": true,
-              "isSigner": false
-            },
-            {
               "name": "vaultAccount",
               "isMut": true,
               "isSigner": false
@@ -1016,16 +942,6 @@
           "isSigner": false
         },
         {
-          "name": "portLendingMarketAccount",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "portLendingMarketAuthorityAccount",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
           "name": "portReserveLiquiditySupplyAccount",
           "isMut": true,
           "isSigner": false
@@ -1033,6 +949,16 @@
         {
           "name": "portReserveCollateralMintAccount",
           "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "portLendingMarketAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "portLendingMarketAuthorityAccount",
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -1050,18 +976,8 @@
           "name": "genericAccs",
           "accounts": [
             {
-              "name": "vaultSigner",
-              "isMut": true,
-              "isSigner": false
-            },
-            {
               "name": "vaultAccount",
               "isMut": true,
-              "isSigner": false
-            },
-            {
-              "name": "clock",
-              "isMut": false,
               "isSigner": false
             }
           ]
@@ -1077,11 +993,6 @@
     {
       "name": "portClaimRewards",
       "accounts": [
-        {
-          "name": "vaultSigner",
-          "isMut": true,
-          "isSigner": false
-        },
         {
           "name": "vaultAccount",
           "isMut": true,
@@ -1147,11 +1058,6 @@
               "isSigner": false
             },
             {
-              "name": "vaultSigner",
-              "isMut": true,
-              "isSigner": false
-            },
-            {
               "name": "vaultInputTokenAccount",
               "isMut": true,
               "isSigner": false
@@ -1212,11 +1118,6 @@
         {
           "name": "genericAccs",
           "accounts": [
-            {
-              "name": "vaultSigner",
-              "isMut": true,
-              "isSigner": false
-            },
             {
               "name": "vaultAccount",
               "isMut": true,
@@ -1289,18 +1190,8 @@
           "name": "genericAccs",
           "accounts": [
             {
-              "name": "vaultSigner",
-              "isMut": true,
-              "isSigner": false
-            },
-            {
               "name": "vaultAccount",
               "isMut": true,
-              "isSigner": false
-            },
-            {
-              "name": "clock",
-              "isMut": false,
               "isSigner": false
             }
           ]
@@ -1322,13 +1213,8 @@
           "isSigner": true
         },
         {
-          "name": "vaultSigner",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
           "name": "vaultAccount",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -1382,11 +1268,6 @@
           "accounts": [
             {
               "name": "vaultAccount",
-              "isMut": true,
-              "isSigner": false
-            },
-            {
-              "name": "vaultSigner",
               "isMut": true,
               "isSigner": false
             },
@@ -1502,11 +1383,6 @@
           "name": "genericAccs",
           "accounts": [
             {
-              "name": "vaultSigner",
-              "isMut": true,
-              "isSigner": false
-            },
-            {
               "name": "vaultAccount",
               "isMut": true,
               "isSigner": false
@@ -1559,7 +1435,27 @@
           "isSigner": false
         },
         {
+          "name": "franciumLendingPoolInfoAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "franciumLendingPoolTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "franciumFarmingPoolStakeTokenMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "franciumMarketInfoAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "franciumLendingMarketAuthority",
           "isMut": true,
           "isSigner": false
         },
@@ -1587,26 +1483,6 @@
           "name": "franciumFarmingPoolRewardsBTokenAccount",
           "isMut": true,
           "isSigner": false
-        },
-        {
-          "name": "franciumMarketInfoAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "franciumLendingPoolInfoAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "franciumLendingPoolTokenAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "franciumLendingMarketAuthority",
-          "isMut": true,
-          "isSigner": false
         }
       ],
       "args": []
@@ -1618,18 +1494,8 @@
           "name": "genericAccs",
           "accounts": [
             {
-              "name": "vaultSigner",
-              "isMut": true,
-              "isSigner": false
-            },
-            {
               "name": "vaultAccount",
               "isMut": true,
-              "isSigner": false
-            },
-            {
-              "name": "clock",
-              "isMut": false,
               "isSigner": false
             }
           ]
@@ -1650,15 +1516,13 @@
         "kind": "struct",
         "fields": [
           {
-            "name": "bump",
-            "type": "u8"
+            "name": "bumps",
+            "type": {
+              "defined": "Bumps"
+            }
           },
           {
             "name": "inputMintPubkey",
-            "type": "publicKey"
-          },
-          {
-            "name": "vaultLpTokenMintPubkey",
             "type": "publicKey"
           },
           {
@@ -1700,6 +1564,22 @@
   ],
   "types": [
     {
+      "name": "Bumps",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "vault",
+            "type": "u8"
+          },
+          {
+            "name": "lpTokenMint",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
       "name": "ProtocolData",
       "type": {
         "kind": "struct",
@@ -1718,6 +1598,47 @@
             "name": "rewards",
             "type": {
               "defined": "AccumulatedRewards"
+            }
+          },
+          {
+            "name": "hashPubkey",
+            "type": {
+              "defined": "HashPubkey"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "HashPubkey",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "hashDeposit",
+            "type": {
+              "array": [
+                "u8",
+                8
+              ]
+            }
+          },
+          {
+            "name": "hashWithdraw",
+            "type": {
+              "array": [
+                "u8",
+                8
+              ]
+            }
+          },
+          {
+            "name": "hashTvl",
+            "type": {
+              "array": [
+                "u8",
+                8
+              ]
             }
           }
         ]
@@ -1833,58 +1754,73 @@
     },
     {
       "code": 6001,
+      "name": "InvalidLpPrice",
+      "msg": "Invalid lp price"
+    },
+    {
+      "code": 6002,
       "name": "ForbiddenRefresh",
       "msg": "Can not refresh weights yet, not enough slots since last refresh"
     },
     {
-      "code": 6002,
+      "code": 6003,
       "name": "StaleProtocolTVL",
       "msg": "A protocol TVL is stale and must be refreshed"
     },
     {
-      "code": 6003,
+      "code": 6004,
       "name": "InvalidProtocolDeposit",
       "msg": "Invalid amount to deposit"
     },
     {
-      "code": 6004,
+      "code": 6005,
       "name": "InvalidProtocolWithdraw",
       "msg": "Invalid amount to withdraw"
     },
     {
-      "code": 6005,
+      "code": 6006,
       "name": "InvalidDepositAmount",
       "msg": "Invalid deposited amount. Please deposit more than 100 lamports"
     },
     {
-      "code": 6006,
+      "code": 6007,
       "name": "InvalidOwner",
       "msg": "Invalid owner"
     },
     {
-      "code": 6007,
+      "code": 6008,
       "name": "InvalidMint",
       "msg": "Invalid mint"
     },
     {
-      "code": 6008,
+      "code": 6009,
       "name": "OnPaused",
       "msg": "Deposits and withdraws aren't allowed on PAUSE"
     },
     {
-      "code": 6009,
+      "code": 6010,
       "name": "InvalidInstructions",
       "msg": "The instructions provided are invalid"
     },
     {
-      "code": 6010,
+      "code": 6011,
       "name": "MathOverflow",
       "msg": "Math operation overflow"
     },
     {
-      "code": 6011,
+      "code": 6012,
       "name": "InvalidWeights",
       "msg": "Non-valid weights"
+    },
+    {
+      "code": 6013,
+      "name": "InvalidHash",
+      "msg": "Invalid hash from provided pubkeys"
+    },
+    {
+      "code": 6014,
+      "name": "InvalidArraySize",
+      "msg": "Invalid size for array"
     }
   ]
 }

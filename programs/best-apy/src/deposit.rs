@@ -27,6 +27,14 @@ impl<'info> Deposit<'info> {
             minted_tokens: self.vault_lp_token_mint_pubkey.supply,
         }
         .token_to_lp(amount)?;
+        let lp_amount_previous_price = self
+            .vault_account
+            .previous_lp_price
+            .lp_to_token(lp_amount)?;
+        require!(
+            lp_amount < lp_amount_previous_price,
+            ErrorCode::InvalidLpPrice
+        );
 
         // Update total deposited amounts
         self.vault_account.current_tvl = self
@@ -41,7 +49,7 @@ impl<'info> Deposit<'info> {
         let cpi_accounts = MintTo {
             mint: self.vault_lp_token_mint_pubkey.to_account_info(),
             to: self.user_lp_token_account.to_account_info(),
-            authority: self.vault_signer.clone(),
+            authority: self.vault_account.to_account_info(),
         };
         let cpi_program = self.token_program.to_account_info();
         let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer);
