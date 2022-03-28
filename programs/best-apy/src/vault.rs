@@ -5,6 +5,8 @@ use anchor_lang::prelude::*;
 use anchor_lang::solana_program::hash::hashv;
 use std::{cmp, convert::TryInto};
 
+pub const HASH_PUBKEYS_LEN: usize = 8;
+
 /// Strategy vault account
 #[account]
 #[derive(Default)]
@@ -263,16 +265,21 @@ impl ProtocolData {
 #[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default)]
 pub struct HashPubkey {
     /// Hash of important accounts for each protocol on deposit
-    pub hash_deposit: [u8; 8],
+    pub hash_deposit: [u8; HASH_PUBKEYS_LEN],
     /// Hash of important accounts for each protocol on withdraw
-    pub hash_withdraw: [u8; 8],
+    pub hash_withdraw: [u8; HASH_PUBKEYS_LEN],
     /// Hash of important accounts for each protocol on tvl
-    pub hash_tvl: [u8; 8],
+    pub hash_tvl: [u8; HASH_PUBKEYS_LEN],
     // TODO additional padding
 }
 
 impl<'info> SetHash<'info> {
-    pub fn set_hash(&mut self, protocol: usize, action: String, hash: [u8; 8]) -> Result<()> {
+    pub fn set_hash(
+        &mut self,
+        protocol: usize,
+        action: String,
+        hash: [u8; HASH_PUBKEYS_LEN],
+    ) -> Result<()> {
         match action.as_str() {
             "D" => {
                 self.vault_account.protocols[protocol]
@@ -291,9 +298,9 @@ impl<'info> SetHash<'info> {
     }
 }
 
-pub fn check_hash_pub_keys(keys: &[&[u8]], target_hash: [u8; 8]) -> Result<()> {
+pub fn check_hash_pub_keys(keys: &[&[u8]], target_hash: [u8; HASH_PUBKEYS_LEN]) -> Result<()> {
     require!(
-        target_hash == hashv(keys).to_bytes()[0..8],
+        target_hash == hashv(keys).to_bytes()[..HASH_PUBKEYS_LEN],
         ErrorCode::InvalidHash
     );
     Ok(())
