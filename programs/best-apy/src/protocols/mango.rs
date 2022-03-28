@@ -199,11 +199,19 @@ impl<'info> MangoWithdraw<'info> {
         Ok(())
     }
 
-    /// Withdraw from the protocol and get the true token balance. Mango does not give back any LP
-    /// token, but the same logic than for other protocols is implemented here.
+    /// Withdraw from the protocol and get the true token balance
     fn withdraw_and_get_balance(&mut self, amount: u64) -> Result<u64> {
+        let amount_before = self.generic_accs.vault_input_token_account.amount;
+
         self.cpi_withdraw(amount)?;
-        Ok(amount)
+        self.generic_accs.vault_input_token_account.reload()?;
+
+        let amount_after = self.generic_accs.vault_input_token_account.amount;
+        let amount_diff = amount_after
+            .checked_sub(amount_before)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+
+        Ok(amount_diff)
     }
 
     /// CPI withdraw call
