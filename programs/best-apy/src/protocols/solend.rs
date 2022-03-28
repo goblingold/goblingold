@@ -142,7 +142,7 @@ impl<'info> SolendDeposit<'info> {
         self.cpi_deposit(amount)?;
 
         self.generic_accs.vault_account.protocols[Protocols::Solend as usize]
-            .update_after_deposit(self.generic_accs.clock.slot, amount)?;
+            .update_after_deposit(amount)?;
 
         Ok(())
     }
@@ -269,7 +269,7 @@ impl<'info> SolendWithdraw<'info> {
         let amount_withdrawn = self.withdraw_and_get_balance(amount)?;
 
         self.generic_accs.vault_account.protocols[Protocols::Solend as usize]
-            .update_after_withdraw(self.generic_accs.clock.slot, amount_withdrawn)?;
+            .update_after_withdraw(amount_withdrawn)?;
 
         Ok(())
     }

@@ -236,10 +236,8 @@ impl ProtocolData {
     }
 
     /// Update token amount after depositing in the protocol
-    pub fn update_after_deposit(&mut self, current_slot: u64, amount: u64) -> Result<()> {
-        self.rewards
-            .deposited_integral
-            .accumulate(current_slot, self.amount)?;
+    pub fn update_after_deposit(&mut self, amount: u64) -> Result<()> {
+        self.rewards.deposited_integral.accumulate(self.amount)?;
         self.amount = self
             .amount
             .checked_add(amount)
@@ -249,10 +247,8 @@ impl ProtocolData {
     }
 
     /// Update token amount after withdrawing from the protocol
-    pub fn update_after_withdraw(&mut self, current_slot: u64, amount: u64) -> Result<()> {
-        self.rewards
-            .deposited_integral
-            .accumulate(current_slot, self.amount)?;
+    pub fn update_after_withdraw(&mut self, amount: u64) -> Result<()> {
+        self.rewards.deposited_integral.accumulate(self.amount)?;
         self.amount = self
             .amount
             .checked_sub(amount)
@@ -366,7 +362,8 @@ pub struct SlotIntegrated {
 
 impl SlotIntegrated {
     /// Update the summation accumulator
-    pub fn accumulate(&mut self, current_slot: u64, amount: u64) -> Result<()> {
+    pub fn accumulate(&mut self, amount: u64) -> Result<()> {
+        let current_slot = Clock::get()?.slot;
         let elapsed_slots = current_slot
             .checked_sub(self.last_slot)
             .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
