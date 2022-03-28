@@ -37,6 +37,8 @@ impl<'info> Withdraw<'info> {
         token::burn(cpi_ctx, lp_amount)?;
 
         // Transfer tokens back to user
+        // Fee = 1 lamport due precision errors when withdrawing from lending protocols
+        let amount_conservative = amount.saturating_sub(1);
         let cpi_accounts = Transfer {
             from: self.vault_input_token_account.to_account_info(),
             to: self.user_input_token_account.to_account_info(),
@@ -44,7 +46,7 @@ impl<'info> Withdraw<'info> {
         };
         let cpi_program = self.token_program.to_account_info();
         let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer);
-        token::transfer(cpi_ctx, amount)?;
+        token::transfer(cpi_ctx, amount_conservative)?;
 
         // Update total withdraw
         self.vault_account.current_tvl = self

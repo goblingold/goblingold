@@ -423,9 +423,7 @@ impl<'info> SolendTVL<'info> {
         let tvl = self.max_withdrawable()?;
 
         let protocol = &mut self.generic_accs.vault_account.protocols[Protocols::Solend as usize];
-        let rewards = tvl
-            .checked_sub(protocol.tokens.base_amount)
-            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+        let rewards = tvl.saturating_sub(protocol.tokens.base_amount);
 
         protocol.rewards.update(rewards)?;
 
