@@ -522,7 +522,7 @@ impl<'info> PortTVL<'info> {
 
     pub fn check_hash(&self) -> Result<()> {
         check_hash_pub_keys(
-            &[self.reserve.key.as_ref()],
+            &[self.reserve.key.as_ref(), self.obligation.key().as_ref()],
             self.generic_accs.vault_account.protocols[Protocols::Port as usize]
                 .hash_pubkey
                 .hash_tvl,

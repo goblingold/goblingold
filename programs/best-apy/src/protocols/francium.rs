@@ -602,7 +602,10 @@ impl<'info> FranciumTVL<'info> {
     }
     pub fn check_hash(&self) -> Result<()> {
         check_hash_pub_keys(
-            &[self.lending_pool.key.as_ref()],
+            &[
+                self.lending_pool.key.as_ref(),
+                self.farming_user.key.as_ref(),
+            ],
             self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
                 .hash_pubkey
                 .hash_tvl,
