@@ -82,7 +82,7 @@
           "name": "weights",
           "type": {
             "array": [
-              "u16",
+              "u32",
               5
             ]
           }
@@ -1601,7 +1601,7 @@
         "fields": [
           {
             "name": "weight",
-            "type": "u16"
+            "type": "u32"
           },
           {
             "name": "amount",
