@@ -11,10 +11,9 @@ use error::ErrorCode;
 use protocols::{francium::*, mango::*, port::*, solend::*, tulip::*, PROTOCOLS_LEN};
 use std::mem::size_of;
 use std::str::FromStr;
-use vault::{Bumps, InitVaultAccountParams, VaultAccount};
+use vault::{Bumps, InitVaultAccountParams, VaultAccount, HASH_PUBKEYS_LEN};
 
 mod deposit;
-mod duplicated_ixs;
 mod error;
 mod generic_accounts;
 mod macros;
@@ -102,7 +101,7 @@ pub mod best_apy {
         ctx: Context<SetHash>,
         protocol: usize,
         action: String,
-        hash: [u8; 8],
+        hash: [u8; HASH_PUBKEYS_LEN],
     ) -> Result<()> {
         ctx.accounts.set_hash(protocol, action, hash)
     }

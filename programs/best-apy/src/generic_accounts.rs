@@ -22,33 +22,21 @@ impl<'info> GenericWithdrawAccounts<'info> {
     /// from the bot or from a user, assuming for the latter that the following ix corresponds to
     /// the `withdraw` one
     pub fn amount_to_withdraw(&self, protocol: Protocols) -> Result<u64> {
-        self.amount_to_withdraw_in_n_txs(protocol, 1)
-    }
-
-    /// Compute the amount to withdraw from the protocol depending on whether the instruction comes
-    /// from the bot or from a user, assuming for the latter that the n-following ix corresponds to
-    /// the `withdraw` one
-    pub fn amount_to_withdraw_in_n_txs(
-        &self,
-        protocol: Protocols,
-        target_ix: usize,
-    ) -> Result<u64> {
-        if let Some(amount_target_ix) = self.read_amount_from_withdraw_ix(target_ix)? {
-            Ok(amount_target_ix)
+        if let Some(amount) = self.read_amount_from_withdraw_ix()? {
+            Ok(amount)
         } else {
             Ok(self.vault_account.calculate_withdraw(protocol)?)
         }
     }
 
-    /// Read the amount to withdraw from the target `withdraw` instruction
-    fn read_amount_from_withdraw_ix(&self, target_ix_index: usize) -> Result<Option<u64>> {
+    /// Read the amount to withdraw from the next `withdraw` instruction
+    fn read_amount_from_withdraw_ix(&self) -> Result<Option<u64>> {
         let current_index =
             sysvar::instructions::load_current_index_checked(&self.instructions)? as usize;
 
-        if let Ok(next_ix) = sysvar::instructions::load_instruction_at_checked(
-            current_index + target_ix_index,
-            &self.instructions,
-        ) {
+        if let Ok(next_ix) =
+            sysvar::instructions::load_instruction_at_checked(current_index + 1, &self.instructions)
+        {
             let ix_data: &[u8] = &next_ix.data;
             require!(
                 next_ix.data.len() == IX_WITHDRAW_DATA_LEN && ix_data[..8] == IX_WITHDRAW_SIGHASH,

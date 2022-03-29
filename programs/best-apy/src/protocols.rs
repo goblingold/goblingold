@@ -1,4 +1,5 @@
 pub mod francium;
+pub mod francium_farming_user;
 pub mod francium_lending_pool;
 pub mod mango;
 pub mod port;

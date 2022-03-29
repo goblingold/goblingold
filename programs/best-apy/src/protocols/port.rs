@@ -1,7 +1,7 @@
 use crate::error::ErrorCode;
 use crate::macros::generate_seeds;
 use crate::protocols::Protocols;
-use crate::vault::{check_hash_pub_keys, TokenBalances, VaultAccount};
+use crate::vault::{check_hash_pub_keys, VaultAccount};
 use crate::{
     generic_accounts_anchor_modules::*, GenericDepositAccounts, GenericTVLAccounts,
     GenericWithdrawAccounts,
@@ -204,30 +204,13 @@ impl<'info> PortDeposit<'info> {
     /// Deposit into protocol
     pub fn deposit(&mut self) -> Result<()> {
         let amount = self.generic_accs.amount_to_deposit(Protocols::Port)?;
-        let balances = self.deposit_and_get_balances(amount)?;
-
-        self.generic_accs.vault_account.protocols[Protocols::Port as usize]
-            .update_after_deposit(self.generic_accs.clock.slot, balances)?;
-
-        Ok(())
-    }
-
-    /// Deposit into the protocol and get the true token balances
-    fn deposit_and_get_balances(&mut self, amount: u64) -> Result<TokenBalances> {
-        let lp_before = self.port_destination_deposit_collateral_account.amount;
 
         self.cpi_deposit(amount)?;
-        self.port_destination_deposit_collateral_account.reload()?;
 
-        let lp_after = self.port_destination_deposit_collateral_account.amount;
-        let lp_amount = lp_after
-            .checked_sub(lp_before)
-            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+        self.generic_accs.vault_account.protocols[Protocols::Port as usize]
+            .update_after_deposit(amount)?;
 
-        Ok(TokenBalances {
-            base_amount: amount,
-            lp_amount,
-        })
+        Ok(())
     }
 
     /// CPI deposit call
@@ -342,10 +325,10 @@ impl<'info> PortWithdraw<'info> {
     /// Withdraw from the protocol
     pub fn withdraw(&mut self) -> Result<()> {
         let amount = self.generic_accs.amount_to_withdraw(Protocols::Port)?;
-        let balances = self.withdraw_and_get_balances(amount)?;
+        let amount_withdrawn = self.withdraw_and_get_balance(amount)?;
 
         self.generic_accs.vault_account.protocols[Protocols::Port as usize]
-            .update_after_withdraw(self.generic_accs.clock.slot, balances)?;
+            .update_after_withdraw(amount_withdrawn)?;
 
         Ok(())
     }
@@ -360,13 +343,12 @@ impl<'info> PortWithdraw<'info> {
         Ok(lp_amount)
     }
 
-    /// Withdraw from the protocol and get the true token balances
-    fn withdraw_and_get_balances(&mut self, amount: u64) -> Result<TokenBalances> {
+    /// Withdraw from the protocol and get the true token balance
+    fn withdraw_and_get_balance(&mut self, amount: u64) -> Result<u64> {
         let lp_amount = self.liquidity_to_collateral(amount)?;
         let amount_before = self.generic_accs.vault_input_token_account.amount;
 
         self.cpi_withdraw(lp_amount)?;
-
         self.generic_accs.vault_input_token_account.reload()?;
 
         let amount_after = self.generic_accs.vault_input_token_account.amount;
@@ -374,10 +356,7 @@ impl<'info> PortWithdraw<'info> {
             .checked_sub(amount_before)
             .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
-        Ok(TokenBalances {
-            base_amount: amount_diff,
-            lp_amount,
-        })
+        Ok(amount_diff)
     }
 
     /// CPI withdraw call
@@ -468,8 +447,11 @@ impl<'info> PortWithdraw<'info> {
 pub struct PortTVL<'info> {
     pub generic_accs: GenericTVLAccounts<'info>,
     #[account(owner = port_lending_program_id::ID)]
-    /// CHECK: owner and mint data field are checked
+    /// CHECK: hash, owner and mint data field are checked
     pub reserve: AccountInfo<'info>,
+    #[account(owner = port_lending_program_id::ID)]
+    /// CHECK: hash, owner and reserve & owner fields are checked
+    pub obligation: AccountInfo<'info>,
 }
 
 impl<'info> PortTVL<'info> {
@@ -478,7 +460,7 @@ impl<'info> PortTVL<'info> {
         let tvl = self.max_withdrawable()?;
 
         let protocol = &mut self.generic_accs.vault_account.protocols[Protocols::Port as usize];
-        let rewards = tvl.saturating_sub(protocol.tokens.base_amount);
+        let rewards = tvl.saturating_sub(protocol.amount);
 
         protocol.rewards.update(rewards)?;
 
@@ -487,19 +469,28 @@ impl<'info> PortTVL<'info> {
 
     /// Calculate the max native units to withdraw
     fn max_withdrawable(&self) -> Result<u64> {
-        let protocol = self.generic_accs.vault_account.protocols[Protocols::Port as usize];
-        self.lp_to_liquidity(protocol.tokens.lp_amount)
-    }
-
-    /// Convert reserve collateral to liquidity
-    fn lp_to_liquidity(&self, lp_amount: u64) -> Result<u64> {
-        let mut account_data_slice: &[u8] = &self.reserve.try_borrow_data()?;
-        let reserve = port_anchor_adaptor::PortReserve::try_deserialize(&mut account_data_slice)?;
+        let mut reserve_data: &[u8] = &self.reserve.try_borrow_data()?;
+        let mut obligation_data: &[u8] = &self.reserve.try_borrow_data()?;
+        let reserve = port_anchor_adaptor::PortReserve::try_deserialize(&mut reserve_data)?;
+        let obligation =
+            port_anchor_adaptor::PortObligation::try_deserialize(&mut obligation_data)?;
 
         require!(
             reserve.liquidity.mint_pubkey == self.generic_accs.vault_account.input_mint_pubkey,
             ErrorCode::InvalidMint
         );
+
+        require!(
+            obligation.owner == self.generic_accs.vault_account.key(),
+            ErrorCode::InvalidObligationOwner
+        );
+
+        require!(
+            obligation.deposits[0].deposit_reserve == *self.reserve.key,
+            ErrorCode::InvalidObligationReserve
+        );
+
+        let lp_amount = obligation.deposits[0].deposited_amount;
 
         let tvl = reserve
             .collateral_exchange_rate()?
@@ -510,7 +501,7 @@ impl<'info> PortTVL<'info> {
 
     pub fn check_hash(&self) -> Result<()> {
         check_hash_pub_keys(
-            &[self.reserve.key.as_ref()],
+            &[self.reserve.key.as_ref(), self.obligation.key().as_ref()],
             self.generic_accs.vault_account.protocols[Protocols::Port as usize]
                 .hash_pubkey
                 .hash_tvl,

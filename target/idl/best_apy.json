@@ -712,6 +712,11 @@
           "name": "reserve",
           "isMut": false,
           "isSigner": false
+        },
+        {
+          "name": "obligation",
+          "isMut": false,
+          "isSigner": false
         }
       ],
       "args": []
@@ -986,6 +991,11 @@
           "name": "reserve",
           "isMut": false,
           "isSigner": false
+        },
+        {
+          "name": "obligation",
+          "isMut": false,
+          "isSigner": false
         }
       ],
       "args": []
@@ -1200,6 +1210,11 @@
           "name": "reserve",
           "isMut": false,
           "isSigner": false
+        },
+        {
+          "name": "vaultTulipCollateralTokenAccount",
+          "isMut": true,
+          "isSigner": false
         }
       ],
       "args": []
@@ -1287,11 +1302,6 @@
               "isSigner": false
             }
           ]
-        },
-        {
-          "name": "instructions",
-          "isMut": false,
-          "isSigner": false
         },
         {
           "name": "franciumLendingProgramId",
@@ -1504,6 +1514,11 @@
           "name": "lendingPool",
           "isMut": false,
           "isSigner": false
+        },
+        {
+          "name": "farmingUser",
+          "isMut": false,
+          "isSigner": false
         }
       ],
       "args": []
@@ -1589,10 +1604,8 @@
             "type": "u16"
           },
           {
-            "name": "tokens",
-            "type": {
-              "defined": "TokenBalances"
-            }
+            "name": "amount",
+            "type": "u64"
           },
           {
             "name": "rewards",
@@ -1640,22 +1653,6 @@
                 8
               ]
             }
-          }
-        ]
-      }
-    },
-    {
-      "name": "TokenBalances",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "baseAmount",
-            "type": "u64"
-          },
-          {
-            "name": "lpAmount",
-            "type": "u64"
           }
         ]
       }
@@ -1821,9 +1818,16 @@
       "code": 6014,
       "name": "InvalidArraySize",
       "msg": "Invalid size for array"
+    },
+    {
+      "code": 6015,
+      "name": "InvalidObligationOwner",
+      "msg": "Invalid obligation account owner"
+    },
+    {
+      "code": 6016,
+      "name": "InvalidObligationReserve",
+      "msg": "Invalid obligation reserve account"
     }
-  ],
-  "metadata": {
-    "address": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-  }
+  ]
 }
