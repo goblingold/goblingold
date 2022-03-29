@@ -18,7 +18,7 @@ devnet = []
 [dependencies]
 anchor-lang = "0.23.0"
 anchor-spl = "0.23.0"
-spl-token-lending = {package = "spl-token-lending", git = "https://github.com/solana-labs/solana-program-library", features = ["no-entrypoint"], rev = "cd8d79a"}
+solana-maths = "0.1.2"
 port-anchor-adaptor = "0.3.4"
 mango = {package = "mango", git = "https://github.com/blockworks-foundation/mango-v3", features = ["no-entrypoint"], rev = "ae5fe3b"} # v3.4.1
 solend-token-lending = { version = "0.1.1", features = ["no-entrypoint"] }

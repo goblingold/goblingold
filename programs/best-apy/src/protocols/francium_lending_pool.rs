@@ -1,4 +1,5 @@
 use anchor_lang::solana_program::{
+    clock::Slot,
     msg,
     program_error::ProgramError,
     program_option::COption,
@@ -6,8 +7,7 @@ use anchor_lang::solana_program::{
     pubkey::{Pubkey, PUBKEY_BYTES},
 };
 use arrayref::{array_ref, array_refs};
-use spl_token_lending::math::{Decimal, Rate, TryAdd, TryDiv, TryMul, WAD};
-use spl_token_lending::state::LastUpdate;
+use solana_maths::{Decimal, Rate, TryAdd, TryDiv, TryMul, WAD};
 use std::convert::TryFrom;
 
 const INITIAL_COLLATERAL_RATIO: u64 = 1;
@@ -144,6 +144,15 @@ impl CollateralExchangeRate {
     ) -> Result<Decimal, ProgramError> {
         liquidity_amount.try_mul(self.0)
     }
+}
+
+/// Last update state
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct LastUpdate {
+    /// Last slot when updated
+    pub slot: Slot,
+    /// True when marked stale, false when slot updated
+    pub stale: bool,
 }
 
 impl Sealed for LendingPool {}
