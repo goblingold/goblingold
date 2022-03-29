@@ -175,25 +175,25 @@ pub mod best_apy {
     /// Francium: Initialize protocol accounts
     // ACCESS RESTRICTED. ONLY ALLOWED_DEPLOYER
     pub fn francium_initialize(ctx: Context<FranciumInitialize>) -> Result<()> {
-        ctx.accounts.create_and_initialize()
+        protocols::francium::initialize(ctx)
     }
 
     /// Francium: Deposit from the vault account
     #[access_control(ctx.accounts.check_hash())]
     pub fn francium_deposit(ctx: Context<FranciumDeposit>) -> Result<()> {
-        ctx.accounts.deposit()
+        protocols::francium::deposit(ctx)
     }
 
     /// Francium: Withdraw to the vault account
     #[access_control(ctx.accounts.check_hash())]
     pub fn francium_withdraw(ctx: Context<FranciumWithdraw>) -> Result<()> {
-        ctx.accounts.withdraw()
+        protocols::francium::withdraw(ctx)
     }
 
     /// Francium: Compute the TVL
     #[access_control(ctx.accounts.check_hash())]
     pub fn francium_tvl(ctx: Context<FranciumTVL>) -> Result<()> {
-        ctx.accounts.update_rewards()
+        protocols::francium::update_rewards(ctx)
     }
 }
 
