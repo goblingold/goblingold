@@ -22,8 +22,8 @@ impl<'info> GenericWithdrawAccounts<'info> {
     /// from the bot or from a user, assuming for the latter that the following ix corresponds to
     /// the `withdraw` one
     pub fn amount_to_withdraw(&self, protocol: Protocols) -> Result<u64> {
-        if let Some(amount_target_ix) = self.read_amount_from_withdraw_ix()? {
-            Ok(amount_target_ix)
+        if let Some(amount) = self.read_amount_from_withdraw_ix()? {
+            Ok(amount)
         } else {
             Ok(self.vault_account.calculate_withdraw(protocol)?)
         }
