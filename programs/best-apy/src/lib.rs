@@ -11,7 +11,7 @@ use error::ErrorCode;
 use protocols::{francium::*, mango::*, port::*, solend::*, tulip::*, PROTOCOLS_LEN};
 use std::mem::size_of;
 use std::str::FromStr;
-use vault::{Bumps, InitVaultAccountParams, VaultAccount, HASH_PUBKEYS_LEN};
+use vault::{Bumps, InitVaultAccountParams, VaultAccount, HASH_PUBKEYS_LEN, WEIGHTS_SCALE};
 
 mod deposit;
 mod error;
@@ -55,14 +55,14 @@ pub mod best_apy {
     // ACCESS RESTRICTED. ONLY ALLOWED_DEPLOYER
     pub fn set_protocol_weights(
         ctx: Context<SetProtocolWeights>,
-        weights: [u16; PROTOCOLS_LEN],
+        weights: [u32; PROTOCOLS_LEN],
     ) -> Result<()> {
         let weights_sum = weights
             .iter()
-            .try_fold(0_u16, |acc, &x| acc.checked_add(x))
+            .try_fold(0_u32, |acc, &x| acc.checked_add(x))
             .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
-        require!(weights_sum == 1000, ErrorCode::InvalidWeights);
+        require!(weights_sum == WEIGHTS_SCALE, ErrorCode::InvalidWeights);
 
         ctx.accounts
             .vault_account

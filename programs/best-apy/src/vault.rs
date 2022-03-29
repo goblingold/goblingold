@@ -6,6 +6,7 @@ use anchor_lang::solana_program::hash::hashv;
 use std::{cmp, convert::TryInto};
 
 pub const HASH_PUBKEYS_LEN: usize = 8;
+pub const WEIGHTS_SCALE: u32 = 1_000_000;
 
 /// Strategy vault account
 #[account]
@@ -67,7 +68,7 @@ impl VaultAccount {
 
         if total_deposit != 0 && total_rewards != 0 {
             for i in 0..PROTOCOLS_LEN {
-                if self.protocols[i].is_used() {
+                if self.protocols[i].is_active() {
                     let rewards_wo_i: u128 = total_rewards
                         .checked_sub(rewards[i])
                         .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
@@ -101,13 +102,13 @@ impl VaultAccount {
             // deposited
             #[allow(clippy::needless_range_loop)]
             for i in 0..PROTOCOLS_LEN {
-                if self.protocols[i].is_used() {
+                if self.protocols[i].is_active() {
                     self.protocols[i].weight = deposit[i]
-                        .checked_mul(1000)
+                        .checked_mul(WEIGHTS_SCALE.into())
                         .ok_or_else(|| error!(ErrorCode::MathOverflow))?
                         .checked_div(total_deposit)
                         .ok_or_else(|| error!(ErrorCode::MathOverflow))?
-                        as u16;
+                        as u32;
 
                     if self.protocols[i].weight == 0 {
                         self.protocols[i].weight = 1
@@ -123,13 +124,13 @@ impl VaultAccount {
                 .max_by_key(|&(_, protocol)| protocol.weight)
                 .unwrap();
 
-            let weights_sum: u16 = self
+            let weights_sum: u32 = self
                 .protocols
                 .iter()
-                .try_fold(0_u16, |acc, &protocol| acc.checked_add(protocol.weight))
+                .try_fold(0_u32, |acc, &protocol| acc.checked_add(protocol.weight))
                 .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
-            self.protocols[max_indx].weight = 1000_u16
+            self.protocols[max_indx].weight = WEIGHTS_SCALE
                 .checked_sub(
                     weights_sum
                         .checked_sub(max_protocol.weight)
@@ -198,7 +199,7 @@ pub struct Bumps {
 #[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default)]
 pub struct ProtocolData {
     /// Percentage of the TVL that should be deposited in the protocol
-    pub weight: u16,
+    pub weight: u32,
     /// Deposited token amount in the protocol
     pub amount: u64,
     /// Accumulated rewards
@@ -208,9 +209,9 @@ pub struct ProtocolData {
 }
 
 impl ProtocolData {
-    /// Check the protocol is used
-    pub fn is_used(&self) -> bool {
-        self.weight != u16::default()
+    /// Check the protocol is active
+    pub fn is_active(&self) -> bool {
+        self.weight != u32::default()
     }
 
     /// Amount that should be deposited according to the weight
@@ -218,7 +219,7 @@ impl ProtocolData {
         let amount: u64 = (total_amount as u128)
             .checked_mul(self.weight as u128)
             .ok_or_else(|| error!(ErrorCode::MathOverflow))?
-            .checked_div(1000_u128)
+            .checked_div(WEIGHTS_SCALE.into())
             .ok_or_else(|| error!(ErrorCode::MathOverflow))?
             .try_into()
             .map_err(|_| ErrorCode::MathOverflow)?;
