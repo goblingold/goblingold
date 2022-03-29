@@ -5,6 +5,8 @@ use anchor_lang::prelude::*;
 use anchor_lang::solana_program::hash::hashv;
 use std::{cmp, convert::TryInto};
 
+pub const HASH_PUBKEYS_LEN: usize = 8;
+
 /// Strategy vault account
 #[account]
 #[derive(Default)]
@@ -142,7 +144,7 @@ impl VaultAccount {
     pub fn calculate_deposit(&self, protocol: Protocols, available_amount: u64) -> Result<u64> {
         let protocol = &self.protocols[protocol as usize];
 
-        let deposited_amount = protocol.tokens.base_amount;
+        let deposited_amount = protocol.amount;
         let target_amount = protocol.amount_should_be_deposited(self.current_tvl)?;
 
         if target_amount > deposited_amount {
@@ -160,7 +162,7 @@ impl VaultAccount {
     pub fn calculate_withdraw(&self, protocol: Protocols) -> Result<u64> {
         let protocol = &self.protocols[protocol as usize];
 
-        let deposited_amount = protocol.tokens.base_amount;
+        let deposited_amount = protocol.amount;
         let target_amount = protocol.amount_should_be_deposited(self.current_tvl)?;
 
         if target_amount < deposited_amount {
@@ -197,8 +199,8 @@ pub struct Bumps {
 pub struct ProtocolData {
     /// Percentage of the TVL that should be deposited in the protocol
     pub weight: u16,
-    /// Token balances in the protocol
-    pub tokens: TokenBalances,
+    /// Deposited token amount in the protocol
+    pub amount: u64,
     /// Accumulated rewards
     pub rewards: AccumulatedRewards,
     /// Hashes of Pubkey
@@ -225,38 +227,33 @@ impl ProtocolData {
 
     /// Update the protocol tvl with the generated rewards
     pub fn update_tvl(&mut self) -> Result<()> {
-        self.tokens.base_amount = self
-            .tokens
-            .base_amount
+        self.amount = self
+            .amount
             .checked_add(self.rewards.amount)
             .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
         self.rewards.amount = 0_u64;
         Ok(())
     }
 
-    /// Update token amounts after depositing in the protocol
-    pub fn update_after_deposit(
-        &mut self,
-        current_slot: u64,
-        balances: TokenBalances,
-    ) -> Result<()> {
-        self.rewards
-            .deposited_integral
-            .accumulate(current_slot, self.tokens.base_amount)?;
-        self.tokens = self.tokens.add(balances)?;
+    /// Update token amount after depositing in the protocol
+    pub fn update_after_deposit(&mut self, amount: u64) -> Result<()> {
+        self.rewards.deposited_integral.accumulate(self.amount)?;
+        self.amount = self
+            .amount
+            .checked_add(amount)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+
         Ok(())
     }
 
-    /// Update token amounts after withdrawing from the protocol
-    pub fn update_after_withdraw(
-        &mut self,
-        current_slot: u64,
-        balances: TokenBalances,
-    ) -> Result<()> {
-        self.rewards
-            .deposited_integral
-            .accumulate(current_slot, self.tokens.base_amount)?;
-        self.tokens = self.tokens.sub(balances)?;
+    /// Update token amount after withdrawing from the protocol
+    pub fn update_after_withdraw(&mut self, amount: u64) -> Result<()> {
+        self.rewards.deposited_integral.accumulate(self.amount)?;
+        self.amount = self
+            .amount
+            .checked_sub(amount)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+
         Ok(())
     }
 }
@@ -264,16 +261,21 @@ impl ProtocolData {
 #[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default)]
 pub struct HashPubkey {
     /// Hash of important accounts for each protocol on deposit
-    pub hash_deposit: [u8; 8],
+    pub hash_deposit: [u8; HASH_PUBKEYS_LEN],
     /// Hash of important accounts for each protocol on withdraw
-    pub hash_withdraw: [u8; 8],
+    pub hash_withdraw: [u8; HASH_PUBKEYS_LEN],
     /// Hash of important accounts for each protocol on tvl
-    pub hash_tvl: [u8; 8],
+    pub hash_tvl: [u8; HASH_PUBKEYS_LEN],
     // TODO additional padding
 }
 
 impl<'info> SetHash<'info> {
-    pub fn set_hash(&mut self, protocol: usize, action: String, hash: [u8; 8]) -> Result<()> {
+    pub fn set_hash(
+        &mut self,
+        protocol: usize,
+        action: String,
+        hash: [u8; HASH_PUBKEYS_LEN],
+    ) -> Result<()> {
         match action.as_str() {
             "D" => {
                 self.vault_account.protocols[protocol]
@@ -292,57 +294,12 @@ impl<'info> SetHash<'info> {
     }
 }
 
-pub fn check_hash_pub_keys(keys: &[&[u8]], target_hash: [u8; 8]) -> Result<()> {
+pub fn check_hash_pub_keys(keys: &[&[u8]], target_hash: [u8; HASH_PUBKEYS_LEN]) -> Result<()> {
     require!(
-        target_hash == hashv(keys).to_bytes()[0..8],
+        target_hash == hashv(keys).to_bytes()[..HASH_PUBKEYS_LEN],
         ErrorCode::InvalidHash
     );
     Ok(())
-}
-
-/// Token balances in the protocol
-#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default)]
-pub struct TokenBalances {
-    /// Input tokens deposited in the protocol
-    pub base_amount: u64,
-    /// LP tokens returned by the protocol
-    pub lp_amount: u64,
-}
-
-impl TokenBalances {
-    pub fn add(&self, rhs: Self) -> Result<Self> {
-        let base_amount = self
-            .base_amount
-            .checked_add(rhs.base_amount)
-            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
-
-        let lp_amount = self
-            .lp_amount
-            .checked_add(rhs.lp_amount)
-            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
-
-        Ok(Self {
-            base_amount,
-            lp_amount,
-        })
-    }
-
-    pub fn sub(&self, rhs: Self) -> Result<Self> {
-        let base_amount = self
-            .base_amount
-            .checked_sub(rhs.base_amount)
-            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
-
-        let lp_amount = self
-            .lp_amount
-            .checked_sub(rhs.lp_amount)
-            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
-
-        Ok(Self {
-            base_amount,
-            lp_amount,
-        })
-    }
 }
 
 /// Generated rewards
@@ -405,7 +362,8 @@ pub struct SlotIntegrated {
 
 impl SlotIntegrated {
     /// Update the summation accumulator
-    pub fn accumulate(&mut self, current_slot: u64, amount: u64) -> Result<()> {
+    pub fn accumulate(&mut self, amount: u64) -> Result<()> {
+        let current_slot = Clock::get()?.slot;
         let elapsed_slots = current_slot
             .checked_sub(self.last_slot)
             .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
