@@ -1,5 +1,5 @@
+use crate::protocols::state::*;
 use anchor_lang::solana_program::{
-    clock::Slot,
     msg,
     program_error::ProgramError,
     program_option::COption,
@@ -146,15 +146,6 @@ impl CollateralExchangeRate {
     }
 }
 
-/// Last update state
-#[derive(Clone, Debug, Default, PartialEq)]
-pub struct LastUpdate {
-    /// Last slot when updated
-    pub slot: Slot,
-    /// True when marked stale, false when slot updated
-    pub stale: bool,
-}
-
 impl Sealed for LendingPool {}
 impl IsInitialized for LendingPool {
     fn is_initialized(&self) -> bool {
@@ -279,30 +270,5 @@ impl Pack for LendingPool {
             interest_reverse_rate: u8::from_le_bytes(*interest_reverse_rate),
             accumulated_interest_reverse: u64::from_le_bytes(*accumulated_interest_reverse),
         })
-    }
-}
-
-// Helpers
-fn unpack_decimal(src: &[u8; 16]) -> Decimal {
-    Decimal::from_scaled_val(u128::from_le_bytes(*src))
-}
-
-fn unpack_bool(src: &[u8; 1]) -> Result<bool, ProgramError> {
-    match u8::from_le_bytes(*src) {
-        0 => Ok(false),
-        1 => Ok(true),
-        _ => {
-            msg!("Boolean cannot be unpacked");
-            Err(ProgramError::InvalidAccountData)
-        }
-    }
-}
-
-fn unpack_coption_key(src: &[u8; 4 + PUBKEY_BYTES]) -> Result<COption<Pubkey>, ProgramError> {
-    let (tag, body) = array_refs![src, 4, 32];
-    match *tag {
-        [0, 0, 0, 0] => Ok(COption::None),
-        [1, 0, 0, 0] => Ok(COption::Some(Pubkey::new_from_array(*body))),
-        _ => Err(ProgramError::InvalidAccountData),
     }
 }

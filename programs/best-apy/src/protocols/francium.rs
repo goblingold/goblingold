@@ -1,7 +1,7 @@
 use crate::error::ErrorCode;
 use crate::macros::generate_seeds;
+use crate::protocols::state::{francium_farming_user, francium_lending_pool};
 use crate::protocols::Protocols;
-use crate::protocols::{francium_farming_user, francium_lending_pool};
 use crate::vault::{check_hash_pub_keys, VaultAccount};
 use crate::{
     generic_accounts_anchor_modules::*, GenericDepositAccounts, GenericTVLAccounts,

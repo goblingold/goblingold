@@ -1,6 +1,6 @@
 use crate::error::ErrorCode;
 use crate::macros::generate_seeds;
-use crate::protocols::tulip_reserve;
+use crate::protocols::state::tulip_reserve;
 use crate::protocols::Protocols;
 use crate::vault::check_hash_pub_keys;
 use crate::{
