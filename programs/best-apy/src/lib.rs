@@ -80,96 +80,96 @@ pub mod best_apy {
     /// Mango: Initialize protocol accounts
     // ACCESS RESTRICTED. ONLY ALLOWED_DEPLOYER
     pub fn mango_initialize(ctx: Context<MangoInitialize>) -> Result<()> {
-        ctx.accounts.create_and_initialize()
+        protocols::mango::initialize(ctx)
     }
 
     /// Mango: Deposit from the vault account
     #[access_control(ctx.accounts.check_hash())]
     pub fn mango_deposit(ctx: Context<MangoDeposit>) -> Result<()> {
-        ctx.accounts.deposit()
+        protocols::mango::deposit(ctx)
     }
 
     /// Mango: Withdraw to the vault account
     #[access_control(ctx.accounts.check_hash())]
     pub fn mango_withdraw(ctx: Context<MangoWithdraw>) -> Result<()> {
-        ctx.accounts.withdraw()
+        protocols::mango::withdraw(ctx)
     }
 
     /// Mango: Compute the TVL
     #[access_control(ctx.accounts.check_hash())]
     pub fn mango_tvl(ctx: Context<MangoTVL>) -> Result<()> {
-        ctx.accounts.update_rewards()
+        protocols::mango::update_rewards(ctx)
     }
 
     /// Solend: Initialize protocol accounts
     // ACCESS RESTRICTED. ONLY ALLOWED_DEPLOYER
     pub fn solend_initialize(ctx: Context<SolendInitialize>) -> Result<()> {
-        ctx.accounts.create_and_initialize()
+        protocols::solend::initialize(ctx)
     }
 
     /// Solend: Deposit from the vault account
     #[access_control(ctx.accounts.check_hash())]
     pub fn solend_deposit(ctx: Context<SolendDeposit>) -> Result<()> {
-        ctx.accounts.deposit()
+        protocols::solend::deposit(ctx)
     }
 
     /// Solend: Withdraw to the vault account
     #[access_control(ctx.accounts.check_hash())]
     pub fn solend_withdraw(ctx: Context<SolendWithdraw>) -> Result<()> {
-        ctx.accounts.withdraw()
+        protocols::solend::withdraw(ctx)
     }
 
     /// Solend: Compute the TVL
     #[access_control(ctx.accounts.check_hash())]
     pub fn solend_tvl(ctx: Context<SolendTVL>) -> Result<()> {
-        ctx.accounts.update_rewards()
+        protocols::solend::update_rewards(ctx)
     }
 
     /// Port: Initialize protocol accounts
     // ACCESS RESTRICTED. ONLY ALLOWED_DEPLOYER
     pub fn port_initialize(ctx: Context<PortInitialize>) -> Result<()> {
-        ctx.accounts.create_and_initialize()
+        protocols::port::initialize(ctx)
     }
 
     /// Port: Deposit from the vault account
     #[access_control(ctx.accounts.check_hash())]
     pub fn port_deposit(ctx: Context<PortDeposit>) -> Result<()> {
-        ctx.accounts.deposit()
+        protocols::port::deposit(ctx)
     }
 
     /// Port: Withdraw to the vault account
     #[access_control(ctx.accounts.check_hash())]
     pub fn port_withdraw(ctx: Context<PortWithdraw>) -> Result<()> {
-        ctx.accounts.withdraw()
+        protocols::port::withdraw(ctx)
     }
 
     /// Port: Compute the TVL
     #[access_control(ctx.accounts.check_hash())]
     pub fn port_tvl(ctx: Context<PortTVL>) -> Result<()> {
-        ctx.accounts.update_rewards()
+        protocols::port::update_rewards(ctx)
     }
 
     /// Port: Claim rewards
     pub fn port_claim_rewards(ctx: Context<PortClaimRewards>) -> Result<()> {
-        ctx.accounts.claim_rewards()
+        protocols::port::claim_rewards(ctx)
     }
 
     /// Tulip: Deposit from the vault account
     #[access_control(ctx.accounts.check_hash())]
     pub fn tulip_deposit(ctx: Context<TulipDeposit>) -> Result<()> {
-        ctx.accounts.deposit()
+        protocols::tulip::deposit(ctx)
     }
 
     /// Tulip: Withdraw to the vault account
     #[access_control(ctx.accounts.check_hash())]
     pub fn tulip_withdraw(ctx: Context<TulipWithdraw>) -> Result<()> {
-        ctx.accounts.withdraw()
+        protocols::tulip::withdraw(ctx)
     }
 
     /// Tulip: Compute the TVL
     #[access_control(ctx.accounts.check_hash())]
     pub fn tulip_tvl(ctx: Context<TulipTVL>) -> Result<()> {
-        ctx.accounts.update_rewards()
+        protocols::tulip::update_rewards(ctx)
     }
 
     /// Francium: Initialize protocol accounts

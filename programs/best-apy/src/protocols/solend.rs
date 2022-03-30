@@ -97,6 +97,11 @@ impl<'info> SolendInitialize<'info> {
     }
 }
 
+/// Create and initialize protocol accounts
+pub fn initialize(ctx: Context<SolendInitialize>) -> Result<()> {
+    ctx.accounts.create_and_initialize()
+}
+
 #[derive(Accounts)]
 pub struct SolendDeposit<'info> {
     pub generic_accs: GenericDepositAccounts<'info>,
@@ -135,18 +140,6 @@ pub struct SolendDeposit<'info> {
 }
 
 impl<'info> SolendDeposit<'info> {
-    /// Deposit into protocol
-    pub fn deposit(&mut self) -> Result<()> {
-        let amount = self.generic_accs.amount_to_deposit(Protocols::Solend)?;
-
-        self.cpi_deposit(amount)?;
-
-        self.generic_accs.vault_account.protocols[Protocols::Solend as usize]
-            .update_after_deposit(amount)?;
-
-        Ok(())
-    }
-
     /// CPI deposit call
     fn cpi_deposit(&self, amount: u64) -> Result<()> {
         let seeds = generate_seeds!(self.generic_accs.vault_account);
@@ -229,6 +222,20 @@ impl<'info> SolendDeposit<'info> {
     }
 }
 
+/// Deposit into protocol
+pub fn deposit(ctx: Context<SolendDeposit>) -> Result<()> {
+    let amount = ctx
+        .accounts
+        .generic_accs
+        .amount_to_deposit(Protocols::Solend)?;
+
+    ctx.accounts.cpi_deposit(amount)?;
+    ctx.accounts.generic_accs.vault_account.protocols[Protocols::Solend as usize]
+        .update_after_deposit(amount)?;
+
+    Ok(())
+}
+
 #[derive(Accounts)]
 pub struct SolendWithdraw<'info> {
     pub generic_accs: GenericWithdrawAccounts<'info>,
@@ -263,17 +270,6 @@ pub struct SolendWithdraw<'info> {
 }
 
 impl<'info> SolendWithdraw<'info> {
-    /// Withdraw from the protocol
-    pub fn withdraw(&mut self) -> Result<()> {
-        let amount = self.generic_accs.amount_to_withdraw(Protocols::Solend)?;
-        let amount_withdrawn = self.withdraw_and_get_balance(amount)?;
-
-        self.generic_accs.vault_account.protocols[Protocols::Solend as usize]
-            .update_after_withdraw(amount_withdrawn)?;
-
-        Ok(())
-    }
-
     /// Convert reserve liquidity to collateral
     fn liquidity_to_collateral(&self, amount: u64) -> Result<u64> {
         let reserve = solend_token_lending::state::Reserve::unpack(
@@ -382,6 +378,20 @@ impl<'info> SolendWithdraw<'info> {
     }
 }
 
+/// Withdraw from the protocol
+pub fn withdraw(ctx: Context<SolendWithdraw>) -> Result<()> {
+    let amount = ctx
+        .accounts
+        .generic_accs
+        .amount_to_withdraw(Protocols::Solend)?;
+    let amount_withdrawn = ctx.accounts.withdraw_and_get_balance(amount)?;
+
+    ctx.accounts.generic_accs.vault_account.protocols[Protocols::Solend as usize]
+        .update_after_withdraw(amount_withdrawn)?;
+
+    Ok(())
+}
+
 #[derive(Accounts)]
 pub struct SolendTVL<'info> {
     pub generic_accs: GenericTVLAccounts<'info>,
@@ -394,18 +404,6 @@ pub struct SolendTVL<'info> {
 }
 
 impl<'info> SolendTVL<'info> {
-    /// Update the protocol TVL
-    pub fn update_rewards(&mut self) -> Result<()> {
-        let tvl = self.max_withdrawable()?;
-
-        let protocol = &mut self.generic_accs.vault_account.protocols[Protocols::Solend as usize];
-        let rewards = tvl.saturating_sub(protocol.amount);
-
-        protocol.rewards.update(rewards)?;
-
-        Ok(())
-    }
-
     /// Calculate the max native units to withdraw
     fn max_withdrawable(&self) -> Result<u64> {
         let reserve = solend_token_lending::state::Reserve::unpack(&self.reserve.data.borrow())?;
@@ -443,4 +441,17 @@ impl<'info> SolendTVL<'info> {
                 .hash_tvl,
         )
     }
+}
+
+/// Update the protocol TVL
+pub fn update_rewards(ctx: Context<SolendTVL>) -> Result<()> {
+    let tvl = ctx.accounts.max_withdrawable()?;
+
+    let protocol =
+        &mut ctx.accounts.generic_accs.vault_account.protocols[Protocols::Solend as usize];
+    let rewards = tvl.saturating_sub(protocol.amount);
+
+    protocol.rewards.update(rewards)?;
+
+    Ok(())
 }

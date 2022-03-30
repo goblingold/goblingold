@@ -58,13 +58,6 @@ pub struct PortInitialize<'info> {
 }
 
 impl<'info> PortInitialize<'info> {
-    /// Create and initialize protocol accounts
-    pub fn create_and_initialize(&self) -> Result<()> {
-        self.initialize_obligation()?;
-        self.initialize_stake()?;
-        Ok(())
-    }
-
     /// Create and initialize obligation account
     fn initialize_obligation(&self) -> Result<()> {
         let seeds = generate_seeds!(self.vault_account);
@@ -159,6 +152,13 @@ impl<'info> PortInitialize<'info> {
     }
 }
 
+/// Create and initialize protocol accounts
+pub fn initialize(ctx: Context<PortInitialize>) -> Result<()> {
+    ctx.accounts.initialize_obligation()?;
+    ctx.accounts.initialize_stake()?;
+    Ok(())
+}
+
 #[derive(Accounts)]
 pub struct PortDeposit<'info> {
     pub generic_accs: GenericDepositAccounts<'info>,
@@ -201,18 +201,6 @@ pub struct PortDeposit<'info> {
 }
 
 impl<'info> PortDeposit<'info> {
-    /// Deposit into protocol
-    pub fn deposit(&mut self) -> Result<()> {
-        let amount = self.generic_accs.amount_to_deposit(Protocols::Port)?;
-
-        self.cpi_deposit(amount)?;
-
-        self.generic_accs.vault_account.protocols[Protocols::Port as usize]
-            .update_after_deposit(amount)?;
-
-        Ok(())
-    }
-
     /// CPI deposit call
     fn cpi_deposit(&self, amount: u64) -> Result<()> {
         let seeds = generate_seeds!(self.generic_accs.vault_account);
@@ -279,6 +267,20 @@ impl<'info> PortDeposit<'info> {
     }
 }
 
+/// Deposit into protocol
+pub fn deposit(ctx: Context<PortDeposit>) -> Result<()> {
+    let amount = ctx
+        .accounts
+        .generic_accs
+        .amount_to_deposit(Protocols::Port)?;
+
+    ctx.accounts.cpi_deposit(amount)?;
+    ctx.accounts.generic_accs.vault_account.protocols[Protocols::Port as usize]
+        .update_after_deposit(amount)?;
+
+    Ok(())
+}
+
 #[derive(Accounts)]
 pub struct PortWithdraw<'info> {
     pub generic_accs: GenericWithdrawAccounts<'info>,
@@ -322,17 +324,6 @@ pub struct PortWithdraw<'info> {
 }
 
 impl<'info> PortWithdraw<'info> {
-    /// Withdraw from the protocol
-    pub fn withdraw(&mut self) -> Result<()> {
-        let amount = self.generic_accs.amount_to_withdraw(Protocols::Port)?;
-        let amount_withdrawn = self.withdraw_and_get_balance(amount)?;
-
-        self.generic_accs.vault_account.protocols[Protocols::Port as usize]
-            .update_after_withdraw(amount_withdrawn)?;
-
-        Ok(())
-    }
-
     /// Convert reserve liquidity to collateral
     fn liquidity_to_collateral(&self, amount: u64) -> Result<u64> {
         let mut account_data_slice: &[u8] = &self.port_reserve_account.try_borrow_data()?;
@@ -443,6 +434,20 @@ impl<'info> PortWithdraw<'info> {
     }
 }
 
+/// Withdraw from the protocol
+pub fn withdraw(ctx: Context<PortWithdraw>) -> Result<()> {
+    let amount = ctx
+        .accounts
+        .generic_accs
+        .amount_to_withdraw(Protocols::Port)?;
+    let amount_withdrawn = ctx.accounts.withdraw_and_get_balance(amount)?;
+
+    ctx.accounts.generic_accs.vault_account.protocols[Protocols::Port as usize]
+        .update_after_withdraw(amount_withdrawn)?;
+
+    Ok(())
+}
+
 #[derive(Accounts)]
 pub struct PortTVL<'info> {
     pub generic_accs: GenericTVLAccounts<'info>,
@@ -455,18 +460,6 @@ pub struct PortTVL<'info> {
 }
 
 impl<'info> PortTVL<'info> {
-    /// Update the protocol TVL
-    pub fn update_rewards(&mut self) -> Result<()> {
-        let tvl = self.max_withdrawable()?;
-
-        let protocol = &mut self.generic_accs.vault_account.protocols[Protocols::Port as usize];
-        let rewards = tvl.saturating_sub(protocol.amount);
-
-        protocol.rewards.update(rewards)?;
-
-        Ok(())
-    }
-
     /// Calculate the max native units to withdraw
     fn max_withdrawable(&self) -> Result<u64> {
         let mut reserve_data: &[u8] = &self.reserve.try_borrow_data()?;
@@ -509,6 +502,18 @@ impl<'info> PortTVL<'info> {
     }
 }
 
+/// Update the protocol TVL
+pub fn update_rewards(ctx: Context<PortTVL>) -> Result<()> {
+    let tvl = ctx.accounts.max_withdrawable()?;
+
+    let protocol = &mut ctx.accounts.generic_accs.vault_account.protocols[Protocols::Port as usize];
+    let rewards = tvl.saturating_sub(protocol.amount);
+
+    protocol.rewards.update(rewards)?;
+
+    Ok(())
+}
+
 #[derive(Accounts)]
 pub struct PortClaimRewards<'info> {
     #[account(
@@ -544,28 +549,29 @@ pub struct PortClaimRewards<'info> {
     pub clock: Sysvar<'info, Clock>,
 }
 
-impl<'info> PortClaimRewards<'info> {
-    /// Claim protocol rewards
-    pub fn claim_rewards(&self) -> Result<()> {
-        let seeds = generate_seeds!(self.vault_account);
-        let signer = &[&seeds[..]];
+/// Claim protocol rewards
+pub fn claim_rewards(ctx: Context<PortClaimRewards>) -> Result<()> {
+    let seeds = generate_seeds!(ctx.accounts.vault_account);
+    let signer = &[&seeds[..]];
 
-        let cpi_ctx = CpiContext::new_with_signer(
-            self.port_staking_program_id.to_account_info(),
-            port_anchor_adaptor::ClaimReward {
-                stake_account_owner: self.vault_account.to_account_info(),
-                stake_account: self.vault_port_staking_account.to_account_info(),
-                staking_pool: self.port_staking_pool_account.to_account_info(),
-                reward_token_pool: self.port_rewards_token_pool.to_account_info(),
-                reward_dest: self.vault_port_rewards_account.to_account_info(),
-                staking_program_authority: self.port_rewards_account_authority.to_account_info(),
-                clock: self.clock.to_account_info(),
-                token_program: self.token_program.to_account_info(),
-            },
-            signer,
-        );
-        port_anchor_adaptor::claim_reward(cpi_ctx)?;
+    let cpi_ctx = CpiContext::new_with_signer(
+        ctx.accounts.port_staking_program_id.to_account_info(),
+        port_anchor_adaptor::ClaimReward {
+            stake_account_owner: ctx.accounts.vault_account.to_account_info(),
+            stake_account: ctx.accounts.vault_port_staking_account.to_account_info(),
+            staking_pool: ctx.accounts.port_staking_pool_account.to_account_info(),
+            reward_token_pool: ctx.accounts.port_rewards_token_pool.to_account_info(),
+            reward_dest: ctx.accounts.vault_port_rewards_account.to_account_info(),
+            staking_program_authority: ctx
+                .accounts
+                .port_rewards_account_authority
+                .to_account_info(),
+            clock: ctx.accounts.clock.to_account_info(),
+            token_program: ctx.accounts.token_program.to_account_info(),
+        },
+        signer,
+    );
+    port_anchor_adaptor::claim_reward(cpi_ctx)?;
 
-        Ok(())
-    }
+    Ok(())
 }
