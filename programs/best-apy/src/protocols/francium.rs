@@ -1,5 +1,6 @@
 use crate::check_hash::*;
 use crate::error::ErrorCode;
+use crate::instructions::protocol_rewards::ProtocolRewards;
 use crate::macros::generate_seeds;
 use crate::protocols::state::{francium_farming_user, francium_lending_pool};
 use crate::protocols::Protocols;
@@ -565,8 +566,26 @@ pub struct FranciumTVL<'info> {
     pub farming_user: AccountInfo<'info>,
 }
 
-impl<'info> FranciumTVL<'info> {
-    /// Calculate the max native units to withdraw
+impl<'info> CheckHash<'info> for FranciumTVL<'info> {
+    fn hash(&self) -> Hash {
+        hashv(&[
+            self.lending_pool.key.as_ref(),
+            self.farming_user.key.as_ref(),
+        ])
+    }
+
+    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
+            .hash_pubkey
+            .hash_tvl
+    }
+}
+
+impl<'info> ProtocolRewards<'info> for FranciumTVL<'info> {
+    fn protocol_data_as_mut(&mut self) -> &mut crate::vault::ProtocolData {
+        &mut self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
+    }
+
     fn max_withdrawable(&self) -> Result<u64> {
         let lending = francium_lending_pool::LendingPool::unpack(&self.lending_pool.data.borrow())?;
         let farming = francium_farming_user::FarmingUser::unpack(&self.farming_user.data.borrow())?;
@@ -588,32 +607,4 @@ impl<'info> FranciumTVL<'info> {
 
         Ok(tvl)
     }
-}
-
-impl<'info> CheckHash<'info> for FranciumTVL<'info> {
-    fn hash(&self) -> Hash {
-        hashv(&[
-            self.lending_pool.key.as_ref(),
-            self.farming_user.key.as_ref(),
-        ])
-    }
-
-    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
-            .hash_pubkey
-            .hash_tvl
-    }
-}
-
-/// Update the protocol TVL
-pub fn update_rewards(ctx: Context<FranciumTVL>) -> Result<()> {
-    let tvl = ctx.accounts.max_withdrawable()?;
-
-    let protocol =
-        &mut ctx.accounts.generic_accs.vault_account.protocols[Protocols::Francium as usize];
-    let rewards = tvl.saturating_sub(protocol.amount);
-
-    protocol.rewards.update(rewards)?;
-
-    Ok(())
 }

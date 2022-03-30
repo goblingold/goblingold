@@ -1,5 +1,6 @@
 use crate::check_hash::*;
 use crate::error::ErrorCode;
+use crate::instructions::protocol_rewards::ProtocolRewards;
 use crate::macros::generate_seeds;
 use crate::protocols::Protocols;
 use crate::vault::VaultAccount;
@@ -310,8 +311,28 @@ pub struct MangoTVL<'info> {
     pub default_pubkey: AccountInfo<'info>,
 }
 
-impl<'info> MangoTVL<'info> {
-    /// Calculate the max native units to withdraw
+impl<'info> CheckHash<'info> for MangoTVL<'info> {
+    fn hash(&self) -> Hash {
+        hashv(&[
+            self.vault_mango_account.key.as_ref(),
+            self.mango_group_account.key.as_ref(),
+            self.mango_cache_account.key.as_ref(),
+            self.mango_root_bank_account.key.as_ref(),
+        ])
+    }
+
+    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
+            .hash_pubkey
+            .hash_tvl
+    }
+}
+
+impl<'info> ProtocolRewards<'info> for MangoTVL<'info> {
+    fn protocol_data_as_mut(&mut self) -> &mut crate::vault::ProtocolData {
+        &mut self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
+    }
+
     fn max_withdrawable(&self) -> Result<u64> {
         let mango_account = mango::state::MangoAccount::load_checked(
             &self.vault_mango_account,
@@ -357,34 +378,4 @@ impl<'info> MangoTVL<'info> {
 
         Ok(tvl)
     }
-}
-
-impl<'info> CheckHash<'info> for MangoTVL<'info> {
-    fn hash(&self) -> Hash {
-        hashv(&[
-            self.vault_mango_account.key.as_ref(),
-            self.mango_group_account.key.as_ref(),
-            self.mango_cache_account.key.as_ref(),
-            self.mango_root_bank_account.key.as_ref(),
-        ])
-    }
-
-    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
-            .hash_pubkey
-            .hash_tvl
-    }
-}
-
-/// Update the protocol TVL
-pub fn update_rewards(ctx: Context<MangoTVL>) -> Result<()> {
-    let tvl = ctx.accounts.max_withdrawable()?;
-
-    let protocol =
-        &mut ctx.accounts.generic_accs.vault_account.protocols[Protocols::Mango as usize];
-    let rewards = tvl.saturating_sub(protocol.amount);
-
-    protocol.rewards.update(rewards)?;
-
-    Ok(())
 }

@@ -100,7 +100,7 @@ pub mod best_apy {
     /// Mango: Compute the TVL
     #[access_control(ctx.accounts.check_hash())]
     pub fn mango_tvl(ctx: Context<MangoTVL>) -> Result<()> {
-        protocols::mango::update_rewards(ctx)
+        instructions::protocol_rewards::handler(ctx)
     }
 
     /// Solend: Initialize protocol accounts
@@ -124,7 +124,7 @@ pub mod best_apy {
     /// Solend: Compute the TVL
     #[access_control(ctx.accounts.check_hash())]
     pub fn solend_tvl(ctx: Context<SolendTVL>) -> Result<()> {
-        protocols::solend::update_rewards(ctx)
+        instructions::protocol_rewards::handler(ctx)
     }
 
     /// Port: Initialize protocol accounts
@@ -148,7 +148,7 @@ pub mod best_apy {
     /// Port: Compute the TVL
     #[access_control(ctx.accounts.check_hash())]
     pub fn port_tvl(ctx: Context<PortTVL>) -> Result<()> {
-        protocols::port::update_rewards(ctx)
+        instructions::protocol_rewards::handler(ctx)
     }
 
     /// Port: Claim rewards
@@ -171,7 +171,7 @@ pub mod best_apy {
     /// Tulip: Compute the TVL
     #[access_control(ctx.accounts.check_hash())]
     pub fn tulip_tvl(ctx: Context<TulipTVL>) -> Result<()> {
-        protocols::tulip::update_rewards(ctx)
+        instructions::protocol_rewards::handler(ctx)
     }
 
     /// Francium: Initialize protocol accounts
@@ -195,7 +195,7 @@ pub mod best_apy {
     /// Francium: Compute the TVL
     #[access_control(ctx.accounts.check_hash())]
     pub fn francium_tvl(ctx: Context<FranciumTVL>) -> Result<()> {
-        protocols::francium::update_rewards(ctx)
+        instructions::protocol_rewards::handler(ctx)
     }
 }
 

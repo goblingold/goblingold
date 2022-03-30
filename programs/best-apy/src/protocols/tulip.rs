@@ -1,5 +1,6 @@
 use crate::check_hash::*;
 use crate::error::ErrorCode;
+use crate::instructions::protocol_rewards::ProtocolRewards;
 use crate::macros::generate_seeds;
 use crate::protocols::state::tulip_reserve;
 use crate::protocols::Protocols;
@@ -316,8 +317,26 @@ pub struct TulipTVL<'info> {
     pub vault_tulip_collateral_token_account: Account<'info, TokenAccount>,
 }
 
-impl<'info> TulipTVL<'info> {
-    /// Calculate the max native units to withdraw
+impl<'info> CheckHash<'info> for TulipTVL<'info> {
+    fn hash(&self) -> Hash {
+        hashv(&[
+            self.reserve.key.as_ref(),
+            self.vault_tulip_collateral_token_account.key().as_ref(),
+        ])
+    }
+
+    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
+            .hash_pubkey
+            .hash_tvl
+    }
+}
+
+impl<'info> ProtocolRewards<'info> for TulipTVL<'info> {
+    fn protocol_data_as_mut(&mut self) -> &mut crate::vault::ProtocolData {
+        &mut self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
+    }
+
     fn max_withdrawable(&self) -> Result<u64> {
         let reserve = tulip_reserve::Reserve::unpack(&self.reserve.data.borrow())?;
 
@@ -338,32 +357,4 @@ impl<'info> TulipTVL<'info> {
 
         Ok(tvl)
     }
-}
-
-impl<'info> CheckHash<'info> for TulipTVL<'info> {
-    fn hash(&self) -> Hash {
-        hashv(&[
-            self.reserve.key.as_ref(),
-            self.vault_tulip_collateral_token_account.key().as_ref(),
-        ])
-    }
-
-    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
-            .hash_pubkey
-            .hash_tvl
-    }
-}
-
-/// Update the protocol TVL
-pub fn update_rewards(ctx: Context<TulipTVL>) -> Result<()> {
-    let tvl = ctx.accounts.max_withdrawable()?;
-
-    let protocol =
-        &mut ctx.accounts.generic_accs.vault_account.protocols[Protocols::Tulip as usize];
-    let rewards = tvl.saturating_sub(protocol.amount);
-
-    protocol.rewards.update(rewards)?;
-
-    Ok(())
 }
