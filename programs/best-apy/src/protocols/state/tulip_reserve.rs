@@ -1,5 +1,5 @@
+use crate::protocols::state::*;
 use anchor_lang::solana_program::{
-    clock::Slot,
     msg,
     program_error::ProgramError,
     program_pack::{IsInitialized, Pack, Sealed},
@@ -141,15 +141,6 @@ impl CollateralExchangeRate {
     }
 }
 
-/// Last update state
-#[derive(Clone, Debug, Default, PartialEq)]
-pub struct LastUpdate {
-    /// Last slot when updated
-    pub slot: Slot,
-    /// True when marked stale, false when slot updated
-    pub stale: bool,
-}
-
 impl Sealed for Reserve {}
 impl IsInitialized for Reserve {
     fn is_initialized(&self) -> bool {
@@ -244,21 +235,5 @@ impl Pack for Reserve {
                 supply_pubkey: Pubkey::new_from_array(*collateral_supply_pubkey),
             },
         })
-    }
-}
-
-// Helpers
-fn unpack_decimal(src: &[u8; 16]) -> Decimal {
-    Decimal::from_scaled_val(u128::from_le_bytes(*src))
-}
-
-fn unpack_bool(src: &[u8; 1]) -> Result<bool, ProgramError> {
-    match u8::from_le_bytes(*src) {
-        0 => Ok(false),
-        1 => Ok(true),
-        _ => {
-            msg!("Boolean cannot be unpacked");
-            Err(ProgramError::InvalidAccountData)
-        }
     }
 }

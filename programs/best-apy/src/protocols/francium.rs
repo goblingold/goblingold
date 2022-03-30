@@ -1,7 +1,7 @@
 use crate::error::ErrorCode;
 use crate::macros::generate_seeds;
+use crate::protocols::state::{francium_farming_user, francium_lending_pool};
 use crate::protocols::Protocols;
-use crate::protocols::{francium_farming_user, francium_lending_pool};
 use crate::vault::{check_hash_pub_keys, VaultAccount};
 use crate::{
     generic_accounts_anchor_modules::*, GenericDepositAccounts, GenericTVLAccounts,
@@ -81,49 +81,49 @@ pub struct FranciumInitialize<'info> {
     pub rent: Sysvar<'info, Rent>,
 }
 
+impl<'info> FranciumInitialize<'info> {
+    /// Create and initialize protocol account
+    pub fn create_and_initialize(&self) -> Result<()> {
+        let seeds = generate_seeds!(self.vault_account);
+        let signer = &[&seeds[..]];
+
+        let accounts = [
+            self.vault_account.to_account_info(),
+            self.vault_francium_farming_account.to_account_info(),
+            self.francium_farming_pool_account.to_account_info(),
+            self.vault_francium_collateral_token_account
+                .to_account_info(),
+            self.vault_francium_account_mint_rewards.to_account_info(),
+            self.vault_francium_account_mint_b_rewards.to_account_info(),
+            self.system_program.to_account_info(),
+            self.rent.to_account_info(),
+        ];
+        let accounts_metas = accounts
+            .iter()
+            .map(|acc| {
+                if acc.key == &self.vault_account.key() {
+                    AccountMeta::new(*acc.key, true)
+                } else if acc.is_writable {
+                    AccountMeta::new(*acc.key, false)
+                } else {
+                    AccountMeta::new_readonly(*acc.key, false)
+                }
+            })
+            .collect::<Vec<_>>();
+        let ix_init = Instruction::new_with_borsh(
+            francium_lending_reward_program_id::ID,
+            &InstructionData { instruction: 1 },
+            accounts_metas,
+        );
+        invoke_signed(&ix_init, &accounts, signer)?;
+
+        Ok(())
+    }
+}
+
 /// Create and initialize protocol account
 pub fn initialize(ctx: Context<FranciumInitialize>) -> Result<()> {
-    let seeds = generate_seeds!(ctx.accounts.vault_account);
-    let signer = &[&seeds[..]];
-
-    let accounts = [
-        ctx.accounts.vault_account.to_account_info(),
-        ctx.accounts
-            .vault_francium_farming_account
-            .to_account_info(),
-        ctx.accounts.francium_farming_pool_account.to_account_info(),
-        ctx.accounts
-            .vault_francium_collateral_token_account
-            .to_account_info(),
-        ctx.accounts
-            .vault_francium_account_mint_rewards
-            .to_account_info(),
-        ctx.accounts
-            .vault_francium_account_mint_b_rewards
-            .to_account_info(),
-        ctx.accounts.system_program.to_account_info(),
-        ctx.accounts.rent.to_account_info(),
-    ];
-    let accounts_metas = accounts
-        .iter()
-        .map(|acc| {
-            if acc.key == &ctx.accounts.vault_account.key() {
-                AccountMeta::new(*acc.key, true)
-            } else if acc.is_writable {
-                AccountMeta::new(*acc.key, false)
-            } else {
-                AccountMeta::new_readonly(*acc.key, false)
-            }
-        })
-        .collect::<Vec<_>>();
-    let ix_init = Instruction::new_with_borsh(
-        francium_lending_reward_program_id::ID,
-        &InstructionData { instruction: 1 },
-        accounts_metas,
-    );
-    invoke_signed(&ix_init, &accounts, signer)?;
-
-    Ok(())
+    ctx.accounts.create_and_initialize()
 }
 
 #[derive(Accounts)]
@@ -318,7 +318,6 @@ pub fn deposit(ctx: Context<FranciumDeposit>) -> Result<()> {
         .amount_to_deposit(Protocols::Francium)?;
 
     ctx.accounts.cpi_deposit(amount)?;
-
     ctx.accounts.generic_accs.vault_account.protocols[Protocols::Francium as usize]
         .update_after_deposit(amount)?;
 

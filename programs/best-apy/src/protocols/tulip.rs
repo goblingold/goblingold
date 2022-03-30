@@ -1,6 +1,6 @@
 use crate::error::ErrorCode;
 use crate::macros::generate_seeds;
-use crate::protocols::tulip_reserve;
+use crate::protocols::state::tulip_reserve;
 use crate::protocols::Protocols;
 use crate::vault::check_hash_pub_keys;
 use crate::{
@@ -62,18 +62,6 @@ pub struct TulipDeposit<'info> {
 }
 
 impl<'info> TulipDeposit<'info> {
-    /// Deposit into protocol
-    pub fn deposit(&mut self) -> Result<()> {
-        let amount = self.generic_accs.amount_to_deposit(Protocols::Tulip)?;
-
-        self.cpi_deposit(amount)?;
-
-        self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
-            .update_after_deposit(amount)?;
-
-        Ok(())
-    }
-
     /// CPI deposit call
     fn cpi_deposit(&self, amount: u64) -> Result<()> {
         let seeds = generate_seeds!(self.generic_accs.vault_account);
@@ -148,6 +136,20 @@ impl<'info> TulipDeposit<'info> {
     }
 }
 
+/// Deposit into protocol
+pub fn deposit(ctx: Context<TulipDeposit>) -> Result<()> {
+    let amount = ctx
+        .accounts
+        .generic_accs
+        .amount_to_deposit(Protocols::Tulip)?;
+
+    ctx.accounts.cpi_deposit(amount)?;
+    ctx.accounts.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
+        .update_after_deposit(amount)?;
+
+    Ok(())
+}
+
 #[derive(Accounts)]
 pub struct TulipWithdraw<'info> {
     pub generic_accs: GenericWithdrawAccounts<'info>,
@@ -176,17 +178,6 @@ pub struct TulipWithdraw<'info> {
 }
 
 impl<'info> TulipWithdraw<'info> {
-    /// Withdraw from the protocol
-    pub fn withdraw(&mut self) -> Result<()> {
-        let amount = self.generic_accs.amount_to_withdraw(Protocols::Tulip)?;
-        let amount_withdrawn = self.withdraw_and_get_balance(amount)?;
-
-        self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
-            .update_after_withdraw(amount_withdrawn)?;
-
-        Ok(())
-    }
-
     /// Convert reserve liquidity to collateral
     fn liquidity_to_collateral(&self, amount: u64) -> Result<u64> {
         let reserve = tulip_reserve::Reserve::unpack(&self.tulip_reserve_account.data.borrow())?;
@@ -288,6 +279,20 @@ impl<'info> TulipWithdraw<'info> {
     }
 }
 
+/// Withdraw from the protocol
+pub fn withdraw(ctx: Context<TulipWithdraw>) -> Result<()> {
+    let amount = ctx
+        .accounts
+        .generic_accs
+        .amount_to_withdraw(Protocols::Tulip)?;
+    let amount_withdrawn = ctx.accounts.withdraw_and_get_balance(amount)?;
+
+    ctx.accounts.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
+        .update_after_withdraw(amount_withdrawn)?;
+
+    Ok(())
+}
+
 #[derive(Accounts)]
 pub struct TulipTVL<'info> {
     pub generic_accs: GenericTVLAccounts<'info>,
@@ -303,18 +308,6 @@ pub struct TulipTVL<'info> {
 }
 
 impl<'info> TulipTVL<'info> {
-    /// Update the protocol TVL
-    pub fn update_rewards(&mut self) -> Result<()> {
-        let tvl = self.max_withdrawable()?;
-
-        let protocol = &mut self.generic_accs.vault_account.protocols[Protocols::Tulip as usize];
-        let rewards = tvl.saturating_sub(protocol.amount);
-
-        protocol.rewards.update(rewards)?;
-
-        Ok(())
-    }
-
     /// Calculate the max native units to withdraw
     fn max_withdrawable(&self) -> Result<u64> {
         let reserve = tulip_reserve::Reserve::unpack(&self.reserve.data.borrow())?;
@@ -348,4 +341,17 @@ impl<'info> TulipTVL<'info> {
                 .hash_tvl,
         )
     }
+}
+
+/// Update the protocol TVL
+pub fn update_rewards(ctx: Context<TulipTVL>) -> Result<()> {
+    let tvl = ctx.accounts.max_withdrawable()?;
+
+    let protocol =
+        &mut ctx.accounts.generic_accs.vault_account.protocols[Protocols::Tulip as usize];
+    let rewards = tvl.saturating_sub(protocol.amount);
+
+    protocol.rewards.update(rewards)?;
+
+    Ok(())
 }

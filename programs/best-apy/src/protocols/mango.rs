@@ -70,6 +70,11 @@ impl<'info> MangoInitialize<'info> {
     }
 }
 
+/// Create and initialize protocol account
+pub fn initialize(ctx: Context<MangoInitialize>) -> Result<()> {
+    ctx.accounts.create_and_initialize()
+}
+
 #[derive(Accounts)]
 pub struct MangoDeposit<'info> {
     pub generic_accs: GenericDepositAccounts<'info>,
@@ -95,18 +100,6 @@ pub struct MangoDeposit<'info> {
 }
 
 impl<'info> MangoDeposit<'info> {
-    /// Deposit into protocol
-    pub fn deposit(&mut self) -> Result<()> {
-        let amount = self.generic_accs.amount_to_deposit(Protocols::Mango)?;
-
-        self.cpi_deposit(amount)?;
-
-        self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
-            .update_after_deposit(amount)?;
-
-        Ok(())
-    }
-
     /// CPI deposit call
     fn cpi_deposit(&self, amount: u64) -> Result<()> {
         let seeds = generate_seeds!(self.generic_accs.vault_account);
@@ -159,6 +152,20 @@ impl<'info> MangoDeposit<'info> {
     }
 }
 
+/// Deposit into protocol
+pub fn deposit(ctx: Context<MangoDeposit>) -> Result<()> {
+    let amount = ctx
+        .accounts
+        .generic_accs
+        .amount_to_deposit(Protocols::Mango)?;
+
+    ctx.accounts.cpi_deposit(amount)?;
+    ctx.accounts.generic_accs.vault_account.protocols[Protocols::Mango as usize]
+        .update_after_deposit(amount)?;
+
+    Ok(())
+}
+
 #[derive(Accounts)]
 pub struct MangoWithdraw<'info> {
     pub generic_accs: GenericWithdrawAccounts<'info>,
@@ -188,17 +195,6 @@ pub struct MangoWithdraw<'info> {
 }
 
 impl<'info> MangoWithdraw<'info> {
-    /// Withdraw from the protocol
-    pub fn withdraw(&mut self) -> Result<()> {
-        let amount = self.generic_accs.amount_to_withdraw(Protocols::Mango)?;
-        let amount_withdrawn = self.withdraw_and_get_balance(amount)?;
-
-        self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
-            .update_after_withdraw(amount_withdrawn)?;
-
-        Ok(())
-    }
-
     /// Withdraw from the protocol and get the true token balance
     fn withdraw_and_get_balance(&mut self, amount: u64) -> Result<u64> {
         let amount_before = self.generic_accs.vault_input_token_account.amount;
@@ -273,6 +269,20 @@ impl<'info> MangoWithdraw<'info> {
     }
 }
 
+/// Withdraw from the protocol
+pub fn withdraw(ctx: Context<MangoWithdraw>) -> Result<()> {
+    let amount = ctx
+        .accounts
+        .generic_accs
+        .amount_to_withdraw(Protocols::Mango)?;
+    let amount_withdrawn = ctx.accounts.withdraw_and_get_balance(amount)?;
+
+    ctx.accounts.generic_accs.vault_account.protocols[Protocols::Mango as usize]
+        .update_after_withdraw(amount_withdrawn)?;
+
+    Ok(())
+}
+
 #[derive(Accounts)]
 pub struct MangoTVL<'info> {
     pub generic_accs: GenericTVLAccounts<'info>,
@@ -290,18 +300,6 @@ pub struct MangoTVL<'info> {
 }
 
 impl<'info> MangoTVL<'info> {
-    /// Update the protocol TVL
-    pub fn update_rewards(&mut self) -> Result<()> {
-        let tvl = self.max_withdrawable()?;
-
-        let protocol = &mut self.generic_accs.vault_account.protocols[Protocols::Mango as usize];
-        let rewards = tvl.saturating_sub(protocol.amount);
-
-        protocol.rewards.update(rewards)?;
-
-        Ok(())
-    }
-
     /// Calculate the max native units to withdraw
     fn max_withdrawable(&self) -> Result<u64> {
         let mango_account = mango::state::MangoAccount::load_checked(
@@ -362,4 +360,17 @@ impl<'info> MangoTVL<'info> {
                 .hash_tvl,
         )
     }
+}
+
+/// Update the protocol TVL
+pub fn update_rewards(ctx: Context<MangoTVL>) -> Result<()> {
+    let tvl = ctx.accounts.max_withdrawable()?;
+
+    let protocol =
+        &mut ctx.accounts.generic_accs.vault_account.protocols[Protocols::Mango as usize];
+    let rewards = tvl.saturating_sub(protocol.amount);
+
+    protocol.rewards.update(rewards)?;
+
+    Ok(())
 }

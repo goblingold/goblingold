@@ -1,11 +1,9 @@
 pub mod francium;
-pub mod francium_farming_user;
-pub mod francium_lending_pool;
 pub mod mango;
 pub mod port;
 pub mod solend;
+pub mod state;
 pub mod tulip;
-pub mod tulip_reserve;
 
 pub const PROTOCOLS_LEN: usize = 5;
 
