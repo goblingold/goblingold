@@ -94,7 +94,7 @@ pub mod best_apy {
     /// Mango: Withdraw to the vault account
     #[access_control(ctx.accounts.check_hash())]
     pub fn mango_withdraw(ctx: Context<MangoWithdraw>) -> Result<()> {
-        protocols::mango::withdraw(ctx)
+        instructions::protocol_withdraw::handler(ctx)
     }
 
     /// Mango: Compute the TVL
@@ -118,7 +118,7 @@ pub mod best_apy {
     /// Solend: Withdraw to the vault account
     #[access_control(ctx.accounts.check_hash())]
     pub fn solend_withdraw(ctx: Context<SolendWithdraw>) -> Result<()> {
-        protocols::solend::withdraw(ctx)
+        instructions::protocol_withdraw::handler(ctx)
     }
 
     /// Solend: Compute the TVL
@@ -142,7 +142,7 @@ pub mod best_apy {
     /// Port: Withdraw to the vault account
     #[access_control(ctx.accounts.check_hash())]
     pub fn port_withdraw(ctx: Context<PortWithdraw>) -> Result<()> {
-        protocols::port::withdraw(ctx)
+        instructions::protocol_withdraw::handler(ctx)
     }
 
     /// Port: Compute the TVL
@@ -165,7 +165,7 @@ pub mod best_apy {
     /// Tulip: Withdraw to the vault account
     #[access_control(ctx.accounts.check_hash())]
     pub fn tulip_withdraw(ctx: Context<TulipWithdraw>) -> Result<()> {
-        protocols::tulip::withdraw(ctx)
+        instructions::protocol_withdraw::handler(ctx)
     }
 
     /// Tulip: Compute the TVL
@@ -189,7 +189,7 @@ pub mod best_apy {
     /// Francium: Withdraw to the vault account
     #[access_control(ctx.accounts.check_hash())]
     pub fn francium_withdraw(ctx: Context<FranciumWithdraw>) -> Result<()> {
-        protocols::francium::withdraw(ctx)
+        instructions::protocol_withdraw::handler(ctx)
     }
 
     /// Francium: Compute the TVL

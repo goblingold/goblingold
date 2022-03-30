@@ -3,6 +3,7 @@ use crate::error::ErrorCode;
 use crate::instructions::protocol_deposit::ProtocolDeposit;
 use crate::instructions::protocol_initialize::ProtocolInitialize;
 use crate::instructions::protocol_rewards::ProtocolRewards;
+use crate::instructions::protocol_withdraw::ProtocolWithdraw;
 use crate::macros::generate_seeds;
 use crate::protocols::Protocols;
 use crate::vault::VaultAccount;
@@ -312,8 +313,42 @@ pub struct PortWithdraw<'info> {
     pub port_staking_pool_account: AccountInfo<'info>,
 }
 
-impl<'info> PortWithdraw<'info> {
-    /// Convert reserve liquidity to collateral
+impl<'info> CheckHash<'info> for PortWithdraw<'info> {
+    fn hash(&self) -> Hash {
+        hashv(&[
+            self.vault_port_collateral_token_account.key().as_ref(),
+            self.vault_port_obligation_account.key.as_ref(),
+            self.vault_port_staking_account.key.as_ref(),
+            self.port_source_collateral_account.key.as_ref(),
+            self.port_reserve_account.key.as_ref(),
+            self.port_reserve_liquidity_supply_account.key.as_ref(),
+            self.port_reserve_collateral_mint_account.key.as_ref(),
+            self.port_lending_market_account.key.as_ref(),
+            self.port_lending_market_authority_account.key.as_ref(),
+            self.port_staking_pool_account.key.as_ref(),
+        ])
+    }
+
+    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[Protocols::Port as usize]
+            .hash_pubkey
+            .hash_withdraw
+    }
+}
+
+impl<'info> ProtocolWithdraw<'info> for PortWithdraw<'info> {
+    fn protocol_data_as_mut(&mut self) -> &mut crate::vault::ProtocolData {
+        &mut self.generic_accs.vault_account.protocols[Protocols::Port as usize]
+    }
+
+    fn input_token_account_as_mut(&mut self) -> &mut Account<'info, TokenAccount> {
+        &mut self.generic_accs.vault_input_token_account
+    }
+
+    fn get_amount(&self) -> Result<u64> {
+        self.generic_accs.amount_to_withdraw(Protocols::Port)
+    }
+
     fn liquidity_to_collateral(&self, amount: u64) -> Result<u64> {
         let mut account_data_slice: &[u8] = &self.port_reserve_account.try_borrow_data()?;
         let reserve = port_anchor_adaptor::PortReserve::try_deserialize(&mut account_data_slice)?;
@@ -323,23 +358,6 @@ impl<'info> PortWithdraw<'info> {
         Ok(lp_amount)
     }
 
-    /// Withdraw from the protocol and get the true token balance
-    fn withdraw_and_get_balance(&mut self, amount: u64) -> Result<u64> {
-        let lp_amount = self.liquidity_to_collateral(amount)?;
-        let amount_before = self.generic_accs.vault_input_token_account.amount;
-
-        self.cpi_withdraw(lp_amount)?;
-        self.generic_accs.vault_input_token_account.reload()?;
-
-        let amount_after = self.generic_accs.vault_input_token_account.amount;
-        let amount_diff = amount_after
-            .checked_sub(amount_before)
-            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
-
-        Ok(amount_diff)
-    }
-
-    /// CPI withdraw call
     fn cpi_withdraw(&self, amount: u64) -> Result<()> {
         let seeds = generate_seeds!(self.generic_accs.vault_account);
         let signer = &[&seeds[..]];
@@ -401,43 +419,6 @@ impl<'info> PortWithdraw<'info> {
 
         Ok(())
     }
-}
-
-impl<'info> CheckHash<'info> for PortWithdraw<'info> {
-    fn hash(&self) -> Hash {
-        hashv(&[
-            self.vault_port_collateral_token_account.key().as_ref(),
-            self.vault_port_obligation_account.key.as_ref(),
-            self.vault_port_staking_account.key.as_ref(),
-            self.port_source_collateral_account.key.as_ref(),
-            self.port_reserve_account.key.as_ref(),
-            self.port_reserve_liquidity_supply_account.key.as_ref(),
-            self.port_reserve_collateral_mint_account.key.as_ref(),
-            self.port_lending_market_account.key.as_ref(),
-            self.port_lending_market_authority_account.key.as_ref(),
-            self.port_staking_pool_account.key.as_ref(),
-        ])
-    }
-
-    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[Protocols::Port as usize]
-            .hash_pubkey
-            .hash_withdraw
-    }
-}
-
-/// Withdraw from the protocol
-pub fn withdraw(ctx: Context<PortWithdraw>) -> Result<()> {
-    let amount = ctx
-        .accounts
-        .generic_accs
-        .amount_to_withdraw(Protocols::Port)?;
-    let amount_withdrawn = ctx.accounts.withdraw_and_get_balance(amount)?;
-
-    ctx.accounts.generic_accs.vault_account.protocols[Protocols::Port as usize]
-        .update_after_withdraw(amount_withdrawn)?;
-
-    Ok(())
 }
 
 #[derive(Accounts)]
