@@ -1,11 +1,10 @@
+use crate::check_hash::CHECKHASH_BYTES;
 use crate::error::ErrorCode;
 use crate::protocols::{Protocols, PROTOCOLS_LEN};
 use crate::SetHash;
 use anchor_lang::prelude::*;
-use anchor_lang::solana_program::hash::hashv;
 use std::{cmp, convert::TryInto};
 
-pub const HASH_PUBKEYS_LEN: usize = 8;
 pub const WEIGHTS_SCALE: u32 = 1_000_000;
 
 /// Strategy vault account
@@ -262,11 +261,11 @@ impl ProtocolData {
 #[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default)]
 pub struct HashPubkey {
     /// Hash of important accounts for each protocol on deposit
-    pub hash_deposit: [u8; HASH_PUBKEYS_LEN],
+    pub hash_deposit: [u8; CHECKHASH_BYTES],
     /// Hash of important accounts for each protocol on withdraw
-    pub hash_withdraw: [u8; HASH_PUBKEYS_LEN],
+    pub hash_withdraw: [u8; CHECKHASH_BYTES],
     /// Hash of important accounts for each protocol on tvl
-    pub hash_tvl: [u8; HASH_PUBKEYS_LEN],
+    pub hash_tvl: [u8; CHECKHASH_BYTES],
     // TODO additional padding
 }
 
@@ -275,7 +274,7 @@ impl<'info> SetHash<'info> {
         &mut self,
         protocol: usize,
         action: String,
-        hash: [u8; HASH_PUBKEYS_LEN],
+        hash: [u8; CHECKHASH_BYTES],
     ) -> Result<()> {
         match action.as_str() {
             "D" => {
@@ -293,14 +292,6 @@ impl<'info> SetHash<'info> {
         }
         Ok(())
     }
-}
-
-pub fn check_hash_pub_keys(keys: &[&[u8]], target_hash: [u8; HASH_PUBKEYS_LEN]) -> Result<()> {
-    require!(
-        target_hash == hashv(keys).to_bytes()[..HASH_PUBKEYS_LEN],
-        ErrorCode::InvalidHash
-    );
-    Ok(())
 }
 
 /// Generated rewards

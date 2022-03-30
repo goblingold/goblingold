@@ -1,14 +1,19 @@
+use crate::check_hash::*;
 use crate::error::ErrorCode;
 use crate::macros::generate_seeds;
 use crate::protocols::Protocols;
-use crate::vault::{check_hash_pub_keys, VaultAccount};
+use crate::vault::VaultAccount;
 use crate::{
     generic_accounts_anchor_modules::*, GenericDepositAccounts, GenericTVLAccounts,
     GenericWithdrawAccounts,
 };
 use crate::{ALLOWED_DEPLOYER, VAULT_ACCOUNT_SEED};
 use anchor_lang::prelude::*;
-use anchor_lang::solana_program::{program::invoke_signed, pubkey::Pubkey};
+use anchor_lang::solana_program::{
+    hash::{hashv, Hash},
+    program::invoke_signed,
+    pubkey::Pubkey,
+};
 use std::str::FromStr;
 
 /// Program ids
@@ -134,21 +139,24 @@ impl<'info> MangoDeposit<'info> {
 
         Ok(())
     }
+}
 
-    pub fn check_hash(&self) -> Result<()> {
-        check_hash_pub_keys(
-            &[
-                self.vault_mango_account.key.as_ref(),
-                self.mango_group_account.key.as_ref(),
-                self.mango_cache_account.key.as_ref(),
-                self.mango_root_bank_account.key.as_ref(),
-                self.mango_node_bank_account.key.as_ref(),
-                self.mango_vault_account.key.as_ref(),
-            ],
-            self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
-                .hash_pubkey
-                .hash_deposit,
-        )
+impl<'info> CheckHash<'info> for MangoDeposit<'info> {
+    fn hash(&self) -> Hash {
+        hashv(&[
+            self.vault_mango_account.key.as_ref(),
+            self.mango_group_account.key.as_ref(),
+            self.mango_cache_account.key.as_ref(),
+            self.mango_root_bank_account.key.as_ref(),
+            self.mango_node_bank_account.key.as_ref(),
+            self.mango_vault_account.key.as_ref(),
+        ])
+    }
+
+    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
+            .hash_pubkey
+            .hash_deposit
     }
 }
 
@@ -250,22 +258,25 @@ impl<'info> MangoWithdraw<'info> {
 
         Ok(())
     }
+}
 
-    pub fn check_hash(&self) -> Result<()> {
-        check_hash_pub_keys(
-            &[
-                self.vault_mango_account.key.as_ref(),
-                self.mango_cache_account.key.as_ref(),
-                self.mango_group_account.key.as_ref(),
-                self.mango_group_signer_account.key.as_ref(),
-                self.mango_root_bank_account.key.as_ref(),
-                self.mango_node_bank_account.key.as_ref(),
-                self.mango_vault_account.key.as_ref(),
-            ],
-            self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
-                .hash_pubkey
-                .hash_withdraw,
-        )
+impl<'info> CheckHash<'info> for MangoWithdraw<'info> {
+    fn hash(&self) -> Hash {
+        hashv(&[
+            self.vault_mango_account.key.as_ref(),
+            self.mango_cache_account.key.as_ref(),
+            self.mango_group_account.key.as_ref(),
+            self.mango_group_signer_account.key.as_ref(),
+            self.mango_root_bank_account.key.as_ref(),
+            self.mango_node_bank_account.key.as_ref(),
+            self.mango_vault_account.key.as_ref(),
+        ])
+    }
+
+    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
+            .hash_pubkey
+            .hash_withdraw
     }
 }
 
@@ -346,19 +357,22 @@ impl<'info> MangoTVL<'info> {
 
         Ok(tvl)
     }
+}
 
-    pub fn check_hash(&self) -> Result<()> {
-        check_hash_pub_keys(
-            &[
-                self.vault_mango_account.key.as_ref(),
-                self.mango_group_account.key.as_ref(),
-                self.mango_cache_account.key.as_ref(),
-                self.mango_root_bank_account.key.as_ref(),
-            ],
-            self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
-                .hash_pubkey
-                .hash_tvl,
-        )
+impl<'info> CheckHash<'info> for MangoTVL<'info> {
+    fn hash(&self) -> Hash {
+        hashv(&[
+            self.vault_mango_account.key.as_ref(),
+            self.mango_group_account.key.as_ref(),
+            self.mango_cache_account.key.as_ref(),
+            self.mango_root_bank_account.key.as_ref(),
+        ])
+    }
+
+    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
+            .hash_pubkey
+            .hash_tvl
     }
 }
 

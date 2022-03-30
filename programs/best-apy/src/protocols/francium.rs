@@ -1,8 +1,9 @@
+use crate::check_hash::*;
 use crate::error::ErrorCode;
 use crate::macros::generate_seeds;
 use crate::protocols::state::{francium_farming_user, francium_lending_pool};
 use crate::protocols::Protocols;
-use crate::vault::{check_hash_pub_keys, VaultAccount};
+use crate::vault::VaultAccount;
 use crate::{
     generic_accounts_anchor_modules::*, GenericDepositAccounts, GenericTVLAccounts,
     GenericWithdrawAccounts,
@@ -11,7 +12,10 @@ use crate::{ALLOWED_DEPLOYER, VAULT_ACCOUNT_SEED};
 use anchor_lang::prelude::borsh::{BorshDeserialize, BorshSerialize};
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::{
-    instruction::Instruction, program::invoke_signed, program_pack::Pack,
+    hash::{hashv, Hash},
+    instruction::Instruction,
+    program::invoke_signed,
+    program_pack::Pack,
 };
 use anchor_spl::token::TokenAccount;
 use std::str::FromStr;
@@ -278,35 +282,38 @@ impl<'info> FranciumDeposit<'info> {
         }
         Ok(())
     }
+}
 
-    pub fn check_hash(&self) -> Result<()> {
-        check_hash_pub_keys(
-            &[
-                self.vault_francium_collateral_token_account.key().as_ref(),
-                self.vault_francium_account_mint_rewards.key().as_ref(),
-                self.vault_francium_account_mint_b_rewards.key().as_ref(),
-                self.vault_francium_farming_account.key.as_ref(),
-                self.francium_lending_pool_info_account.key.as_ref(),
-                self.francium_lending_pool_token_account.key.as_ref(),
-                self.francium_farming_pool_stake_token_mint.key.as_ref(),
-                self.francium_market_info_account.key.as_ref(),
-                self.francium_lending_market_authority.key.as_ref(),
-                self.francium_farming_pool_account.key.as_ref(),
-                self.francium_farming_pool_authority.key.as_ref(),
-                self.francium_farming_pool_stake_token_account
-                    .key()
-                    .as_ref(),
-                self.francium_farming_pool_rewards_token_account
-                    .key
-                    .as_ref(),
-                self.francium_farming_pool_rewards_b_token_account
-                    .key
-                    .as_ref(),
-            ],
-            self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
-                .hash_pubkey
-                .hash_deposit,
-        )
+impl<'info> CheckHash<'info> for FranciumDeposit<'info> {
+    fn hash(&self) -> Hash {
+        hashv(&[
+            self.vault_francium_collateral_token_account.key().as_ref(),
+            self.vault_francium_account_mint_rewards.key().as_ref(),
+            self.vault_francium_account_mint_b_rewards.key().as_ref(),
+            self.vault_francium_farming_account.key.as_ref(),
+            self.francium_lending_pool_info_account.key.as_ref(),
+            self.francium_lending_pool_token_account.key.as_ref(),
+            self.francium_farming_pool_stake_token_mint.key.as_ref(),
+            self.francium_market_info_account.key.as_ref(),
+            self.francium_lending_market_authority.key.as_ref(),
+            self.francium_farming_pool_account.key.as_ref(),
+            self.francium_farming_pool_authority.key.as_ref(),
+            self.francium_farming_pool_stake_token_account
+                .key()
+                .as_ref(),
+            self.francium_farming_pool_rewards_token_account
+                .key
+                .as_ref(),
+            self.francium_farming_pool_rewards_b_token_account
+                .key
+                .as_ref(),
+        ])
+    }
+
+    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
+            .hash_pubkey
+            .hash_deposit
     }
 }
 
@@ -501,32 +508,35 @@ impl<'info> FranciumWithdraw<'info> {
 
         Ok(())
     }
+}
 
-    pub fn check_hash(&self) -> Result<()> {
-        check_hash_pub_keys(
-            &[
-                self.vault_francium_collateral_token_account.key().as_ref(),
-                self.vault_francium_account_mint_rewards.key().as_ref(),
-                self.vault_francium_farming_account.key.as_ref(),
-                self.francium_lending_pool_info_account.key.as_ref(),
-                self.francium_lending_pool_token_account.key.as_ref(),
-                self.francium_farming_pool_stake_token_mint.key.as_ref(),
-                self.francium_market_info_account.key.as_ref(),
-                self.francium_lending_market_authority.key.as_ref(),
-                self.francium_farming_pool_account.key.as_ref(),
-                self.francium_farming_pool_authority.key.as_ref(),
-                self.francium_farming_pool_stake_token_account.key.as_ref(),
-                self.francium_farming_pool_rewards_token_account
-                    .key
-                    .as_ref(),
-                self.francium_farming_pool_rewards_b_token_account
-                    .key
-                    .as_ref(),
-            ],
-            self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
-                .hash_pubkey
-                .hash_withdraw,
-        )
+impl<'info> CheckHash<'info> for FranciumWithdraw<'info> {
+    fn hash(&self) -> Hash {
+        hashv(&[
+            self.vault_francium_collateral_token_account.key().as_ref(),
+            self.vault_francium_account_mint_rewards.key().as_ref(),
+            self.vault_francium_farming_account.key.as_ref(),
+            self.francium_lending_pool_info_account.key.as_ref(),
+            self.francium_lending_pool_token_account.key.as_ref(),
+            self.francium_farming_pool_stake_token_mint.key.as_ref(),
+            self.francium_market_info_account.key.as_ref(),
+            self.francium_lending_market_authority.key.as_ref(),
+            self.francium_farming_pool_account.key.as_ref(),
+            self.francium_farming_pool_authority.key.as_ref(),
+            self.francium_farming_pool_stake_token_account.key.as_ref(),
+            self.francium_farming_pool_rewards_token_account
+                .key
+                .as_ref(),
+            self.francium_farming_pool_rewards_b_token_account
+                .key
+                .as_ref(),
+        ])
+    }
+
+    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
+            .hash_pubkey
+            .hash_withdraw
     }
 }
 
@@ -578,16 +588,20 @@ impl<'info> FranciumTVL<'info> {
 
         Ok(tvl)
     }
-    pub fn check_hash(&self) -> Result<()> {
-        check_hash_pub_keys(
-            &[
-                self.lending_pool.key.as_ref(),
-                self.farming_user.key.as_ref(),
-            ],
-            self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
-                .hash_pubkey
-                .hash_tvl,
-        )
+}
+
+impl<'info> CheckHash<'info> for FranciumTVL<'info> {
+    fn hash(&self) -> Hash {
+        hashv(&[
+            self.lending_pool.key.as_ref(),
+            self.farming_user.key.as_ref(),
+        ])
+    }
+
+    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
+            .hash_pubkey
+            .hash_tvl
     }
 }
 
