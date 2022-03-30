@@ -204,17 +204,6 @@ fn program_not_paused() -> Result<()> {
     Ok(())
 }
 
-/// Anchor generated modules required for using the GenericAccounts structs as fields of
-/// #[derive(Acounts)] structs in other source files
-pub mod generic_accounts_anchor_modules {
-    pub(crate) use super::__client_accounts_generic_deposit_accounts;
-    pub(crate) use super::__client_accounts_generic_tvl_accounts;
-    pub(crate) use super::__client_accounts_generic_withdraw_accounts;
-    pub(crate) use super::__cpi_client_accounts_generic_deposit_accounts;
-    pub(crate) use super::__cpi_client_accounts_generic_tvl_accounts;
-    pub(crate) use super::__cpi_client_accounts_generic_withdraw_accounts;
-}
-
 //#[derive(Accounts)]
 //pub struct CloseAccount<'info> {
 //    #[account(constraint = Pubkey::from_str(ALLOWED_DEPLOYER).unwrap()== *user_signer.key)]

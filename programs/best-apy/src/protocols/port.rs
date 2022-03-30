@@ -1,16 +1,11 @@
 use crate::check_hash::*;
 use crate::error::ErrorCode;
-use crate::instructions::protocol_deposit::ProtocolDeposit;
-use crate::instructions::protocol_initialize::ProtocolInitialize;
-use crate::instructions::protocol_rewards::ProtocolRewards;
-use crate::instructions::protocol_withdraw::ProtocolWithdraw;
+use crate::instructions::{
+    protocol_deposit::*, protocol_initialize::*, protocol_rewards::*, protocol_withdraw::*,
+};
 use crate::macros::generate_seeds;
 use crate::protocols::Protocols;
-use crate::vault::VaultAccount;
-use crate::{
-    generic_accounts_anchor_modules::*, GenericDepositAccounts, GenericTVLAccounts,
-    GenericWithdrawAccounts,
-};
+use crate::vault::{ProtocolData, VaultAccount};
 use crate::{ALLOWED_DEPLOYER, VAULT_ACCOUNT_SEED};
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::{
@@ -220,7 +215,7 @@ impl<'info> CheckHash<'info> for PortDeposit<'info> {
 }
 
 impl<'info> ProtocolDeposit<'info> for PortDeposit<'info> {
-    fn protocol_data_as_mut(&mut self) -> &mut crate::vault::ProtocolData {
+    fn protocol_data_as_mut(&mut self) -> &mut ProtocolData {
         &mut self.generic_accs.vault_account.protocols[Protocols::Port as usize]
     }
 
@@ -337,7 +332,7 @@ impl<'info> CheckHash<'info> for PortWithdraw<'info> {
 }
 
 impl<'info> ProtocolWithdraw<'info> for PortWithdraw<'info> {
-    fn protocol_data_as_mut(&mut self) -> &mut crate::vault::ProtocolData {
+    fn protocol_data_as_mut(&mut self) -> &mut ProtocolData {
         &mut self.generic_accs.vault_account.protocols[Protocols::Port as usize]
     }
 
@@ -445,7 +440,7 @@ impl<'info> CheckHash<'info> for PortTVL<'info> {
 }
 
 impl<'info> ProtocolRewards<'info> for PortTVL<'info> {
-    fn protocol_data_as_mut(&mut self) -> &mut crate::vault::ProtocolData {
+    fn protocol_data_as_mut(&mut self) -> &mut ProtocolData {
         &mut self.generic_accs.vault_account.protocols[Protocols::Port as usize]
     }
 

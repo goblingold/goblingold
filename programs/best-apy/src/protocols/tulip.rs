@@ -1,15 +1,9 @@
 use crate::check_hash::*;
 use crate::error::ErrorCode;
-use crate::instructions::protocol_deposit::ProtocolDeposit;
-use crate::instructions::protocol_rewards::ProtocolRewards;
-use crate::instructions::protocol_withdraw::ProtocolWithdraw;
+use crate::instructions::{protocol_deposit::*, protocol_rewards::*, protocol_withdraw::*};
 use crate::macros::generate_seeds;
-use crate::protocols::state::tulip_reserve;
-use crate::protocols::Protocols;
-use crate::{
-    generic_accounts_anchor_modules::*, GenericDepositAccounts, GenericTVLAccounts,
-    GenericWithdrawAccounts,
-};
+use crate::protocols::{state::tulip_reserve, Protocols};
+use crate::vault::ProtocolData;
 use anchor_lang::prelude::borsh::{BorshDeserialize, BorshSerialize};
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::{
@@ -89,7 +83,7 @@ impl<'info> CheckHash<'info> for TulipDeposit<'info> {
 }
 
 impl<'info> ProtocolDeposit<'info> for TulipDeposit<'info> {
-    fn protocol_data_as_mut(&mut self) -> &mut crate::vault::ProtocolData {
+    fn protocol_data_as_mut(&mut self) -> &mut ProtocolData {
         &mut self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
     }
 
@@ -180,7 +174,7 @@ pub struct TulipWithdraw<'info> {
 }
 
 impl<'info> ProtocolWithdraw<'info> for TulipWithdraw<'info> {
-    fn protocol_data_as_mut(&mut self) -> &mut crate::vault::ProtocolData {
+    fn protocol_data_as_mut(&mut self) -> &mut ProtocolData {
         &mut self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
     }
 
@@ -308,7 +302,7 @@ impl<'info> CheckHash<'info> for TulipTVL<'info> {
 }
 
 impl<'info> ProtocolRewards<'info> for TulipTVL<'info> {
-    fn protocol_data_as_mut(&mut self) -> &mut crate::vault::ProtocolData {
+    fn protocol_data_as_mut(&mut self) -> &mut ProtocolData {
         &mut self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
     }
 
