@@ -4,8 +4,8 @@
 
 use anchor_lang::prelude::borsh::{BorshDeserialize, BorshSerialize};
 use anchor_lang::prelude::*;
-use anchor_lang::solana_program::{pubkey::Pubkey, sysvar};
-use anchor_spl::token::{Token, TokenAccount};
+use anchor_lang::solana_program::pubkey::Pubkey;
+
 use check_hash::{CheckHash, CHECKHASH_BYTES};
 use error::ErrorCode;
 use instructions::*;
@@ -14,7 +14,6 @@ use vault::VaultAccount;
 
 mod check_hash;
 mod error;
-mod generic_accounts;
 mod instructions;
 mod macros;
 mod protocols;
@@ -203,55 +202,6 @@ pub mod best_apy {
 fn program_not_paused() -> Result<()> {
     require!(!PAUSED, ErrorCode::OnPaused);
     Ok(())
-}
-
-#[derive(Accounts)]
-pub struct GenericDepositAccounts<'info> {
-    #[account(
-        mut,
-        seeds = [VAULT_ACCOUNT_SEED, vault_account.input_mint_pubkey.as_ref()],
-        bump = vault_account.bumps.vault
-    )]
-    pub vault_account: Box<Account<'info, VaultAccount>>,
-    #[account(
-        mut,
-        associated_token::mint = vault_account.input_mint_pubkey,
-        associated_token::authority = vault_account,
-    )]
-    pub vault_input_token_account: Account<'info, TokenAccount>,
-    pub token_program: Program<'info, Token>,
-    pub clock: Sysvar<'info, Clock>,
-}
-
-#[derive(Accounts)]
-pub struct GenericWithdrawAccounts<'info> {
-    #[account(
-        mut,
-        seeds = [VAULT_ACCOUNT_SEED, vault_account.input_mint_pubkey.as_ref()],
-        bump = vault_account.bumps.vault
-    )]
-    pub vault_account: Box<Account<'info, VaultAccount>>,
-    #[account(
-        mut,
-        associated_token::mint = vault_account.input_mint_pubkey,
-        associated_token::authority = vault_account,
-    )]
-    pub vault_input_token_account: Account<'info, TokenAccount>,
-    pub token_program: Program<'info, Token>,
-    pub clock: Sysvar<'info, Clock>,
-    #[account(address = sysvar::instructions::ID)]
-    /// CHECK: address is checked
-    pub instructions: AccountInfo<'info>,
-}
-
-#[derive(Accounts)]
-pub struct GenericTVLAccounts<'info> {
-    #[account(
-        mut,
-        seeds = [VAULT_ACCOUNT_SEED, vault_account.input_mint_pubkey.as_ref()],
-        bump = vault_account.bumps.vault
-    )]
-    pub vault_account: Box<Account<'info, VaultAccount>>,
 }
 
 /// Anchor generated modules required for using the GenericAccounts structs as fields of

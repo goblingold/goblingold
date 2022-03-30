@@ -1,5 +1,8 @@
-use crate::vault::ProtocolData;
+use crate::protocols::Protocols;
+use crate::vault::{ProtocolData, VaultAccount};
+use crate::VAULT_ACCOUNT_SEED;
 use anchor_lang::prelude::*;
+use anchor_spl::token::{Token, TokenAccount};
 
 /// Deposit into the protocol
 pub trait ProtocolDeposit<'info> {
@@ -22,4 +25,30 @@ pub fn handler<'info, T: ProtocolDeposit<'info>>(ctx: Context<T>) -> Result<()> 
         .update_after_deposit(amount)?;
 
     Ok(())
+}
+
+#[derive(Accounts)]
+pub struct GenericDepositAccounts<'info> {
+    #[account(
+        mut,
+        seeds = [VAULT_ACCOUNT_SEED, vault_account.input_mint_pubkey.as_ref()],
+        bump = vault_account.bumps.vault
+    )]
+    pub vault_account: Box<Account<'info, VaultAccount>>,
+    #[account(
+        mut,
+        associated_token::mint = vault_account.input_mint_pubkey,
+        associated_token::authority = vault_account,
+    )]
+    pub vault_input_token_account: Account<'info, TokenAccount>,
+    pub token_program: Program<'info, Token>,
+    pub clock: Sysvar<'info, Clock>,
+}
+
+impl<'info> GenericDepositAccounts<'info> {
+    /// Compute the amount to deposit into the protocol
+    pub fn amount_to_deposit(&self, protocol: Protocols) -> Result<u64> {
+        self.vault_account
+            .calculate_deposit(protocol, self.vault_input_token_account.amount)
+    }
 }
