@@ -1,5 +1,6 @@
 use crate::check_hash::*;
 use crate::error::ErrorCode;
+use crate::instructions::protocol_initialize::ProtocolInitialize;
 use crate::instructions::protocol_rewards::ProtocolRewards;
 use crate::macros::generate_seeds;
 use crate::protocols::Protocols;
@@ -64,9 +65,8 @@ pub struct PortInitialize<'info> {
     pub rent: Sysvar<'info, Rent>,
 }
 
-impl<'info> PortInitialize<'info> {
-    /// Create and initialize obligation account
-    fn initialize_obligation(&self) -> Result<()> {
+impl<'info> ProtocolInitialize<'info> for PortInitialize<'info> {
+    fn cpi_initialize(&self) -> Result<()> {
         let seeds = generate_seeds!(self.vault_account);
         let signer = &[&seeds[..]];
 
@@ -109,14 +109,6 @@ impl<'info> PortInitialize<'info> {
             port_anchor_adaptor::init_obligation(cpi_ctx)?;
         }
 
-        Ok(())
-    }
-
-    /// Create and initialize stake account
-    fn initialize_stake(&self) -> Result<()> {
-        let seeds = generate_seeds!(self.vault_account);
-        let signer = &[&seeds[..]];
-
         {
             let account_size = port_anchor_adaptor::PortStakeAccount::LEN;
             let ix = system_instruction::create_account_with_seed(
@@ -157,13 +149,6 @@ impl<'info> PortInitialize<'info> {
 
         Ok(())
     }
-}
-
-/// Create and initialize protocol accounts
-pub fn initialize(ctx: Context<PortInitialize>) -> Result<()> {
-    ctx.accounts.initialize_obligation()?;
-    ctx.accounts.initialize_stake()?;
-    Ok(())
 }
 
 #[derive(Accounts)]

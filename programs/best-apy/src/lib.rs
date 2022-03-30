@@ -82,7 +82,7 @@ pub mod best_apy {
     /// Mango: Initialize protocol accounts
     // ACCESS RESTRICTED. ONLY ALLOWED_DEPLOYER
     pub fn mango_initialize(ctx: Context<MangoInitialize>) -> Result<()> {
-        protocols::mango::initialize(ctx)
+        instructions::protocol_initialize::handler(ctx)
     }
 
     /// Mango: Deposit from the vault account
@@ -106,7 +106,7 @@ pub mod best_apy {
     /// Solend: Initialize protocol accounts
     // ACCESS RESTRICTED. ONLY ALLOWED_DEPLOYER
     pub fn solend_initialize(ctx: Context<SolendInitialize>) -> Result<()> {
-        protocols::solend::initialize(ctx)
+        instructions::protocol_initialize::handler(ctx)
     }
 
     /// Solend: Deposit from the vault account
@@ -130,7 +130,7 @@ pub mod best_apy {
     /// Port: Initialize protocol accounts
     // ACCESS RESTRICTED. ONLY ALLOWED_DEPLOYER
     pub fn port_initialize(ctx: Context<PortInitialize>) -> Result<()> {
-        protocols::port::initialize(ctx)
+        instructions::protocol_initialize::handler(ctx)
     }
 
     /// Port: Deposit from the vault account
@@ -177,7 +177,7 @@ pub mod best_apy {
     /// Francium: Initialize protocol accounts
     // ACCESS RESTRICTED. ONLY ALLOWED_DEPLOYER
     pub fn francium_initialize(ctx: Context<FranciumInitialize>) -> Result<()> {
-        protocols::francium::initialize(ctx)
+        instructions::protocol_initialize::handler(ctx)
     }
 
     /// Francium: Deposit from the vault account

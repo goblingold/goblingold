@@ -1,5 +1,6 @@
 use crate::check_hash::*;
 use crate::error::ErrorCode;
+use crate::instructions::protocol_initialize::ProtocolInitialize;
 use crate::instructions::protocol_rewards::ProtocolRewards;
 use crate::macros::generate_seeds;
 use crate::protocols::Protocols;
@@ -53,9 +54,8 @@ pub struct SolendInitialize<'info> {
     pub system_program: Program<'info, System>,
 }
 
-impl<'info> SolendInitialize<'info> {
-    /// Create and initialize protocol accounts
-    pub fn create_and_initialize(&self) -> Result<()> {
+impl<'info> ProtocolInitialize<'info> for SolendInitialize<'info> {
+    fn cpi_initialize(&self) -> Result<()> {
         let seeds = generate_seeds!(self.vault_account);
         let signer = &[&seeds[..]];
 
@@ -101,11 +101,6 @@ impl<'info> SolendInitialize<'info> {
 
         Ok(())
     }
-}
-
-/// Create and initialize protocol accounts
-pub fn initialize(ctx: Context<SolendInitialize>) -> Result<()> {
-    ctx.accounts.create_and_initialize()
 }
 
 #[derive(Accounts)]

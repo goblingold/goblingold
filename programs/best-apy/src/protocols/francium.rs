@@ -1,5 +1,6 @@
 use crate::check_hash::*;
 use crate::error::ErrorCode;
+use crate::instructions::protocol_initialize::ProtocolInitialize;
 use crate::instructions::protocol_rewards::ProtocolRewards;
 use crate::macros::generate_seeds;
 use crate::protocols::state::{francium_farming_user, francium_lending_pool};
@@ -86,9 +87,8 @@ pub struct FranciumInitialize<'info> {
     pub rent: Sysvar<'info, Rent>,
 }
 
-impl<'info> FranciumInitialize<'info> {
-    /// Create and initialize protocol account
-    pub fn create_and_initialize(&self) -> Result<()> {
+impl<'info> ProtocolInitialize<'info> for FranciumInitialize<'info> {
+    fn cpi_initialize(&self) -> Result<()> {
         let seeds = generate_seeds!(self.vault_account);
         let signer = &[&seeds[..]];
 
@@ -124,11 +124,6 @@ impl<'info> FranciumInitialize<'info> {
 
         Ok(())
     }
-}
-
-/// Create and initialize protocol account
-pub fn initialize(ctx: Context<FranciumInitialize>) -> Result<()> {
-    ctx.accounts.create_and_initialize()
 }
 
 #[derive(Accounts)]
