@@ -1,5 +1,6 @@
 use crate::check_hash::*;
 use crate::error::ErrorCode;
+use crate::instructions::protocol_deposit::ProtocolDeposit;
 use crate::instructions::protocol_initialize::ProtocolInitialize;
 use crate::instructions::protocol_rewards::ProtocolRewards;
 use crate::macros::generate_seeds;
@@ -100,8 +101,34 @@ pub struct MangoDeposit<'info> {
     pub mango_vault_account: AccountInfo<'info>,
 }
 
-impl<'info> MangoDeposit<'info> {
-    /// CPI deposit call
+impl<'info> CheckHash<'info> for MangoDeposit<'info> {
+    fn hash(&self) -> Hash {
+        hashv(&[
+            self.vault_mango_account.key.as_ref(),
+            self.mango_group_account.key.as_ref(),
+            self.mango_cache_account.key.as_ref(),
+            self.mango_root_bank_account.key.as_ref(),
+            self.mango_node_bank_account.key.as_ref(),
+            self.mango_vault_account.key.as_ref(),
+        ])
+    }
+
+    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
+            .hash_pubkey
+            .hash_deposit
+    }
+}
+
+impl<'info> ProtocolDeposit<'info> for MangoDeposit<'info> {
+    fn protocol_data_as_mut(&mut self) -> &mut crate::vault::ProtocolData {
+        &mut self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
+    }
+
+    fn get_amount(&self) -> Result<u64> {
+        self.generic_accs.amount_to_deposit(Protocols::Mango)
+    }
+
     fn cpi_deposit(&self, amount: u64) -> Result<()> {
         let seeds = generate_seeds!(self.generic_accs.vault_account);
         let signer = &[&seeds[..]];
@@ -135,39 +162,6 @@ impl<'info> MangoDeposit<'info> {
 
         Ok(())
     }
-}
-
-impl<'info> CheckHash<'info> for MangoDeposit<'info> {
-    fn hash(&self) -> Hash {
-        hashv(&[
-            self.vault_mango_account.key.as_ref(),
-            self.mango_group_account.key.as_ref(),
-            self.mango_cache_account.key.as_ref(),
-            self.mango_root_bank_account.key.as_ref(),
-            self.mango_node_bank_account.key.as_ref(),
-            self.mango_vault_account.key.as_ref(),
-        ])
-    }
-
-    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
-            .hash_pubkey
-            .hash_deposit
-    }
-}
-
-/// Deposit into protocol
-pub fn deposit(ctx: Context<MangoDeposit>) -> Result<()> {
-    let amount = ctx
-        .accounts
-        .generic_accs
-        .amount_to_deposit(Protocols::Mango)?;
-
-    ctx.accounts.cpi_deposit(amount)?;
-    ctx.accounts.generic_accs.vault_account.protocols[Protocols::Mango as usize]
-        .update_after_deposit(amount)?;
-
-    Ok(())
 }
 
 #[derive(Accounts)]

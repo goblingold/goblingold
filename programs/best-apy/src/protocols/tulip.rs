@@ -1,5 +1,6 @@
 use crate::check_hash::*;
 use crate::error::ErrorCode;
+use crate::instructions::protocol_deposit::ProtocolDeposit;
 use crate::instructions::protocol_rewards::ProtocolRewards;
 use crate::macros::generate_seeds;
 use crate::protocols::state::tulip_reserve;
@@ -65,8 +66,36 @@ pub struct TulipDeposit<'info> {
     pub tulip_reserve_authority: AccountInfo<'info>,
 }
 
-impl<'info> TulipDeposit<'info> {
-    /// CPI deposit call
+impl<'info> CheckHash<'info> for TulipDeposit<'info> {
+    fn hash(&self) -> Hash {
+        hashv(&[
+            self.vault_tulip_collateral_token_account.key().as_ref(),
+            self.tulip_reserve_account.key.as_ref(),
+            self.tulip_reserve_liquidity_supply_token_account
+                .key
+                .as_ref(),
+            self.tulip_reserve_collateral_token_mint.key.as_ref(),
+            self.tulip_lending_market_account.key.as_ref(),
+            self.tulip_reserve_authority.key.as_ref(),
+        ])
+    }
+
+    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
+            .hash_pubkey
+            .hash_deposit
+    }
+}
+
+impl<'info> ProtocolDeposit<'info> for TulipDeposit<'info> {
+    fn protocol_data_as_mut(&mut self) -> &mut crate::vault::ProtocolData {
+        &mut self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
+    }
+
+    fn get_amount(&self) -> Result<u64> {
+        self.generic_accs.amount_to_deposit(Protocols::Tulip)
+    }
+
     fn cpi_deposit(&self, amount: u64) -> Result<()> {
         let seeds = generate_seeds!(self.generic_accs.vault_account);
         let signer = &[&seeds[..]];
@@ -120,41 +149,6 @@ impl<'info> TulipDeposit<'info> {
         invoke_signed(&ix, &accounts, signer)?;
         Ok(())
     }
-}
-
-impl<'info> CheckHash<'info> for TulipDeposit<'info> {
-    fn hash(&self) -> Hash {
-        hashv(&[
-            self.vault_tulip_collateral_token_account.key().as_ref(),
-            self.tulip_reserve_account.key.as_ref(),
-            self.tulip_reserve_liquidity_supply_token_account
-                .key
-                .as_ref(),
-            self.tulip_reserve_collateral_token_mint.key.as_ref(),
-            self.tulip_lending_market_account.key.as_ref(),
-            self.tulip_reserve_authority.key.as_ref(),
-        ])
-    }
-
-    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
-            .hash_pubkey
-            .hash_deposit
-    }
-}
-
-/// Deposit into protocol
-pub fn deposit(ctx: Context<TulipDeposit>) -> Result<()> {
-    let amount = ctx
-        .accounts
-        .generic_accs
-        .amount_to_deposit(Protocols::Tulip)?;
-
-    ctx.accounts.cpi_deposit(amount)?;
-    ctx.accounts.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
-        .update_after_deposit(amount)?;
-
-    Ok(())
 }
 
 #[derive(Accounts)]

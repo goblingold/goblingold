@@ -88,7 +88,7 @@ pub mod best_apy {
     /// Mango: Deposit from the vault account
     #[access_control(ctx.accounts.check_hash())]
     pub fn mango_deposit(ctx: Context<MangoDeposit>) -> Result<()> {
-        protocols::mango::deposit(ctx)
+        instructions::protocol_deposit::handler(ctx)
     }
 
     /// Mango: Withdraw to the vault account
@@ -112,7 +112,7 @@ pub mod best_apy {
     /// Solend: Deposit from the vault account
     #[access_control(ctx.accounts.check_hash())]
     pub fn solend_deposit(ctx: Context<SolendDeposit>) -> Result<()> {
-        protocols::solend::deposit(ctx)
+        instructions::protocol_deposit::handler(ctx)
     }
 
     /// Solend: Withdraw to the vault account
@@ -136,7 +136,7 @@ pub mod best_apy {
     /// Port: Deposit from the vault account
     #[access_control(ctx.accounts.check_hash())]
     pub fn port_deposit(ctx: Context<PortDeposit>) -> Result<()> {
-        protocols::port::deposit(ctx)
+        instructions::protocol_deposit::handler(ctx)
     }
 
     /// Port: Withdraw to the vault account
@@ -159,7 +159,7 @@ pub mod best_apy {
     /// Tulip: Deposit from the vault account
     #[access_control(ctx.accounts.check_hash())]
     pub fn tulip_deposit(ctx: Context<TulipDeposit>) -> Result<()> {
-        protocols::tulip::deposit(ctx)
+        instructions::protocol_deposit::handler(ctx)
     }
 
     /// Tulip: Withdraw to the vault account
@@ -183,7 +183,7 @@ pub mod best_apy {
     /// Francium: Deposit from the vault account
     #[access_control(ctx.accounts.check_hash())]
     pub fn francium_deposit(ctx: Context<FranciumDeposit>) -> Result<()> {
-        protocols::francium::deposit(ctx)
+        instructions::protocol_deposit::handler(ctx)
     }
 
     /// Francium: Withdraw to the vault account
