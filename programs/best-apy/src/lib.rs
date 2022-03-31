@@ -19,12 +19,12 @@ mod macros;
 mod protocols;
 mod vault;
 
-declare_id!("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+declare_id!("ASkZQEZqHGgxXmDpfFxkCznTQLzLCgWHL3jkJTGtpQiR");
 
 pub const VAULT_ACCOUNT_SEED: &[u8; 5] = b"vault";
 pub const VAULT_LP_TOKEN_MINT_SEED: &[u8; 4] = b"mint";
 
-pub const ALLOWED_DEPLOYER: &str = "8XhNoDjjNoLP5Rys1pBJKGdE8acEC1HJsWGkfkMt6JP1";
+pub const ALLOWED_DEPLOYER: &str = "DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod";
 pub const ALLOWED_RUNNER: &str = "DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod";
 const PAUSED: bool = false;
 
