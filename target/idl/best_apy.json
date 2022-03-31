@@ -93,10 +93,8 @@
       ],
       "args": [
         {
-          "name": "protocol",
-          "type": {
-            "defined": "usize"
-          }
+          "name": "protocolId",
+          "type": "u8"
         },
         {
           "name": "action",

@@ -1,7 +1,7 @@
 use crate::check_hash::CHECKHASH_BYTES;
 use crate::error::ErrorCode;
 use crate::protocols::{Protocols, PROTOCOLS_LEN};
-use crate::SetHash;
+
 use anchor_lang::prelude::*;
 use std::{cmp, convert::TryInto};
 
@@ -268,31 +268,6 @@ pub struct HashPubkey {
     /// Hash of important accounts for each protocol on tvl
     pub hash_tvl: [u8; CHECKHASH_BYTES],
     // TODO additional padding
-}
-
-impl<'info> SetHash<'info> {
-    pub fn set_hash(
-        &mut self,
-        protocol: usize,
-        action: String,
-        hash: [u8; CHECKHASH_BYTES],
-    ) -> Result<()> {
-        match action.as_str() {
-            "D" => {
-                self.vault_account.protocols[protocol]
-                    .hash_pubkey
-                    .hash_deposit = hash
-            }
-            "W" => {
-                self.vault_account.protocols[protocol]
-                    .hash_pubkey
-                    .hash_withdraw = hash
-            }
-            "T" => self.vault_account.protocols[protocol].hash_pubkey.hash_tvl = hash,
-            _ => return Err(ErrorCode::InvalidInstructions.into()),
-        }
-        Ok(())
-    }
 }
 
 /// Generated rewards

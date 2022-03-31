@@ -42,11 +42,11 @@ pub mod best_apy {
     /// Set hash of a protocol for a specific action
     pub fn set_hash(
         ctx: Context<SetHash>,
-        protocol: usize,
+        protocol_id: u8,
         action: String,
         hash: [u8; CHECKHASH_BYTES],
     ) -> Result<()> {
-        instructions::set_hash::handler(ctx, protocol, action, hash)
+        instructions::set_hash::handler(ctx, protocol_id, action, hash)
     }
 
     // ACCESS RESTRICTED. ONLY ALLOWED_DEPLOYER
