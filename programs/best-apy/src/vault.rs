@@ -214,6 +214,13 @@ impl ProtocolData {
         self.weight != u16::default()
     }
 
+    /// Set the protocol pubkey hashes
+    pub fn set_hashes(&mut self, hashes: [[u8; CHECKHASH_BYTES]; 3]) {
+        self.hash_pubkey.hash_deposit = hashes[0];
+        self.hash_pubkey.hash_withdraw = hashes[1];
+        self.hash_pubkey.hash_tvl = hashes[2];
+    }
+
     /// Amount that should be deposited according to the weight
     fn amount_should_be_deposited(&self, total_amount: u64) -> Result<u64> {
         let amount: u64 = (total_amount as u128)

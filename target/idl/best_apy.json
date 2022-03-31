@@ -78,7 +78,7 @@
       "args": []
     },
     {
-      "name": "setHash",
+      "name": "setHashes",
       "accounts": [
         {
           "name": "userSigner",
@@ -97,15 +97,16 @@
           "type": "u8"
         },
         {
-          "name": "action",
-          "type": "string"
-        },
-        {
-          "name": "hash",
+          "name": "hashes",
           "type": {
             "array": [
-              "u8",
-              8
+              {
+                "array": [
+                  "u8",
+                  8
+                ]
+              },
+              3
             ]
           }
         }
