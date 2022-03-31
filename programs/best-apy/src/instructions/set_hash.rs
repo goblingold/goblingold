@@ -1,4 +1,6 @@
 use crate::check_hash::CHECKHASH_BYTES;
+use crate::error::ErrorCode;
+
 use crate::vault::VaultAccount;
 use crate::ALLOWED_DEPLOYER;
 use crate::VAULT_ACCOUNT_SEED;
@@ -18,12 +20,38 @@ pub struct SetHash<'info> {
     pub vault_account: Account<'info, VaultAccount>,
 }
 
+impl<'info> SetHash<'info> {
+    pub fn set_hash(
+        &mut self,
+        protocol_id: u8,
+        action: String,
+        hash: [u8; CHECKHASH_BYTES],
+    ) -> Result<()> {
+        let protocol = protocol_id as usize;
+        match action.as_str() {
+            "D" => {
+                self.vault_account.protocols[protocol]
+                    .hash_pubkey
+                    .hash_deposit = hash
+            }
+            "W" => {
+                self.vault_account.protocols[protocol]
+                    .hash_pubkey
+                    .hash_withdraw = hash
+            }
+            "T" => self.vault_account.protocols[protocol].hash_pubkey.hash_tvl = hash,
+            _ => return Err(ErrorCode::InvalidInstructions.into()),
+        }
+        Ok(())
+    }
+}
+
 /// Set hash of a protocol for a specific action
 pub fn handler(
     ctx: Context<SetHash>,
-    protocol: usize,
+    protocol_id: u8,
     action: String,
     hash: [u8; CHECKHASH_BYTES],
 ) -> Result<()> {
-    ctx.accounts.set_hash(protocol, action, hash)
+    ctx.accounts.set_hash(protocol_id, action, hash)
 }
