@@ -1,14 +1,20 @@
+use crate::check_hash::*;
 use crate::error::ErrorCode;
 use crate::macros::generate_seeds;
 use crate::protocols::Protocols;
-use crate::vault::{check_hash_pub_keys, VaultAccount};
+use crate::vault::VaultAccount;
 use crate::{
     generic_accounts_anchor_modules::*, GenericDepositAccounts, GenericTVLAccounts,
     GenericWithdrawAccounts,
 };
 use crate::{ALLOWED_DEPLOYER, VAULT_ACCOUNT_SEED};
 use anchor_lang::prelude::*;
-use anchor_lang::solana_program::{program::invoke_signed, pubkey::Pubkey, system_instruction};
+use anchor_lang::solana_program::{
+    hash::{hashv, Hash},
+    program::invoke_signed,
+    pubkey::Pubkey,
+    system_instruction,
+};
 use anchor_spl::token::{Token, TokenAccount};
 use std::str::FromStr;
 
@@ -243,27 +249,30 @@ impl<'info> PortDeposit<'info> {
 
         Ok(())
     }
+}
 
-    pub fn check_hash(&self) -> Result<()> {
-        check_hash_pub_keys(
-            &[
-                self.vault_port_collateral_token_account.key().as_ref(),
-                self.vault_port_obligation_account.key.as_ref(),
-                self.vault_port_staking_account.key.as_ref(),
-                self.port_reserve_account.key.as_ref(),
-                self.port_reserve_liquidity_supply_account.key.as_ref(),
-                self.port_reserve_collateral_mint_account.key.as_ref(),
-                self.port_lending_market_account.key.as_ref(),
-                self.port_lending_market_authority_account.key.as_ref(),
-                self.port_destination_deposit_collateral_account
-                    .key()
-                    .as_ref(),
-                self.port_staking_pool_account.key.as_ref(),
-            ],
-            self.generic_accs.vault_account.protocols[Protocols::Port as usize]
-                .hash_pubkey
-                .hash_deposit,
-        )
+impl<'info> CheckHash<'info> for PortDeposit<'info> {
+    fn hash(&self) -> Hash {
+        hashv(&[
+            self.vault_port_collateral_token_account.key().as_ref(),
+            self.vault_port_obligation_account.key.as_ref(),
+            self.vault_port_staking_account.key.as_ref(),
+            self.port_reserve_account.key.as_ref(),
+            self.port_reserve_liquidity_supply_account.key.as_ref(),
+            self.port_reserve_collateral_mint_account.key.as_ref(),
+            self.port_lending_market_account.key.as_ref(),
+            self.port_lending_market_authority_account.key.as_ref(),
+            self.port_destination_deposit_collateral_account
+                .key()
+                .as_ref(),
+            self.port_staking_pool_account.key.as_ref(),
+        ])
+    }
+
+    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[Protocols::Port as usize]
+            .hash_pubkey
+            .hash_deposit
     }
 }
 
@@ -412,25 +421,28 @@ impl<'info> PortWithdraw<'info> {
 
         Ok(())
     }
+}
 
-    pub fn check_hash(&self) -> Result<()> {
-        check_hash_pub_keys(
-            &[
-                self.vault_port_collateral_token_account.key().as_ref(),
-                self.vault_port_obligation_account.key.as_ref(),
-                self.vault_port_staking_account.key.as_ref(),
-                self.port_source_collateral_account.key.as_ref(),
-                self.port_reserve_account.key.as_ref(),
-                self.port_reserve_liquidity_supply_account.key.as_ref(),
-                self.port_reserve_collateral_mint_account.key.as_ref(),
-                self.port_lending_market_account.key.as_ref(),
-                self.port_lending_market_authority_account.key.as_ref(),
-                self.port_staking_pool_account.key.as_ref(),
-            ],
-            self.generic_accs.vault_account.protocols[Protocols::Port as usize]
-                .hash_pubkey
-                .hash_withdraw,
-        )
+impl<'info> CheckHash<'info> for PortWithdraw<'info> {
+    fn hash(&self) -> Hash {
+        hashv(&[
+            self.vault_port_collateral_token_account.key().as_ref(),
+            self.vault_port_obligation_account.key.as_ref(),
+            self.vault_port_staking_account.key.as_ref(),
+            self.port_source_collateral_account.key.as_ref(),
+            self.port_reserve_account.key.as_ref(),
+            self.port_reserve_liquidity_supply_account.key.as_ref(),
+            self.port_reserve_collateral_mint_account.key.as_ref(),
+            self.port_lending_market_account.key.as_ref(),
+            self.port_lending_market_authority_account.key.as_ref(),
+            self.port_staking_pool_account.key.as_ref(),
+        ])
+    }
+
+    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[Protocols::Port as usize]
+            .hash_pubkey
+            .hash_withdraw
     }
 }
 
@@ -491,14 +503,17 @@ impl<'info> PortTVL<'info> {
 
         Ok(tvl)
     }
+}
 
-    pub fn check_hash(&self) -> Result<()> {
-        check_hash_pub_keys(
-            &[self.reserve.key.as_ref(), self.obligation.key().as_ref()],
-            self.generic_accs.vault_account.protocols[Protocols::Port as usize]
-                .hash_pubkey
-                .hash_tvl,
-        )
+impl<'info> CheckHash<'info> for PortTVL<'info> {
+    fn hash(&self) -> Hash {
+        hashv(&[self.reserve.key.as_ref(), self.obligation.key.as_ref()])
+    }
+
+    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[Protocols::Port as usize]
+            .hash_pubkey
+            .hash_tvl
     }
 }
 

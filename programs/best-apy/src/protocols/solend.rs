@@ -1,7 +1,8 @@
+use crate::check_hash::*;
 use crate::error::ErrorCode;
 use crate::macros::generate_seeds;
 use crate::protocols::Protocols;
-use crate::vault::{check_hash_pub_keys, VaultAccount};
+use crate::vault::VaultAccount;
 use crate::{
     generic_accounts_anchor_modules::*, GenericDepositAccounts, GenericTVLAccounts,
     GenericWithdrawAccounts,
@@ -9,7 +10,11 @@ use crate::{
 use crate::{ALLOWED_DEPLOYER, VAULT_ACCOUNT_SEED};
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::{
-    instruction::Instruction, program::invoke_signed, program_pack::Pack, pubkey::Pubkey,
+    hash::{hashv, Hash},
+    instruction::Instruction,
+    program::invoke_signed,
+    program_pack::Pack,
+    pubkey::Pubkey,
     system_instruction,
 };
 use anchor_spl::token::{Token, TokenAccount};
@@ -192,33 +197,36 @@ impl<'info> SolendDeposit<'info> {
 
         Ok(())
     }
+}
 
-    pub fn check_hash(&self) -> Result<()> {
-        check_hash_pub_keys(
-            &[
-                self.vault_solend_destination_collateral_token_account
-                    .key()
-                    .as_ref(),
-                self.vault_solend_obligation_account.key.as_ref(),
-                self.solend_reserve_account.key.as_ref(),
-                self.solend_reserve_liquidity_supply_spl_token_account
-                    .key
-                    .as_ref(),
-                self.solend_reserve_collateral_spl_token_mint.key.as_ref(),
-                self.solend_lending_market_account.key.as_ref(),
-                self.solend_derived_lending_market_authority.key.as_ref(),
-                self.solend_destination_deposit_reserve_collateral_supply_spl_token_account
-                    .key()
-                    .as_ref(),
-                self.solend_pyth_price_oracle_account.key.as_ref(),
-                self.solend_switchboard_price_feed_oracle_account
-                    .key
-                    .as_ref(),
-            ],
-            self.generic_accs.vault_account.protocols[Protocols::Solend as usize]
-                .hash_pubkey
-                .hash_deposit,
-        )
+impl<'info> CheckHash<'info> for SolendDeposit<'info> {
+    fn hash(&self) -> Hash {
+        hashv(&[
+            self.vault_solend_destination_collateral_token_account
+                .key()
+                .as_ref(),
+            self.vault_solend_obligation_account.key.as_ref(),
+            self.solend_reserve_account.key.as_ref(),
+            self.solend_reserve_liquidity_supply_spl_token_account
+                .key
+                .as_ref(),
+            self.solend_reserve_collateral_spl_token_mint.key.as_ref(),
+            self.solend_lending_market_account.key.as_ref(),
+            self.solend_derived_lending_market_authority.key.as_ref(),
+            self.solend_destination_deposit_reserve_collateral_supply_spl_token_account
+                .key()
+                .as_ref(),
+            self.solend_pyth_price_oracle_account.key.as_ref(),
+            self.solend_switchboard_price_feed_oracle_account
+                .key
+                .as_ref(),
+        ])
+    }
+
+    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[Protocols::Solend as usize]
+            .hash_pubkey
+            .hash_deposit
     }
 }
 
@@ -352,29 +360,32 @@ impl<'info> SolendWithdraw<'info> {
 
         Ok(())
     }
+}
 
-    pub fn check_hash(&self) -> Result<()> {
-        check_hash_pub_keys(
-            &[
-                self.vault_solend_destination_collateral_token_account
-                    .key()
-                    .as_ref(),
-                self.vault_solend_obligation_account.key.as_ref(),
-                self.solend_source_withdraw_reserve_collateral_supply_spl_token_account
-                    .key
-                    .as_ref(),
-                self.solend_withdraw_reserve_account.key.as_ref(),
-                self.solend_lending_market_account.key.as_ref(),
-                self.solend_derived_lending_market_authority.key.as_ref(),
-                self.solend_reserve_collateral_spl_token_mint.key.as_ref(),
-                self.solend_reserve_liquidity_supply_spl_token_account
-                    .key
-                    .as_ref(),
-            ],
-            self.generic_accs.vault_account.protocols[Protocols::Solend as usize]
-                .hash_pubkey
-                .hash_withdraw,
-        )
+impl<'info> CheckHash<'info> for SolendWithdraw<'info> {
+    fn hash(&self) -> Hash {
+        hashv(&[
+            self.vault_solend_destination_collateral_token_account
+                .key()
+                .as_ref(),
+            self.vault_solend_obligation_account.key.as_ref(),
+            self.solend_source_withdraw_reserve_collateral_supply_spl_token_account
+                .key
+                .as_ref(),
+            self.solend_withdraw_reserve_account.key.as_ref(),
+            self.solend_lending_market_account.key.as_ref(),
+            self.solend_derived_lending_market_authority.key.as_ref(),
+            self.solend_reserve_collateral_spl_token_mint.key.as_ref(),
+            self.solend_reserve_liquidity_supply_spl_token_account
+                .key
+                .as_ref(),
+        ])
+    }
+
+    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[Protocols::Solend as usize]
+            .hash_pubkey
+            .hash_withdraw
     }
 }
 
@@ -432,14 +443,17 @@ impl<'info> SolendTVL<'info> {
 
         Ok(tvl)
     }
+}
 
-    pub fn check_hash(&self) -> Result<()> {
-        check_hash_pub_keys(
-            &[self.reserve.key.as_ref(), self.obligation.key.as_ref()],
-            self.generic_accs.vault_account.protocols[Protocols::Solend as usize]
-                .hash_pubkey
-                .hash_tvl,
-        )
+impl<'info> CheckHash<'info> for SolendTVL<'info> {
+    fn hash(&self) -> Hash {
+        hashv(&[self.reserve.key.as_ref(), self.obligation.key.as_ref()])
+    }
+
+    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[Protocols::Solend as usize]
+            .hash_pubkey
+            .hash_tvl
     }
 }
 

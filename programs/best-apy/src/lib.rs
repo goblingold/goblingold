@@ -6,11 +6,13 @@ use anchor_lang::prelude::borsh::{BorshDeserialize, BorshSerialize};
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::{pubkey::Pubkey, sysvar};
 use anchor_spl::token::{Token, TokenAccount};
+use check_hash::{CheckHash, CHECKHASH_BYTES};
 use error::ErrorCode;
 use instructions::*;
 use protocols::{francium::*, mango::*, port::*, solend::*, tulip::*, PROTOCOLS_LEN};
-use vault::{VaultAccount, HASH_PUBKEYS_LEN};
+use vault::VaultAccount;
 
+mod check_hash;
 mod error;
 mod generic_accounts;
 mod instructions;
@@ -43,7 +45,7 @@ pub mod best_apy {
         ctx: Context<SetHash>,
         protocol: usize,
         action: String,
-        hash: [u8; HASH_PUBKEYS_LEN],
+        hash: [u8; CHECKHASH_BYTES],
     ) -> Result<()> {
         instructions::set_hash::handler(ctx, protocol, action, hash)
     }
@@ -195,11 +197,6 @@ pub mod best_apy {
     pub fn francium_tvl(ctx: Context<FranciumTVL>) -> Result<()> {
         protocols::francium::update_rewards(ctx)
     }
-}
-
-/// Trait to check the validity of a hash of the accounts passed
-pub trait CheckHash<'info> {
-    fn check_hash(&self) -> Result<()>;
 }
 
 /// Check if the program is paused

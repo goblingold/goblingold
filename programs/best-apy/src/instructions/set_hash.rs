@@ -1,4 +1,5 @@
-use crate::vault::{VaultAccount, HASH_PUBKEYS_LEN};
+use crate::check_hash::CHECKHASH_BYTES;
+use crate::vault::VaultAccount;
 use crate::ALLOWED_DEPLOYER;
 use crate::VAULT_ACCOUNT_SEED;
 use anchor_lang::prelude::*;
@@ -22,7 +23,7 @@ pub fn handler(
     ctx: Context<SetHash>,
     protocol: usize,
     action: String,
-    hash: [u8; HASH_PUBKEYS_LEN],
+    hash: [u8; CHECKHASH_BYTES],
 ) -> Result<()> {
     ctx.accounts.set_hash(protocol, action, hash)
 }

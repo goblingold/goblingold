@@ -1,8 +1,8 @@
+use crate::check_hash::*;
 use crate::error::ErrorCode;
 use crate::macros::generate_seeds;
 use crate::protocols::state::tulip_reserve;
 use crate::protocols::Protocols;
-use crate::vault::check_hash_pub_keys;
 use crate::{
     generic_accounts_anchor_modules::*, GenericDepositAccounts, GenericTVLAccounts,
     GenericWithdrawAccounts,
@@ -10,7 +10,10 @@ use crate::{
 use anchor_lang::prelude::borsh::{BorshDeserialize, BorshSerialize};
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::{
-    instruction::Instruction, program::invoke_signed, program_pack::Pack,
+    hash::{hashv, Hash},
+    instruction::Instruction,
+    program::invoke_signed,
+    program_pack::Pack,
 };
 use anchor_spl::token::TokenAccount;
 
@@ -116,23 +119,26 @@ impl<'info> TulipDeposit<'info> {
         invoke_signed(&ix, &accounts, signer)?;
         Ok(())
     }
+}
 
-    pub fn check_hash(&self) -> Result<()> {
-        check_hash_pub_keys(
-            &[
-                self.vault_tulip_collateral_token_account.key().as_ref(),
-                self.tulip_reserve_account.key.as_ref(),
-                self.tulip_reserve_liquidity_supply_token_account
-                    .key
-                    .as_ref(),
-                self.tulip_reserve_collateral_token_mint.key.as_ref(),
-                self.tulip_lending_market_account.key.as_ref(),
-                self.tulip_reserve_authority.key.as_ref(),
-            ],
-            self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
-                .hash_pubkey
-                .hash_deposit,
-        )
+impl<'info> CheckHash<'info> for TulipDeposit<'info> {
+    fn hash(&self) -> Hash {
+        hashv(&[
+            self.vault_tulip_collateral_token_account.key().as_ref(),
+            self.tulip_reserve_account.key.as_ref(),
+            self.tulip_reserve_liquidity_supply_token_account
+                .key
+                .as_ref(),
+            self.tulip_reserve_collateral_token_mint.key.as_ref(),
+            self.tulip_lending_market_account.key.as_ref(),
+            self.tulip_reserve_authority.key.as_ref(),
+        ])
+    }
+
+    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
+            .hash_pubkey
+            .hash_deposit
     }
 }
 
@@ -259,23 +265,26 @@ impl<'info> TulipWithdraw<'info> {
 
         Ok(())
     }
+}
 
-    pub fn check_hash(&self) -> Result<()> {
-        check_hash_pub_keys(
-            &[
-                self.vault_tulip_collateral_token_account.key().as_ref(),
-                self.tulip_reserve_account.key.as_ref(),
-                self.tulip_reserve_liquidity_supply_token_account
-                    .key
-                    .as_ref(),
-                self.tulip_reserve_collateral_token_mint.key.as_ref(),
-                self.tulip_lending_market_account.key.as_ref(),
-                self.tulip_reserve_authority.key.as_ref(),
-            ],
-            self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
-                .hash_pubkey
-                .hash_withdraw,
-        )
+impl<'info> CheckHash<'info> for TulipWithdraw<'info> {
+    fn hash(&self) -> Hash {
+        hashv(&[
+            self.vault_tulip_collateral_token_account.key().as_ref(),
+            self.tulip_reserve_account.key.as_ref(),
+            self.tulip_reserve_liquidity_supply_token_account
+                .key
+                .as_ref(),
+            self.tulip_reserve_collateral_token_mint.key.as_ref(),
+            self.tulip_lending_market_account.key.as_ref(),
+            self.tulip_reserve_authority.key.as_ref(),
+        ])
+    }
+
+    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
+            .hash_pubkey
+            .hash_withdraw
     }
 }
 
@@ -329,17 +338,20 @@ impl<'info> TulipTVL<'info> {
 
         Ok(tvl)
     }
+}
 
-    pub fn check_hash(&self) -> Result<()> {
-        check_hash_pub_keys(
-            &[
-                self.reserve.key.as_ref(),
-                self.vault_tulip_collateral_token_account.key().as_ref(),
-            ],
-            self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
-                .hash_pubkey
-                .hash_tvl,
-        )
+impl<'info> CheckHash<'info> for TulipTVL<'info> {
+    fn hash(&self) -> Hash {
+        hashv(&[
+            self.reserve.key.as_ref(),
+            self.vault_tulip_collateral_token_account.key().as_ref(),
+        ])
+    }
+
+    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
+            .hash_pubkey
+            .hash_tvl
     }
 }
 
