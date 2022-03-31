@@ -3,6 +3,7 @@ use anchor_lang::prelude::*;
 use anchor_lang::solana_program::hash::Hash;
 
 /// Bytes of the truncated hash to be checked
+#[constant]
 pub const CHECKHASH_BYTES: usize = 8;
 
 /// Trait to check the validity of a hash of the accounts passed

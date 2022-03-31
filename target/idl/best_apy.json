@@ -1,6 +1,20 @@
 {
   "version": "0.1.0",
   "name": "best_apy",
+  "constants": [
+    {
+      "name": "CHECKHASH_BYTES",
+      "type": {
+        "defined": "usize"
+      },
+      "value": "8"
+    },
+    {
+      "name": "WEIGHTS_SCALE",
+      "type": "u16",
+      "value": "10_000"
+    }
+  ],
   "instructions": [
     {
       "name": "initializeVault",
@@ -118,7 +132,7 @@
           "name": "weights",
           "type": {
             "array": [
-              "u32",
+              "u16",
               5
             ]
           }
@@ -1601,7 +1615,7 @@
         "fields": [
           {
             "name": "weight",
-            "type": "u32"
+            "type": "u16"
           },
           {
             "name": "amount",

@@ -52,7 +52,7 @@ pub mod best_apy {
     // ACCESS RESTRICTED. ONLY ALLOWED_DEPLOYER
     pub fn set_protocol_weights(
         ctx: Context<SetProtocolWeights>,
-        weights: [u32; PROTOCOLS_LEN],
+        weights: [u16; PROTOCOLS_LEN],
     ) -> Result<()> {
         instructions::set_protocol_weights::handler(ctx, weights)
     }

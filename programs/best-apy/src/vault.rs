@@ -5,7 +5,8 @@ use crate::SetHash;
 use anchor_lang::prelude::*;
 use std::{cmp, convert::TryInto};
 
-pub const WEIGHTS_SCALE: u32 = 1_000_000;
+#[constant]
+pub const WEIGHTS_SCALE: u16 = 10_000;
 
 /// Strategy vault account
 #[account]
@@ -107,7 +108,7 @@ impl VaultAccount {
                         .ok_or_else(|| error!(ErrorCode::MathOverflow))?
                         .checked_div(total_deposit)
                         .ok_or_else(|| error!(ErrorCode::MathOverflow))?
-                        as u32;
+                        as u16;
 
                     if self.protocols[i].weight == 0 {
                         self.protocols[i].weight = 1
@@ -123,10 +124,10 @@ impl VaultAccount {
                 .max_by_key(|&(_, protocol)| protocol.weight)
                 .unwrap();
 
-            let weights_sum: u32 = self
+            let weights_sum: u16 = self
                 .protocols
                 .iter()
-                .try_fold(0_u32, |acc, &protocol| acc.checked_add(protocol.weight))
+                .try_fold(0_u16, |acc, &protocol| acc.checked_add(protocol.weight))
                 .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
             self.protocols[max_indx].weight = WEIGHTS_SCALE
@@ -198,7 +199,7 @@ pub struct Bumps {
 #[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default)]
 pub struct ProtocolData {
     /// Percentage of the TVL that should be deposited in the protocol
-    pub weight: u32,
+    pub weight: u16,
     /// Deposited token amount in the protocol
     pub amount: u64,
     /// Accumulated rewards
@@ -210,7 +211,7 @@ pub struct ProtocolData {
 impl ProtocolData {
     /// Check the protocol is active
     pub fn is_active(&self) -> bool {
-        self.weight != u32::default()
+        self.weight != u16::default()
     }
 
     /// Amount that should be deposited according to the weight
