@@ -1,12 +1,11 @@
 use crate::check_hash::*;
 use crate::error::ErrorCode;
+use crate::instructions::{
+    protocol_deposit::*, protocol_initialize::*, protocol_rewards::*, protocol_withdraw::*,
+};
 use crate::macros::generate_seeds;
 use crate::protocols::Protocols;
-use crate::vault::VaultAccount;
-use crate::{
-    generic_accounts_anchor_modules::*, GenericDepositAccounts, GenericTVLAccounts,
-    GenericWithdrawAccounts,
-};
+use crate::vault::{ProtocolData, VaultAccount};
 use crate::{ALLOWED_DEPLOYER, VAULT_ACCOUNT_SEED};
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::{
@@ -52,9 +51,8 @@ pub struct SolendInitialize<'info> {
     pub system_program: Program<'info, System>,
 }
 
-impl<'info> SolendInitialize<'info> {
-    /// Create and initialize protocol accounts
-    pub fn create_and_initialize(&self) -> Result<()> {
+impl<'info> ProtocolInitialize<'info> for SolendInitialize<'info> {
+    fn cpi_initialize(&self) -> Result<()> {
         let seeds = generate_seeds!(self.vault_account);
         let signer = &[&seeds[..]];
 
@@ -102,11 +100,6 @@ impl<'info> SolendInitialize<'info> {
     }
 }
 
-/// Create and initialize protocol accounts
-pub fn initialize(ctx: Context<SolendInitialize>) -> Result<()> {
-    ctx.accounts.create_and_initialize()
-}
-
 #[derive(Accounts)]
 pub struct SolendDeposit<'info> {
     pub generic_accs: GenericDepositAccounts<'info>,
@@ -144,8 +137,46 @@ pub struct SolendDeposit<'info> {
     pub solend_switchboard_price_feed_oracle_account: AccountInfo<'info>,
 }
 
-impl<'info> SolendDeposit<'info> {
-    /// CPI deposit call
+impl<'info> CheckHash<'info> for SolendDeposit<'info> {
+    fn hash(&self) -> Hash {
+        hashv(&[
+            self.vault_solend_destination_collateral_token_account
+                .key()
+                .as_ref(),
+            self.vault_solend_obligation_account.key.as_ref(),
+            self.solend_reserve_account.key.as_ref(),
+            self.solend_reserve_liquidity_supply_spl_token_account
+                .key
+                .as_ref(),
+            self.solend_reserve_collateral_spl_token_mint.key.as_ref(),
+            self.solend_lending_market_account.key.as_ref(),
+            self.solend_derived_lending_market_authority.key.as_ref(),
+            self.solend_destination_deposit_reserve_collateral_supply_spl_token_account
+                .key()
+                .as_ref(),
+            self.solend_pyth_price_oracle_account.key.as_ref(),
+            self.solend_switchboard_price_feed_oracle_account
+                .key
+                .as_ref(),
+        ])
+    }
+
+    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[Protocols::Solend as usize]
+            .hash_pubkey
+            .hash_deposit
+    }
+}
+
+impl<'info> ProtocolDeposit<'info> for SolendDeposit<'info> {
+    fn protocol_data_as_mut(&mut self) -> &mut ProtocolData {
+        &mut self.generic_accs.vault_account.protocols[Protocols::Solend as usize]
+    }
+
+    fn get_amount(&self) -> Result<u64> {
+        self.generic_accs.amount_to_deposit(Protocols::Solend)
+    }
+
     fn cpi_deposit(&self, amount: u64) -> Result<()> {
         let seeds = generate_seeds!(self.generic_accs.vault_account);
         let signer = &[&seeds[..]];
@@ -199,51 +230,6 @@ impl<'info> SolendDeposit<'info> {
     }
 }
 
-impl<'info> CheckHash<'info> for SolendDeposit<'info> {
-    fn hash(&self) -> Hash {
-        hashv(&[
-            self.vault_solend_destination_collateral_token_account
-                .key()
-                .as_ref(),
-            self.vault_solend_obligation_account.key.as_ref(),
-            self.solend_reserve_account.key.as_ref(),
-            self.solend_reserve_liquidity_supply_spl_token_account
-                .key
-                .as_ref(),
-            self.solend_reserve_collateral_spl_token_mint.key.as_ref(),
-            self.solend_lending_market_account.key.as_ref(),
-            self.solend_derived_lending_market_authority.key.as_ref(),
-            self.solend_destination_deposit_reserve_collateral_supply_spl_token_account
-                .key()
-                .as_ref(),
-            self.solend_pyth_price_oracle_account.key.as_ref(),
-            self.solend_switchboard_price_feed_oracle_account
-                .key
-                .as_ref(),
-        ])
-    }
-
-    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[Protocols::Solend as usize]
-            .hash_pubkey
-            .hash_deposit
-    }
-}
-
-/// Deposit into protocol
-pub fn deposit(ctx: Context<SolendDeposit>) -> Result<()> {
-    let amount = ctx
-        .accounts
-        .generic_accs
-        .amount_to_deposit(Protocols::Solend)?;
-
-    ctx.accounts.cpi_deposit(amount)?;
-    ctx.accounts.generic_accs.vault_account.protocols[Protocols::Solend as usize]
-        .update_after_deposit(amount)?;
-
-    Ok(())
-}
-
 #[derive(Accounts)]
 pub struct SolendWithdraw<'info> {
     pub generic_accs: GenericWithdrawAccounts<'info>,
@@ -277,8 +263,46 @@ pub struct SolendWithdraw<'info> {
     pub solend_reserve_liquidity_supply_spl_token_account: AccountInfo<'info>,
 }
 
-impl<'info> SolendWithdraw<'info> {
-    /// Convert reserve liquidity to collateral
+impl<'info> CheckHash<'info> for SolendWithdraw<'info> {
+    fn hash(&self) -> Hash {
+        hashv(&[
+            self.vault_solend_destination_collateral_token_account
+                .key()
+                .as_ref(),
+            self.vault_solend_obligation_account.key.as_ref(),
+            self.solend_source_withdraw_reserve_collateral_supply_spl_token_account
+                .key
+                .as_ref(),
+            self.solend_withdraw_reserve_account.key.as_ref(),
+            self.solend_lending_market_account.key.as_ref(),
+            self.solend_derived_lending_market_authority.key.as_ref(),
+            self.solend_reserve_collateral_spl_token_mint.key.as_ref(),
+            self.solend_reserve_liquidity_supply_spl_token_account
+                .key
+                .as_ref(),
+        ])
+    }
+
+    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[Protocols::Solend as usize]
+            .hash_pubkey
+            .hash_withdraw
+    }
+}
+
+impl<'info> ProtocolWithdraw<'info> for SolendWithdraw<'info> {
+    fn protocol_data_as_mut(&mut self) -> &mut ProtocolData {
+        &mut self.generic_accs.vault_account.protocols[Protocols::Solend as usize]
+    }
+
+    fn input_token_account_as_mut(&mut self) -> &mut Account<'info, TokenAccount> {
+        &mut self.generic_accs.vault_input_token_account
+    }
+
+    fn get_amount(&self) -> Result<u64> {
+        self.generic_accs.amount_to_withdraw(Protocols::Solend)
+    }
+
     fn liquidity_to_collateral(&self, amount: u64) -> Result<u64> {
         let reserve = solend_token_lending::state::Reserve::unpack(
             &self.solend_withdraw_reserve_account.data.borrow(),
@@ -289,23 +313,6 @@ impl<'info> SolendWithdraw<'info> {
         Ok(lp_amount)
     }
 
-    /// Withdraw from the protocol and get the true token balance
-    fn withdraw_and_get_balance(&mut self, amount: u64) -> Result<u64> {
-        let lp_amount = self.liquidity_to_collateral(amount)?;
-        let amount_before = self.generic_accs.vault_input_token_account.amount;
-
-        self.cpi_withdraw(lp_amount)?;
-        self.generic_accs.vault_input_token_account.reload()?;
-
-        let amount_after = self.generic_accs.vault_input_token_account.amount;
-        let amount_diff = amount_after
-            .checked_sub(amount_before)
-            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
-
-        Ok(amount_diff)
-    }
-
-    /// CPI withdraw call
     fn cpi_withdraw(&self, amount: u64) -> Result<()> {
         let seeds = generate_seeds!(self.generic_accs.vault_account);
         let signer = &[&seeds[..]];
@@ -362,47 +369,6 @@ impl<'info> SolendWithdraw<'info> {
     }
 }
 
-impl<'info> CheckHash<'info> for SolendWithdraw<'info> {
-    fn hash(&self) -> Hash {
-        hashv(&[
-            self.vault_solend_destination_collateral_token_account
-                .key()
-                .as_ref(),
-            self.vault_solend_obligation_account.key.as_ref(),
-            self.solend_source_withdraw_reserve_collateral_supply_spl_token_account
-                .key
-                .as_ref(),
-            self.solend_withdraw_reserve_account.key.as_ref(),
-            self.solend_lending_market_account.key.as_ref(),
-            self.solend_derived_lending_market_authority.key.as_ref(),
-            self.solend_reserve_collateral_spl_token_mint.key.as_ref(),
-            self.solend_reserve_liquidity_supply_spl_token_account
-                .key
-                .as_ref(),
-        ])
-    }
-
-    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[Protocols::Solend as usize]
-            .hash_pubkey
-            .hash_withdraw
-    }
-}
-
-/// Withdraw from the protocol
-pub fn withdraw(ctx: Context<SolendWithdraw>) -> Result<()> {
-    let amount = ctx
-        .accounts
-        .generic_accs
-        .amount_to_withdraw(Protocols::Solend)?;
-    let amount_withdrawn = ctx.accounts.withdraw_and_get_balance(amount)?;
-
-    ctx.accounts.generic_accs.vault_account.protocols[Protocols::Solend as usize]
-        .update_after_withdraw(amount_withdrawn)?;
-
-    Ok(())
-}
-
 #[derive(Accounts)]
 pub struct SolendTVL<'info> {
     pub generic_accs: GenericTVLAccounts<'info>,
@@ -414,8 +380,23 @@ pub struct SolendTVL<'info> {
     pub obligation: AccountInfo<'info>,
 }
 
-impl<'info> SolendTVL<'info> {
-    /// Calculate the max native units to withdraw
+impl<'info> CheckHash<'info> for SolendTVL<'info> {
+    fn hash(&self) -> Hash {
+        hashv(&[self.reserve.key.as_ref(), self.obligation.key.as_ref()])
+    }
+
+    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[Protocols::Solend as usize]
+            .hash_pubkey
+            .hash_tvl
+    }
+}
+
+impl<'info> ProtocolRewards<'info> for SolendTVL<'info> {
+    fn protocol_data_as_mut(&mut self) -> &mut ProtocolData {
+        &mut self.generic_accs.vault_account.protocols[Protocols::Solend as usize]
+    }
+
     fn max_withdrawable(&self) -> Result<u64> {
         let reserve = solend_token_lending::state::Reserve::unpack(&self.reserve.data.borrow())?;
         let obligation =
@@ -443,29 +424,4 @@ impl<'info> SolendTVL<'info> {
 
         Ok(tvl)
     }
-}
-
-impl<'info> CheckHash<'info> for SolendTVL<'info> {
-    fn hash(&self) -> Hash {
-        hashv(&[self.reserve.key.as_ref(), self.obligation.key.as_ref()])
-    }
-
-    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[Protocols::Solend as usize]
-            .hash_pubkey
-            .hash_tvl
-    }
-}
-
-/// Update the protocol TVL
-pub fn update_rewards(ctx: Context<SolendTVL>) -> Result<()> {
-    let tvl = ctx.accounts.max_withdrawable()?;
-
-    let protocol =
-        &mut ctx.accounts.generic_accs.vault_account.protocols[Protocols::Solend as usize];
-    let rewards = tvl.saturating_sub(protocol.amount);
-
-    protocol.rewards.update(rewards)?;
-
-    Ok(())
 }

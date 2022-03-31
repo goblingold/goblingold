@@ -1,12 +1,11 @@
 use crate::check_hash::*;
 use crate::error::ErrorCode;
+use crate::instructions::{
+    protocol_deposit::*, protocol_initialize::*, protocol_rewards::*, protocol_withdraw::*,
+};
 use crate::macros::generate_seeds;
 use crate::protocols::Protocols;
-use crate::vault::VaultAccount;
-use crate::{
-    generic_accounts_anchor_modules::*, GenericDepositAccounts, GenericTVLAccounts,
-    GenericWithdrawAccounts,
-};
+use crate::vault::{ProtocolData, VaultAccount};
 use crate::{ALLOWED_DEPLOYER, VAULT_ACCOUNT_SEED};
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::{
@@ -14,6 +13,7 @@ use anchor_lang::solana_program::{
     program::invoke_signed,
     pubkey::Pubkey,
 };
+use anchor_spl::token::TokenAccount;
 use std::str::FromStr;
 
 /// Program ids
@@ -46,9 +46,8 @@ pub struct MangoInitialize<'info> {
     pub system_program: Program<'info, System>,
 }
 
-impl<'info> MangoInitialize<'info> {
-    /// Create and initialize protocol account
-    pub fn create_and_initialize(&self) -> Result<()> {
+impl<'info> ProtocolInitialize<'info> for MangoInitialize<'info> {
+    fn cpi_initialize(&self) -> Result<()> {
         let seeds = generate_seeds!(self.vault_account);
         let signer = &[&seeds[..]];
 
@@ -75,11 +74,6 @@ impl<'info> MangoInitialize<'info> {
     }
 }
 
-/// Create and initialize protocol account
-pub fn initialize(ctx: Context<MangoInitialize>) -> Result<()> {
-    ctx.accounts.create_and_initialize()
-}
-
 #[derive(Accounts)]
 pub struct MangoDeposit<'info> {
     pub generic_accs: GenericDepositAccounts<'info>,
@@ -104,8 +98,34 @@ pub struct MangoDeposit<'info> {
     pub mango_vault_account: AccountInfo<'info>,
 }
 
-impl<'info> MangoDeposit<'info> {
-    /// CPI deposit call
+impl<'info> CheckHash<'info> for MangoDeposit<'info> {
+    fn hash(&self) -> Hash {
+        hashv(&[
+            self.vault_mango_account.key.as_ref(),
+            self.mango_group_account.key.as_ref(),
+            self.mango_cache_account.key.as_ref(),
+            self.mango_root_bank_account.key.as_ref(),
+            self.mango_node_bank_account.key.as_ref(),
+            self.mango_vault_account.key.as_ref(),
+        ])
+    }
+
+    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
+            .hash_pubkey
+            .hash_deposit
+    }
+}
+
+impl<'info> ProtocolDeposit<'info> for MangoDeposit<'info> {
+    fn protocol_data_as_mut(&mut self) -> &mut ProtocolData {
+        &mut self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
+    }
+
+    fn get_amount(&self) -> Result<u64> {
+        self.generic_accs.amount_to_deposit(Protocols::Mango)
+    }
+
     fn cpi_deposit(&self, amount: u64) -> Result<()> {
         let seeds = generate_seeds!(self.generic_accs.vault_account);
         let signer = &[&seeds[..]];
@@ -141,39 +161,6 @@ impl<'info> MangoDeposit<'info> {
     }
 }
 
-impl<'info> CheckHash<'info> for MangoDeposit<'info> {
-    fn hash(&self) -> Hash {
-        hashv(&[
-            self.vault_mango_account.key.as_ref(),
-            self.mango_group_account.key.as_ref(),
-            self.mango_cache_account.key.as_ref(),
-            self.mango_root_bank_account.key.as_ref(),
-            self.mango_node_bank_account.key.as_ref(),
-            self.mango_vault_account.key.as_ref(),
-        ])
-    }
-
-    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
-            .hash_pubkey
-            .hash_deposit
-    }
-}
-
-/// Deposit into protocol
-pub fn deposit(ctx: Context<MangoDeposit>) -> Result<()> {
-    let amount = ctx
-        .accounts
-        .generic_accs
-        .amount_to_deposit(Protocols::Mango)?;
-
-    ctx.accounts.cpi_deposit(amount)?;
-    ctx.accounts.generic_accs.vault_account.protocols[Protocols::Mango as usize]
-        .update_after_deposit(amount)?;
-
-    Ok(())
-}
-
 #[derive(Accounts)]
 pub struct MangoWithdraw<'info> {
     pub generic_accs: GenericWithdrawAccounts<'info>,
@@ -202,23 +189,39 @@ pub struct MangoWithdraw<'info> {
     pub system_program: AccountInfo<'info>,
 }
 
-impl<'info> MangoWithdraw<'info> {
-    /// Withdraw from the protocol and get the true token balance
-    fn withdraw_and_get_balance(&mut self, amount: u64) -> Result<u64> {
-        let amount_before = self.generic_accs.vault_input_token_account.amount;
-
-        self.cpi_withdraw(amount)?;
-        self.generic_accs.vault_input_token_account.reload()?;
-
-        let amount_after = self.generic_accs.vault_input_token_account.amount;
-        let amount_diff = amount_after
-            .checked_sub(amount_before)
-            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
-
-        Ok(amount_diff)
+impl<'info> CheckHash<'info> for MangoWithdraw<'info> {
+    fn hash(&self) -> Hash {
+        hashv(&[
+            self.vault_mango_account.key.as_ref(),
+            self.mango_cache_account.key.as_ref(),
+            self.mango_group_account.key.as_ref(),
+            self.mango_group_signer_account.key.as_ref(),
+            self.mango_root_bank_account.key.as_ref(),
+            self.mango_node_bank_account.key.as_ref(),
+            self.mango_vault_account.key.as_ref(),
+        ])
     }
 
-    /// CPI withdraw call
+    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
+            .hash_pubkey
+            .hash_withdraw
+    }
+}
+
+impl<'info> ProtocolWithdraw<'info> for MangoWithdraw<'info> {
+    fn protocol_data_as_mut(&mut self) -> &mut ProtocolData {
+        &mut self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
+    }
+
+    fn input_token_account_as_mut(&mut self) -> &mut Account<'info, TokenAccount> {
+        &mut self.generic_accs.vault_input_token_account
+    }
+
+    fn get_amount(&self) -> Result<u64> {
+        self.generic_accs.amount_to_withdraw(Protocols::Mango)
+    }
+
     fn cpi_withdraw(&self, amount: u64) -> Result<()> {
         let seeds = generate_seeds!(self.generic_accs.vault_account);
         let signer = &[&seeds[..]];
@@ -260,40 +263,6 @@ impl<'info> MangoWithdraw<'info> {
     }
 }
 
-impl<'info> CheckHash<'info> for MangoWithdraw<'info> {
-    fn hash(&self) -> Hash {
-        hashv(&[
-            self.vault_mango_account.key.as_ref(),
-            self.mango_cache_account.key.as_ref(),
-            self.mango_group_account.key.as_ref(),
-            self.mango_group_signer_account.key.as_ref(),
-            self.mango_root_bank_account.key.as_ref(),
-            self.mango_node_bank_account.key.as_ref(),
-            self.mango_vault_account.key.as_ref(),
-        ])
-    }
-
-    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
-            .hash_pubkey
-            .hash_withdraw
-    }
-}
-
-/// Withdraw from the protocol
-pub fn withdraw(ctx: Context<MangoWithdraw>) -> Result<()> {
-    let amount = ctx
-        .accounts
-        .generic_accs
-        .amount_to_withdraw(Protocols::Mango)?;
-    let amount_withdrawn = ctx.accounts.withdraw_and_get_balance(amount)?;
-
-    ctx.accounts.generic_accs.vault_account.protocols[Protocols::Mango as usize]
-        .update_after_withdraw(amount_withdrawn)?;
-
-    Ok(())
-}
-
 #[derive(Accounts)]
 pub struct MangoTVL<'info> {
     pub generic_accs: GenericTVLAccounts<'info>,
@@ -310,8 +279,28 @@ pub struct MangoTVL<'info> {
     pub default_pubkey: AccountInfo<'info>,
 }
 
-impl<'info> MangoTVL<'info> {
-    /// Calculate the max native units to withdraw
+impl<'info> CheckHash<'info> for MangoTVL<'info> {
+    fn hash(&self) -> Hash {
+        hashv(&[
+            self.vault_mango_account.key.as_ref(),
+            self.mango_group_account.key.as_ref(),
+            self.mango_cache_account.key.as_ref(),
+            self.mango_root_bank_account.key.as_ref(),
+        ])
+    }
+
+    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
+            .hash_pubkey
+            .hash_tvl
+    }
+}
+
+impl<'info> ProtocolRewards<'info> for MangoTVL<'info> {
+    fn protocol_data_as_mut(&mut self) -> &mut ProtocolData {
+        &mut self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
+    }
+
     fn max_withdrawable(&self) -> Result<u64> {
         let mango_account = mango::state::MangoAccount::load_checked(
             &self.vault_mango_account,
@@ -357,34 +346,4 @@ impl<'info> MangoTVL<'info> {
 
         Ok(tvl)
     }
-}
-
-impl<'info> CheckHash<'info> for MangoTVL<'info> {
-    fn hash(&self) -> Hash {
-        hashv(&[
-            self.vault_mango_account.key.as_ref(),
-            self.mango_group_account.key.as_ref(),
-            self.mango_cache_account.key.as_ref(),
-            self.mango_root_bank_account.key.as_ref(),
-        ])
-    }
-
-    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
-            .hash_pubkey
-            .hash_tvl
-    }
-}
-
-/// Update the protocol TVL
-pub fn update_rewards(ctx: Context<MangoTVL>) -> Result<()> {
-    let tvl = ctx.accounts.max_withdrawable()?;
-
-    let protocol =
-        &mut ctx.accounts.generic_accs.vault_account.protocols[Protocols::Mango as usize];
-    let rewards = tvl.saturating_sub(protocol.amount);
-
-    protocol.rewards.update(rewards)?;
-
-    Ok(())
 }

@@ -1,12 +1,9 @@
 use crate::check_hash::*;
 use crate::error::ErrorCode;
+use crate::instructions::{protocol_deposit::*, protocol_rewards::*, protocol_withdraw::*};
 use crate::macros::generate_seeds;
-use crate::protocols::state::tulip_reserve;
-use crate::protocols::Protocols;
-use crate::{
-    generic_accounts_anchor_modules::*, GenericDepositAccounts, GenericTVLAccounts,
-    GenericWithdrawAccounts,
-};
+use crate::protocols::{state::tulip_reserve, Protocols};
+use crate::vault::ProtocolData;
 use anchor_lang::prelude::borsh::{BorshDeserialize, BorshSerialize};
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::{
@@ -64,8 +61,36 @@ pub struct TulipDeposit<'info> {
     pub tulip_reserve_authority: AccountInfo<'info>,
 }
 
-impl<'info> TulipDeposit<'info> {
-    /// CPI deposit call
+impl<'info> CheckHash<'info> for TulipDeposit<'info> {
+    fn hash(&self) -> Hash {
+        hashv(&[
+            self.vault_tulip_collateral_token_account.key().as_ref(),
+            self.tulip_reserve_account.key.as_ref(),
+            self.tulip_reserve_liquidity_supply_token_account
+                .key
+                .as_ref(),
+            self.tulip_reserve_collateral_token_mint.key.as_ref(),
+            self.tulip_lending_market_account.key.as_ref(),
+            self.tulip_reserve_authority.key.as_ref(),
+        ])
+    }
+
+    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
+            .hash_pubkey
+            .hash_deposit
+    }
+}
+
+impl<'info> ProtocolDeposit<'info> for TulipDeposit<'info> {
+    fn protocol_data_as_mut(&mut self) -> &mut ProtocolData {
+        &mut self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
+    }
+
+    fn get_amount(&self) -> Result<u64> {
+        self.generic_accs.amount_to_deposit(Protocols::Tulip)
+    }
+
     fn cpi_deposit(&self, amount: u64) -> Result<()> {
         let seeds = generate_seeds!(self.generic_accs.vault_account);
         let signer = &[&seeds[..]];
@@ -121,41 +146,6 @@ impl<'info> TulipDeposit<'info> {
     }
 }
 
-impl<'info> CheckHash<'info> for TulipDeposit<'info> {
-    fn hash(&self) -> Hash {
-        hashv(&[
-            self.vault_tulip_collateral_token_account.key().as_ref(),
-            self.tulip_reserve_account.key.as_ref(),
-            self.tulip_reserve_liquidity_supply_token_account
-                .key
-                .as_ref(),
-            self.tulip_reserve_collateral_token_mint.key.as_ref(),
-            self.tulip_lending_market_account.key.as_ref(),
-            self.tulip_reserve_authority.key.as_ref(),
-        ])
-    }
-
-    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
-            .hash_pubkey
-            .hash_deposit
-    }
-}
-
-/// Deposit into protocol
-pub fn deposit(ctx: Context<TulipDeposit>) -> Result<()> {
-    let amount = ctx
-        .accounts
-        .generic_accs
-        .amount_to_deposit(Protocols::Tulip)?;
-
-    ctx.accounts.cpi_deposit(amount)?;
-    ctx.accounts.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
-        .update_after_deposit(amount)?;
-
-    Ok(())
-}
-
 #[derive(Accounts)]
 pub struct TulipWithdraw<'info> {
     pub generic_accs: GenericWithdrawAccounts<'info>,
@@ -183,8 +173,19 @@ pub struct TulipWithdraw<'info> {
     pub tulip_reserve_authority: AccountInfo<'info>,
 }
 
-impl<'info> TulipWithdraw<'info> {
-    /// Convert reserve liquidity to collateral
+impl<'info> ProtocolWithdraw<'info> for TulipWithdraw<'info> {
+    fn protocol_data_as_mut(&mut self) -> &mut ProtocolData {
+        &mut self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
+    }
+
+    fn input_token_account_as_mut(&mut self) -> &mut Account<'info, TokenAccount> {
+        &mut self.generic_accs.vault_input_token_account
+    }
+
+    fn get_amount(&self) -> Result<u64> {
+        self.generic_accs.amount_to_withdraw(Protocols::Tulip)
+    }
+
     fn liquidity_to_collateral(&self, amount: u64) -> Result<u64> {
         let reserve = tulip_reserve::Reserve::unpack(&self.tulip_reserve_account.data.borrow())?;
         let lp_amount = reserve
@@ -193,23 +194,6 @@ impl<'info> TulipWithdraw<'info> {
         Ok(lp_amount)
     }
 
-    /// Withdraw from the protocol and get the true token balance
-    fn withdraw_and_get_balance(&mut self, amount: u64) -> Result<u64> {
-        let lp_amount = self.liquidity_to_collateral(amount)?;
-        let amount_before = self.generic_accs.vault_input_token_account.amount;
-
-        self.cpi_withdraw(lp_amount)?;
-        self.generic_accs.vault_input_token_account.reload()?;
-
-        let amount_after = self.generic_accs.vault_input_token_account.amount;
-        let amount_diff = amount_after
-            .checked_sub(amount_before)
-            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
-
-        Ok(amount_diff)
-    }
-
-    /// CPI withdraw call
     fn cpi_withdraw(&self, amount: u64) -> Result<()> {
         let seeds = generate_seeds!(self.generic_accs.vault_account);
         let signer = &[&seeds[..]];
@@ -288,20 +272,6 @@ impl<'info> CheckHash<'info> for TulipWithdraw<'info> {
     }
 }
 
-/// Withdraw from the protocol
-pub fn withdraw(ctx: Context<TulipWithdraw>) -> Result<()> {
-    let amount = ctx
-        .accounts
-        .generic_accs
-        .amount_to_withdraw(Protocols::Tulip)?;
-    let amount_withdrawn = ctx.accounts.withdraw_and_get_balance(amount)?;
-
-    ctx.accounts.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
-        .update_after_withdraw(amount_withdrawn)?;
-
-    Ok(())
-}
-
 #[derive(Accounts)]
 pub struct TulipTVL<'info> {
     pub generic_accs: GenericTVLAccounts<'info>,
@@ -316,8 +286,26 @@ pub struct TulipTVL<'info> {
     pub vault_tulip_collateral_token_account: Account<'info, TokenAccount>,
 }
 
-impl<'info> TulipTVL<'info> {
-    /// Calculate the max native units to withdraw
+impl<'info> CheckHash<'info> for TulipTVL<'info> {
+    fn hash(&self) -> Hash {
+        hashv(&[
+            self.reserve.key.as_ref(),
+            self.vault_tulip_collateral_token_account.key().as_ref(),
+        ])
+    }
+
+    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
+            .hash_pubkey
+            .hash_tvl
+    }
+}
+
+impl<'info> ProtocolRewards<'info> for TulipTVL<'info> {
+    fn protocol_data_as_mut(&mut self) -> &mut ProtocolData {
+        &mut self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
+    }
+
     fn max_withdrawable(&self) -> Result<u64> {
         let reserve = tulip_reserve::Reserve::unpack(&self.reserve.data.borrow())?;
 
@@ -338,32 +326,4 @@ impl<'info> TulipTVL<'info> {
 
         Ok(tvl)
     }
-}
-
-impl<'info> CheckHash<'info> for TulipTVL<'info> {
-    fn hash(&self) -> Hash {
-        hashv(&[
-            self.reserve.key.as_ref(),
-            self.vault_tulip_collateral_token_account.key().as_ref(),
-        ])
-    }
-
-    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
-            .hash_pubkey
-            .hash_tvl
-    }
-}
-
-/// Update the protocol TVL
-pub fn update_rewards(ctx: Context<TulipTVL>) -> Result<()> {
-    let tvl = ctx.accounts.max_withdrawable()?;
-
-    let protocol =
-        &mut ctx.accounts.generic_accs.vault_account.protocols[Protocols::Tulip as usize];
-    let rewards = tvl.saturating_sub(protocol.amount);
-
-    protocol.rewards.update(rewards)?;
-
-    Ok(())
 }

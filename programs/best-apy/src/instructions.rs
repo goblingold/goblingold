@@ -11,3 +11,13 @@ pub use refresh_weights::*;
 pub use set_hash::*;
 pub use set_protocol_weights::*;
 pub use withdraw::*;
+
+pub mod protocol_deposit;
+pub mod protocol_initialize;
+pub mod protocol_rewards;
+pub mod protocol_withdraw;
+
+pub use protocol_deposit::*;
+pub use protocol_initialize::*;
+pub use protocol_rewards::*;
+pub use protocol_withdraw::*;

@@ -1,12 +1,11 @@
 use crate::check_hash::*;
 use crate::error::ErrorCode;
+use crate::instructions::{
+    protocol_deposit::*, protocol_initialize::*, protocol_rewards::*, protocol_withdraw::*,
+};
 use crate::macros::generate_seeds;
 use crate::protocols::Protocols;
-use crate::vault::VaultAccount;
-use crate::{
-    generic_accounts_anchor_modules::*, GenericDepositAccounts, GenericTVLAccounts,
-    GenericWithdrawAccounts,
-};
+use crate::vault::{ProtocolData, VaultAccount};
 use crate::{ALLOWED_DEPLOYER, VAULT_ACCOUNT_SEED};
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::{
@@ -63,9 +62,8 @@ pub struct PortInitialize<'info> {
     pub rent: Sysvar<'info, Rent>,
 }
 
-impl<'info> PortInitialize<'info> {
-    /// Create and initialize obligation account
-    fn initialize_obligation(&self) -> Result<()> {
+impl<'info> ProtocolInitialize<'info> for PortInitialize<'info> {
+    fn cpi_initialize(&self) -> Result<()> {
         let seeds = generate_seeds!(self.vault_account);
         let signer = &[&seeds[..]];
 
@@ -107,14 +105,6 @@ impl<'info> PortInitialize<'info> {
             );
             port_anchor_adaptor::init_obligation(cpi_ctx)?;
         }
-
-        Ok(())
-    }
-
-    /// Create and initialize stake account
-    fn initialize_stake(&self) -> Result<()> {
-        let seeds = generate_seeds!(self.vault_account);
-        let signer = &[&seeds[..]];
 
         {
             let account_size = port_anchor_adaptor::PortStakeAccount::LEN;
@@ -158,13 +148,6 @@ impl<'info> PortInitialize<'info> {
     }
 }
 
-/// Create and initialize protocol accounts
-pub fn initialize(ctx: Context<PortInitialize>) -> Result<()> {
-    ctx.accounts.initialize_obligation()?;
-    ctx.accounts.initialize_stake()?;
-    Ok(())
-}
-
 #[derive(Accounts)]
 pub struct PortDeposit<'info> {
     pub generic_accs: GenericDepositAccounts<'info>,
@@ -206,8 +189,40 @@ pub struct PortDeposit<'info> {
     pub port_staking_pool_account: AccountInfo<'info>,
 }
 
-impl<'info> PortDeposit<'info> {
-    /// CPI deposit call
+impl<'info> CheckHash<'info> for PortDeposit<'info> {
+    fn hash(&self) -> Hash {
+        hashv(&[
+            self.vault_port_collateral_token_account.key().as_ref(),
+            self.vault_port_obligation_account.key.as_ref(),
+            self.vault_port_staking_account.key.as_ref(),
+            self.port_reserve_account.key.as_ref(),
+            self.port_reserve_liquidity_supply_account.key.as_ref(),
+            self.port_reserve_collateral_mint_account.key.as_ref(),
+            self.port_lending_market_account.key.as_ref(),
+            self.port_lending_market_authority_account.key.as_ref(),
+            self.port_destination_deposit_collateral_account
+                .key()
+                .as_ref(),
+            self.port_staking_pool_account.key.as_ref(),
+        ])
+    }
+
+    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[Protocols::Port as usize]
+            .hash_pubkey
+            .hash_deposit
+    }
+}
+
+impl<'info> ProtocolDeposit<'info> for PortDeposit<'info> {
+    fn protocol_data_as_mut(&mut self) -> &mut ProtocolData {
+        &mut self.generic_accs.vault_account.protocols[Protocols::Port as usize]
+    }
+
+    fn get_amount(&self) -> Result<u64> {
+        self.generic_accs.amount_to_deposit(Protocols::Port)
+    }
+
     fn cpi_deposit(&self, amount: u64) -> Result<()> {
         let seeds = generate_seeds!(self.generic_accs.vault_account);
         let signer = &[&seeds[..]];
@@ -249,45 +264,6 @@ impl<'info> PortDeposit<'info> {
 
         Ok(())
     }
-}
-
-impl<'info> CheckHash<'info> for PortDeposit<'info> {
-    fn hash(&self) -> Hash {
-        hashv(&[
-            self.vault_port_collateral_token_account.key().as_ref(),
-            self.vault_port_obligation_account.key.as_ref(),
-            self.vault_port_staking_account.key.as_ref(),
-            self.port_reserve_account.key.as_ref(),
-            self.port_reserve_liquidity_supply_account.key.as_ref(),
-            self.port_reserve_collateral_mint_account.key.as_ref(),
-            self.port_lending_market_account.key.as_ref(),
-            self.port_lending_market_authority_account.key.as_ref(),
-            self.port_destination_deposit_collateral_account
-                .key()
-                .as_ref(),
-            self.port_staking_pool_account.key.as_ref(),
-        ])
-    }
-
-    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[Protocols::Port as usize]
-            .hash_pubkey
-            .hash_deposit
-    }
-}
-
-/// Deposit into protocol
-pub fn deposit(ctx: Context<PortDeposit>) -> Result<()> {
-    let amount = ctx
-        .accounts
-        .generic_accs
-        .amount_to_deposit(Protocols::Port)?;
-
-    ctx.accounts.cpi_deposit(amount)?;
-    ctx.accounts.generic_accs.vault_account.protocols[Protocols::Port as usize]
-        .update_after_deposit(amount)?;
-
-    Ok(())
 }
 
 #[derive(Accounts)]
@@ -332,8 +308,42 @@ pub struct PortWithdraw<'info> {
     pub port_staking_pool_account: AccountInfo<'info>,
 }
 
-impl<'info> PortWithdraw<'info> {
-    /// Convert reserve liquidity to collateral
+impl<'info> CheckHash<'info> for PortWithdraw<'info> {
+    fn hash(&self) -> Hash {
+        hashv(&[
+            self.vault_port_collateral_token_account.key().as_ref(),
+            self.vault_port_obligation_account.key.as_ref(),
+            self.vault_port_staking_account.key.as_ref(),
+            self.port_source_collateral_account.key.as_ref(),
+            self.port_reserve_account.key.as_ref(),
+            self.port_reserve_liquidity_supply_account.key.as_ref(),
+            self.port_reserve_collateral_mint_account.key.as_ref(),
+            self.port_lending_market_account.key.as_ref(),
+            self.port_lending_market_authority_account.key.as_ref(),
+            self.port_staking_pool_account.key.as_ref(),
+        ])
+    }
+
+    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[Protocols::Port as usize]
+            .hash_pubkey
+            .hash_withdraw
+    }
+}
+
+impl<'info> ProtocolWithdraw<'info> for PortWithdraw<'info> {
+    fn protocol_data_as_mut(&mut self) -> &mut ProtocolData {
+        &mut self.generic_accs.vault_account.protocols[Protocols::Port as usize]
+    }
+
+    fn input_token_account_as_mut(&mut self) -> &mut Account<'info, TokenAccount> {
+        &mut self.generic_accs.vault_input_token_account
+    }
+
+    fn get_amount(&self) -> Result<u64> {
+        self.generic_accs.amount_to_withdraw(Protocols::Port)
+    }
+
     fn liquidity_to_collateral(&self, amount: u64) -> Result<u64> {
         let mut account_data_slice: &[u8] = &self.port_reserve_account.try_borrow_data()?;
         let reserve = port_anchor_adaptor::PortReserve::try_deserialize(&mut account_data_slice)?;
@@ -343,23 +353,6 @@ impl<'info> PortWithdraw<'info> {
         Ok(lp_amount)
     }
 
-    /// Withdraw from the protocol and get the true token balance
-    fn withdraw_and_get_balance(&mut self, amount: u64) -> Result<u64> {
-        let lp_amount = self.liquidity_to_collateral(amount)?;
-        let amount_before = self.generic_accs.vault_input_token_account.amount;
-
-        self.cpi_withdraw(lp_amount)?;
-        self.generic_accs.vault_input_token_account.reload()?;
-
-        let amount_after = self.generic_accs.vault_input_token_account.amount;
-        let amount_diff = amount_after
-            .checked_sub(amount_before)
-            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
-
-        Ok(amount_diff)
-    }
-
-    /// CPI withdraw call
     fn cpi_withdraw(&self, amount: u64) -> Result<()> {
         let seeds = generate_seeds!(self.generic_accs.vault_account);
         let signer = &[&seeds[..]];
@@ -423,43 +416,6 @@ impl<'info> PortWithdraw<'info> {
     }
 }
 
-impl<'info> CheckHash<'info> for PortWithdraw<'info> {
-    fn hash(&self) -> Hash {
-        hashv(&[
-            self.vault_port_collateral_token_account.key().as_ref(),
-            self.vault_port_obligation_account.key.as_ref(),
-            self.vault_port_staking_account.key.as_ref(),
-            self.port_source_collateral_account.key.as_ref(),
-            self.port_reserve_account.key.as_ref(),
-            self.port_reserve_liquidity_supply_account.key.as_ref(),
-            self.port_reserve_collateral_mint_account.key.as_ref(),
-            self.port_lending_market_account.key.as_ref(),
-            self.port_lending_market_authority_account.key.as_ref(),
-            self.port_staking_pool_account.key.as_ref(),
-        ])
-    }
-
-    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[Protocols::Port as usize]
-            .hash_pubkey
-            .hash_withdraw
-    }
-}
-
-/// Withdraw from the protocol
-pub fn withdraw(ctx: Context<PortWithdraw>) -> Result<()> {
-    let amount = ctx
-        .accounts
-        .generic_accs
-        .amount_to_withdraw(Protocols::Port)?;
-    let amount_withdrawn = ctx.accounts.withdraw_and_get_balance(amount)?;
-
-    ctx.accounts.generic_accs.vault_account.protocols[Protocols::Port as usize]
-        .update_after_withdraw(amount_withdrawn)?;
-
-    Ok(())
-}
-
 #[derive(Accounts)]
 pub struct PortTVL<'info> {
     pub generic_accs: GenericTVLAccounts<'info>,
@@ -471,8 +427,23 @@ pub struct PortTVL<'info> {
     pub obligation: AccountInfo<'info>,
 }
 
-impl<'info> PortTVL<'info> {
-    /// Calculate the max native units to withdraw
+impl<'info> CheckHash<'info> for PortTVL<'info> {
+    fn hash(&self) -> Hash {
+        hashv(&[self.reserve.key.as_ref(), self.obligation.key.as_ref()])
+    }
+
+    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[Protocols::Port as usize]
+            .hash_pubkey
+            .hash_tvl
+    }
+}
+
+impl<'info> ProtocolRewards<'info> for PortTVL<'info> {
+    fn protocol_data_as_mut(&mut self) -> &mut ProtocolData {
+        &mut self.generic_accs.vault_account.protocols[Protocols::Port as usize]
+    }
+
     fn max_withdrawable(&self) -> Result<u64> {
         let mut reserve_data: &[u8] = &self.reserve.try_borrow_data()?;
         let mut obligation_data: &[u8] = &self.reserve.try_borrow_data()?;
@@ -503,30 +474,6 @@ impl<'info> PortTVL<'info> {
 
         Ok(tvl)
     }
-}
-
-impl<'info> CheckHash<'info> for PortTVL<'info> {
-    fn hash(&self) -> Hash {
-        hashv(&[self.reserve.key.as_ref(), self.obligation.key.as_ref()])
-    }
-
-    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[Protocols::Port as usize]
-            .hash_pubkey
-            .hash_tvl
-    }
-}
-
-/// Update the protocol TVL
-pub fn update_rewards(ctx: Context<PortTVL>) -> Result<()> {
-    let tvl = ctx.accounts.max_withdrawable()?;
-
-    let protocol = &mut ctx.accounts.generic_accs.vault_account.protocols[Protocols::Port as usize];
-    let rewards = tvl.saturating_sub(protocol.amount);
-
-    protocol.rewards.update(rewards)?;
-
-    Ok(())
 }
 
 #[derive(Accounts)]

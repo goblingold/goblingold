@@ -4,8 +4,8 @@
 
 use anchor_lang::prelude::borsh::{BorshDeserialize, BorshSerialize};
 use anchor_lang::prelude::*;
-use anchor_lang::solana_program::{pubkey::Pubkey, sysvar};
-use anchor_spl::token::{Token, TokenAccount};
+use anchor_lang::solana_program::pubkey::Pubkey;
+
 use check_hash::{CheckHash, CHECKHASH_BYTES};
 use error::ErrorCode;
 use instructions::*;
@@ -14,7 +14,6 @@ use vault::VaultAccount;
 
 mod check_hash;
 mod error;
-mod generic_accounts;
 mod instructions;
 mod macros;
 mod protocols;
@@ -82,73 +81,73 @@ pub mod best_apy {
     /// Mango: Initialize protocol accounts
     // ACCESS RESTRICTED. ONLY ALLOWED_DEPLOYER
     pub fn mango_initialize(ctx: Context<MangoInitialize>) -> Result<()> {
-        protocols::mango::initialize(ctx)
+        instructions::protocol_initialize::handler(ctx)
     }
 
     /// Mango: Deposit from the vault account
     #[access_control(ctx.accounts.check_hash())]
     pub fn mango_deposit(ctx: Context<MangoDeposit>) -> Result<()> {
-        protocols::mango::deposit(ctx)
+        instructions::protocol_deposit::handler(ctx)
     }
 
     /// Mango: Withdraw to the vault account
     #[access_control(ctx.accounts.check_hash())]
     pub fn mango_withdraw(ctx: Context<MangoWithdraw>) -> Result<()> {
-        protocols::mango::withdraw(ctx)
+        instructions::protocol_withdraw::handler(ctx)
     }
 
     /// Mango: Compute the TVL
     #[access_control(ctx.accounts.check_hash())]
     pub fn mango_tvl(ctx: Context<MangoTVL>) -> Result<()> {
-        protocols::mango::update_rewards(ctx)
+        instructions::protocol_rewards::handler(ctx)
     }
 
     /// Solend: Initialize protocol accounts
     // ACCESS RESTRICTED. ONLY ALLOWED_DEPLOYER
     pub fn solend_initialize(ctx: Context<SolendInitialize>) -> Result<()> {
-        protocols::solend::initialize(ctx)
+        instructions::protocol_initialize::handler(ctx)
     }
 
     /// Solend: Deposit from the vault account
     #[access_control(ctx.accounts.check_hash())]
     pub fn solend_deposit(ctx: Context<SolendDeposit>) -> Result<()> {
-        protocols::solend::deposit(ctx)
+        instructions::protocol_deposit::handler(ctx)
     }
 
     /// Solend: Withdraw to the vault account
     #[access_control(ctx.accounts.check_hash())]
     pub fn solend_withdraw(ctx: Context<SolendWithdraw>) -> Result<()> {
-        protocols::solend::withdraw(ctx)
+        instructions::protocol_withdraw::handler(ctx)
     }
 
     /// Solend: Compute the TVL
     #[access_control(ctx.accounts.check_hash())]
     pub fn solend_tvl(ctx: Context<SolendTVL>) -> Result<()> {
-        protocols::solend::update_rewards(ctx)
+        instructions::protocol_rewards::handler(ctx)
     }
 
     /// Port: Initialize protocol accounts
     // ACCESS RESTRICTED. ONLY ALLOWED_DEPLOYER
     pub fn port_initialize(ctx: Context<PortInitialize>) -> Result<()> {
-        protocols::port::initialize(ctx)
+        instructions::protocol_initialize::handler(ctx)
     }
 
     /// Port: Deposit from the vault account
     #[access_control(ctx.accounts.check_hash())]
     pub fn port_deposit(ctx: Context<PortDeposit>) -> Result<()> {
-        protocols::port::deposit(ctx)
+        instructions::protocol_deposit::handler(ctx)
     }
 
     /// Port: Withdraw to the vault account
     #[access_control(ctx.accounts.check_hash())]
     pub fn port_withdraw(ctx: Context<PortWithdraw>) -> Result<()> {
-        protocols::port::withdraw(ctx)
+        instructions::protocol_withdraw::handler(ctx)
     }
 
     /// Port: Compute the TVL
     #[access_control(ctx.accounts.check_hash())]
     pub fn port_tvl(ctx: Context<PortTVL>) -> Result<()> {
-        protocols::port::update_rewards(ctx)
+        instructions::protocol_rewards::handler(ctx)
     }
 
     /// Port: Claim rewards
@@ -159,43 +158,43 @@ pub mod best_apy {
     /// Tulip: Deposit from the vault account
     #[access_control(ctx.accounts.check_hash())]
     pub fn tulip_deposit(ctx: Context<TulipDeposit>) -> Result<()> {
-        protocols::tulip::deposit(ctx)
+        instructions::protocol_deposit::handler(ctx)
     }
 
     /// Tulip: Withdraw to the vault account
     #[access_control(ctx.accounts.check_hash())]
     pub fn tulip_withdraw(ctx: Context<TulipWithdraw>) -> Result<()> {
-        protocols::tulip::withdraw(ctx)
+        instructions::protocol_withdraw::handler(ctx)
     }
 
     /// Tulip: Compute the TVL
     #[access_control(ctx.accounts.check_hash())]
     pub fn tulip_tvl(ctx: Context<TulipTVL>) -> Result<()> {
-        protocols::tulip::update_rewards(ctx)
+        instructions::protocol_rewards::handler(ctx)
     }
 
     /// Francium: Initialize protocol accounts
     // ACCESS RESTRICTED. ONLY ALLOWED_DEPLOYER
     pub fn francium_initialize(ctx: Context<FranciumInitialize>) -> Result<()> {
-        protocols::francium::initialize(ctx)
+        instructions::protocol_initialize::handler(ctx)
     }
 
     /// Francium: Deposit from the vault account
     #[access_control(ctx.accounts.check_hash())]
     pub fn francium_deposit(ctx: Context<FranciumDeposit>) -> Result<()> {
-        protocols::francium::deposit(ctx)
+        instructions::protocol_deposit::handler(ctx)
     }
 
     /// Francium: Withdraw to the vault account
     #[access_control(ctx.accounts.check_hash())]
     pub fn francium_withdraw(ctx: Context<FranciumWithdraw>) -> Result<()> {
-        protocols::francium::withdraw(ctx)
+        instructions::protocol_withdraw::handler(ctx)
     }
 
     /// Francium: Compute the TVL
     #[access_control(ctx.accounts.check_hash())]
     pub fn francium_tvl(ctx: Context<FranciumTVL>) -> Result<()> {
-        protocols::francium::update_rewards(ctx)
+        instructions::protocol_rewards::handler(ctx)
     }
 }
 
@@ -203,66 +202,6 @@ pub mod best_apy {
 fn program_not_paused() -> Result<()> {
     require!(!PAUSED, ErrorCode::OnPaused);
     Ok(())
-}
-
-#[derive(Accounts)]
-pub struct GenericDepositAccounts<'info> {
-    #[account(
-        mut,
-        seeds = [VAULT_ACCOUNT_SEED, vault_account.input_mint_pubkey.as_ref()],
-        bump = vault_account.bumps.vault
-    )]
-    pub vault_account: Box<Account<'info, VaultAccount>>,
-    #[account(
-        mut,
-        associated_token::mint = vault_account.input_mint_pubkey,
-        associated_token::authority = vault_account,
-    )]
-    pub vault_input_token_account: Account<'info, TokenAccount>,
-    pub token_program: Program<'info, Token>,
-    pub clock: Sysvar<'info, Clock>,
-}
-
-#[derive(Accounts)]
-pub struct GenericWithdrawAccounts<'info> {
-    #[account(
-        mut,
-        seeds = [VAULT_ACCOUNT_SEED, vault_account.input_mint_pubkey.as_ref()],
-        bump = vault_account.bumps.vault
-    )]
-    pub vault_account: Box<Account<'info, VaultAccount>>,
-    #[account(
-        mut,
-        associated_token::mint = vault_account.input_mint_pubkey,
-        associated_token::authority = vault_account,
-    )]
-    pub vault_input_token_account: Account<'info, TokenAccount>,
-    pub token_program: Program<'info, Token>,
-    pub clock: Sysvar<'info, Clock>,
-    #[account(address = sysvar::instructions::ID)]
-    /// CHECK: address is checked
-    pub instructions: AccountInfo<'info>,
-}
-
-#[derive(Accounts)]
-pub struct GenericTVLAccounts<'info> {
-    #[account(
-        mut,
-        seeds = [VAULT_ACCOUNT_SEED, vault_account.input_mint_pubkey.as_ref()],
-        bump = vault_account.bumps.vault
-    )]
-    pub vault_account: Box<Account<'info, VaultAccount>>,
-}
-
-/// Anchor generated modules required for using the GenericAccounts structs as fields of
-/// #[derive(Acounts)] structs in other source files
-pub mod generic_accounts_anchor_modules {
-    pub(crate) use super::__client_accounts_generic_deposit_accounts;
-    pub(crate) use super::__client_accounts_generic_tvl_accounts;
-    pub(crate) use super::__client_accounts_generic_withdraw_accounts;
-    pub(crate) use super::__cpi_client_accounts_generic_deposit_accounts;
-    pub(crate) use super::__cpi_client_accounts_generic_tvl_accounts;
-    pub(crate) use super::__cpi_client_accounts_generic_withdraw_accounts;
 }
 
 //#[derive(Accounts)]

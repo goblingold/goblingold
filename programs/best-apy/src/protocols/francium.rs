@@ -1,13 +1,14 @@
 use crate::check_hash::*;
 use crate::error::ErrorCode;
-use crate::macros::generate_seeds;
-use crate::protocols::state::{francium_farming_user, francium_lending_pool};
-use crate::protocols::Protocols;
-use crate::vault::VaultAccount;
-use crate::{
-    generic_accounts_anchor_modules::*, GenericDepositAccounts, GenericTVLAccounts,
-    GenericWithdrawAccounts,
+use crate::instructions::{
+    protocol_deposit::*, protocol_initialize::*, protocol_rewards::*, protocol_withdraw::*,
 };
+use crate::macros::generate_seeds;
+use crate::protocols::{
+    state::{francium_farming_user, francium_lending_pool},
+    Protocols,
+};
+use crate::vault::{ProtocolData, VaultAccount};
 use crate::{ALLOWED_DEPLOYER, VAULT_ACCOUNT_SEED};
 use anchor_lang::prelude::borsh::{BorshDeserialize, BorshSerialize};
 use anchor_lang::prelude::*;
@@ -85,9 +86,8 @@ pub struct FranciumInitialize<'info> {
     pub rent: Sysvar<'info, Rent>,
 }
 
-impl<'info> FranciumInitialize<'info> {
-    /// Create and initialize protocol account
-    pub fn create_and_initialize(&self) -> Result<()> {
+impl<'info> ProtocolInitialize<'info> for FranciumInitialize<'info> {
+    fn cpi_initialize(&self) -> Result<()> {
         let seeds = generate_seeds!(self.vault_account);
         let signer = &[&seeds[..]];
 
@@ -123,11 +123,6 @@ impl<'info> FranciumInitialize<'info> {
 
         Ok(())
     }
-}
-
-/// Create and initialize protocol account
-pub fn initialize(ctx: Context<FranciumInitialize>) -> Result<()> {
-    ctx.accounts.create_and_initialize()
 }
 
 #[derive(Accounts)]
@@ -191,8 +186,48 @@ pub struct FranciumDeposit<'info> {
     pub francium_farming_pool_rewards_b_token_account: AccountInfo<'info>,
 }
 
-impl<'info> FranciumDeposit<'info> {
-    /// CPI deposit call
+impl<'info> CheckHash<'info> for FranciumDeposit<'info> {
+    fn hash(&self) -> Hash {
+        hashv(&[
+            self.vault_francium_collateral_token_account.key().as_ref(),
+            self.vault_francium_account_mint_rewards.key().as_ref(),
+            self.vault_francium_account_mint_b_rewards.key().as_ref(),
+            self.vault_francium_farming_account.key.as_ref(),
+            self.francium_lending_pool_info_account.key.as_ref(),
+            self.francium_lending_pool_token_account.key.as_ref(),
+            self.francium_farming_pool_stake_token_mint.key.as_ref(),
+            self.francium_market_info_account.key.as_ref(),
+            self.francium_lending_market_authority.key.as_ref(),
+            self.francium_farming_pool_account.key.as_ref(),
+            self.francium_farming_pool_authority.key.as_ref(),
+            self.francium_farming_pool_stake_token_account
+                .key()
+                .as_ref(),
+            self.francium_farming_pool_rewards_token_account
+                .key
+                .as_ref(),
+            self.francium_farming_pool_rewards_b_token_account
+                .key
+                .as_ref(),
+        ])
+    }
+
+    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
+            .hash_pubkey
+            .hash_deposit
+    }
+}
+
+impl<'info> ProtocolDeposit<'info> for FranciumDeposit<'info> {
+    fn protocol_data_as_mut(&mut self) -> &mut ProtocolData {
+        &mut self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
+    }
+
+    fn get_amount(&self) -> Result<u64> {
+        self.generic_accs.amount_to_deposit(Protocols::Francium)
+    }
+
     fn cpi_deposit(&self, amount: u64) -> Result<()> {
         let seeds = generate_seeds!(self.generic_accs.vault_account);
         let signer = &[&seeds[..]];
@@ -284,53 +319,6 @@ impl<'info> FranciumDeposit<'info> {
     }
 }
 
-impl<'info> CheckHash<'info> for FranciumDeposit<'info> {
-    fn hash(&self) -> Hash {
-        hashv(&[
-            self.vault_francium_collateral_token_account.key().as_ref(),
-            self.vault_francium_account_mint_rewards.key().as_ref(),
-            self.vault_francium_account_mint_b_rewards.key().as_ref(),
-            self.vault_francium_farming_account.key.as_ref(),
-            self.francium_lending_pool_info_account.key.as_ref(),
-            self.francium_lending_pool_token_account.key.as_ref(),
-            self.francium_farming_pool_stake_token_mint.key.as_ref(),
-            self.francium_market_info_account.key.as_ref(),
-            self.francium_lending_market_authority.key.as_ref(),
-            self.francium_farming_pool_account.key.as_ref(),
-            self.francium_farming_pool_authority.key.as_ref(),
-            self.francium_farming_pool_stake_token_account
-                .key()
-                .as_ref(),
-            self.francium_farming_pool_rewards_token_account
-                .key
-                .as_ref(),
-            self.francium_farming_pool_rewards_b_token_account
-                .key
-                .as_ref(),
-        ])
-    }
-
-    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
-            .hash_pubkey
-            .hash_deposit
-    }
-}
-
-/// Deposit into protocol
-pub fn deposit(ctx: Context<FranciumDeposit>) -> Result<()> {
-    let amount = ctx
-        .accounts
-        .generic_accs
-        .amount_to_deposit(Protocols::Francium)?;
-
-    ctx.accounts.cpi_deposit(amount)?;
-    ctx.accounts.generic_accs.vault_account.protocols[Protocols::Francium as usize]
-        .update_after_deposit(amount)?;
-
-    Ok(())
-}
-
 #[derive(Accounts)]
 pub struct FranciumWithdraw<'info> {
     pub generic_accs: GenericWithdrawAccounts<'info>,
@@ -387,8 +375,49 @@ pub struct FranciumWithdraw<'info> {
     pub francium_farming_pool_rewards_b_token_account: AccountInfo<'info>,
 }
 
-impl<'info> FranciumWithdraw<'info> {
-    /// Convert reserve liquidity to collateral
+impl<'info> CheckHash<'info> for FranciumWithdraw<'info> {
+    fn hash(&self) -> Hash {
+        hashv(&[
+            self.vault_francium_collateral_token_account.key().as_ref(),
+            self.vault_francium_account_mint_rewards.key().as_ref(),
+            self.vault_francium_farming_account.key.as_ref(),
+            self.francium_lending_pool_info_account.key.as_ref(),
+            self.francium_lending_pool_token_account.key.as_ref(),
+            self.francium_farming_pool_stake_token_mint.key.as_ref(),
+            self.francium_market_info_account.key.as_ref(),
+            self.francium_lending_market_authority.key.as_ref(),
+            self.francium_farming_pool_account.key.as_ref(),
+            self.francium_farming_pool_authority.key.as_ref(),
+            self.francium_farming_pool_stake_token_account.key.as_ref(),
+            self.francium_farming_pool_rewards_token_account
+                .key
+                .as_ref(),
+            self.francium_farming_pool_rewards_b_token_account
+                .key
+                .as_ref(),
+        ])
+    }
+
+    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
+            .hash_pubkey
+            .hash_withdraw
+    }
+}
+
+impl<'info> ProtocolWithdraw<'info> for FranciumWithdraw<'info> {
+    fn protocol_data_as_mut(&mut self) -> &mut ProtocolData {
+        &mut self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
+    }
+
+    fn input_token_account_as_mut(&mut self) -> &mut Account<'info, TokenAccount> {
+        &mut self.generic_accs.vault_input_token_account
+    }
+
+    fn get_amount(&self) -> Result<u64> {
+        self.generic_accs.amount_to_withdraw(Protocols::Francium)
+    }
+
     fn liquidity_to_collateral(&self, amount: u64) -> Result<u64> {
         let lending_pool = francium_lending_pool::LendingPool::unpack(
             &self.francium_lending_pool_info_account.data.borrow(),
@@ -401,23 +430,6 @@ impl<'info> FranciumWithdraw<'info> {
         Ok(lp_amount)
     }
 
-    /// Withdraw from the protocol and get the true token balance
-    fn withdraw_and_get_balance(&mut self, amount: u64) -> Result<u64> {
-        let lp_amount = self.liquidity_to_collateral(amount)?;
-        let amount_before = self.generic_accs.vault_input_token_account.amount;
-
-        self.cpi_withdraw(lp_amount)?;
-        self.generic_accs.vault_input_token_account.reload()?;
-
-        let amount_after = self.generic_accs.vault_input_token_account.amount;
-        let amount_diff = amount_after
-            .checked_sub(amount_before)
-            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
-
-        Ok(amount_diff)
-    }
-
-    /// CPI withdraw call from stake
     fn cpi_withdraw(&self, amount: u64) -> Result<()> {
         let seeds = generate_seeds!(self.generic_accs.vault_account);
         let signer = &[&seeds[..]];
@@ -510,50 +522,6 @@ impl<'info> FranciumWithdraw<'info> {
     }
 }
 
-impl<'info> CheckHash<'info> for FranciumWithdraw<'info> {
-    fn hash(&self) -> Hash {
-        hashv(&[
-            self.vault_francium_collateral_token_account.key().as_ref(),
-            self.vault_francium_account_mint_rewards.key().as_ref(),
-            self.vault_francium_farming_account.key.as_ref(),
-            self.francium_lending_pool_info_account.key.as_ref(),
-            self.francium_lending_pool_token_account.key.as_ref(),
-            self.francium_farming_pool_stake_token_mint.key.as_ref(),
-            self.francium_market_info_account.key.as_ref(),
-            self.francium_lending_market_authority.key.as_ref(),
-            self.francium_farming_pool_account.key.as_ref(),
-            self.francium_farming_pool_authority.key.as_ref(),
-            self.francium_farming_pool_stake_token_account.key.as_ref(),
-            self.francium_farming_pool_rewards_token_account
-                .key
-                .as_ref(),
-            self.francium_farming_pool_rewards_b_token_account
-                .key
-                .as_ref(),
-        ])
-    }
-
-    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
-            .hash_pubkey
-            .hash_withdraw
-    }
-}
-
-/// Withdraw from the protocol
-pub fn withdraw(ctx: Context<FranciumWithdraw>) -> Result<()> {
-    let amount = ctx
-        .accounts
-        .generic_accs
-        .amount_to_withdraw(Protocols::Francium)?;
-    let amount_withdrawn = ctx.accounts.withdraw_and_get_balance(amount)?;
-
-    ctx.accounts.generic_accs.vault_account.protocols[Protocols::Francium as usize]
-        .update_after_withdraw(amount_withdrawn)?;
-
-    Ok(())
-}
-
 #[derive(Accounts)]
 pub struct FranciumTVL<'info> {
     pub generic_accs: GenericTVLAccounts<'info>,
@@ -565,8 +533,26 @@ pub struct FranciumTVL<'info> {
     pub farming_user: AccountInfo<'info>,
 }
 
-impl<'info> FranciumTVL<'info> {
-    /// Calculate the max native units to withdraw
+impl<'info> CheckHash<'info> for FranciumTVL<'info> {
+    fn hash(&self) -> Hash {
+        hashv(&[
+            self.lending_pool.key.as_ref(),
+            self.farming_user.key.as_ref(),
+        ])
+    }
+
+    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
+            .hash_pubkey
+            .hash_tvl
+    }
+}
+
+impl<'info> ProtocolRewards<'info> for FranciumTVL<'info> {
+    fn protocol_data_as_mut(&mut self) -> &mut ProtocolData {
+        &mut self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
+    }
+
     fn max_withdrawable(&self) -> Result<u64> {
         let lending = francium_lending_pool::LendingPool::unpack(&self.lending_pool.data.borrow())?;
         let farming = francium_farming_user::FarmingUser::unpack(&self.farming_user.data.borrow())?;
@@ -588,32 +574,4 @@ impl<'info> FranciumTVL<'info> {
 
         Ok(tvl)
     }
-}
-
-impl<'info> CheckHash<'info> for FranciumTVL<'info> {
-    fn hash(&self) -> Hash {
-        hashv(&[
-            self.lending_pool.key.as_ref(),
-            self.farming_user.key.as_ref(),
-        ])
-    }
-
-    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
-            .hash_pubkey
-            .hash_tvl
-    }
-}
-
-/// Update the protocol TVL
-pub fn update_rewards(ctx: Context<FranciumTVL>) -> Result<()> {
-    let tvl = ctx.accounts.max_withdrawable()?;
-
-    let protocol =
-        &mut ctx.accounts.generic_accs.vault_account.protocols[Protocols::Francium as usize];
-    let rewards = tvl.saturating_sub(protocol.amount);
-
-    protocol.rewards.update(rewards)?;
-
-    Ok(())
 }
