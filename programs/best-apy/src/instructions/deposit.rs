@@ -36,48 +36,60 @@ pub struct Deposit<'info> {
     pub token_program: Program<'info, Token>,
 }
 
-/// Deposit user input tokens into the vault account
-pub fn handler(ctx: Context<Deposit>, amount: u64) -> Result<()> {
-    require!(amount >= 100, ErrorCode::InvalidDepositAmount);
-    msg!("GoblinGold: Deposit");
-
-    // Transfer user token to vault account
-    let cpi_accounts = Transfer {
-        from: ctx.accounts.user_input_token_account.to_account_info(),
-        to: ctx.accounts.vault_input_token_account.to_account_info(),
-        authority: ctx.accounts.user_signer.to_account_info(),
-    };
-    let cpi_program = ctx.accounts.token_program.to_account_info();
-    let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
-    token::transfer(cpi_ctx, amount)?;
-
-    // Mint vault tokens to user vault account
-    let price = LpPrice {
-        total_tokens: ctx.accounts.vault_account.current_tvl,
-        minted_tokens: ctx.accounts.vault_lp_token_mint_pubkey.supply,
-    };
-
-    // Ensure price goes up
-    if ctx.accounts.vault_account.previous_lp_price != LpPrice::default() {
-        require!(
-            price > ctx.accounts.vault_account.previous_lp_price,
-            ErrorCode::InvalidLpPrice
-        );
+impl<'info> Deposit<'info> {
+    fn current_lp_price(&self) -> LpPrice {
+        LpPrice {
+            total_tokens: self.vault_account.current_tvl,
+            minted_tokens: self.vault_lp_token_mint_pubkey.supply,
+        }
     }
 
-    let lp_amount = price.token_to_lp(amount)?;
+    fn transfer_from_user_to_vault_ctx(&self) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>> {
+        CpiContext::new(
+            self.token_program.to_account_info(),
+            Transfer {
+                from: self.user_input_token_account.to_account_info(),
+                to: self.vault_input_token_account.to_account_info(),
+                authority: self.user_signer.to_account_info(),
+            },
+        )
+    }
+
+    fn mint_lp_to_user_ctx(&self) -> CpiContext<'_, '_, '_, 'info, MintTo<'info>> {
+        CpiContext::new(
+            self.token_program.to_account_info(),
+            MintTo {
+                mint: self.vault_lp_token_mint_pubkey.to_account_info(),
+                to: self.user_lp_token_account.to_account_info(),
+                authority: self.vault_account.to_account_info(),
+            },
+        )
+    }
+}
+
+/// Deposit user input tokens into the vault account
+pub fn handler(ctx: Context<Deposit>, amount: u64) -> Result<()> {
+    msg!("GoblinGold: Deposit");
+
+    let current_price = ctx.accounts.current_lp_price();
+    let previous_price = ctx.accounts.vault_account.previous_lp_price;
+
+    if previous_price != LpPrice::default() {
+        require!(current_price > previous_price, ErrorCode::InvalidLpPrice);
+    }
+
+    require!(amount >= 100, ErrorCode::InvalidDepositAmount);
+
+    let lp_amount = current_price.token_to_lp(amount)?;
 
     let seeds = generate_seeds!(ctx.accounts.vault_account);
     let signer = &[&seeds[..]];
 
-    let cpi_accounts = MintTo {
-        mint: ctx.accounts.vault_lp_token_mint_pubkey.to_account_info(),
-        to: ctx.accounts.user_lp_token_account.to_account_info(),
-        authority: ctx.accounts.vault_account.to_account_info(),
-    };
-    let cpi_program = ctx.accounts.token_program.to_account_info();
-    let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer);
-    token::mint_to(cpi_ctx, lp_amount)?;
+    token::transfer(ctx.accounts.transfer_from_user_to_vault_ctx(), amount)?;
+    token::mint_to(
+        ctx.accounts.mint_lp_to_user_ctx().with_signer(signer),
+        lp_amount,
+    )?;
 
     // Update total deposited amounts
     ctx.accounts.vault_account.current_tvl = ctx
