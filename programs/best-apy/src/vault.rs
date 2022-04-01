@@ -1,9 +1,11 @@
 use crate::check_hash::CHECKHASH_BYTES;
 use crate::error::ErrorCode;
 use crate::protocols::{Protocols, PROTOCOLS_LEN};
-
 use anchor_lang::prelude::*;
-use std::{cmp, convert::TryInto};
+use std::{
+    cmp::{self, Ordering},
+    convert::TryInto,
+};
 
 #[constant]
 pub const WEIGHTS_SCALE: u16 = 10_000;
@@ -214,6 +216,13 @@ impl ProtocolData {
         self.weight != u16::default()
     }
 
+    /// Set the protocol pubkey hashes
+    pub fn set_hashes(&mut self, hashes: [[u8; CHECKHASH_BYTES]; 3]) {
+        self.hash_pubkey.hash_deposit = hashes[0];
+        self.hash_pubkey.hash_withdraw = hashes[1];
+        self.hash_pubkey.hash_tvl = hashes[2];
+    }
+
     /// Amount that should be deposited according to the weight
     fn amount_should_be_deposited(&self, total_amount: u64) -> Result<u64> {
         let amount: u64 = (total_amount as u128)
@@ -367,7 +376,7 @@ impl SlotIntegrated {
 }
 
 /// Strategy LP token price
-#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default, Debug)]
+#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default, Debug, PartialEq)]
 pub struct LpPrice {
     /// Total amount of tokens to be distributed
     pub total_tokens: u64,
@@ -405,15 +414,18 @@ impl LpPrice {
                 .map_err(|_| ErrorCode::MathOverflow)?)
         }
     }
+}
 
-    /// Returns true if self price > previous_price
-    pub fn greater_than(&self, previous_price: LpPrice) -> Result<bool> {
+impl PartialOrd for LpPrice {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         let lhs = (self.total_tokens as u128)
-            .checked_mul(previous_price.minted_tokens as u128)
-            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
-        let lhr = (previous_price.total_tokens as u128)
+            .checked_mul(other.minted_tokens as u128)
+            .unwrap();
+
+        let rhs = (other.total_tokens as u128)
             .checked_mul(self.minted_tokens as u128)
-            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
-        Ok(lhs > lhr)
+            .unwrap();
+
+        lhs.partial_cmp(&rhs)
     }
 }

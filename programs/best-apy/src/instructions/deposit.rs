@@ -52,28 +52,20 @@ pub fn handler(ctx: Context<Deposit>, amount: u64) -> Result<()> {
     token::transfer(cpi_ctx, amount)?;
 
     // Mint vault tokens to user vault account
-    let lp_amount = LpPrice {
+    let price = LpPrice {
         total_tokens: ctx.accounts.vault_account.current_tvl,
         minted_tokens: ctx.accounts.vault_lp_token_mint_pubkey.supply,
-    }
-    .token_to_lp(amount)?;
-    let lp_amount_previous_price = ctx
-        .accounts
-        .vault_account
-        .previous_lp_price
-        .lp_to_token(lp_amount)?;
-    require!(
-        lp_amount < lp_amount_previous_price,
-        ErrorCode::InvalidLpPrice
-    );
+    };
 
-    // Update total deposited amounts
-    ctx.accounts.vault_account.current_tvl = ctx
-        .accounts
-        .vault_account
-        .current_tvl
-        .checked_add(amount)
-        .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+    // Ensure price goes up
+    if ctx.accounts.vault_account.previous_lp_price != LpPrice::default() {
+        require!(
+            price > ctx.accounts.vault_account.previous_lp_price,
+            ErrorCode::InvalidLpPrice
+        );
+    }
+
+    let lp_amount = price.token_to_lp(amount)?;
 
     let seeds = generate_seeds!(ctx.accounts.vault_account);
     let signer = &[&seeds[..]];
@@ -86,6 +78,14 @@ pub fn handler(ctx: Context<Deposit>, amount: u64) -> Result<()> {
     let cpi_program = ctx.accounts.token_program.to_account_info();
     let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer);
     token::mint_to(cpi_ctx, lp_amount)?;
+
+    // Update total deposited amounts
+    ctx.accounts.vault_account.current_tvl = ctx
+        .accounts
+        .vault_account
+        .current_tvl
+        .checked_add(amount)
+        .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
     Ok(())
 }
