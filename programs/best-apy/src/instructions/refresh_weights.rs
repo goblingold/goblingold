@@ -42,8 +42,26 @@ pub struct RefreshWeights<'info> {
 }
 
 impl<'info> RefreshWeights<'info> {
+    fn current_lp_price(&self) -> LpPrice {
+        LpPrice {
+            total_tokens: self.vault_account.current_tvl,
+            minted_tokens: self.vault_lp_token_mint_pubkey.supply,
+        }
+    }
+
+    fn mint_lps_to_treasury_ctx(&self) -> CpiContext<'_, '_, '_, 'info, MintTo<'info>> {
+        CpiContext::new(
+            self.token_program.to_account_info(),
+            MintTo {
+                mint: self.vault_lp_token_mint_pubkey.to_account_info(),
+                to: self.dao_treasury_lp_token_account.to_account_info(),
+                authority: self.vault_account.to_account_info(),
+            },
+        )
+    }
+
     /// Mint LP tokens to the treasury account in order to take the fees
-    pub fn mint_fees_and_update_tvl(&mut self) -> Result<()> {
+    fn mint_fees_and_update_tvl(&mut self) -> Result<()> {
         let rewards = self.vault_account.rewards_sum;
         if rewards > 0 {
             let lp_fee = FEE
@@ -71,15 +89,7 @@ impl<'info> RefreshWeights<'info> {
             if lp_fee > 0 {
                 let seeds = generate_seeds!(self.vault_account);
                 let signer = &[&seeds[..]];
-
-                let cpi_accounts = MintTo {
-                    mint: self.vault_lp_token_mint_pubkey.to_account_info(),
-                    to: self.dao_treasury_lp_token_account.to_account_info(),
-                    authority: self.vault_account.to_account_info(),
-                };
-                let cpi_program = self.token_program.to_account_info();
-                let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer);
-                token::mint_to(cpi_ctx, lp_fee)?;
+                token::mint_to(self.mint_lps_to_treasury_ctx().with_signer(signer), lp_fee)?;
 
                 self.vault_account.current_tvl = self
                     .vault_account
@@ -89,16 +99,14 @@ impl<'info> RefreshWeights<'info> {
                 self.vault_account.rewards_sum = 0_u64;
 
                 // Check price always goes up
-                let current_lp_price = LpPrice {
-                    total_tokens: self.vault_account.current_tvl,
-                    minted_tokens: self.vault_lp_token_mint_pubkey.supply,
-                };
+                let current_price = self.current_lp_price();
+                let previous_price = self.vault_account.previous_lp_price;
 
-                if current_lp_price < self.vault_account.previous_lp_price {
+                if current_price < previous_price {
                     msg!(
                         "GoblinGold:WARN price became inconsistent: previous {:?}, new  {:?}",
-                        self.vault_account.previous_lp_price,
-                        current_lp_price
+                        previous_price,
+                        current_price
                     )
                 }
             }
