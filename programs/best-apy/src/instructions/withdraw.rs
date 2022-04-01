@@ -41,20 +41,27 @@ pub struct Withdraw<'info> {
 /// Withdraw the required input tokens from the vault and send them back to the user
 pub fn handler(ctx: Context<Withdraw>, lp_amount: u64) -> Result<()> {
     msg!("GoblinGold: Withdraw");
-    // Use previous value of LP
-    // In order to avoid depositors
+
+    let current_price = LpPrice {
+        total_tokens: ctx.accounts.vault_account.current_tvl,
+        minted_tokens: ctx.accounts.vault_lp_token_mint_pubkey.supply,
+    };
+
+    if ctx.accounts.vault_account.previous_lp_price != LpPrice::default() {
+        require!(
+            current_price > ctx.accounts.vault_account.previous_lp_price,
+            ErrorCode::InvalidLpPrice
+        );
+    }
+
+    // Use previous value of LP in order to avoid depositors
     let amount = ctx
         .accounts
         .vault_account
         .previous_lp_price
         .lp_to_token(lp_amount)?;
-    let amount_current_price = LpPrice {
-        total_tokens: ctx.accounts.vault_account.current_tvl,
-        minted_tokens: ctx.accounts.vault_lp_token_mint_pubkey.supply,
-    }
-    .lp_to_token(amount)?;
+
     require!(amount > 0, ErrorCode::InvalidZeroWithdraw);
-    require!(amount < amount_current_price, ErrorCode::InvalidLpPrice);
 
     let seeds = generate_seeds!(ctx.accounts.vault_account);
     let signer = &[&seeds[..]];
