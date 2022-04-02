@@ -16,6 +16,12 @@ const MAX_ELAPSED_SLOTS_FOR_TVL: u64 = 30;
 /// Protocol fee
 const FEE: u128 = 100; // in per mil
 
+#[event]
+pub struct RefreshWeightsEvent {
+    previous_price: LpPrice,
+    current_price: LpPrice,
+}
+
 #[derive(Accounts)]
 pub struct RefreshWeights<'info> {
     #[account(
@@ -97,18 +103,6 @@ impl<'info> RefreshWeights<'info> {
                     .checked_add(rewards)
                     .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
                 self.vault_account.rewards_sum = 0_u64;
-
-                // Check price always goes up
-                let current_price = self.current_lp_price();
-                let previous_price = self.vault_account.previous_lp_price;
-
-                if current_price < previous_price {
-                    msg!(
-                        "GoblinGold:WARN price became inconsistent: previous {:?}, new  {:?}",
-                        previous_price,
-                        current_price
-                    )
-                }
             }
         }
 
@@ -172,6 +166,11 @@ pub fn handler(ctx: Context<RefreshWeights>) -> Result<()> {
     };
 
     ctx.accounts.mint_fees_and_update_tvl()?;
+
+    emit!(RefreshWeightsEvent {
+        current_price: ctx.accounts.current_lp_price(),
+        previous_price: ctx.accounts.vault_account.previous_lp_price,
+    });
 
     Ok(())
 }
