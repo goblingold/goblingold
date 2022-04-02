@@ -112,8 +112,6 @@ impl<'info> RefreshWeights<'info> {
 
 /// Refresh the protocol weights
 pub fn handler(ctx: Context<RefreshWeights>) -> Result<()> {
-    msg!("GoblinGold: Refresh weights");
-
     let current_slot = Clock::get()?.slot;
     let elapsed_slots = current_slot
         .checked_sub(ctx.accounts.vault_account.last_refresh_slot)
