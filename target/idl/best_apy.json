@@ -1756,6 +1756,27 @@
       }
     }
   ],
+  "events": [
+    {
+      "name": "RefreshWeightsEvent",
+      "fields": [
+        {
+          "name": "previousPrice",
+          "type": {
+            "defined": "LpPrice"
+          },
+          "index": false
+        },
+        {
+          "name": "currentPrice",
+          "type": {
+            "defined": "LpPrice"
+          },
+          "index": false
+        }
+      ]
+    }
+  ],
   "errors": [
     {
       "code": 6000,

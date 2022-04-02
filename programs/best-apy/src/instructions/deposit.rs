@@ -69,8 +69,6 @@ impl<'info> Deposit<'info> {
 
 /// Deposit user input tokens into the vault account
 pub fn handler(ctx: Context<Deposit>, amount: u64) -> Result<()> {
-    msg!("GoblinGold: Deposit");
-
     let current_price = ctx.accounts.current_lp_price();
     let previous_price = ctx.accounts.vault_account.previous_lp_price;
 
