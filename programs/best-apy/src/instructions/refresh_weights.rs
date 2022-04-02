@@ -158,16 +158,14 @@ pub fn handler(ctx: Context<RefreshWeights>) -> Result<()> {
             protocol.rewards.reset_integral().unwrap();
         });
 
-    ctx.accounts.vault_account.previous_lp_price = LpPrice {
-        total_tokens: ctx.accounts.vault_account.current_tvl,
-        minted_tokens: ctx.accounts.vault_lp_token_mint_pubkey.supply,
-    };
+    ctx.accounts.vault_account.previous_lp_price = ctx.accounts.current_lp_price();
 
     ctx.accounts.mint_fees_and_update_tvl()?;
+    ctx.accounts.vault_lp_token_mint_pubkey.reload()?;
 
     emit!(RefreshWeightsEvent {
-        current_price: ctx.accounts.current_lp_price(),
         previous_price: ctx.accounts.vault_account.previous_lp_price,
+        current_price: ctx.accounts.current_lp_price(),
     });
 
     Ok(())
