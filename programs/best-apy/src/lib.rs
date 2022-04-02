@@ -24,8 +24,8 @@ declare_id!("ASkZQEZqHGgxXmDpfFxkCznTQLzLCgWHL3jkJTGtpQiR");
 pub const VAULT_ACCOUNT_SEED: &[u8; 5] = b"vault";
 pub const VAULT_LP_TOKEN_MINT_SEED: &[u8; 4] = b"mint";
 
-pub const ALLOWED_DEPLOYER: &str = "DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod";
-pub const ALLOWED_RUNNER: &str = "DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod";
+pub const ALLOWED_DEPLOYER: &str = "2fmQLSF1xR5FK3Yc5VhGvnrx7mjXbNSJN3d3WySYnzr6";
+pub const ALLOWED_RUNNER: &str = "2fmQLSF1xR5FK3Yc5VhGvnrx7mjXbNSJN3d3WySYnzr6";
 const PAUSED: bool = false;
 
 #[program]
