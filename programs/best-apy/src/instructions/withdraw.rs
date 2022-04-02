@@ -71,8 +71,6 @@ impl<'info> Withdraw<'info> {
 
 /// Withdraw the required input tokens from the vault and send them back to the user
 pub fn handler(ctx: Context<Withdraw>, lp_amount: u64) -> Result<()> {
-    msg!("GoblinGold: Withdraw");
-
     let current_price = ctx.accounts.current_lp_price();
     let previous_price = ctx.accounts.vault_account.previous_lp_price;
 
