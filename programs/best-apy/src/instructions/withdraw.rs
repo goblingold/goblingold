@@ -38,57 +38,67 @@ pub struct Withdraw<'info> {
     pub instructions: AccountInfo<'info>,
 }
 
+impl<'info> Withdraw<'info> {
+    fn current_lp_price(&self) -> LpPrice {
+        LpPrice {
+            total_tokens: self.vault_account.current_tvl,
+            minted_tokens: self.vault_lp_token_mint_pubkey.supply,
+        }
+    }
+
+    fn transfer_from_vault_to_user_ctx(&self) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>> {
+        CpiContext::new(
+            self.token_program.to_account_info(),
+            Transfer {
+                from: self.vault_input_token_account.to_account_info(),
+                to: self.user_input_token_account.to_account_info(),
+                authority: self.vault_account.to_account_info(),
+            },
+        )
+    }
+
+    fn burn_user_lps_ctx(&self) -> CpiContext<'_, '_, '_, 'info, Burn<'info>> {
+        CpiContext::new(
+            self.token_program.to_account_info(),
+            Burn {
+                mint: self.vault_lp_token_mint_pubkey.to_account_info(),
+                to: self.user_lp_token_account.to_account_info(),
+                authority: self.user_signer.to_account_info(),
+            },
+        )
+    }
+}
+
 /// Withdraw the required input tokens from the vault and send them back to the user
 pub fn handler(ctx: Context<Withdraw>, lp_amount: u64) -> Result<()> {
     msg!("GoblinGold: Withdraw");
 
-    let current_price = LpPrice {
-        total_tokens: ctx.accounts.vault_account.current_tvl,
-        minted_tokens: ctx.accounts.vault_lp_token_mint_pubkey.supply,
-    };
+    let current_price = ctx.accounts.current_lp_price();
+    let previous_price = ctx.accounts.vault_account.previous_lp_price;
 
-    if ctx.accounts.vault_account.previous_lp_price != LpPrice::default() {
-        require!(
-            current_price > ctx.accounts.vault_account.previous_lp_price,
-            ErrorCode::InvalidLpPrice
-        );
+    if previous_price != LpPrice::default() {
+        require!(current_price > previous_price, ErrorCode::InvalidLpPrice);
     }
 
-    // Use previous value of LP in order to avoid depositors
-    let amount = ctx
-        .accounts
-        .vault_account
-        .previous_lp_price
-        .lp_to_token(lp_amount)?;
+    // Use previous value of LP in order to avoid depositors.
+    // Also add a 1 lamport fee due precision errors when withdrawing from lending protocols
+    let amount = previous_price.lp_to_token(lp_amount)?;
+    let amount_conservative = amount.saturating_sub(1);
 
-    require!(amount > 0, ErrorCode::InvalidZeroWithdraw);
+    require!(amount_conservative > 1, ErrorCode::InvalidZeroWithdraw);
 
     let seeds = generate_seeds!(ctx.accounts.vault_account);
     let signer = &[&seeds[..]];
 
-    // Burn user vault tokens
-    let cpi_accounts = Burn {
-        mint: ctx.accounts.vault_lp_token_mint_pubkey.to_account_info(),
-        to: ctx.accounts.user_lp_token_account.to_account_info(),
-        authority: ctx.accounts.user_signer.to_account_info(),
-    };
-    let cpi_program = ctx.accounts.token_program.to_account_info();
-    let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
-    token::burn(cpi_ctx, lp_amount)?;
+    token::burn(ctx.accounts.burn_user_lps_ctx(), lp_amount)?;
+    token::transfer(
+        ctx.accounts
+            .transfer_from_vault_to_user_ctx()
+            .with_signer(signer),
+        amount_conservative,
+    )?;
 
-    // Transfer tokens back to user
-    // Fee = 1 lamport due precision errors when withdrawing from lending protocols
-    let amount_conservative = amount.saturating_sub(1);
-    let cpi_accounts = Transfer {
-        from: ctx.accounts.vault_input_token_account.to_account_info(),
-        to: ctx.accounts.user_input_token_account.to_account_info(),
-        authority: ctx.accounts.vault_account.to_account_info(),
-    };
-    let cpi_program = ctx.accounts.token_program.to_account_info();
-    let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer);
-    token::transfer(cpi_ctx, amount_conservative)?;
-
-    // Update total withdraw
+    // Update total withdraw (assuming we have lost 1 lamport due precision errors)
     ctx.accounts.vault_account.current_tvl = ctx
         .accounts
         .vault_account
