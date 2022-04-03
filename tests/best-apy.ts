@@ -39,4 +39,15 @@ describe("best_apy", () => {
       console.log("tx init_protocols_" + i.toString() + ":", txSig);
     }
   });
+
+  it("Set hashes", async () => {
+    const txsHashes = await program.setHashes();
+    const txHashes = txsHashes.reduce(
+      (acc, tx) => acc.add(tx),
+      new anchor.web3.Transaction()
+    );
+
+    const txSigHashes = await program.provider.send(txHashes);
+    console.log("tx set_hashes:", txSigHashes);
+  });
 });
