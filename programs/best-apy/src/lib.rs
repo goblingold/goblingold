@@ -210,6 +210,7 @@ fn program_not_paused() -> Result<()> {
 
 /// Check if target key is authorized
 fn is_admin(key: &Pubkey) -> Result<()> {
+    #[cfg(not(feature = "test"))]
     require!(key == &ADMIN_PUBKEY, UnauthorizedUser);
     Ok(())
 }

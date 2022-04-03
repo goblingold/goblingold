@@ -14,6 +14,7 @@ no-idl = []
 cpi = ["no-entrypoint"]
 default = []
 devnet = []
+test = []
 
 [dependencies]
 anchor-lang = "0.23.0"
