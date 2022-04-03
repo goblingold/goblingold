@@ -1,11 +1,11 @@
 import * as anchor from "@project-serum/anchor";
-import { Program } from "@project-serum/anchor";
+import * as spl from "@solana/spl-token";
 import { assert } from "chai";
-import { GoblinGold, NetworkName } from "goblin-sdk";
+import { GoblinGold, NetworkName, TokenName } from "goblin-sdk";
 import { BestApy } from "../target/types/best_apy";
 
 describe("best_apy", () => {
-  const testingProgram = anchor.workspace.BestApy as Program<BestApy>;
+  const testingProgram = anchor.workspace.BestApy as anchor.Program<BestApy>;
 
   const client = new GoblinGold(
     NetworkName.Mainnet,
@@ -15,6 +15,7 @@ describe("best_apy", () => {
   );
 
   const program = client.BestApy;
+  const tokenInput = TokenName.WSOL;
 
   it("Initialize vault with weights", async () => {
     const protocolWeights = [2000, 2000, 2000, 2000, 2000];
@@ -49,5 +50,70 @@ describe("best_apy", () => {
 
     const txSigHashes = await program.provider.send(txHashes);
     console.log("tx set_hashes:", txSigHashes);
+  });
+
+  it("Deposit", async () => {
+    const amount = new anchor.BN(1_000_000_000);
+    const userSigner = program.provider.wallet.publicKey;
+
+    const wrappedKeypair = anchor.web3.Keypair.generate();
+    const userInputTokenAccount = wrappedKeypair.publicKey;
+
+    const userLpTokenAccount = await spl.getAssociatedTokenAddress(
+      program.vaultKeys[tokenInput].vaultLpTokenMintAddress,
+      userSigner,
+      false
+    );
+
+    const lamports = await spl.getMinimumBalanceForRentExemptAccount(
+      client.provider.connection
+    );
+
+    const tx = new anchor.web3.Transaction()
+      .add(
+        anchor.web3.SystemProgram.createAccount({
+          fromPubkey: userSigner,
+          newAccountPubkey: userInputTokenAccount,
+          space: spl.ACCOUNT_SIZE,
+          lamports,
+          programId: spl.TOKEN_PROGRAM_ID,
+        }),
+        anchor.web3.SystemProgram.transfer({
+          fromPubkey: userSigner,
+          toPubkey: userInputTokenAccount,
+          lamports: amount.toNumber(),
+        }),
+        spl.createInitializeAccountInstruction(
+          userInputTokenAccount,
+          spl.NATIVE_MINT,
+          userSigner
+        )
+      )
+      .add(
+        spl.createAssociatedTokenAccountInstruction(
+          userSigner,
+          userLpTokenAccount,
+          userSigner,
+          program.vaultKeys[tokenInput].vaultLpTokenMintAddress
+        )
+      )
+      .add(
+        await program.deposit({
+          userInputTokenAccount,
+          userLpTokenAccount,
+          amount,
+        })
+      )
+      .add(
+        spl.createCloseAccountInstruction(
+          userInputTokenAccount,
+          userSigner,
+          userSigner,
+          []
+        )
+      );
+
+    const txsAll = await program.provider.send(tx, [wrappedKeypair]);
+    console.log("tx deposit:", txsAll);
   });
 });
