@@ -6,7 +6,7 @@ use crate::instructions::{
 use crate::macros::generate_seeds;
 use crate::protocols::Protocols;
 use crate::vault::{ProtocolData, VaultAccount};
-use crate::{ALLOWED_DEPLOYER, VAULT_ACCOUNT_SEED};
+use crate::VAULT_ACCOUNT_SEED;
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::{
     hash::{hashv, Hash},
@@ -17,7 +17,6 @@ use anchor_lang::solana_program::{
     system_instruction,
 };
 use anchor_spl::token::{Token, TokenAccount};
-use std::str::FromStr;
 
 /// Program id
 pub mod solend_program_id {
@@ -30,7 +29,6 @@ pub mod solend_program_id {
 
 #[derive(Accounts)]
 pub struct SolendInitialize<'info> {
-    #[account(constraint = Pubkey::from_str(ALLOWED_DEPLOYER).unwrap()== *user_signer.key)]
     pub user_signer: Signer<'info>,
     #[account(
         seeds = [VAULT_ACCOUNT_SEED, vault_account.input_mint_pubkey.as_ref()],

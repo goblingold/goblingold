@@ -10,11 +10,7 @@ use std::str::FromStr;
 
 #[derive(Accounts)]
 pub struct InitializeVault<'info> {
-    // Only deployer can initialize
-    #[account(
-        mut,
-        constraint = Pubkey::from_str(ALLOWED_DEPLOYER).unwrap()== *user_signer.key
-    )]
+    #[account(mut)]
     pub user_signer: Signer<'info>,
     pub input_token_mint_address: Account<'info, Mint>,
     #[account(

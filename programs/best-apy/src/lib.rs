@@ -5,11 +5,11 @@
 use anchor_lang::prelude::borsh::{BorshDeserialize, BorshSerialize};
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::pubkey::Pubkey;
-
 use check_hash::{CheckHash, CHECKHASH_BYTES};
 use error::ErrorCode;
 use instructions::*;
 use protocols::{francium::*, mango::*, port::*, solend::*, tulip::*, PROTOCOLS_LEN};
+use std::str::FromStr;
 use vault::VaultAccount;
 
 mod check_hash;
@@ -33,13 +33,13 @@ pub mod best_apy {
     use super::*;
 
     /// Initialize the vault account and its fields
-    // ACCESS RESTRICTED. ONLY ALLOWED_DEPLOYER
+    #[access_control(is_authorized(ctx.accounts.user_signer.key))]
     pub fn initialize_vault(ctx: Context<InitializeVault>) -> Result<()> {
         instructions::initialize_vault::handler(ctx)
     }
 
-    // ACCESS RESTRICTED. ONLY ALLOWED_DEPLOYER
     /// Set protocol hashes
+    #[access_control(is_authorized(ctx.accounts.user_signer.key))]
     pub fn set_hashes(
         ctx: Context<SetHashes>,
         protocol_id: u8,
@@ -48,7 +48,7 @@ pub mod best_apy {
         instructions::set_hashes::handler(ctx, protocol_id, hashes)
     }
 
-    // ACCESS RESTRICTED. ONLY ALLOWED_DEPLOYER
+    #[access_control(is_authorized(ctx.accounts.user_signer.key))]
     pub fn set_protocol_weights(
         ctx: Context<SetProtocolWeights>,
         weights: [u16; PROTOCOLS_LEN],
@@ -78,7 +78,7 @@ pub mod best_apy {
     }
 
     /// Mango: Initialize protocol accounts
-    // ACCESS RESTRICTED. ONLY ALLOWED_DEPLOYER
+    #[access_control(is_authorized(ctx.accounts.user_signer.key))]
     pub fn mango_initialize(ctx: Context<MangoInitialize>) -> Result<()> {
         instructions::protocol_initialize::handler(ctx)
     }
@@ -102,7 +102,7 @@ pub mod best_apy {
     }
 
     /// Solend: Initialize protocol accounts
-    // ACCESS RESTRICTED. ONLY ALLOWED_DEPLOYER
+    #[access_control(is_authorized(ctx.accounts.user_signer.key))]
     pub fn solend_initialize(ctx: Context<SolendInitialize>) -> Result<()> {
         instructions::protocol_initialize::handler(ctx)
     }
@@ -126,7 +126,7 @@ pub mod best_apy {
     }
 
     /// Port: Initialize protocol accounts
-    // ACCESS RESTRICTED. ONLY ALLOWED_DEPLOYER
+    #[access_control(is_authorized(ctx.accounts.user_signer.key))]
     pub fn port_initialize(ctx: Context<PortInitialize>) -> Result<()> {
         instructions::protocol_initialize::handler(ctx)
     }
@@ -173,7 +173,7 @@ pub mod best_apy {
     }
 
     /// Francium: Initialize protocol accounts
-    // ACCESS RESTRICTED. ONLY ALLOWED_DEPLOYER
+    #[access_control(is_authorized(ctx.accounts.user_signer.key))]
     pub fn francium_initialize(ctx: Context<FranciumInitialize>) -> Result<()> {
         instructions::protocol_initialize::handler(ctx)
     }
@@ -200,6 +200,15 @@ pub mod best_apy {
 /// Check if the program is paused
 fn program_not_paused() -> Result<()> {
     require!(!PAUSED, ErrorCode::OnPaused);
+    Ok(())
+}
+
+/// Check if target key is authorized
+fn is_authorized(key: &Pubkey) -> Result<()> {
+    require!(
+        key == &Pubkey::from_str(ALLOWED_DEPLOYER).unwrap(),
+        UnauthorizedUser
+    );
     Ok(())
 }
 

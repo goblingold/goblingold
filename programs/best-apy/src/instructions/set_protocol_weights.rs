@@ -1,16 +1,13 @@
 use crate::error::ErrorCode;
 use crate::protocols::PROTOCOLS_LEN;
 use crate::vault::{VaultAccount, WEIGHTS_SCALE};
-use crate::ALLOWED_DEPLOYER;
+
 use crate::VAULT_ACCOUNT_SEED;
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::pubkey::Pubkey;
-use std::str::FromStr;
 
 #[derive(Accounts)]
 pub struct SetProtocolWeights<'info> {
-    // Only deployer can modify weights
-    #[account(constraint = Pubkey::from_str(ALLOWED_DEPLOYER).unwrap()== *user_signer.key)]
     pub user_signer: Signer<'info>,
     #[account(
         mut,

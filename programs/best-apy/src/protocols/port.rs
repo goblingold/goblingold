@@ -33,7 +33,6 @@ pub mod port_staking_program_id {
 
 #[derive(Accounts)]
 pub struct PortInitialize<'info> {
-    #[account(constraint = Pubkey::from_str(ALLOWED_DEPLOYER).unwrap()== *user_signer.key)]
     pub user_signer: Signer<'info>,
     #[account(
         seeds = [VAULT_ACCOUNT_SEED, vault_account.input_mint_pubkey.as_ref()],
