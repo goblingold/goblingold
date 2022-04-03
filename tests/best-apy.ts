@@ -1,5 +1,6 @@
 import * as anchor from "@project-serum/anchor";
 import { Program } from "@project-serum/anchor";
+import { assert } from "chai";
 import { GoblinGold, NetworkName } from "goblin-sdk";
 import { BestApy } from "../target/types/best_apy";
 
@@ -15,7 +16,7 @@ describe("best_apy", () => {
 
   const program = client.BestApy;
 
-  it("Is initialized!", async () => {
+  it("Initialize vault with weights", async () => {
     const protocolWeights = [2000, 2000, 2000, 2000, 2000];
 
     const txVault = await program.initializeVault();
@@ -24,5 +25,10 @@ describe("best_apy", () => {
 
     const txSigVault = await program.provider.send(txVault);
     console.log("tx init_vault:", txSigVault);
+
+    const vaultData = await program.decodeVault();
+    const vaultWeights = vaultData.protocols.map((data) => data.weight);
+
+    assert.deepStrictEqual(vaultWeights, protocolWeights);
   });
 });
