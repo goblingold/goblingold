@@ -31,4 +31,12 @@ describe("best_apy", () => {
 
     assert.deepStrictEqual(vaultWeights, protocolWeights);
   });
+
+  it("Initialize protocol accounts", async () => {
+    const txsProtocols = await program.initializeProtocolAccounts();
+    for (let i = 0; i < txsProtocols.length; ++i) {
+      const txSig = await program.provider.send(txsProtocols[i]);
+      console.log("tx init_protocols_" + i.toString() + ":", txSig);
+    }
+  });
 });
