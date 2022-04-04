@@ -16,6 +16,7 @@ startup_wait = 20_000
 
 [test.validator]
 url = "https://api.mainnet-beta.solana.com"
+warp_slot = ""
 
 
 # mango

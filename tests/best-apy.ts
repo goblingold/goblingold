@@ -1,7 +1,7 @@
 import * as anchor from "@project-serum/anchor";
 import * as spl from "@solana/spl-token";
 import { assert } from "chai";
-import { GoblinGold, NetworkName, TokenName } from "goblin-sdk";
+import { GoblinGold, NetworkName, Protocols, TokenName } from "goblin-sdk";
 import { BestApy } from "../target/types/best_apy";
 
 describe("best_apy", () => {
@@ -115,5 +115,15 @@ describe("best_apy", () => {
 
     const txsAll = await program.provider.send(tx, [wrappedKeypair]);
     console.log("tx deposit:", txsAll);
+  });
+
+  it("Deposit into the protocols", async () => {
+    const txs = await program.rebalance();
+    for (let i = 0; i < txs.length; ++i) {
+      if (i != Protocols.Mango) {
+        const txSig = await program.provider.send(txs[i]);
+        console.log("tx deposit_protocols_" + i.toString() + ":", txSig);
+      }
+    }
   });
 });
