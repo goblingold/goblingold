@@ -35,7 +35,7 @@ impl<'info> InitializeSunny<'info> {
     pub fn initialize_vault(&self, bump: u8) -> Result<()> {
         let accounts = vec![
             self.sunny_pool.to_account_info(),
-            self.vault_signer.to_account_info(),
+            self.vault_account.to_account_info(),
             self.vault_sunny.to_account_info(),
             self.user_signer.to_account_info(),
             self.system_program.to_account_info(),
@@ -130,7 +130,7 @@ impl<'info> SunnyStake<'info> {
             let cpi_accounts = Transfer {
                 from: self.vault_lp_saber.to_account_info(),
                 to: self.stake_saber.vault_sunny_ata.to_account_info(),
-                authority: self.vault_signer.to_account_info(),
+                authority: self.vault_account.to_account_info(),
             };
             let cpi_program = self.token_program.to_account_info();
             let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer);
@@ -140,7 +140,7 @@ impl<'info> SunnyStake<'info> {
         // deposit_vendor
         {
             let accounts = vec![
-                self.vault_signer.to_account_info(),
+                self.vault_account.to_account_info(),
                 self.stake_saber.vault_sunny_ata.to_account_info(),
                 self.sunny_pool.to_account_info(),
                 self.vault_sunny.to_account_info(),
@@ -155,7 +155,7 @@ impl<'info> SunnyStake<'info> {
             let accounts_metas = accounts
                 .iter()
                 .map(|acc| {
-                    if acc.key == self.vault_signer.key {
+                    if acc.key == self.vault_account.to_account_info().key {
                         AccountMeta::new_readonly(*acc.key, true)
                     } else if acc.is_writable {
                         AccountMeta::new(*acc.key, false)
@@ -179,7 +179,7 @@ impl<'info> SunnyStake<'info> {
         // stake_internal
         {
             let accounts = vec![
-                self.vault_signer.to_account_info(),
+                self.vault_account.to_account_info(),
                 self.sunny_token_mint.to_account_info(),
                 self.stake_sunny.vault_sunny_ata.to_account_info(),
                 self.sunny_pool.to_account_info(),
@@ -195,7 +195,7 @@ impl<'info> SunnyStake<'info> {
             let accounts_metas = accounts
                 .iter()
                 .map(|acc| {
-                    if acc.key == self.vault_signer.key {
+                    if acc.key == self.vault_account.to_account_info().key {
                         AccountMeta::new_readonly(*acc.key, true)
                     } else if acc.is_writable {
                         AccountMeta::new(*acc.key, false)
@@ -237,7 +237,7 @@ impl<'info> SunnyUnstake<'info> {
         // unstake_internal
         {
             let accounts = vec![
-                self.vault_signer.to_account_info(),
+                self.vault_account.to_account_info(),
                 self.sunny_token_mint.to_account_info(),
                 self.stake_sunny.vault_sunny_ata.to_account_info(),
                 self.sunny_pool.to_account_info(),
@@ -253,7 +253,7 @@ impl<'info> SunnyUnstake<'info> {
             let accounts_metas = accounts
                 .iter()
                 .map(|acc| {
-                    if acc.key == self.vault_signer.key {
+                    if acc.key == self.vault_account.to_account_info().key {
                         AccountMeta::new_readonly(*acc.key, true)
                     } else if acc.is_writable {
                         AccountMeta::new(*acc.key, false)
@@ -278,7 +278,7 @@ impl<'info> SunnyUnstake<'info> {
         // withdraw_vendor
         {
             let accounts = vec![
-                self.vault_signer.to_account_info(),
+                self.vault_account.to_account_info(),
                 self.stake_saber.vault_sunny_ata.to_account_info(),
                 self.sunny_pool.to_account_info(),
                 self.vault_sunny.to_account_info(),
@@ -293,7 +293,7 @@ impl<'info> SunnyUnstake<'info> {
             let accounts_metas = accounts
                 .iter()
                 .map(|acc| {
-                    if acc.key == self.vault_signer.key {
+                    if acc.key == self.vault_account.to_account_info().key {
                         AccountMeta::new_readonly(*acc.key, true)
                     } else if acc.is_writable {
                         AccountMeta::new(*acc.key, false)
@@ -318,7 +318,7 @@ impl<'info> SunnyUnstake<'info> {
         // withdraw_from_vault
         {
             let accounts = vec![
-                self.vault_signer.to_account_info(),
+                self.vault_account.to_account_info(),
                 self.sunny_pool.to_account_info(),
                 self.vault_sunny.to_account_info(),
                 self.stake_saber.vault_sunny_ata.to_account_info(),
@@ -329,7 +329,7 @@ impl<'info> SunnyUnstake<'info> {
             let accounts_metas = accounts
                 .iter()
                 .map(|acc| {
-                    if acc.key == self.vault_signer.key {
+                    if acc.key == self.vault_account.to_account_info().key {
                         AccountMeta::new_readonly(*acc.key, true)
                     } else if acc.is_writable {
                         AccountMeta::new(*acc.key, false)
@@ -385,7 +385,7 @@ impl<'info> SunnyClaimRewards<'info> {
             let accounts_metas = accounts
                 .iter()
                 .map(|acc| {
-                    if acc.key == self.vault_signer.key {
+                    if acc.key == self.vault_account.to_account_info().key {
                         AccountMeta::new_readonly(*acc.key, true)
                     } else if acc.is_writable {
                         AccountMeta::new(*acc.key, false)
@@ -409,7 +409,7 @@ impl<'info> SunnyClaimRewards<'info> {
         // withdraw_from_vault
         {
             let accounts = vec![
-                self.vault_signer.to_account_info(),
+                self.vault_account.to_account_info(),
                 self.sunny_pool.to_account_info(),
                 self.vault_sunny.to_account_info(),
                 self.vault_sunny_rewards_ata.to_account_info(),
@@ -420,7 +420,7 @@ impl<'info> SunnyClaimRewards<'info> {
             let accounts_metas = accounts
                 .iter()
                 .map(|acc| {
-                    if acc.key == self.vault_signer.key {
+                    if acc.key == self.vault_account.to_account_info().key {
                         AccountMeta::new_readonly(*acc.key, true)
                     } else if acc.is_writable {
                         AccountMeta::new(*acc.key, false)
@@ -504,7 +504,7 @@ impl<'info> SunnyRedeem<'info> {
             let accounts_metas = accounts
                 .iter()
                 .map(|acc| {
-                    if acc.key == self.vault_signer.key {
+                    if acc.key == self.vault_account.to_account_info().key {
                         AccountMeta::new_readonly(*acc.key, true)
                     } else if acc.is_writable {
                         AccountMeta::new(*acc.key, false)

@@ -114,7 +114,7 @@ pub mod liq_mining {
         let cpi_accounts = MintTo {
             mint: ctx.accounts.vault_lp_token_mint_address.to_account_info(),
             to: ctx.accounts.user_lp_token_account.to_account_info(),
-            authority: ctx.accounts.vault_signer.to_account_info(),
+            authority: ctx.accounts.vault_account.to_account_info(),
         };
         let cpi_program = ctx.accounts.token_program.to_account_info();
         let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer);
@@ -148,7 +148,7 @@ pub mod liq_mining {
         let cpi_accounts = Transfer {
             from: ctx.accounts.vault_input_token_account.to_account_info(),
             to: ctx.accounts.user_input_token_account.to_account_info(),
-            authority: ctx.accounts.vault_signer.to_account_info(),
+            authority: ctx.accounts.vault_account.to_account_info(),
         };
         let cpi_program = ctx.accounts.token_program.to_account_info();
         let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer);
@@ -219,7 +219,7 @@ pub mod liq_mining {
         let cpi_accounts = Transfer {
             from: ctx.accounts.redeem_saber.redeem_ctx.redemption_destination.to_account_info(),
             to: ctx.accounts.dao_treasury_saber_token_account.to_account_info(),
-            authority: ctx.accounts.vault_signer.to_account_info(),
+            authority: ctx.accounts.vault_account.to_account_info(),
         };
         let cpi_program = ctx.accounts.token_program.to_account_info();
         let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
@@ -228,7 +228,7 @@ pub mod liq_mining {
         let cpi_accounts = Transfer {
             from: ctx.accounts.redeem_sunny.redeem_ctx.redemption_destination.to_account_info(),
             to: ctx.accounts.dao_treasury_sunny_token_account.to_account_info(),
-            authority: ctx.accounts.vault_signer.to_account_info(),
+            authority: ctx.accounts.vault_account.to_account_info(),
         };
         let cpi_program = ctx.accounts.token_program.to_account_info();
         let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
@@ -427,13 +427,11 @@ pub struct InitializeStrategy<'info> {
         space = 8 + size_of::<VaultAccount>()
     )]
     pub vault_account: Box<Account<'info, VaultAccount>>,
-    /// CHECK: TODO 
-    pub vault_signer: AccountInfo<'info>,
     #[account(
         init,
         payer = user_signer,
         mint::decimals = input_token_mint_address.decimals,
-        mint::authority = vault_signer,
+        mint::authority = vault_account,
     )]
     pub vault_lp_token_mint_pubkey: Account<'info, Mint>,
     pub input_token_mint_address: Account<'info, Mint>,
@@ -443,7 +441,7 @@ pub struct InitializeStrategy<'info> {
         init,
         payer = user_signer,
         associated_token::mint = input_token_mint_address,
-        associated_token::authority = vault_signer,
+        associated_token::authority = vault_account,
    )]
     pub vault_input_token_account: Account<'info, TokenAccount>,
     #[account(
@@ -464,18 +462,17 @@ pub struct InitializeStrategy<'info> {
 pub struct InitializeATA<'info> {
     #[account(mut)]
     pub user_signer: Signer<'info>,
-    #[account(
-        seeds = [vault_account.to_account_info().key.as_ref()],
-        bump = vault_account.bump,
-    )]
-    /// CHECK: TODO 
-    pub vault_signer: AccountInfo<'info>,
+    // TODO
+    // #[account(
+    //     seeds = [vault_account.to_account_info().key.as_ref()],
+    //     bump = vault_account.bump,
+    // )]
     pub vault_account: Account<'info, VaultAccount>,
     #[account(
          init,
          payer = user_signer,
          associated_token::mint = mint_account,
-         associated_token::authority = vault_signer,
+         associated_token::authority = vault_account,
     )]
     pub vault_signer_ata: Account<'info, TokenAccount>,
     pub mint_account: Account<'info, Mint>,
@@ -488,12 +485,11 @@ pub struct InitializeATA<'info> {
 #[derive(Accounts)]
 pub struct InitializeSunny<'info> {
     pub user_signer: Signer<'info>,
-    #[account(
-        seeds = [vault_account.to_account_info().key.as_ref()],
-        bump = vault_account.bump,
-    )]
-    /// CHECK: TODO 
-    pub vault_signer: AccountInfo<'info>,
+    // TODO
+    // #[account(
+    //     seeds = [vault_account.to_account_info().key.as_ref()],
+    //     bump = vault_account.bump,
+    // )]
     pub vault_account: Account<'info, VaultAccount>,
     #[account(mut)]
     /// CHECK: TODO check seeds with anchor .21
@@ -510,12 +506,11 @@ pub struct InitializeSunny<'info> {
 pub struct InitializeSunnyMiner<'info> {
     #[account(mut)]
     pub user_signer: Signer<'info>,
+    // TODO
     #[account(
         seeds = [vault_account.to_account_info().key.as_ref()],
         bump = vault_account.bump
     )]
-    /// CHECK: TODO 
-    pub vault_signer: AccountInfo<'info>,
     pub vault_account: Box<Account<'info, VaultAccount>>,
     /// CHECK: TODO 
     pub vault_sunny: AccountInfo<'info>,
@@ -548,12 +543,11 @@ pub struct InitializeSunnyMiner<'info> {
 pub struct CreateQuarryMiner<'info> {
     #[account(mut)]
     pub user_signer: Signer<'info>,
-    #[account(
-        seeds = [vault_account.to_account_info().key.as_ref()],
-        bump = vault_account.bump
-    )]
-    /// CHECK: TODO 
-    pub vault_signer: AccountInfo<'info>,
+    // TODO
+    // #[account(
+    //     seeds = [vault_account.to_account_info().key.as_ref()],
+    //     bump = vault_account.bump
+    // )]
     pub vault_account: Account<'info, VaultAccount>,
     pub quarry_mine_program_id: Program<'info, QuarryMine>,
     #[account(
@@ -569,7 +563,7 @@ pub struct CreateQuarryMiner<'info> {
     pub rent: Sysvar<'info, Rent>,
     #[account(
         constraint = quarry_miner.payer.key == user_signer.key,
-        constraint = quarry_miner.authority.key == vault_signer.key,
+        constraint = quarry_miner.authority.key == vault_account.to_account_info().key,
         constraint = quarry_miner.miner_vault.key == &vault_miner_stable_swap.to_account_info().key(),
         constraint = quarry_miner.token_program.key == token_program.key,
         constraint = quarry_miner.system_program.key == system_program.key,
@@ -632,22 +626,21 @@ pub struct Deposit<'info> {
         constraint = user_lp_token_account.owner == *user_signer.key,
     )]
     pub user_lp_token_account: Account<'info, TokenAccount>,
-    #[account(
-        seeds = [vault_account.to_account_info().key.as_ref()],
-        bump = vault_account.bump
-    )]
-    /// CHECK: TODO 
-    pub vault_signer: AccountInfo<'info>,
+    // TODO
+    // #[account(
+    //     seeds = [vault_account.to_account_info().key.as_ref()],
+    //     bump = vault_account.bump
+    // )]
     pub vault_account: Box<Account<'info, VaultAccount>>,
     #[account(
         mut,
         constraint = vault_lp_token_mint_address.key() == vault_account.vault_lp_token_mint_pubkey,
-        constraint = vault_lp_token_mint_address.mint_authority == COption::Some(*vault_signer.key),
+        constraint = vault_lp_token_mint_address.mint_authority == COption::Some(*vault_account.to_account_info().key),
     )]
     pub vault_lp_token_mint_address: Account<'info, Mint>,
     #[account(
         mut,
-        constraint = vault_lp_token_mint_pubkey.mint_authority == COption::Some(*vault_signer.key),
+        constraint = vault_lp_token_mint_pubkey.mint_authority == COption::Some(*vault_account.to_account_info().key),
         constraint = vault_account.vault_lp_token_mint_pubkey == *vault_lp_token_mint_pubkey.to_account_info().key
     )]
     pub vault_lp_token_mint_pubkey: Account<'info, Mint>,
@@ -676,23 +669,22 @@ pub struct Withdraw<'info> {
         constraint = user_lp_token_account.owner == *user_signer.key,
     )]
     pub user_lp_token_account: Account<'info, TokenAccount>,
-    #[account(
-        seeds = [vault_account.to_account_info().key.as_ref()],
-        bump = vault_account.bump
-    )]
-    /// CHECK: TODO 
-    pub vault_signer: AccountInfo<'info>,
+    // TODO
+    // #[account(
+    //     seeds = [vault_account.to_account_info().key.as_ref()],
+    //     bump = vault_account.bump
+    // )]
     pub vault_account: Box<Account<'info, VaultAccount>>,
     #[account(
         mut,
-        constraint = vault_lp_token_mint_pubkey.mint_authority == COption::Some(*vault_signer.key),
+        constraint = vault_lp_token_mint_pubkey.mint_authority == COption::Some(*vault_account.to_account_info().key),
         constraint = vault_account.vault_lp_token_mint_pubkey == *vault_lp_token_mint_pubkey.to_account_info().key
     )]
     pub vault_lp_token_mint_pubkey: Account<'info, Mint>,
     #[account(
         mut,
         constraint = vault_lp_token_mint_address.key() == vault_account.vault_lp_token_mint_pubkey,
-        constraint = vault_lp_token_mint_address.mint_authority == COption::Some(*vault_signer.key),
+        constraint = vault_lp_token_mint_address.mint_authority == COption::Some(*vault_account.to_account_info().key),
     )]
     pub vault_lp_token_mint_address: Account<'info, Mint>,
     // #[account(
@@ -707,46 +699,44 @@ pub struct Withdraw<'info> {
 
 #[derive(Accounts)]
 pub struct SaberDeposit<'info> {
+    // TODO
     #[account(
         seeds = [vault_account.to_account_info().key.as_ref()],
         bump = vault_account.bump
     )]
-    /// CHECK: TODO 
-    pub vault_signer: AccountInfo<'info>,
     pub vault_account: Account<'info, VaultAccount>,
     pub stable_swap_program_id: Program<'info, StableSwap>,
     #[account(
         mut,
-        constraint = vault_lp_token_mint_pubkey.mint_authority == COption::Some(*vault_signer.key),
+        constraint = vault_lp_token_mint_pubkey.mint_authority == COption::Some(*vault_account.to_account_info().key),
         constraint = vault_account.vault_lp_token_mint_pubkey == *vault_lp_token_mint_pubkey.to_account_info().key
     )]
     pub vault_lp_token_mint_pubkey: Account<'info, Mint>,
     #[account(
         constraint = deposit.user.swap.key == &vault_account.stable_swap_pool_id,
-        constraint = deposit.user.user_authority.key == vault_signer.key,
+        constraint = deposit.user.user_authority.key == vault_account.to_account_info().key,
         constraint = deposit.input_a.user.mint == vault_account.input_mint_pubkey,
-        constraint = deposit.input_a.user.owner == *vault_signer.key,
-        constraint = deposit.input_b.user.owner == *vault_signer.key,
+        constraint = deposit.input_a.user.owner == *vault_account.to_account_info().key,
+        constraint = deposit.input_b.user.owner == *vault_account.to_account_info().key,
     )]
     pub deposit: StableSwapAnchorDeposit<'info>,
 }
 
 #[derive(Accounts)]
 pub struct SaberWithdraw<'info> {
-    #[account(
-        seeds = [vault_account.to_account_info().key.as_ref()],
-        bump = vault_account.bump
-    )]
-    /// CHECK: TODO 
-    pub vault_signer: AccountInfo<'info>,
+    // TODO
+    // #[account(
+    //     seeds = [vault_account.to_account_info().key.as_ref()],
+    //     bump = vault_account.bump
+    // )]
     pub vault_account: Account<'info, VaultAccount>,
     pub stable_swap_program_id: Program<'info, StableSwap>,
     #[account(
-        constraint = withdraw.input_lp.owner == *vault_signer.key,
+        constraint = withdraw.input_lp.owner == *vault_account.to_account_info().key,
         constraint = withdraw.user.swap.key == &vault_account.stable_swap_pool_id,
-        constraint = withdraw.user.user_authority.key == vault_signer.key,
+        constraint = withdraw.user.user_authority.key == vault_account.to_account_info().key,
         constraint = withdraw.output.user_token.user.mint == vault_account.input_mint_pubkey,
-        constraint = withdraw.output.user_token.user.owner == *vault_signer.key,
+        constraint = withdraw.output.user_token.user.owner == *vault_account.to_account_info().key,
     )]
     pub withdraw: StableSwapWithdrawOne<'info>,
 }
@@ -908,12 +898,11 @@ pub struct SunnyStake<'info> {
 
 #[derive(Accounts)]
 pub struct SunnyUnstake<'info> {
-    #[account(
-        seeds = [vault_account.to_account_info().key.as_ref()],
-        bump = vault_account.bump
-    )]
-    /// CHECK: TODO 
-    pub vault_signer: AccountInfo<'info>,
+    // TODO
+    // #[account(
+    //     seeds = [vault_account.to_account_info().key.as_ref()],
+    //     bump = vault_account.bump
+    // )]
     pub vault_account: Account<'info, VaultAccount>,
     #[account(mut)]
     pub vault_lp_saber: Box<Account<'info, TokenAccount>>,
@@ -970,34 +959,32 @@ pub struct SunnyStakeInternal<'info> {
 
 #[derive(Accounts)]
 pub struct Stake<'info> {
-    #[account(
-        seeds = [vault_account.to_account_info().key.as_ref()],
-        bump = vault_account.bump
-    )]
-    /// CHECK: TODO 
-    pub vault_signer: AccountInfo<'info>,
+    // TODO
+    // #[account(
+    //     seeds = [vault_account.to_account_info().key.as_ref()],
+    //     bump = vault_account.bump
+    // )]
     pub vault_account: Account<'info, VaultAccount>,
     pub quarry_mine_program_id: Program<'info, QuarryMine>,
     #[account(
-        constraint = user_stake.authority.key == vault_signer.key,
-        constraint = user_stake.token_account.owner == *vault_signer.key
+        constraint = user_stake.authority.key == vault_account.to_account_info().key,
+        constraint = user_stake.token_account.owner == *vault_account.to_account_info().key
     )]
     pub user_stake: QuarryMineUserStake<'info>,
 }
 
 #[derive(Accounts)]
 pub struct Unstake<'info> {
-    #[account(
-        seeds = [vault_account.to_account_info().key.as_ref()],
-        bump = vault_account.bump
-    )]
-    /// CHECK: TODO 
-    pub vault_signer: AccountInfo<'info>,
+    // TODO
+    // #[account(
+    //     seeds = [vault_account.to_account_info().key.as_ref()],
+    //     bump = vault_account.bump
+    // )]
     pub vault_account: Account<'info, VaultAccount>,
     pub quarry_mine_program_id: Program<'info, QuarryMine>,
     #[account(
-        constraint = user_stake.authority.key == vault_signer.key,
-        constraint = user_stake.token_account.owner == *vault_signer.key
+        constraint = user_stake.authority.key == vault_account.to_account_info().key,
+        constraint = user_stake.token_account.owner == *vault_account.to_account_info().key
     )]
     pub user_stake: QuarryMineUserStake<'info>,
 }
@@ -1046,12 +1033,11 @@ impl<'info> QuarryMineUserStake<'info> {
 
 #[derive(Accounts)]
 pub struct SunnyClaimRewards<'info> {
-    #[account(
-        seeds = [vault_account.to_account_info().key.as_ref()],
-        bump = vault_account.bump
-    )]
-    /// CHECK: TODO 
-    pub vault_signer: AccountInfo<'info>,
+    // TODO
+    // #[account(
+    //     seeds = [vault_account.to_account_info().key.as_ref()],
+    //     bump = vault_account.bump
+    // )]
     pub vault_account: Account<'info, VaultAccount>,
     #[account(mut)]
     /// CHECK: TODO 
@@ -1117,17 +1103,16 @@ pub struct SunnyClaimRewards<'info> {
 
 #[derive(Accounts)]
 pub struct ClaimRewardsSaber<'info> {
-    #[account(
-        seeds = [vault_account.to_account_info().key.as_ref()],
-        bump = vault_account.bump
-    )]
-    /// CHECK: TODO 
-    pub vault_signer: AccountInfo<'info>,
+    // TODO
+    // #[account(
+    //     seeds = [vault_account.to_account_info().key.as_ref()],
+    //     bump = vault_account.bump
+    // )]
     pub vault_account: Account<'info, VaultAccount>,
     pub quarry_mine_program_id: Program<'info, QuarryMine>,
     #[account(
-        constraint = claim_rewards.stake.authority.key == vault_signer.key,
-        constraint = claim_rewards.rewards_token_account.owner == *vault_signer.key,
+        constraint = claim_rewards.stake.authority.key == vault_account.to_account_info().key,
+        constraint = claim_rewards.rewards_token_account.owner == *vault_account.to_account_info().key,
     )]
     pub claim_rewards: QuarryMineClaimRewards<'info>,
 }
@@ -1209,12 +1194,11 @@ impl<'info> QuarryMineUserClaim<'info> {
 #[derive(Accounts)]
 pub struct SunnyRedeem<'info> {
     // TODO split in two ixs? stack too large...
-    #[account(
-        seeds = [vault_account.to_account_info().key.as_ref()],
-        bump = vault_account.bump
-    )]
-    /// CHECK: TODO 
-    pub vault_signer: AccountInfo<'info>,
+    // TODO
+    // #[account(
+    //     seeds = [vault_account.to_account_info().key.as_ref()],
+    //     bump = vault_account.bump
+    // )]
     pub vault_account: Box<Account<'info, VaultAccount>>,
     #[account(constraint = sunny_quarry_redeemer_program.key == &sunny::quarry_redeemer_program::ID)]
    /// CHECK: TODO 
@@ -1223,15 +1207,15 @@ pub struct SunnyRedeem<'info> {
     /// CHECK: TODO 
     pub redeemer_program_id: AccountInfo<'info>,
     #[account(
-        constraint = redeem_saber.redeem_ctx.source_authority.key ==  vault_signer.key,
-        constraint = redeem_saber.redeem_ctx.iou_source.owner == *vault_signer.key,
-        constraint = redeem_saber.redeem_ctx.redemption_destination.owner == *vault_signer.key,
+        constraint = redeem_saber.redeem_ctx.source_authority.key ==  vault_account.to_account_info().key,
+        constraint = redeem_saber.redeem_ctx.iou_source.owner == *vault_account.to_account_info().key,
+        constraint = redeem_saber.redeem_ctx.redemption_destination.owner == *vault_account.to_account_info().key,
     )]
     pub redeem_saber: RedeemerRedeemTokensFromMintProxy<'info>,
     #[account(
-        constraint = redeem_sunny.redeem_ctx.source_authority.key ==  vault_signer.key,
-        constraint = redeem_sunny.redeem_ctx.iou_source.owner == *vault_signer.key,
-        constraint = redeem_sunny.redeem_ctx.redemption_destination.owner == *vault_signer.key,
+        constraint = redeem_sunny.redeem_ctx.source_authority.key ==  vault_account.to_account_info().key,
+        constraint = redeem_sunny.redeem_ctx.iou_source.owner == *vault_account.to_account_info().key,
+        constraint = redeem_sunny.redeem_ctx.redemption_destination.owner == *vault_account.to_account_info().key,
     )]
     pub redeem_sunny: SunnyRedeemTokensFromMintWrapper<'info>,
     #[account(
@@ -1248,20 +1232,19 @@ pub struct SunnyRedeem<'info> {
 
 #[derive(Accounts)]
 pub struct SaberRedeem<'info> {
-    #[account(
-        seeds = [vault_account.to_account_info().key.as_ref()],
-        bump = vault_account.bump
-    )]
-    /// CHECK: TODO 
-    pub vault_signer: AccountInfo<'info>,
+    // TODO
+    // #[account(
+    //     seeds = [vault_account.to_account_info().key.as_ref()],
+    //     bump = vault_account.bump
+    // )]
     pub vault_account: Account<'info, VaultAccount>,
     #[account(constraint = redeemer_program_id.key == &redeemer::ID)]
     /// CHECK: TODO 
     pub redeemer_program_id: AccountInfo<'info>,
     #[account(
-        constraint = redeem.redeem_ctx.source_authority.key ==  vault_signer.key,
-        constraint = redeem.redeem_ctx.iou_source.owner == *vault_signer.key,
-        constraint = redeem.redeem_ctx.redemption_destination.owner == *vault_signer.key,
+        constraint = redeem.redeem_ctx.source_authority.key ==  vault_account.to_account_info().key,
+        constraint = redeem.redeem_ctx.iou_source.owner == *vault_account.to_account_info().key,
+        constraint = redeem.redeem_ctx.redemption_destination.owner == *vault_account.to_account_info().key,
     )]
     pub redeem: RedeemerRedeemTokensFromMintProxy<'info>,
 }
@@ -1368,12 +1351,11 @@ impl<'info> RedeemerMutTokenPair<'info> {
 
 #[derive(Accounts)]
 pub struct RaydiumSwap<'info> {
-    #[account(
-        seeds = [vault_account.to_account_info().key.as_ref()],
-        bump = vault_account.bump
-    )]
-    /// CHECK: TODO 
-    pub vault_signer: AccountInfo<'info>,
+    // TODO
+    // #[account(
+    //     seeds = [vault_account.to_account_info().key.as_ref()],
+    //     bump = vault_account.bump
+    // )]
     pub vault_account: Account<'info, VaultAccount>,
     // #[account(
     //     mut,
