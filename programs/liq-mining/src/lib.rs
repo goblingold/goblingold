@@ -18,15 +18,18 @@ declare_id!("BGWxArsLbrQh7BXQ1fV8byZ9yM1BZ1HXkwXyGuSQafyX");
 
 pub const ALLOWED_DEPLOYER: &str = "2fmQLSF1xR5FK3Yc5VhGvnrx7mjXbNSJN3d3WySYnzr6";
 pub const ALLOWED_RUNNER: &str = "2fmQLSF1xR5FK3Yc5VhGvnrx7mjXbNSJN3d3WySYnzr6";
+
+pub const VAULT_ACCOUNT_SEED: &[u8; 5] = b"vault";
+pub const VAULT_LP_TOKEN_MINT_SEED: &[u8; 4] = b"mint";
 const FEE: u64 = 10; // in per cent
 
 #[program]
 pub mod liq_mining {
     use super::*;
 
-    pub fn initialize_strategy(ctx: Context<InitializeStrategy>, bump: u8) -> Result<()> {
+    pub fn initialize_strategy(ctx: Context<InitializeStrategy>) -> Result<()> {
         let vault_account = &mut ctx.accounts.vault_account;
-        vault_account.bump = bump;
+        vault_account.bump = *ctx.bumps.get("vault_account").unwrap();
         vault_account.dao_treasury_saber_token_account = *ctx
             .accounts
             .dao_treasury_saber_token_account
@@ -424,7 +427,9 @@ pub struct InitializeStrategy<'info> {
     #[account(
         init,
         payer = user_signer,
-        space = 8 + size_of::<VaultAccount>()
+        space = 8 + size_of::<VaultAccount>(),
+        seeds = [VAULT_ACCOUNT_SEED, input_token_mint_address.key().as_ref()],
+        bump
     )]
     pub vault_account: Box<Account<'info, VaultAccount>>,
     #[account(
