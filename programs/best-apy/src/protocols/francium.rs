@@ -9,7 +9,7 @@ use crate::protocols::{
     Protocols,
 };
 use crate::vault::{ProtocolData, VaultAccount};
-use crate::{ALLOWED_DEPLOYER, VAULT_ACCOUNT_SEED};
+use crate::VAULT_ACCOUNT_SEED;
 use anchor_lang::prelude::borsh::{BorshDeserialize, BorshSerialize};
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::{
@@ -19,7 +19,6 @@ use anchor_lang::solana_program::{
     program_pack::Pack,
 };
 use anchor_spl::token::TokenAccount;
-use std::str::FromStr;
 
 /// Program ids
 pub mod francium_lending_program_id {
@@ -47,7 +46,6 @@ pub struct InstructionAmountData {
 
 #[derive(Accounts)]
 pub struct FranciumInitialize<'info> {
-    #[account(constraint = Pubkey::from_str(ALLOWED_DEPLOYER).unwrap()== *user_signer.key)]
     pub user_signer: Signer<'info>,
     #[account(
         mut,

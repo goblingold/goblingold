@@ -37,4 +37,6 @@ pub enum ErrorCode {
     InvalidObligationOwner,
     #[msg("Invalid obligation reserve account")]
     InvalidObligationReserve,
+    #[msg("Unauthorized user")]
+    UnauthorizedUser,
 }

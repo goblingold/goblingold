@@ -1,20 +1,15 @@
 use crate::vault::{Bumps, InitVaultAccountParams, VaultAccount};
-use crate::ALLOWED_DEPLOYER;
+use crate::TREASURY_PUBKEY;
 use crate::{VAULT_ACCOUNT_SEED, VAULT_LP_TOKEN_MINT_SEED};
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::pubkey::Pubkey;
 use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token::{Mint, Token, TokenAccount};
 use std::mem::size_of;
-use std::str::FromStr;
 
 #[derive(Accounts)]
 pub struct InitializeVault<'info> {
-    // Only deployer can initialize
-    #[account(
-        mut,
-        constraint = Pubkey::from_str(ALLOWED_DEPLOYER).unwrap()== *user_signer.key
-    )]
+    #[account(mut)]
     pub user_signer: Signer<'info>,
     pub input_token_mint_address: Account<'info, Mint>,
     #[account(
@@ -48,7 +43,7 @@ pub struct InitializeVault<'info> {
         associated_token::authority = dao_treasury_owner,
     )]
     pub dao_treasury_lp_token_account: Account<'info, TokenAccount>,
-    #[account(constraint = dao_treasury_owner.key == &Pubkey::from_str(ALLOWED_DEPLOYER).unwrap())]
+    #[account(constraint = dao_treasury_owner.key == &TREASURY_PUBKEY)]
     /// CHECKED: address is checked
     pub dao_treasury_owner: AccountInfo<'info>,
     pub system_program: Program<'info, System>,

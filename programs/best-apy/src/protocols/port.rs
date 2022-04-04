@@ -6,7 +6,7 @@ use crate::instructions::{
 use crate::macros::generate_seeds;
 use crate::protocols::Protocols;
 use crate::vault::{ProtocolData, VaultAccount};
-use crate::{ALLOWED_DEPLOYER, VAULT_ACCOUNT_SEED};
+use crate::{TREASURY_PUBKEY, VAULT_ACCOUNT_SEED};
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::{
     hash::{hashv, Hash},
@@ -15,7 +15,6 @@ use anchor_lang::solana_program::{
     system_instruction,
 };
 use anchor_spl::token::{Token, TokenAccount};
-use std::str::FromStr;
 
 /// Program ids
 pub mod port_lending_program_id {
@@ -33,7 +32,6 @@ pub mod port_staking_program_id {
 
 #[derive(Accounts)]
 pub struct PortInitialize<'info> {
-    #[account(constraint = Pubkey::from_str(ALLOWED_DEPLOYER).unwrap()== *user_signer.key)]
     pub user_signer: Signer<'info>,
     #[account(
         seeds = [VAULT_ACCOUNT_SEED, vault_account.input_mint_pubkey.as_ref()],
@@ -484,7 +482,7 @@ pub struct PortClaimRewards<'info> {
         bump = vault_account.bumps.vault
     )]
     pub vault_account: Box<Account<'info, VaultAccount>>,
-    #[account(constraint = dao_treasury_owner.key == &Pubkey::from_str(ALLOWED_DEPLOYER).unwrap())]
+    #[account(constraint = dao_treasury_owner.key == &TREASURY_PUBKEY)]
     /// CHECKED: address is checked
     pub dao_treasury_owner: AccountInfo<'info>,
     #[account(constraint = port_staking_program_id.key == &port_staking_program_id::ID)]
