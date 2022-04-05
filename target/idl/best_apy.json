@@ -1862,6 +1862,11 @@
       "code": 6016,
       "name": "InvalidObligationReserve",
       "msg": "Invalid obligation reserve account"
+    },
+    {
+      "code": 6017,
+      "name": "UnauthorizedUser",
+      "msg": "Unauthorized user"
     }
   ]
 }

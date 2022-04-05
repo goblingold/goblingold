@@ -1,15 +1,13 @@
 use crate::check_hash::CHECKHASH_BYTES;
 
 use crate::vault::VaultAccount;
-use crate::ALLOWED_DEPLOYER;
+
 use crate::VAULT_ACCOUNT_SEED;
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::pubkey::Pubkey;
-use std::str::FromStr;
 
 #[derive(Accounts)]
 pub struct SetHashes<'info> {
-    #[account(constraint = Pubkey::from_str(ALLOWED_DEPLOYER).unwrap()== *user_signer.key)]
     pub user_signer: Signer<'info>,
     #[account(
         mut,

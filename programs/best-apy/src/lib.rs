@@ -1,11 +1,6 @@
-// Some functions here have a RESTRICTED ACCESS.
-// Besides others, to make them unrestricted it should be checked that the vault token accounts
-// are deterministic (associated token accounts)
-
 use anchor_lang::prelude::borsh::{BorshDeserialize, BorshSerialize};
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::pubkey::Pubkey;
-
 use check_hash::{CheckHash, CHECKHASH_BYTES};
 use error::ErrorCode;
 use instructions::*;
@@ -21,25 +16,35 @@ mod vault;
 
 declare_id!("ASkZQEZqHGgxXmDpfFxkCznTQLzLCgWHL3jkJTGtpQiR");
 
-pub const VAULT_ACCOUNT_SEED: &[u8; 5] = b"vault";
-pub const VAULT_LP_TOKEN_MINT_SEED: &[u8; 4] = b"mint";
-
-pub const ALLOWED_DEPLOYER: &str = "2fmQLSF1xR5FK3Yc5VhGvnrx7mjXbNSJN3d3WySYnzr6";
-pub const ALLOWED_RUNNER: &str = "2fmQLSF1xR5FK3Yc5VhGvnrx7mjXbNSJN3d3WySYnzr6";
 const PAUSED: bool = false;
+
+const VAULT_ACCOUNT_SEED: &[u8; 5] = b"vault";
+const VAULT_LP_TOKEN_MINT_SEED: &[u8; 4] = b"mint";
+
+// DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+const ADMIN_PUBKEY: Pubkey = Pubkey::new_from_array([
+    191, 17, 77, 109, 253, 243, 16, 188, 64, 67, 249, 18, 51, 62, 173, 81, 128, 208, 121, 29, 74,
+    57, 94, 247, 114, 4, 114, 88, 209, 115, 147, 136,
+]);
+
+// 8XhNoDjjNoLP5Rys1pBJKGdE8acEC1HJsWGkfkMt6JP1
+const TREASURY_PUBKEY: Pubkey = Pubkey::new_from_array([
+    111, 222, 226, 197, 174, 64, 51, 181, 235, 205, 56, 138, 76, 105, 173, 158, 191, 43, 143, 141,
+    91, 145, 78, 45, 130, 86, 102, 175, 146, 188, 82, 152,
+]);
 
 #[program]
 pub mod best_apy {
     use super::*;
 
     /// Initialize the vault account and its fields
-    // ACCESS RESTRICTED. ONLY ALLOWED_DEPLOYER
+    #[access_control(is_admin(ctx.accounts.user_signer.key))]
     pub fn initialize_vault(ctx: Context<InitializeVault>) -> Result<()> {
         instructions::initialize_vault::handler(ctx)
     }
 
-    // ACCESS RESTRICTED. ONLY ALLOWED_DEPLOYER
     /// Set protocol hashes
+    #[access_control(is_admin(ctx.accounts.user_signer.key))]
     pub fn set_hashes(
         ctx: Context<SetHashes>,
         protocol_id: u8,
@@ -48,7 +53,7 @@ pub mod best_apy {
         instructions::set_hashes::handler(ctx, protocol_id, hashes)
     }
 
-    // ACCESS RESTRICTED. ONLY ALLOWED_DEPLOYER
+    #[access_control(is_admin(ctx.accounts.user_signer.key))]
     pub fn set_protocol_weights(
         ctx: Context<SetProtocolWeights>,
         weights: [u16; PROTOCOLS_LEN],
@@ -78,7 +83,7 @@ pub mod best_apy {
     }
 
     /// Mango: Initialize protocol accounts
-    // ACCESS RESTRICTED. ONLY ALLOWED_DEPLOYER
+    #[access_control(is_admin(ctx.accounts.user_signer.key))]
     pub fn mango_initialize(ctx: Context<MangoInitialize>) -> Result<()> {
         instructions::protocol_initialize::handler(ctx)
     }
@@ -102,7 +107,7 @@ pub mod best_apy {
     }
 
     /// Solend: Initialize protocol accounts
-    // ACCESS RESTRICTED. ONLY ALLOWED_DEPLOYER
+    #[access_control(is_admin(ctx.accounts.user_signer.key))]
     pub fn solend_initialize(ctx: Context<SolendInitialize>) -> Result<()> {
         instructions::protocol_initialize::handler(ctx)
     }
@@ -126,7 +131,7 @@ pub mod best_apy {
     }
 
     /// Port: Initialize protocol accounts
-    // ACCESS RESTRICTED. ONLY ALLOWED_DEPLOYER
+    #[access_control(is_admin(ctx.accounts.user_signer.key))]
     pub fn port_initialize(ctx: Context<PortInitialize>) -> Result<()> {
         instructions::protocol_initialize::handler(ctx)
     }
@@ -173,7 +178,7 @@ pub mod best_apy {
     }
 
     /// Francium: Initialize protocol accounts
-    // ACCESS RESTRICTED. ONLY ALLOWED_DEPLOYER
+    #[access_control(is_admin(ctx.accounts.user_signer.key))]
     pub fn francium_initialize(ctx: Context<FranciumInitialize>) -> Result<()> {
         instructions::protocol_initialize::handler(ctx)
     }
@@ -200,6 +205,13 @@ pub mod best_apy {
 /// Check if the program is paused
 fn program_not_paused() -> Result<()> {
     require!(!PAUSED, ErrorCode::OnPaused);
+    Ok(())
+}
+
+/// Check if target key is authorized
+fn is_admin(key: &Pubkey) -> Result<()> {
+    #[cfg(not(feature = "test"))]
+    require!(key == &ADMIN_PUBKEY, UnauthorizedUser);
     Ok(())
 }
 
