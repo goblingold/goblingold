@@ -1,7 +1,8 @@
 use crate::check_hash::*;
 use crate::error::ErrorCode;
 use crate::instructions::{
-    protocol_deposit::*, protocol_initialize::*, protocol_rewards::*, protocol_withdraw::*,
+    protocol_deposit::*, protocol_deposit_2_ixs::ProtocolDeposit2Ixs, protocol_initialize::*,
+    protocol_rewards::*, protocol_withdraw::*, protocol_withdraw_2_ixs::ProtocolWithdraw2Ixs,
 };
 use crate::macros::generate_seeds;
 use crate::protocols::{
@@ -17,6 +18,7 @@ use anchor_lang::solana_program::{
     instruction::Instruction,
     program::invoke_signed,
     program_pack::Pack,
+    sysvar,
 };
 use anchor_spl::token::TokenAccount;
 
@@ -126,6 +128,9 @@ impl<'info> ProtocolInitialize<'info> for FranciumInitialize<'info> {
 #[derive(Accounts)]
 pub struct FranciumDeposit<'info> {
     pub generic_accs: GenericDepositAccounts<'info>,
+    #[account(address = sysvar::instructions::ID)]
+    /// CHECK: address is checked
+    pub instructions: AccountInfo<'info>,
     #[account(constraint = francium_lending_program_id.key == &francium_lending_program_id::ID)]
     /// CHECK: Francium CPI
     pub francium_lending_program_id: AccountInfo<'info>,
@@ -217,20 +222,24 @@ impl<'info> CheckHash<'info> for FranciumDeposit<'info> {
     }
 }
 
-impl<'info> ProtocolDeposit<'info> for FranciumDeposit<'info> {
+impl<'info> ProtocolDeposit2Ixs<'info> for FranciumDeposit<'info> {
     fn protocol_data_as_mut(&mut self) -> &mut ProtocolData {
         &mut self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
+    }
+
+    fn instructions_account(&self) -> AccountInfo<'info> {
+        self.instructions.to_account_info()
     }
 
     fn get_amount(&self) -> Result<u64> {
         self.generic_accs.amount_to_deposit(Protocols::Francium)
     }
 
-    fn cpi_deposit(&self, amount: u64) -> Result<()> {
+    fn cpi_deposit(&self, amount: u64, is_last_deposit_ix: bool) -> Result<()> {
         let seeds = generate_seeds!(self.generic_accs.vault_account);
         let signer = &[&seeds[..]];
 
-        {
+        if !is_last_deposit_ix {
             // Deposit Lending
             let accounts = [
                 self.generic_accs
@@ -269,9 +278,7 @@ impl<'info> ProtocolDeposit<'info> for FranciumDeposit<'info> {
                 account_metas,
             );
             invoke_signed(&ix, &accounts, signer)?;
-        }
-
-        {
+        } else {
             // Deposit stake
             let accounts = [
                 self.generic_accs.vault_account.to_account_info(),
@@ -403,17 +410,22 @@ impl<'info> CheckHash<'info> for FranciumWithdraw<'info> {
     }
 }
 
-impl<'info> ProtocolWithdraw<'info> for FranciumWithdraw<'info> {
+impl<'info> ProtocolWithdraw2Ixs<'info> for FranciumWithdraw<'info> {
     fn protocol_data_as_mut(&mut self) -> &mut ProtocolData {
         &mut self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
+    }
+
+    fn instructions_account(&self) -> AccountInfo<'info> {
+        self.generic_accs.instructions.to_account_info()
     }
 
     fn input_token_account_as_mut(&mut self) -> &mut Account<'info, TokenAccount> {
         &mut self.generic_accs.vault_input_token_account
     }
 
-    fn get_amount(&self) -> Result<u64> {
-        self.generic_accs.amount_to_withdraw(Protocols::Francium)
+    fn get_amount(&self, target_withdraw_ix: usize) -> Result<u64> {
+        self.generic_accs
+            .amount_to_withdraw_in_n_txs(Protocols::Francium, target_withdraw_ix)
     }
 
     fn liquidity_to_collateral(&self, amount: u64) -> Result<u64> {
@@ -428,11 +440,11 @@ impl<'info> ProtocolWithdraw<'info> for FranciumWithdraw<'info> {
         Ok(lp_amount)
     }
 
-    fn cpi_withdraw(&self, amount: u64) -> Result<()> {
+    fn cpi_withdraw(&self, amount: u64, is_last_withdraw_ix: bool) -> Result<()> {
         let seeds = generate_seeds!(self.generic_accs.vault_account);
         let signer = &[&seeds[..]];
 
-        {
+        if !is_last_withdraw_ix {
             // Unstake
             let accounts = [
                 self.generic_accs.vault_account.to_account_info(),
@@ -473,9 +485,7 @@ impl<'info> ProtocolWithdraw<'info> for FranciumWithdraw<'info> {
                 account_metas,
             );
             invoke_signed(&ix, &accounts, signer)?;
-        }
-
-        {
+        } else {
             // Withdraw Lending
             let accounts = [
                 self.vault_francium_collateral_token_account

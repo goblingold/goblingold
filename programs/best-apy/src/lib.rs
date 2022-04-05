@@ -8,6 +8,7 @@ use protocols::{francium::*, mango::*, port::*, solend::*, tulip::*, PROTOCOLS_L
 use vault::VaultAccount;
 
 mod check_hash;
+mod duplicated_ixs;
 mod error;
 mod instructions;
 mod macros;
@@ -186,13 +187,13 @@ pub mod best_apy {
     /// Francium: Deposit from the vault account
     #[access_control(ctx.accounts.check_hash())]
     pub fn francium_deposit(ctx: Context<FranciumDeposit>) -> Result<()> {
-        instructions::protocol_deposit::handler(ctx)
+        instructions::protocol_deposit_2_ixs::handler(ctx)
     }
 
     /// Francium: Withdraw to the vault account
     #[access_control(ctx.accounts.check_hash())]
     pub fn francium_withdraw(ctx: Context<FranciumWithdraw>) -> Result<()> {
-        instructions::protocol_withdraw::handler(ctx)
+        instructions::protocol_withdraw_2_ixs::handler(ctx)
     }
 
     /// Francium: Compute the TVL
