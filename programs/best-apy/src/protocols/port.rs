@@ -444,7 +444,7 @@ impl<'info> ProtocolRewards<'info> for PortTVL<'info> {
 
     fn max_withdrawable(&self) -> Result<u64> {
         let mut reserve_data: &[u8] = &self.reserve.try_borrow_data()?;
-        let mut obligation_data: &[u8] = &self.reserve.try_borrow_data()?;
+        let mut obligation_data: &[u8] = &self.obligation.try_borrow_data()?;
         let reserve = port_anchor_adaptor::PortReserve::try_deserialize(&mut reserve_data)?;
         let obligation =
             port_anchor_adaptor::PortObligation::try_deserialize(&mut obligation_data)?;
