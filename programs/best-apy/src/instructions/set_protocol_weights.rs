@@ -23,7 +23,8 @@ pub fn handler(ctx: Context<SetProtocolWeights>, weights: [u16; PROTOCOLS_LEN]) 
         .try_fold(0_u16, |acc, &x| acc.checked_add(x))
         .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
-    require!(weights_sum == WEIGHTS_SCALE, ErrorCode::InvalidWeights);
+    // For security reasons we might want to set weights_sum == 0 in order to withdraw everything from every protocol.
+    require!(weights_sum == WEIGHTS_SCALE || weights_sum == 0, ErrorCode::InvalidWeights);
 
     ctx.accounts
         .vault_account
