@@ -315,7 +315,7 @@ impl<'info> ProtocolRewards<'info> for TulipTVL<'info> {
         );
 
         require!(
-            reserve.collateral.mint_pubkey == self.vault_tulip_collateral_token_account.key(),
+            reserve.collateral.mint_pubkey == self.vault_tulip_collateral_token_account.mint,
             ErrorCode::InvalidMint
         );
 
