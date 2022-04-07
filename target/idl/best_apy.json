@@ -1873,8 +1873,5 @@
       "name": "UnauthorizedUser",
       "msg": "Unauthorized user"
     }
-  ],
-  "metadata": {
-    "address": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-  }
+  ]
 }
