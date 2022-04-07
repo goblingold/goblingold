@@ -536,7 +536,7 @@ pub struct FranciumTVL<'info> {
     #[account(owner = francium_lending_program_id::ID)]
     /// CHECK: owner and mint data field are checked
     pub lending_pool: AccountInfo<'info>,
-    #[account(owner = francium_lending_program_id::ID)]
+    #[account(owner = francium_lending_reward_program_id::ID)]
     /// CHECK: owner and owner data field are checked
     pub farming_user: AccountInfo<'info>,
 }
