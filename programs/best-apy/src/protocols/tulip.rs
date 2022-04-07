@@ -284,14 +284,12 @@ pub struct TulipTVL<'info> {
         associated_token::authority = generic_accs.vault_account,
     )]
     pub vault_tulip_collateral_token_account: Account<'info, TokenAccount>,
-    pub tulip_collateral_token_mint: Account<'info, Mint>,
 }
 
 impl<'info> CheckHash<'info> for TulipTVL<'info> {
     fn hash(&self) -> Hash {
         hashv(&[
             self.reserve.key.as_ref(),
-            self.tulip_collateral_token_mint.key().as_ref(),
             self.vault_tulip_collateral_token_account.key().as_ref(),
         ])
     }
@@ -317,7 +315,7 @@ impl<'info> ProtocolRewards<'info> for TulipTVL<'info> {
         );
 
         require!(
-            reserve.collateral.mint_pubkey == self.tulip_collateral_token_mint.key(),
+            reserve.collateral.mint_pubkey == self.vault_tulip_collateral_token_account.mint.key(),
             ErrorCode::InvalidMint
         );
 
