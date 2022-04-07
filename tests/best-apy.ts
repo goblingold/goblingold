@@ -1,7 +1,13 @@
 import * as anchor from "@project-serum/anchor";
 import * as spl from "@solana/spl-token";
 import { assert } from "chai";
-import { GoblinGold, NetworkName, Protocols, TokenName } from "goblin-sdk";
+import {
+  GoblinGold,
+  NetworkName,
+  Protocols,
+  TokenName,
+  decodeAccount,
+} from "goblin-sdk";
 import { BestApy } from "../target/types/best_apy";
 
 describe("best_apy", () => {
@@ -16,6 +22,16 @@ describe("best_apy", () => {
 
   const program = client.BestApy;
   const tokenInput = TokenName.WSOL;
+
+  const compBudgetIx = new anchor.web3.TransactionInstruction({
+    programId: new anchor.web3.PublicKey(
+      "ComputeBudget111111111111111111111111111111"
+    ),
+    keys: [],
+    data: Buffer.from(
+      Uint8Array.of(0, ...new anchor.BN(400_000).toArray("le", 8))
+    ),
+  });
 
   it("Initialize vault with weights", async () => {
     const protocolWeights = [2000, 2000, 2000, 2000, 2000];
@@ -37,7 +53,7 @@ describe("best_apy", () => {
     const txsProtocols = await program.initializeProtocolAccounts();
     for (let i = 0; i < txsProtocols.length; ++i) {
       const txSig = await program.provider.send(txsProtocols[i]);
-      console.log("tx init_protocols_" + i.toString() + ":", txSig);
+      console.log("tx init_protocols_" + Protocols[i] + ":", txSig);
     }
   });
 
@@ -117,13 +133,94 @@ describe("best_apy", () => {
     console.log("tx deposit:", txsAll);
   });
 
+  const activeWeights = [0, 2000, 0, 4000, 4000];
+  const activeProtocols = [];
+  activeWeights.forEach((w, i) => {
+    if (w > 0) {
+      activeProtocols.push(Protocols[i]);
+    }
+  });
+
+  it("Deactivate mango & port", async () => {
+    const tx = await program.setProtocolWeights(activeWeights);
+    const txSig = await program.provider.send(tx);
+    console.log("tx zero_weights:", txSig);
+  });
+
   it("Deposit into the protocols", async () => {
     const txs = await program.rebalance();
     for (let i = 0; i < txs.length; ++i) {
-      if (i != Protocols.Mango) {
-        const txSig = await program.provider.send(txs[i]);
-        console.log("tx deposit_protocols_" + i.toString() + ":", txSig);
-      }
+      const txSig = await program.provider.send(txs[i]);
+      console.log("tx deposit_protocols_" + activeProtocols[i] + ":", txSig);
+    }
+  });
+
+  it("Refresh weights", async () => {
+    const tx = await program.refreshWeights();
+    const txSig = await program.provider.send(tx);
+    console.log("tx refresh:", txSig);
+  });
+
+  it("Withdraw from the protocols", async () => {
+    const userSigner = program.provider.wallet.publicKey;
+
+    const wrappedKeypair = anchor.web3.Keypair.generate();
+    const userInputTokenAccount = wrappedKeypair.publicKey;
+
+    const userLpTokenAccount = await spl.getAssociatedTokenAddress(
+      program.vaultKeys[tokenInput].vaultLpTokenMintAddress,
+      userSigner,
+      false
+    );
+
+    const userLpTokenAccountInfo =
+      await program.provider.connection.getAccountInfo(userLpTokenAccount);
+    if (!userLpTokenAccountInfo) {
+      throw new Error("Error: user_lp_token_account not found");
+    }
+
+    const data = decodeAccount(userLpTokenAccountInfo.data);
+    const lpAmount = new anchor.BN(data.amount);
+
+    const txs = await program.withdraw({
+      userInputTokenAccount,
+      userLpTokenAccount,
+      lpAmount,
+    });
+
+    const lamports = await spl.getMinimumBalanceForRentExemptAccount(
+      client.provider.connection
+    );
+
+    for (let i = 0; i < txs.length; ++i) {
+      const tx = new anchor.web3.Transaction()
+        .add(
+          anchor.web3.SystemProgram.createAccount({
+            fromPubkey: userSigner,
+            newAccountPubkey: userInputTokenAccount,
+            space: spl.ACCOUNT_SIZE,
+            lamports,
+            programId: spl.TOKEN_PROGRAM_ID,
+          }),
+          spl.createInitializeAccountInstruction(
+            userInputTokenAccount,
+            spl.NATIVE_MINT,
+            userSigner
+          )
+        )
+        .add(txs[i])
+        .add(
+          spl.createCloseAccountInstruction(
+            userInputTokenAccount,
+            userSigner,
+            userSigner,
+            []
+          )
+        );
+
+      console.log("Attempting to withdraw from " + activeProtocols[i]);
+      const txSig = await program.provider.send(tx, [wrappedKeypair]);
+      console.log("tx withdraw_protocols_" + activeProtocols[i] + ":", txSig);
     }
   });
 });
