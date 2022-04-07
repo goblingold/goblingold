@@ -1228,6 +1228,11 @@
           "name": "vaultTulipCollateralTokenAccount",
           "isMut": true,
           "isSigner": false
+        },
+        {
+          "name": "tulipCollateralTokenMint",
+          "isMut": false,
+          "isSigner": false
         }
       ],
       "args": []
