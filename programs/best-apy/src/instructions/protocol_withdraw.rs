@@ -43,6 +43,12 @@ pub fn handler<'info, T: ProtocolWithdraw<'info>>(ctx: Context<T>) -> Result<()>
         input_token_account.reload()?;
         input_token_account.amount
     };
+    msg!("amount {} , lp_amount {} ,", amount, lp_amount);
+    msg!(
+        "amount_before {} , amount_after {} ,",
+        amount_before,
+        amount_after
+    );
 
     let amount_diff = amount_after
         .checked_sub(amount_before)

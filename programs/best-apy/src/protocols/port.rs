@@ -469,7 +469,7 @@ impl<'info> ProtocolRewards<'info> for PortTVL<'info> {
         let tvl = reserve
             .collateral_exchange_rate()?
             .collateral_to_liquidity(lp_amount)?;
-
+        msg!(" port lp_amount {} , amount {}", lp_amount, tvl);
         Ok(tvl)
     }
 }

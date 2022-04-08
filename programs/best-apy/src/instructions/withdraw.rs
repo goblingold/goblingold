@@ -82,7 +82,7 @@ pub fn handler(ctx: Context<Withdraw>, lp_amount: u64) -> Result<()> {
     // Also add a 1 lamport fee due precision errors when withdrawing from lending protocols
     let amount = previous_price.lp_to_token(lp_amount)?;
     let amount_conservative = amount.saturating_sub(1);
-
+    msg!("withdraw lp_amount {}, amount {}", lp_amount, amount);
     require!(amount_conservative > 1, ErrorCode::InvalidZeroWithdraw);
 
     let seeds = generate_seeds!(ctx.accounts.vault_account);

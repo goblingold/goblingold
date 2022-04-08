@@ -323,6 +323,7 @@ impl<'info> ProtocolRewards<'info> for TulipTVL<'info> {
         let tvl = reserve
             .collateral_exchange_rate()?
             .collateral_to_liquidity(lp_amount)?;
+        msg!(" tulip lp_amount {} , amount {}", lp_amount, tvl);
 
         Ok(tvl)
     }
