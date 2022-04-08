@@ -20,14 +20,21 @@ pub struct VaultAccount {
     pub input_mint_pubkey: Pubkey,
     /// Destination fee account
     pub dao_treasury_lp_token_account: Pubkey,
+
+    /// Last refresh slot in which protocol weights were updated
+    pub last_refresh_slot: u64,
+
+    /// Strategy refresh parameters
+    pub refresh: RefreshParams,
+
     /// Current TVL deposited in the strategy (considering deposits/withdraws)
     pub current_tvl: u64,
-    /// Last refresh slot in which protocol rewards were accrued
-    pub last_refresh_slot: u64,
-    /// Price of the LP token in the previous interval
-    pub previous_lp_price: LpPrice,
     /// Accumulated rewards until fee is minted (not accounted in current_tvl)
     pub rewards_sum: u64,
+
+    /// Price of the LP token in the previous interval
+    pub previous_lp_price: LpPrice,
+
     /// Protocol data
     pub protocols: [ProtocolData; PROTOCOLS_LEN],
     // TODO additional padding
@@ -42,6 +49,19 @@ impl VaultAccount {
             dao_treasury_lp_token_account: params.dao_treasury_lp_token_account,
             ..Self::default()
         }
+    }
+
+    /// Compute the minimum weight
+    fn minimum_weight(&self, total_deposit: u128) -> Result<u16> {
+        let min_weight = (self.refresh.min_deposit_lamports as u128)
+            .checked_mul(WEIGHTS_SCALE.into())
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?
+            .checked_div(total_deposit)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?
+            .try_into()
+            .map_err(|_| ErrorCode::MathOverflow)?;
+
+        Ok(std::cmp::max(1, min_weight))
     }
 
     /// Update protocol weights
@@ -100,8 +120,9 @@ impl VaultAccount {
                 }
             }
 
-            // If one of the non-zero weights is zero now, set to one so all the used protocols get
-            // deposited
+            // Set at least the minimum weight for the active protocols
+            let min_weight = self.minimum_weight(total_deposit)?;
+
             #[allow(clippy::needless_range_loop)]
             for i in 0..PROTOCOLS_LEN {
                 if self.protocols[i].is_active() {
@@ -112,9 +133,7 @@ impl VaultAccount {
                         .ok_or_else(|| error!(ErrorCode::MathOverflow))?
                         as u16;
 
-                    if self.protocols[i].weight == 0 {
-                        self.protocols[i].weight = 1
-                    }
+                    self.protocols[i].weight = std::cmp::max(min_weight, self.protocols[i].weight);
                 }
             }
 
@@ -140,6 +159,7 @@ impl VaultAccount {
                 )
                 .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
         }
+
         Ok(())
     }
 
@@ -195,6 +215,15 @@ pub struct InitVaultAccountParams {
 pub struct Bumps {
     pub vault: u8,
     pub lp_token_mint: u8,
+}
+
+/// Strategy refresh parameters
+#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default)]
+pub struct RefreshParams {
+    /// Minimum elapsed slots for updating the protocol weights
+    pub min_elapsed_slots: u64,
+    /// Minimum amount of lamports to deposit in each protocol
+    pub min_deposit_lamports: u64,
 }
 
 /// Protocol data

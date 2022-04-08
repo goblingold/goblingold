@@ -5,7 +5,7 @@ use check_hash::{CheckHash, CHECKHASH_BYTES};
 use error::ErrorCode;
 use instructions::*;
 use protocols::{francium::*, mango::*, port::*, solend::*, tulip::*, PROTOCOLS_LEN};
-use vault::VaultAccount;
+use vault::{RefreshParams, VaultAccount};
 
 mod check_hash;
 mod duplicated_ixs;
@@ -54,6 +54,13 @@ pub mod best_apy {
         instructions::set_hashes::handler(ctx, protocol_id, hashes)
     }
 
+    /// Set the strategy refresh paraemeters
+    #[access_control(is_admin(ctx.accounts.user_signer.key))]
+    pub fn set_refresh_params(ctx: Context<SetRefreshParams>, params: RefreshParams) -> Result<()> {
+        instructions::set_refresh_params::handler(ctx, params)
+    }
+
+    /// Set the protocol weights
     #[access_control(is_admin(ctx.accounts.user_signer.key))]
     pub fn set_protocol_weights(
         ctx: Context<SetProtocolWeights>,
