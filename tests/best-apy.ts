@@ -23,16 +23,6 @@ describe("best_apy", () => {
   const program = client.BestApy;
   const tokenInput = TokenName.WSOL;
 
-  const compBudgetIx = new anchor.web3.TransactionInstruction({
-    programId: new anchor.web3.PublicKey(
-      "ComputeBudget111111111111111111111111111111"
-    ),
-    keys: [],
-    data: Buffer.from(
-      Uint8Array.of(0, ...new anchor.BN(400_000).toArray("le", 8))
-    ),
-  });
-
   it("Initialize vault with weights", async () => {
     const protocolWeights = [2000, 2000, 2000, 2000, 2000];
 
@@ -133,25 +123,11 @@ describe("best_apy", () => {
     console.log("tx deposit:", txsAll);
   });
 
-  const activeWeights = [0, 2000, 0, 4000, 4000];
-  const activeProtocols = [];
-  activeWeights.forEach((w, i) => {
-    if (w > 0) {
-      activeProtocols.push(Protocols[i]);
-    }
-  });
-
-  it("Deactivate mango & port", async () => {
-    const tx = await program.setProtocolWeights(activeWeights);
-    const txSig = await program.provider.send(tx);
-    console.log("tx zero_weights:", txSig);
-  });
-
   it("Deposit into the protocols", async () => {
     const txs = await program.rebalance();
     for (let i = 0; i < txs.length; ++i) {
       const txSig = await program.provider.send(txs[i]);
-      console.log("tx deposit_protocols_" + activeProtocols[i] + ":", txSig);
+      console.log("tx deposit_protocols_" + i.toString() + ":", txSig);
     }
   });
 
@@ -218,9 +194,8 @@ describe("best_apy", () => {
           )
         );
 
-      console.log("Attempting to withdraw from " + activeProtocols[i]);
       const txSig = await program.provider.send(tx, [wrappedKeypair]);
-      console.log("tx withdraw_protocols_" + activeProtocols[i] + ":", txSig);
+      console.log("tx withdraw_protocols_" + i.toString() + ":", txSig);
     }
   });
 });
