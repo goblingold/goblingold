@@ -29,7 +29,15 @@ pub trait ProtocolWithdraw<'info> {
 /// Deposit into the protocol and update protocol data
 pub fn handler<'info, T: ProtocolWithdraw<'info>>(ctx: Context<T>) -> Result<()> {
     let amount = ctx.accounts.get_amount()?;
-    let lp_amount = ctx.accounts.liquidity_to_collateral(amount)?;
+    let mut lp_amount = ctx.accounts.liquidity_to_collateral(amount)?;
+
+    // Add 1 as due to rounding. Otherwise it might happens that there wasn't enough funds
+    // withdrawn from the protocol
+    if amount < ctx.accounts.protocol_data_as_mut().amount {
+        lp_amount = lp_amount
+            .checked_add(1)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+    }
 
     let amount_before = {
         let input_token_account = ctx.accounts.input_token_account_as_mut();

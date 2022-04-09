@@ -73,7 +73,7 @@ pub fn handler(ctx: Context<Deposit>, amount: u64) -> Result<()> {
     let previous_price = ctx.accounts.vault_account.previous_lp_price;
 
     if previous_price != LpPrice::default() {
-        require!(current_price > previous_price, ErrorCode::InvalidLpPrice);
+        require!(current_price >= previous_price, ErrorCode::InvalidLpPrice);
     }
 
     require!(amount >= 100, ErrorCode::InvalidDepositAmount);
