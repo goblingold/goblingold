@@ -75,7 +75,7 @@ pub fn handler(ctx: Context<Withdraw>, lp_amount: u64) -> Result<()> {
     let previous_price = ctx.accounts.vault_account.previous_lp_price;
 
     if previous_price != LpPrice::default() {
-        require!(current_price > previous_price, ErrorCode::InvalidLpPrice);
+        require!(current_price >= previous_price, ErrorCode::InvalidLpPrice);
     }
 
     // Use previous value of LP in order to avoid depositors.
