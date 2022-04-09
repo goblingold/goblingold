@@ -410,15 +410,20 @@ impl<'info> ProtocolRewards<'info> for SolendTVL<'info> {
             ErrorCode::InvalidObligationOwner
         );
 
-        require!(
-            obligation.deposits[0].deposit_reserve == *self.reserve.key,
-            ErrorCode::InvalidObligationReserve
-        );
+        let tvl = if obligation.deposits.is_empty() {
+            0
+        } else {
+            require!(
+                obligation.deposits[0].deposit_reserve == *self.reserve.key,
+                ErrorCode::InvalidObligationReserve
+            );
 
-        let lp_amount = obligation.deposits[0].deposited_amount;
-        let tvl = reserve
-            .collateral_exchange_rate()?
-            .collateral_to_liquidity(lp_amount)?;
+            let lp_amount = obligation.deposits[0].deposited_amount;
+
+            reserve
+                .collateral_exchange_rate()?
+                .collateral_to_liquidity(lp_amount)?
+        };
 
         Ok(tvl)
     }
