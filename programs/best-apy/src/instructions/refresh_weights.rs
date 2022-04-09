@@ -7,9 +7,6 @@ use anchor_lang::solana_program::{program_option::COption, pubkey::Pubkey};
 use anchor_spl::token::{self, Mint, MintTo, Token, TokenAccount};
 use std::convert::TryInto;
 
-// TODO check these limits
-/// Minimum elapsed slots for updating the protocol weights
-const MIN_ELAPSED_SLOTS_FOR_UPDATING: u64 = 1500; // ~ 0.6 ms/block * 1500 block = 15 min
 /// Maximum elapsed slots for computing the protocols TVL
 const MAX_ELAPSED_SLOTS_FOR_TVL: u64 = 30;
 
@@ -118,7 +115,7 @@ pub fn handler(ctx: Context<RefreshWeights>) -> Result<()> {
         .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
     require!(
-        elapsed_slots > MIN_ELAPSED_SLOTS_FOR_UPDATING,
+        elapsed_slots > ctx.accounts.vault_account.refresh.min_elapsed_slots,
         ErrorCode::ForbiddenRefresh
     );
 

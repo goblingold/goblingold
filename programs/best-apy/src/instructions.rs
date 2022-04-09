@@ -3,6 +3,7 @@ pub mod initialize_vault;
 pub mod refresh_weights;
 pub mod set_hashes;
 pub mod set_protocol_weights;
+pub mod set_refresh_params;
 pub mod withdraw;
 
 pub use deposit::*;
@@ -10,6 +11,7 @@ pub use initialize_vault::*;
 pub use refresh_weights::*;
 pub use set_hashes::*;
 pub use set_protocol_weights::*;
+pub use set_refresh_params::*;
 pub use withdraw::*;
 
 pub mod protocol_deposit;

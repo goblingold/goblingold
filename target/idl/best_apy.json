@@ -1563,11 +1563,23 @@
             "type": "publicKey"
           },
           {
+            "name": "lastRefreshSlot",
+            "type": "u64"
+          },
+          {
+            "name": "minElapsedSlots",
+            "type": "u64"
+          },
+          {
+            "name": "minDepositLamports",
+            "type": "u64"
+          },
+          {
             "name": "currentTvl",
             "type": "u64"
           },
           {
-            "name": "lastRefreshSlot",
+            "name": "rewardsSum",
             "type": "u64"
           },
           {
@@ -1575,10 +1587,6 @@
             "type": {
               "defined": "LpPrice"
             }
-          },
-          {
-            "name": "rewardsSum",
-            "type": "u64"
           },
           {
             "name": "protocols",
