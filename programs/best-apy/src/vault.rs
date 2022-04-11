@@ -265,11 +265,11 @@ pub struct ProtocolData {
     pub rewards: AccumulatedRewards,
 
     /// Padding for other future field
-    pub _padding: [u64; 4],
+    pub _padding: [u64; 5],
 }
 
 impl ProtocolData {
-    pub const SIZE: usize = HashPubkey::SIZE + 4 + 8 + AccumulatedRewards::SIZE + 8 * 4;
+    pub const SIZE: usize = HashPubkey::SIZE + 4 + 8 + AccumulatedRewards::SIZE + 8 * 5;
 
     /// Check the protocol is active
     pub fn is_active(&self) -> bool {
