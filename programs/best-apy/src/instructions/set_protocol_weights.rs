@@ -30,7 +30,9 @@ pub fn handler(ctx: Context<SetProtocolWeights>, weights: [u32; PROTOCOLS_LEN]) 
         ErrorCode::InvalidWeights
     );
 
-    ctx.accounts.vault_account.protocols = vec![ProtocolData::default(); PROTOCOLS_LEN];
+    if ctx.accounts.vault_account.protocols.is_empty() {
+        ctx.accounts.vault_account.protocols = vec![ProtocolData::default(); PROTOCOLS_LEN];
+    }
     ctx.accounts
         .vault_account
         .protocols
