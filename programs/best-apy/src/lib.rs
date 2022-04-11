@@ -15,7 +15,7 @@ mod macros;
 mod protocols;
 mod vault;
 
-declare_id!("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+declare_id!("GGo1dnYpjKfe9omzUaFtaCyizvwpAMf3NhxSCMD61F3A");
 
 const PAUSED: bool = false;
 
