@@ -64,14 +64,10 @@ pub mod best_apy {
     #[access_control(is_admin(ctx.accounts.user_signer.key))]
     pub fn set_protocol_weights(
         ctx: Context<SetProtocolWeights>,
-        weights: [u16; PROTOCOLS_LEN],
+        weights: [u32; PROTOCOLS_LEN],
     ) -> Result<()> {
         instructions::set_protocol_weights::handler(ctx, weights)
     }
-
-    //pub fn close_account(_ctx: Context<CloseAccount>) -> Result<()> {
-    //    Ok(())
-    //}
 
     /// Deposit user input tokens into the vault account
     #[access_control(program_not_paused())]
@@ -222,13 +218,3 @@ fn is_admin(key: &Pubkey) -> Result<()> {
     require!(key == &ADMIN_PUBKEY, UnauthorizedUser);
     Ok(())
 }
-
-//#[derive(Accounts)]
-//pub struct CloseAccount<'info> {
-//    #[account(constraint = Pubkey::from_str(ALLOWED_DEPLOYER).unwrap()== *user_signer.key)]
-//    pub user_signer: Signer<'info>,
-//    #[account(mut, close = vault_account)]
-//    pub vault_account: Account<'info, VaultAccount>,
-//    #[account(mut)]
-//    pub vault_account: AccountInfo<'info>,
-//}

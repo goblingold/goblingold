@@ -4,7 +4,7 @@ use anchor_lang::solana_program::hash::Hash;
 
 /// Bytes of the truncated hash to be checked
 #[constant]
-pub const CHECKHASH_BYTES: usize = 8;
+pub const CHECKHASH_BYTES: usize = 16;
 
 /// Trait to check the validity of a hash of the accounts passed
 pub trait CheckHash<'info> {

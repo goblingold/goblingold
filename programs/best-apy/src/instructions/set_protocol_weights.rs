@@ -17,10 +17,10 @@ pub struct SetProtocolWeights<'info> {
     pub vault_account: Box<Account<'info, VaultAccount>>,
 }
 
-pub fn handler(ctx: Context<SetProtocolWeights>, weights: [u16; PROTOCOLS_LEN]) -> Result<()> {
+pub fn handler(ctx: Context<SetProtocolWeights>, weights: [u32; PROTOCOLS_LEN]) -> Result<()> {
     let weights_sum = weights
         .iter()
-        .try_fold(0_u16, |acc, &x| acc.checked_add(x))
+        .try_fold(0_u32, |acc, &x| acc.checked_add(x))
         .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
     // For security reasons we might want to set weights_sum == 0 in order to withdraw everything from every protocol.

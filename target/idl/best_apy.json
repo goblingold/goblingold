@@ -7,11 +7,11 @@
       "type": {
         "defined": "usize"
       },
-      "value": "8"
+      "value": "16"
     },
     {
       "name": "WEIGHTS_SCALE",
-      "type": "u16",
+      "type": "u32",
       "value": "10_000"
     }
   ],
@@ -103,11 +103,34 @@
               {
                 "array": [
                   "u8",
-                  8
+                  16
                 ]
               },
               3
             ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "setRefreshParams",
+      "accounts": [
+        {
+          "name": "userSigner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "vaultAccount",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "RefreshParams"
           }
         }
       ]
@@ -131,7 +154,7 @@
           "name": "weights",
           "type": {
             "array": [
-              "u16",
+              "u32",
               5
             ]
           }
@@ -1549,6 +1572,10 @@
         "kind": "struct",
         "fields": [
           {
+            "name": "version",
+            "type": "u8"
+          },
+          {
             "name": "bumps",
             "type": {
               "defined": "Bumps"
@@ -1567,12 +1594,10 @@
             "type": "u64"
           },
           {
-            "name": "minElapsedSlots",
-            "type": "u64"
-          },
-          {
-            "name": "minDepositLamports",
-            "type": "u64"
+            "name": "refresh",
+            "type": {
+              "defined": "RefreshParams"
+            }
           },
           {
             "name": "currentTvl",
@@ -1591,12 +1616,13 @@
           {
             "name": "protocols",
             "type": {
-              "array": [
-                {
-                  "defined": "ProtocolData"
-                },
-                5
-              ]
+              "defined": "Box<[ProtocolData;PROTOCOLS_LEN]>"
+            }
+          },
+          {
+            "name": "padding",
+            "type": {
+              "defined": "Box<[ProtocolData;5]>"
             }
           }
         ]
@@ -1621,13 +1647,35 @@
       }
     },
     {
+      "name": "RefreshParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "minElapsedSlots",
+            "type": "u64"
+          },
+          {
+            "name": "minDepositLamports",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
       "name": "ProtocolData",
       "type": {
         "kind": "struct",
         "fields": [
           {
+            "name": "hashPubkey",
+            "type": {
+              "defined": "HashPubkey"
+            }
+          },
+          {
             "name": "weight",
-            "type": "u16"
+            "type": "u32"
           },
           {
             "name": "amount",
@@ -1640,9 +1688,12 @@
             }
           },
           {
-            "name": "hashPubkey",
+            "name": "padding",
             "type": {
-              "defined": "HashPubkey"
+              "array": [
+                "u64",
+                4
+              ]
             }
           }
         ]
@@ -1658,7 +1709,7 @@
             "type": {
               "array": [
                 "u8",
-                8
+                16
               ]
             }
           },
@@ -1667,7 +1718,7 @@
             "type": {
               "array": [
                 "u8",
-                8
+                16
               ]
             }
           },
@@ -1676,7 +1727,7 @@
             "type": {
               "array": [
                 "u8",
-                8
+                16
               ]
             }
           }
