@@ -41,11 +41,8 @@ pub struct VaultAccount {
     /// Price of the LP token in the previous interval
     pub previous_lp_price: LpPrice,
 
-    /// Protocol data
-    pub protocols: Box<[ProtocolData; PROTOCOLS_LEN]>,
-
-    /// Padding for future protocols
-    pub _padding: Box<[ProtocolData; 5]>,
+    /// Protocol data (maximum = 10)
+    pub protocols: Vec<ProtocolData>,
 }
 
 impl VaultAccount {
@@ -58,8 +55,8 @@ impl VaultAccount {
         + 8
         + 8
         + LpPrice::SIZE
-        + ProtocolData::SIZE * 10
-        + 2 * 8; // Box pointers
+        + 4
+        + ProtocolData::SIZE * 10;
 
     /// Initialize a new vault
     pub fn init(params: InitVaultAccountParams) -> Self {
@@ -360,7 +357,7 @@ pub struct AccumulatedRewards {
 }
 
 impl AccumulatedRewards {
-    pub const SIZE: usize = 8 + 8 + 6 + SlotIntegrated::SIZE;
+    pub const SIZE: usize = 8 + 8 + 8 + SlotIntegrated::SIZE;
 
     /// Update the rewards
     pub fn update(&mut self, rewards: u64) -> Result<()> {

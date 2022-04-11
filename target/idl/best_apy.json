@@ -1616,13 +1616,9 @@
           {
             "name": "protocols",
             "type": {
-              "defined": "Box<[ProtocolData;PROTOCOLS_LEN]>"
-            }
-          },
-          {
-            "name": "padding",
-            "type": {
-              "defined": "Box<[ProtocolData;5]>"
+              "vec": {
+                "defined": "ProtocolData"
+              }
             }
           }
         ]
