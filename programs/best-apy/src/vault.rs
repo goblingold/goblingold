@@ -7,13 +7,19 @@ use std::{
     convert::TryInto,
 };
 
+// not used yet, only one version available
+pub const _VAULT_VERSION: u8 = 1;
+
 #[constant]
-pub const WEIGHTS_SCALE: u16 = 10_000;
+pub const WEIGHTS_SCALE: u32 = 10_000;
 
 /// Strategy vault account
 #[account]
 #[derive(Default)]
 pub struct VaultAccount {
+    /// Vault version
+    pub version: u8,
+
     /// PDA bump seeds
     pub bumps: Bumps,
     /// Strategy input token mint address
@@ -35,12 +41,23 @@ pub struct VaultAccount {
     /// Price of the LP token in the previous interval
     pub previous_lp_price: LpPrice,
 
-    /// Protocol data
-    pub protocols: [ProtocolData; PROTOCOLS_LEN],
-    // TODO additional padding
+    /// Protocol data (maximum = 10)
+    pub protocols: Vec<ProtocolData>,
 }
 
 impl VaultAccount {
+    pub const SIZE: usize = 1
+        + Bumps::SIZE
+        + 32
+        + 32
+        + 8
+        + RefreshParams::SIZE
+        + 8
+        + 8
+        + LpPrice::SIZE
+        + 4
+        + ProtocolData::SIZE * 10;
+
     /// Initialize a new vault
     pub fn init(params: InitVaultAccountParams) -> Self {
         Self {
@@ -52,7 +69,7 @@ impl VaultAccount {
     }
 
     /// Compute the minimum weight
-    fn minimum_weight(&self, total_deposit: u128) -> Result<u16> {
+    fn minimum_weight(&self, total_deposit: u128) -> Result<u32> {
         let min_weight = (self.refresh.min_deposit_lamports as u128)
             .checked_mul(WEIGHTS_SCALE.into())
             .ok_or_else(|| error!(ErrorCode::MathOverflow))?
@@ -131,7 +148,7 @@ impl VaultAccount {
                         .ok_or_else(|| error!(ErrorCode::MathOverflow))?
                         .checked_div(total_deposit)
                         .ok_or_else(|| error!(ErrorCode::MathOverflow))?
-                        as u16;
+                        as u32;
 
                     self.protocols[i].weight = std::cmp::max(min_weight, self.protocols[i].weight);
                 }
@@ -145,10 +162,10 @@ impl VaultAccount {
                 .max_by_key(|&(_, protocol)| protocol.weight)
                 .unwrap();
 
-            let weights_sum: u16 = self
+            let weights_sum: u32 = self
                 .protocols
                 .iter()
-                .try_fold(0_u16, |acc, &protocol| acc.checked_add(protocol.weight))
+                .try_fold(0_u32, |acc, &protocol| acc.checked_add(protocol.weight))
                 .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
             self.protocols[max_indx].weight = WEIGHTS_SCALE
@@ -217,6 +234,10 @@ pub struct Bumps {
     pub lp_token_mint: u8,
 }
 
+impl Bumps {
+    pub const SIZE: usize = 1 + 1;
+}
+
 /// Strategy refresh parameters
 #[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default)]
 pub struct RefreshParams {
@@ -226,23 +247,33 @@ pub struct RefreshParams {
     pub min_deposit_lamports: u64,
 }
 
+impl RefreshParams {
+    pub const SIZE: usize = 8 + 8;
+}
+
 /// Protocol data
 #[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default)]
 pub struct ProtocolData {
+    /// Hashes of Pubkey
+    pub hash_pubkey: HashPubkey,
+
     /// Percentage of the TVL that should be deposited in the protocol
-    pub weight: u16,
+    pub weight: u32,
     /// Deposited token amount in the protocol
     pub amount: u64,
     /// Accumulated rewards
     pub rewards: AccumulatedRewards,
-    /// Hashes of Pubkey
-    pub hash_pubkey: HashPubkey,
+
+    /// Padding for other future field
+    pub _padding: [u64; 5],
 }
 
 impl ProtocolData {
+    pub const SIZE: usize = HashPubkey::SIZE + 4 + 8 + AccumulatedRewards::SIZE + 8 * 5;
+
     /// Check the protocol is active
     pub fn is_active(&self) -> bool {
-        self.weight != u16::default()
+        self.weight != u32::default()
     }
 
     /// Set the protocol pubkey hashes
@@ -308,6 +339,10 @@ pub struct HashPubkey {
     // TODO additional padding
 }
 
+impl HashPubkey {
+    pub const SIZE: usize = CHECKHASH_BYTES * 3;
+}
+
 /// Generated rewards
 #[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default)]
 pub struct AccumulatedRewards {
@@ -322,6 +357,8 @@ pub struct AccumulatedRewards {
 }
 
 impl AccumulatedRewards {
+    pub const SIZE: usize = 8 + 8 + 8 + SlotIntegrated::SIZE;
+
     /// Update the rewards
     pub fn update(&mut self, rewards: u64) -> Result<()> {
         let current_slot = Clock::get()?.slot;
@@ -367,6 +404,8 @@ pub struct SlotIntegrated {
 }
 
 impl SlotIntegrated {
+    pub const SIZE: usize = 8 + 8 + 16;
+
     /// Update the summation accumulator
     pub fn accumulate(&mut self, amount: u64) -> Result<()> {
         let current_slot = Clock::get()?.slot;
@@ -414,6 +453,8 @@ pub struct LpPrice {
 }
 
 impl LpPrice {
+    pub const SIZE: usize = 8 + 8;
+
     /// Transform input token amount to LP amount
     pub fn token_to_lp(&self, amount: u64) -> Result<u64> {
         if self.minted_tokens == 0 {

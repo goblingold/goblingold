@@ -14,7 +14,7 @@ pub struct SetHashes<'info> {
         seeds = [VAULT_ACCOUNT_SEED, vault_account.input_mint_pubkey.as_ref()],
         bump = vault_account.bumps.vault
     )]
-    pub vault_account: Account<'info, VaultAccount>,
+    pub vault_account: Box<Account<'info, VaultAccount>>,
 }
 
 /// Set hash of a protocol for a specific action

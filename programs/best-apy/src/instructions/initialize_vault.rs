@@ -5,7 +5,6 @@ use anchor_lang::prelude::*;
 use anchor_lang::solana_program::pubkey::Pubkey;
 use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token::{Mint, Token, TokenAccount};
-use std::mem::size_of;
 
 #[derive(Accounts)]
 pub struct InitializeVault<'info> {
@@ -15,7 +14,7 @@ pub struct InitializeVault<'info> {
     #[account(
         init,
         payer = user_signer,
-        space = 8 + size_of::<VaultAccount>(),
+        space = 8 + VaultAccount::SIZE,
         seeds = [VAULT_ACCOUNT_SEED, input_token_mint_address.key().as_ref()],
         bump,
     )]
