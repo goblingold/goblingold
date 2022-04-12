@@ -1,5 +1,5 @@
 name: Soteria
-// Code from Drift-labs https://github.com/drift-labs/protocol-v1/blob/master/.github/workflows/audit.yml
+
 on:
   push:
     branches: 
