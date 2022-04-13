@@ -62,7 +62,7 @@ impl<'info> RefreshWeights<'info> {
     fn mint_fees_and_update_tvl(&mut self) -> Result<()> {
         let rewards = self.vault_account.rewards_sum;
         if rewards > 0 {
-            let lp_fee = FEE
+            let lp_fee: u64 = FEE
                 .checked_mul(rewards as u128)
                 .ok_or_else(|| error!(ErrorCode::MathOverflow))?
                 .checked_mul(self.vault_lp_token_mint_pubkey.supply as u128)
