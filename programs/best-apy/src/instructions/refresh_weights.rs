@@ -105,14 +105,17 @@ impl<'info> RefreshWeights<'info> {
 /// Refresh the protocol weights
 pub fn handler(ctx: Context<RefreshWeights>) -> Result<()> {
     let current_slot = Clock::get()?.slot;
-    let elapsed_slots = current_slot
-        .checked_sub(ctx.accounts.vault_account.last_refresh_slot)
-        .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
-    require!(
-        elapsed_slots > ctx.accounts.vault_account.refresh.min_elapsed_slots,
-        ErrorCode::ForbiddenRefresh
-    );
+    if ctx.accounts.vault_account.refresh.min_elapsed_slots != u64::default() {
+        let elapsed_slots = current_slot
+            .checked_sub(ctx.accounts.vault_account.last_refresh_slot)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+
+        require!(
+            elapsed_slots > ctx.accounts.vault_account.refresh.min_elapsed_slots,
+            ErrorCode::ForbiddenRefresh
+        );
+    }
 
     if ctx.accounts.vault_account.last_refresh_slot != u64::default() {
         for protocol in ctx.accounts.vault_account.protocols.iter() {
