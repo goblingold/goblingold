@@ -1,7 +1,6 @@
 use crate::error::ErrorCode;
 use crate::protocols::PROTOCOLS_LEN;
 use crate::vault::{ProtocolData, VaultAccount, WEIGHTS_SCALE};
-
 use crate::VAULT_ACCOUNT_SEED;
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::pubkey::Pubkey;

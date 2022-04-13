@@ -1,7 +1,5 @@
 use crate::check_hash::CHECKHASH_BYTES;
-
 use crate::vault::VaultAccount;
-
 use crate::VAULT_ACCOUNT_SEED;
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::pubkey::Pubkey;
