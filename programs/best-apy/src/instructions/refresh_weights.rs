@@ -28,11 +28,6 @@ pub struct RefreshWeights<'info> {
     )]
     pub vault_account: Box<Account<'info, VaultAccount>>,
     #[account(
-        associated_token::mint = vault_account.input_mint_pubkey,
-        associated_token::authority = vault_account,
-    )]
-    pub vault_input_token_account: Account<'info, TokenAccount>,
-    #[account(
         mut,
         constraint = vault_lp_token_mint_pubkey.mint_authority == COption::Some(vault_account.key()),
         seeds = [VAULT_LP_TOKEN_MINT_SEED, vault_account.key().as_ref()],

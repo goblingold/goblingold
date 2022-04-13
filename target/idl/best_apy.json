@@ -267,11 +267,6 @@
           "isSigner": false
         },
         {
-          "name": "vaultInputTokenAccount",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
           "name": "vaultLpTokenMintPubkey",
           "isMut": true,
           "isSigner": false
