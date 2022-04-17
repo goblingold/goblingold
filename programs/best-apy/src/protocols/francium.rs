@@ -557,6 +557,10 @@ impl<'info> CheckHash<'info> for FranciumTVL<'info> {
 }
 
 impl<'info> ProtocolRewards<'info> for FranciumTVL<'info> {
+    fn protocol_id(&self) -> usize {
+        Protocols::Francium as usize
+    }
+
     fn input_mint_pubkey(&self) -> Pubkey {
         self.generic_accs.vault_account.input_mint_pubkey
     }

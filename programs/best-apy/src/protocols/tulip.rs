@@ -302,6 +302,10 @@ impl<'info> CheckHash<'info> for TulipTVL<'info> {
 }
 
 impl<'info> ProtocolRewards<'info> for TulipTVL<'info> {
+    fn protocol_id(&self) -> usize {
+        Protocols::Tulip as usize
+    }
+
     fn input_mint_pubkey(&self) -> Pubkey {
         self.generic_accs.vault_account.input_mint_pubkey
     }

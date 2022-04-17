@@ -391,6 +391,10 @@ impl<'info> CheckHash<'info> for SolendTVL<'info> {
 }
 
 impl<'info> ProtocolRewards<'info> for SolendTVL<'info> {
+    fn protocol_id(&self) -> usize {
+        Protocols::Solend as usize
+    }
+
     fn input_mint_pubkey(&self) -> Pubkey {
         self.generic_accs.vault_account.input_mint_pubkey
     }

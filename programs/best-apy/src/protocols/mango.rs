@@ -295,6 +295,10 @@ impl<'info> CheckHash<'info> for MangoTVL<'info> {
 }
 
 impl<'info> ProtocolRewards<'info> for MangoTVL<'info> {
+    fn protocol_id(&self) -> usize {
+        Protocols::Mango as usize
+    }
+
     fn input_mint_pubkey(&self) -> Pubkey {
         self.generic_accs.vault_account.input_mint_pubkey
     }

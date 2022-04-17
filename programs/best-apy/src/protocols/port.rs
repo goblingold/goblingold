@@ -438,6 +438,10 @@ impl<'info> CheckHash<'info> for PortTVL<'info> {
 }
 
 impl<'info> ProtocolRewards<'info> for PortTVL<'info> {
+    fn protocol_id(&self) -> usize {
+        Protocols::Port as usize
+    }
+
     fn input_mint_pubkey(&self) -> Pubkey {
         self.generic_accs.vault_account.input_mint_pubkey
     }
