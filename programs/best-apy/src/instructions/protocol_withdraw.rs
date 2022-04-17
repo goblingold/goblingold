@@ -115,7 +115,7 @@ impl<'info> GenericWithdrawAccounts<'info> {
             sysvar::instructions::load_current_index_checked(&self.instructions)? as usize;
 
         if let Ok(next_ix) = sysvar::instructions::load_instruction_at_checked(
-            current_index + target_ix,
+            current_index.checked_add(target_ix).unwrap(),
             &self.instructions,
         ) {
             let ix_data: &[u8] = &next_ix.data;
