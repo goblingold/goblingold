@@ -1816,6 +1816,11 @@
       "name": "ProtocolRewardsEvent",
       "fields": [
         {
+          "name": "protocolId",
+          "type": "u8",
+          "index": false
+        },
+        {
           "name": "token",
           "type": "publicKey",
           "index": false
