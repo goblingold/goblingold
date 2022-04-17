@@ -1813,6 +1813,31 @@
   ],
   "events": [
     {
+      "name": "ProtocolRewardsEvent",
+      "fields": [
+        {
+          "name": "token",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "rewards",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "lamports",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "initialSlot",
+          "type": "u64",
+          "index": false
+        }
+      ]
+    },
+    {
       "name": "RefreshWeightsEvent",
       "fields": [
         {
