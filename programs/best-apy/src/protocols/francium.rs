@@ -557,6 +557,14 @@ impl<'info> CheckHash<'info> for FranciumTVL<'info> {
 }
 
 impl<'info> ProtocolRewards<'info> for FranciumTVL<'info> {
+    fn protocol_id(&self) -> usize {
+        Protocols::Francium as usize
+    }
+
+    fn input_mint_pubkey(&self) -> Pubkey {
+        self.generic_accs.vault_account.input_mint_pubkey
+    }
+
     fn protocol_data_as_mut(&mut self) -> &mut ProtocolData {
         &mut self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
     }
