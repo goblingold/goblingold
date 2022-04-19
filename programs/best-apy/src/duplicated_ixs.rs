@@ -8,11 +8,13 @@ pub fn is_last_of_duplicated_ixs(ixs: AccountInfo) -> Result<bool> {
     let current_ix = sysvar::instructions::load_instruction_at_checked(current_index, &ixs)?;
 
     let mut is_same_as_prev_ix = false;
-    if let Ok(prev_ix) = sysvar::instructions::load_instruction_at_checked(
-        current_index.checked_sub(1).unwrap(),
-        &ixs,
-    ) {
-        is_same_as_prev_ix = prev_ix == current_ix
+    if current_index > 0 {
+        if let Ok(prev_ix) = sysvar::instructions::load_instruction_at_checked(
+            current_index.checked_sub(1).unwrap(),
+            &ixs,
+        ) {
+            is_same_as_prev_ix = prev_ix == current_ix
+        }
     };
 
     let mut is_same_as_next_ix = false;
