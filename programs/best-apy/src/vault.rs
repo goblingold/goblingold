@@ -409,7 +409,7 @@ impl AccumulatedRewards {
 }
 
 /// Slot-integrated quantities
-#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default)]
+#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default, Debug, PartialEq)]
 pub struct SlotIntegrated {
     /// Initial slot from which the integral starts
     pub initial_slot: u64,
@@ -515,5 +515,73 @@ impl PartialOrd for LpPrice {
             .unwrap();
 
         lhs.partial_cmp(&rhs)
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_update_protocol_weights() {
+        let mut vault = VaultAccount::default();
+        vault.protocols = vec![ProtocolData::default(); PROTOCOLS_LEN];
+
+        let protocols = &mut vault.protocols;
+        protocols[Protocols::Mango as usize] = ProtocolData {
+            weight: 1,
+            rewards: AccumulatedRewards {
+                amount: 21,
+                deposited_avg_wad: 66709779 * (WAD as u128),
+                ..AccumulatedRewards::default()
+            },
+            ..ProtocolData::default()
+        };
+
+        protocols[Protocols::Solend as usize] = ProtocolData {
+            weight: 1,
+            rewards: AccumulatedRewards {
+                amount: 3521693,
+                deposited_avg_wad: 666831006405 * (WAD as u128),
+                ..AccumulatedRewards::default()
+            },
+            ..ProtocolData::default()
+        };
+
+        protocols[Protocols::Port as usize] = ProtocolData {
+            weight: 1,
+            rewards: AccumulatedRewards {
+                amount: 139,
+                deposited_avg_wad: 66709780 * (WAD as u128),
+                ..AccumulatedRewards::default()
+            },
+            ..ProtocolData::default()
+        };
+
+        protocols[Protocols::Francium as usize] = ProtocolData {
+            weight: 1,
+            rewards: AccumulatedRewards {
+                amount: 532,
+                deposited_avg_wad: 66709785 * (WAD as u128),
+                ..AccumulatedRewards::default()
+            },
+            ..ProtocolData::default()
+        };
+
+        protocols[Protocols::Tulip as usize] = ProtocolData {
+            weight: 1,
+            rewards: AccumulatedRewards {
+                amount: 318,
+                deposited_avg_wad: 66709783 * (WAD as u128),
+                ..AccumulatedRewards::default()
+            },
+            ..ProtocolData::default()
+        };
+
+        vault.update_protocol_weights().unwrap();
+        vault
+            .protocols
+            .iter()
+            .for_each(|protocol| println!("weigth {}", protocol.weight));
     }
 }
