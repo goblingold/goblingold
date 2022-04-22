@@ -107,13 +107,13 @@ pub fn handler(ctx: Context<RefreshWeights>) -> Result<()> {
     let current_time = Clock::get()?.unix_timestamp;
 
     if ctx.accounts.vault_account.refresh.min_elapsed_time != i64::default() {
-        let elapsed_slots = Clock::get()?
+        let elapsed_time = Clock::get()?
             .unix_timestamp
             .checked_sub(ctx.accounts.vault_account.last_refresh_time)
             .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
         require!(
-            elapsed_slots > ctx.accounts.vault_account.refresh.min_elapsed_time,
+            elapsed_time > ctx.accounts.vault_account.refresh.min_elapsed_time,
             ErrorCode::ForbiddenRefresh
         );
     }
