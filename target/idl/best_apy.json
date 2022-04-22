@@ -1585,8 +1585,8 @@
             "type": "publicKey"
           },
           {
-            "name": "lastRefreshSlot",
-            "type": "u64"
+            "name": "lastRefreshTime",
+            "type": "i64"
           },
           {
             "name": "refresh",
@@ -1643,8 +1643,8 @@
         "kind": "struct",
         "fields": [
           {
-            "name": "minElapsedSlots",
-            "type": "u64"
+            "name": "minElapsedTime",
+            "type": "i64"
           },
           {
             "name": "minDepositLamports",
