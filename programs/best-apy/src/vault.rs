@@ -28,7 +28,7 @@ pub struct VaultAccount {
     pub dao_treasury_lp_token_account: Pubkey,
 
     /// Last refresh slot in which protocol weights were updated
-    pub last_refresh_slot: u64,
+    pub last_refresh_time: i64,
 
     /// Strategy refresh parameters
     pub refresh: RefreshParams,
@@ -242,7 +242,7 @@ impl Bumps {
 #[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default)]
 pub struct RefreshParams {
     /// Minimum elapsed slots for updating the protocol weights
-    pub min_elapsed_slots: u64,
+    pub min_elapsed_time: i64,
     /// Minimum amount of lamports to deposit in each protocol
     pub min_deposit_lamports: u64,
 }
