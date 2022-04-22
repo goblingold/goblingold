@@ -119,19 +119,43 @@ pub mod best_apy {
     /// Solend: Deposit from the vault account
     #[access_control(ctx.accounts.check_hash())]
     pub fn solend_deposit(ctx: Context<SolendDeposit>) -> Result<()> {
-        instructions::protocol_deposit::handler(ctx)
+        instructions::protocol_deposit::handler(ctx, Protocols::Solend)
     }
 
     /// Solend: Withdraw to the vault account
     #[access_control(ctx.accounts.check_hash())]
     pub fn solend_withdraw(ctx: Context<SolendWithdraw>) -> Result<()> {
-        instructions::protocol_withdraw::handler(ctx)
+        instructions::protocol_withdraw::handler(ctx, Protocols::Solend)
     }
 
-    /// Solend: Compute the TVL
+     /// Solend: Compute the TVL
+     #[access_control(ctx.accounts.check_hash())]
+     pub fn solend_tvl(ctx: Context<SolendTVL>) -> Result<()> {
+         instructions::protocol_rewards::handler(ctx, Protocols::Solend)
+     }
+
+    /// Solend: Initialize protocol accounts
+    #[access_control(is_admin(ctx.accounts.user_signer.key))]
+    pub fn solend_isolated_pool_initialize(ctx: Context<SolendInitialize>) -> Result<()> {
+        instructions::protocol_initialize::handler(ctx)
+    }
+
+    /// SolendIsolatedPool: Deposit from the vault account
     #[access_control(ctx.accounts.check_hash())]
-    pub fn solend_tvl(ctx: Context<SolendTVL>) -> Result<()> {
-        instructions::protocol_rewards::handler(ctx)
+    pub fn solend_isolated_pool_deposit(ctx: Context<SolendDeposit>) -> Result<()> {
+        instructions::protocol_deposit::handler(ctx,  Protocols::SolendIsolatedPool)
+    }
+
+    /// SolendIsolatedPool: Withdraw to the vault account
+    #[access_control(ctx.accounts.check_hash())]
+    pub fn solend_isolated_pool_withdraw(ctx: Context<SolendWithdraw>) -> Result<()> {
+        instructions::protocol_withdraw::handler(ctx, Protocols::SolendIsolatedPool)
+    }
+
+    /// SolendIsolatedPool: Compute the TVL
+    #[access_control(ctx.accounts.check_hash())]
+    pub fn solend_isolated_pool_tvl(ctx: Context<SolendTVL>) -> Result<()> {
+        instructions::protocol_rewards::handler(ctx, Protocols::SolendIsolatedPool)
     }
 
     /// Port: Initialize protocol accounts

@@ -159,20 +159,20 @@ impl<'info> CheckHash<'info> for SolendDeposit<'info> {
         ])
     }
 
-    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[Protocols::Solend as usize]
+    fn target_hash(&self, protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[protocol as usize]
             .hash_pubkey
             .hash_deposit
     }
 }
 
-impl<'info> ProtocolDeposit<'info> for SolendDeposit<'info> {
-    fn protocol_data_as_mut(&mut self) -> &mut ProtocolData {
-        &mut self.generic_accs.vault_account.protocols[Protocols::Solend as usize]
+impl<'info> ProtocolDepositIsolatedPool<'info> for SolendDeposit<'info> {
+    fn protocol_data_as_mut(&mut self, protocol: Protocols) -> &mut ProtocolData {
+        &mut self.generic_accs.vault_account.protocols[protocol as usize]
     }
 
-    fn get_amount(&self) -> Result<u64> {
-        self.generic_accs.amount_to_deposit(Protocols::Solend)
+    fn get_amount(&self, protocol: Protocols) -> Result<u64> {
+        self.generic_accs.amount_to_deposit(protocol)
     }
 
     fn cpi_deposit(&self, amount: u64) -> Result<()> {
@@ -281,24 +281,24 @@ impl<'info> CheckHash<'info> for SolendWithdraw<'info> {
         ])
     }
 
-    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[Protocols::Solend as usize]
+    fn target_hash(&self, protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[protocol as usize]
             .hash_pubkey
             .hash_withdraw
     }
 }
 
 impl<'info> ProtocolWithdraw<'info> for SolendWithdraw<'info> {
-    fn protocol_data_as_mut(&mut self) -> &mut ProtocolData {
-        &mut self.generic_accs.vault_account.protocols[Protocols::Solend as usize]
+    fn protocol_data_as_mut(&mut self, protocol: Protocols) -> &mut ProtocolData {
+        &mut self.generic_accs.vault_account.protocols[protocol as usize]
     }
 
     fn input_token_account_as_mut(&mut self) -> &mut Account<'info, TokenAccount> {
         &mut self.generic_accs.vault_input_token_account
     }
 
-    fn get_amount(&self) -> Result<u64> {
-        self.generic_accs.amount_to_withdraw(Protocols::Solend)
+    fn get_amount(&self, protocol: Protocols) -> Result<u64> {
+        self.generic_accs.amount_to_withdraw(protocol)
     }
 
     fn liquidity_to_collateral(&self, amount: u64) -> Result<u64> {
@@ -383,24 +383,24 @@ impl<'info> CheckHash<'info> for SolendTVL<'info> {
         hashv(&[self.reserve.key.as_ref(), self.obligation.key.as_ref()])
     }
 
-    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[Protocols::Solend as usize]
+    fn target_hash(&self, protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[protocol as usize]
             .hash_pubkey
             .hash_tvl
     }
 }
 
 impl<'info> ProtocolRewards<'info> for SolendTVL<'info> {
-    fn protocol_id(&self) -> usize {
-        Protocols::Solend as usize
+    fn protocol_id(&self, protocol: Protocols) -> usize {
+        protocol as usize
     }
 
     fn input_mint_pubkey(&self) -> Pubkey {
         self.generic_accs.vault_account.input_mint_pubkey
     }
 
-    fn protocol_data_as_mut(&mut self) -> &mut ProtocolData {
-        &mut self.generic_accs.vault_account.protocols[Protocols::Solend as usize]
+    fn protocol_data_as_mut(&mut self, protocol: Protocols) -> &mut ProtocolData {
+        &mut self.generic_accs.vault_account.protocols[protocol as usize]
     }
 
     fn max_withdrawable(&self) -> Result<u64> {

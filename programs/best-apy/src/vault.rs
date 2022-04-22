@@ -187,7 +187,9 @@ impl VaultAccount {
         let deposited_amount = protocol.amount;
         let target_amount = protocol.amount_should_be_deposited(self.current_tvl)?;
 
-        if target_amount > deposited_amount {
+        if protocol.weight == 0{
+            err!(ErrorCode::InvalidProtocolWithdraw)
+        } else if  target_amount > deposited_amount {
             let amount = target_amount
                 .checked_sub(deposited_amount)
                 .ok_or_else(|| error!(ErrorCode::MathOverflow))?;

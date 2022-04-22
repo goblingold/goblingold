@@ -5,7 +5,7 @@ pub mod solend;
 pub mod state;
 pub mod tulip;
 
-pub const PROTOCOLS_LEN: usize = 5;
+pub const PROTOCOLS_LEN: usize = 6;
 
 /// List of supported protocols
 #[repr(usize)]
@@ -16,4 +16,5 @@ pub enum Protocols {
     Port = 2,
     Tulip = 3,
     Francium = 4,
+    SolendStablePool = 5,
 }

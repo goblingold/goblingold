@@ -1,5 +1,5 @@
 [programs.localnet]
-best_apy = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+best_apy = "GGo1dnYpjKfe9omzUaFtaCyizvwpAMf3NhxSCMD61F3A"
 
 [registry]
 url = "https://anchor.projectserum.com"
@@ -18,6 +18,31 @@ startup_wait = 20_000
 url = "https://api.mainnet-beta.solana.com"
 warp_slot = ""
 
+# user accounts 
+[[test.validator.clone]]
+address = "W89eZsn18V2mMbhuih8sDPFvh8Lt2BNUsqu3WQ3xFDL"
+
+# spl-tokens
+[[test.validator.clone]]
+address = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+
+[[test.validator.clone]]
+address = "mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So"
+
+[[test.validator.clone]]
+address = "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB"
+
+[[test.validator.clone]]
+address = "9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E"
+
+[[test.validator.clone]]
+address = "2FPyTwcZLUg1MDrwsyoP4D6s1tM7hAkHYRjkNb5w6Pxk"
+
+[[test.validator.clone]]
+address = "SRMuApVNdxXokk5GT7XD5cUUgXMBCoAz2LHeuAoKWRt"
+
+[[test.validator.clone]]
+address = "AGFEad2et2ZJif9jaGpdMixQqvW5i81aBdvKe7PHNfz3"
 
 # mango
 [[test.validator.clone]]
@@ -102,6 +127,27 @@ address = "H6ARHf6YXhGYeQfUzQNGk6rDNnLBQKrenN712K4AQJEG"
 [[test.validator.clone]]
 address = "AdtRGGhmqvom3Jemp5YNrxd9q9unX36BZk1pujkkXijL"
 
+# solend stable pool
+[[test.validator.clone]]
+address = "JCRDg9T5mUUxazdJ2nGWDN2pdcXVQc5VM8XDp1DW6Aoa"
+
+[[test.validator.clone]]
+address = "z7yTesDCUkvheHnULMjS6dggiiVczpX5JjfTx5atRgQ"
+
+[[test.validator.clone]]
+address = "4JZ6PXqRDp8jQxXUYX9cbAzHi6uzZk856aoAqPGdV5Da"
+
+[[test.validator.clone]]
+address = "GktVYgkstojYd8nVXGXKJHi7SstvgZ6pkQqQhUPD7y7Q"
+
+[[test.validator.clone]]
+address = "7JF8e93t52SGFUHzMt5cD7vte4b8gWZHY99GLziAUeiP"
+
+[[test.validator.clone]]
+address = "Gnt27xtC473ZT2Mw5u8wZ68Z3gULkSTb5DuxJy7eJotD"
+
+[[test.validator.clone]]
+address = "CZx29wKMUxaJDq6aLVQTdViPL754tTR64NAgQBUGxxHb"
 
 # tulip
 [[test.validator.clone]]
