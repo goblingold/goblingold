@@ -87,7 +87,7 @@ impl VaultAccount {
         let mut deposit: Vec<u128> = self
             .protocols
             .iter()
-            .map(|protocol| protocol.rewards.deposited_avg as u128)
+            .map(|protocol| protocol.rewards.deposited_avg)
             .collect();
 
         let rewards: Vec<u128> = self
@@ -376,7 +376,7 @@ impl AccumulatedRewards {
             .checked_sub(self.deposited_integral.initial_slot)
             .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
-        let acc_at_rewards = (self.deposited_avg as u128)
+        let acc_at_rewards = self.deposited_avg
             .checked_mul(elapsed_slots_while_rewards as u128)
             .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
