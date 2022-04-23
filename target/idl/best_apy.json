@@ -1683,7 +1683,7 @@
             "type": {
               "array": [
                 "u64",
-                5
+                4
               ]
             }
           }
@@ -1740,7 +1740,7 @@
           },
           {
             "name": "depositedAvg",
-            "type": "u64"
+            "type": "u128"
           },
           {
             "name": "depositedIntegral",
@@ -1831,8 +1831,8 @@
           "index": false
         },
         {
-          "name": "lamports",
-          "type": "u64",
+          "name": "lamportsWad",
+          "type": "u128",
           "index": false
         },
         {

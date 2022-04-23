@@ -2,6 +2,7 @@ use crate::check_hash::CHECKHASH_BYTES;
 use crate::error::ErrorCode;
 use crate::protocols::{Protocols, PROTOCOLS_LEN};
 use anchor_lang::prelude::*;
+use solana_maths::WAD;
 use std::{
     cmp::{self, Ordering},
     convert::TryInto,
@@ -265,11 +266,11 @@ pub struct ProtocolData {
     pub rewards: AccumulatedRewards,
 
     /// Padding for other future field
-    pub _padding: [u64; 5],
+    pub _padding: [u64; 4],
 }
 
 impl ProtocolData {
-    pub const SIZE: usize = HashPubkey::SIZE + 4 + 8 + AccumulatedRewards::SIZE + 8 * 5;
+    pub const SIZE: usize = HashPubkey::SIZE + 4 + 8 + AccumulatedRewards::SIZE + 8 * 4;
 
     /// Check the protocol is active
     pub fn is_active(&self) -> bool {
@@ -351,13 +352,13 @@ pub struct AccumulatedRewards {
     /// Last accumulated rewards
     pub amount: u64,
     /// Slot-average deposited amount that generates these rewards
-    pub deposited_avg: u64,
+    pub deposited_avg: u128,
     /// Slot-integrated deposited amount
     pub deposited_integral: SlotIntegrated,
 }
 
 impl AccumulatedRewards {
-    pub const SIZE: usize = 8 + 8 + 8 + SlotIntegrated::SIZE;
+    pub const SIZE: usize = 8 + 8 + 16 + SlotIntegrated::SIZE;
 
     /// Update the rewards
     pub fn update(&mut self, rewards: u64) -> Result<()> {
@@ -427,17 +428,17 @@ impl SlotIntegrated {
     }
 
     /// Compute the average value
-    pub fn get_average(&self, current_slot: u64) -> Result<u64> {
+    pub fn get_average(&self, current_slot: u64) -> Result<u128> {
         let elapsed_slots = current_slot
             .checked_sub(self.initial_slot)
             .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
-        let avg: u64 = self
+        let avg: u128 = self
             .accumulator
-            .checked_div(elapsed_slots as u128)
+            .checked_mul(WAD as u128)
             .ok_or_else(|| error!(ErrorCode::MathOverflow))?
-            .try_into()
-            .map_err(|_| ErrorCode::MathOverflow)?;
+            .checked_div(elapsed_slots as u128)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
         Ok(avg)
     }

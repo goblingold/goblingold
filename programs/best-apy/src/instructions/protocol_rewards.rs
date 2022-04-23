@@ -9,7 +9,7 @@ pub struct ProtocolRewardsEvent {
     protocol_id: u8,
     token: Pubkey,
     rewards: u64,
-    lamports: u64,
+    lamports_wad: u128,
     initial_slot: u64,
 }
 
@@ -42,7 +42,7 @@ pub fn handler<'info, T: ProtocolRewards<'info>>(ctx: Context<T>) -> Result<()> 
         protocol_id,
         token,
         rewards: protocol.rewards.amount,
-        lamports: protocol.rewards.deposited_avg,
+        lamports_wad: protocol.rewards.deposited_avg,
         initial_slot: protocol.rewards.deposited_integral.initial_slot
     });
 
