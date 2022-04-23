@@ -64,9 +64,9 @@ impl VaultAccount {
             bumps: params.bumps,
             input_mint_pubkey: params.input_mint_pubkey,
             dao_treasury_lp_token_account: params.dao_treasury_lp_token_account,
-            refresh: RefreshParams{
+            refresh: RefreshParams {
                 min_elapsed_time: 3000,
-                min_deposit_lamports:0,
+                min_deposit_lamports: 0,
             },
             ..Self::default()
         }
