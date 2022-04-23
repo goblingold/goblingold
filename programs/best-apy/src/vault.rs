@@ -2,7 +2,7 @@ use crate::check_hash::CHECKHASH_BYTES;
 use crate::error::ErrorCode;
 use crate::protocols::{Protocols, PROTOCOLS_LEN};
 use anchor_lang::prelude::*;
-use solana_maths::WAD;
+use solana_maths::{U192, WAD};
 use std::{
     cmp::{self, Ordering},
     convert::TryInto,
@@ -376,9 +376,12 @@ impl AccumulatedRewards {
             .checked_sub(self.deposited_integral.initial_slot)
             .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
-        let acc_at_rewards = self.deposited_avg
-            .checked_mul(elapsed_slots_while_rewards as u128)
-            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+        let acc_at_rewards: u128 = (U192::from(self.deposited_avg))
+            .checked_mul(U192::from(elapsed_slots_while_rewards))
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?
+            .checked_div(U192::from(WAD))
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?
+            .as_u128();
 
         let acc_since_last_rewards = self
             .deposited_integral
@@ -433,12 +436,12 @@ impl SlotIntegrated {
             .checked_sub(self.initial_slot)
             .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
-        let avg: u128 = self
-            .accumulator
-            .checked_mul(WAD as u128)
+        let avg: u128 = (U192::from(self.accumulator))
+            .checked_mul(U192::from(WAD))
             .ok_or_else(|| error!(ErrorCode::MathOverflow))?
-            .checked_div(elapsed_slots as u128)
-            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+            .checked_div(U192::from(elapsed_slots))
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?
+            .as_u128();
 
         Ok(avg)
     }
