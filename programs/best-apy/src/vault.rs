@@ -360,11 +360,13 @@ impl AccumulatedRewards {
     pub const SIZE: usize = 8 + 8 + 8 + SlotIntegrated::SIZE;
 
     /// Update the rewards
-    pub fn update(&mut self, rewards: u64) -> Result<()> {
+    pub fn update(&mut self, rewards: u64, deposited_amount: u64) -> Result<()> {
         let current_slot = Clock::get()?.slot;
         self.last_slot = current_slot;
         self.amount = rewards;
-        self.deposited_avg = self.deposited_integral.get_average(current_slot)?;
+        self.deposited_avg = self
+            .deposited_integral
+            .get_average(current_slot, deposited_amount)?;
         Ok(())
     }
 
@@ -427,7 +429,9 @@ impl SlotIntegrated {
     }
 
     /// Compute the average value
-    pub fn get_average(&self, current_slot: u64) -> Result<u64> {
+    pub fn get_average(&mut self, current_slot: u64, deposited_amount: u64) -> Result<u64> {
+        self.accumulate(deposited_amount)?;
+
         let elapsed_slots = current_slot
             .checked_sub(self.initial_slot)
             .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
