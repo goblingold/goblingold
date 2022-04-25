@@ -87,7 +87,13 @@ impl VaultAccount {
         let mut deposit: Vec<u128> = self
             .protocols
             .iter()
-            .map(|protocol| protocol.rewards.deposited_avg)
+            .map(|protocol| {
+                protocol
+                    .rewards
+                    .deposited_avg
+                    .checked_div(WAD as u128)
+                    .unwrap()
+            })
             .collect();
 
         let rewards: Vec<u128> = self
