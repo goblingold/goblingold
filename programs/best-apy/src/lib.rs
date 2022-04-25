@@ -1,10 +1,10 @@
 use anchor_lang::prelude::borsh::{BorshDeserialize, BorshSerialize};
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::pubkey::Pubkey;
-use check_hash::{CheckHash, CHECKHASH_BYTES};
+use check_hash::{CheckHash,CheckHashIsolatedPool, CHECKHASH_BYTES};
 use error::ErrorCode;
 use instructions::*;
-use protocols::{francium::*, mango::*, port::*, solend::*, tulip::*, PROTOCOLS_LEN};
+use protocols::{Protocols, francium::*, mango::*, port::*, solend::*, tulip::*, PROTOCOLS_LEN};
 use vault::{RefreshParams, VaultAccount};
 
 mod check_hash;
@@ -117,21 +117,21 @@ pub mod best_apy {
     }
 
     /// Solend: Deposit from the vault account
-    #[access_control(ctx.accounts.check_hash())]
+    #[access_control(ctx.accounts.check_hash(Protocols::Solend))]
     pub fn solend_deposit(ctx: Context<SolendDeposit>) -> Result<()> {
-        instructions::protocol_deposit::handler(ctx, Protocols::Solend)
+        instructions::protocol_deposit_isolated_pool::handler(ctx, Protocols::Solend)
     }
 
     /// Solend: Withdraw to the vault account
-    #[access_control(ctx.accounts.check_hash())]
+    #[access_control(ctx.accounts.check_hash(Protocols::Solend))]
     pub fn solend_withdraw(ctx: Context<SolendWithdraw>) -> Result<()> {
-        instructions::protocol_withdraw::handler(ctx, Protocols::Solend)
+        instructions::protocol_withdraw_isolated_pool::handler(ctx, Protocols::Solend)
     }
 
      /// Solend: Compute the TVL
-     #[access_control(ctx.accounts.check_hash())]
+     #[access_control(ctx.accounts.check_hash(Protocols::Solend))]
      pub fn solend_tvl(ctx: Context<SolendTVL>) -> Result<()> {
-         instructions::protocol_rewards::handler(ctx, Protocols::Solend)
+         instructions::protocol_rewards_isolated_pool::handler(ctx, Protocols::Solend)
      }
 
     /// Solend: Initialize protocol accounts
@@ -141,21 +141,21 @@ pub mod best_apy {
     }
 
     /// SolendIsolatedPool: Deposit from the vault account
-    #[access_control(ctx.accounts.check_hash())]
+    #[access_control(ctx.accounts.check_hash(Protocols::SolendStablePool))]
     pub fn solend_isolated_pool_deposit(ctx: Context<SolendDeposit>) -> Result<()> {
-        instructions::protocol_deposit::handler(ctx,  Protocols::SolendIsolatedPool)
+        instructions::protocol_deposit_isolated_pool::handler(ctx,  Protocols::SolendStablePool)
     }
 
     /// SolendIsolatedPool: Withdraw to the vault account
-    #[access_control(ctx.accounts.check_hash())]
+    #[access_control(ctx.accounts.check_hash(Protocols::SolendStablePool))]
     pub fn solend_isolated_pool_withdraw(ctx: Context<SolendWithdraw>) -> Result<()> {
-        instructions::protocol_withdraw::handler(ctx, Protocols::SolendIsolatedPool)
+        instructions::protocol_withdraw_isolated_pool::handler(ctx, Protocols::SolendStablePool)
     }
 
     /// SolendIsolatedPool: Compute the TVL
-    #[access_control(ctx.accounts.check_hash())]
+    #[access_control(ctx.accounts.check_hash(Protocols::SolendStablePool))]
     pub fn solend_isolated_pool_tvl(ctx: Context<SolendTVL>) -> Result<()> {
-        instructions::protocol_rewards::handler(ctx, Protocols::SolendIsolatedPool)
+        instructions::protocol_rewards_isolated_pool::handler(ctx, Protocols::SolendStablePool)
     }
 
     /// Port: Initialize protocol accounts

@@ -75,8 +75,7 @@
           "isSigner": false
         }
       ],
-      "args": [],
-      "returns": null
+      "args": []
     },
     {
       "name": "setHashes",
@@ -111,8 +110,7 @@
             ]
           }
         }
-      ],
-      "returns": null
+      ]
     },
     {
       "name": "setRefreshParams",
@@ -135,8 +133,7 @@
             "defined": "RefreshParams"
           }
         }
-      ],
-      "returns": null
+      ]
     },
     {
       "name": "setProtocolWeights",
@@ -162,8 +159,7 @@
             ]
           }
         }
-      ],
-      "returns": null
+      ]
     },
     {
       "name": "deposit",
@@ -209,8 +205,7 @@
           "name": "amount",
           "type": "u64"
         }
-      ],
-      "returns": null
+      ]
     },
     {
       "name": "withdraw",
@@ -261,8 +256,7 @@
           "name": "lpAmount",
           "type": "u64"
         }
-      ],
-      "returns": null
+      ]
     },
     {
       "name": "refreshWeights",
@@ -288,8 +282,7 @@
           "isSigner": false
         }
       ],
-      "args": [],
-      "returns": null
+      "args": []
     },
     {
       "name": "mangoInitialize",
@@ -325,8 +318,7 @@
           "isSigner": false
         }
       ],
-      "args": [],
-      "returns": null
+      "args": []
     },
     {
       "name": "mangoDeposit",
@@ -392,8 +384,7 @@
           "isSigner": false
         }
       ],
-      "args": [],
-      "returns": null
+      "args": []
     },
     {
       "name": "mangoWithdraw",
@@ -474,8 +465,7 @@
           "isSigner": false
         }
       ],
-      "args": [],
-      "returns": null
+      "args": []
     },
     {
       "name": "mangoTvl",
@@ -516,8 +506,7 @@
           "isSigner": false
         }
       ],
-      "args": [],
-      "returns": null
+      "args": []
     },
     {
       "name": "solendInitialize",
@@ -568,8 +557,7 @@
           "isSigner": false
         }
       ],
-      "args": [],
-      "returns": null
+      "args": []
     },
     {
       "name": "solendDeposit",
@@ -655,8 +643,7 @@
           "isSigner": false
         }
       ],
-      "args": [],
-      "returns": null
+      "args": []
     },
     {
       "name": "solendWithdraw",
@@ -737,8 +724,7 @@
           "isSigner": false
         }
       ],
-      "args": [],
-      "returns": null
+      "args": []
     },
     {
       "name": "solendTvl",
@@ -764,8 +750,251 @@
           "isSigner": false
         }
       ],
-      "args": [],
-      "returns": null
+      "args": []
+    },
+    {
+      "name": "solendIsolatedPoolInitialize",
+      "accounts": [
+        {
+          "name": "userSigner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "vaultAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "vaultSolendObligationAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "solendLendingMarketAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "solendProgramId",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "clock",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "solendIsolatedPoolDeposit",
+      "accounts": [
+        {
+          "name": "genericAccs",
+          "accounts": [
+            {
+              "name": "vaultAccount",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "vaultInputTokenAccount",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "tokenProgram",
+              "isMut": false,
+              "isSigner": false
+            },
+            {
+              "name": "clock",
+              "isMut": false,
+              "isSigner": false
+            }
+          ]
+        },
+        {
+          "name": "solendProgramId",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "vaultSolendDestinationCollateralTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultSolendObligationAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "solendReserveAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "solendReserveLiquiditySupplySplTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "solendReserveCollateralSplTokenMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "solendLendingMarketAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "solendDerivedLendingMarketAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "solendDestinationDepositReserveCollateralSupplySplTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "solendPythPriceOracleAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "solendSwitchboardPriceFeedOracleAccount",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "solendIsolatedPoolWithdraw",
+      "accounts": [
+        {
+          "name": "genericAccs",
+          "accounts": [
+            {
+              "name": "vaultAccount",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "vaultInputTokenAccount",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "tokenProgram",
+              "isMut": false,
+              "isSigner": false
+            },
+            {
+              "name": "clock",
+              "isMut": false,
+              "isSigner": false
+            },
+            {
+              "name": "instructions",
+              "isMut": false,
+              "isSigner": false
+            }
+          ]
+        },
+        {
+          "name": "solendProgramId",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "vaultSolendDestinationCollateralTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultSolendObligationAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "solendSourceWithdrawReserveCollateralSupplySplTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "solendWithdrawReserveAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "solendLendingMarketAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "solendDerivedLendingMarketAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "solendReserveCollateralSplTokenMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "solendReserveLiquiditySupplySplTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "solendIsolatedPoolTvl",
+      "accounts": [
+        {
+          "name": "genericAccs",
+          "accounts": [
+            {
+              "name": "vaultAccount",
+              "isMut": true,
+              "isSigner": false
+            }
+          ]
+        },
+        {
+          "name": "reserve",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "obligation",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
     },
     {
       "name": "portInitialize",
@@ -831,8 +1060,7 @@
           "isSigner": false
         }
       ],
-      "args": [],
-      "returns": null
+      "args": []
     },
     {
       "name": "portDeposit",
@@ -923,8 +1151,7 @@
           "isSigner": false
         }
       ],
-      "args": [],
-      "returns": null
+      "args": []
     },
     {
       "name": "portWithdraw",
@@ -1020,8 +1247,7 @@
           "isSigner": false
         }
       ],
-      "args": [],
-      "returns": null
+      "args": []
     },
     {
       "name": "portTvl",
@@ -1047,8 +1273,7 @@
           "isSigner": false
         }
       ],
-      "args": [],
-      "returns": null
+      "args": []
     },
     {
       "name": "portClaimRewards",
@@ -1104,8 +1329,7 @@
           "isSigner": false
         }
       ],
-      "args": [],
-      "returns": null
+      "args": []
     },
     {
       "name": "tulipDeposit",
@@ -1171,8 +1395,7 @@
           "isSigner": false
         }
       ],
-      "args": [],
-      "returns": null
+      "args": []
     },
     {
       "name": "tulipWithdraw",
@@ -1243,8 +1466,7 @@
           "isSigner": false
         }
       ],
-      "args": [],
-      "returns": null
+      "args": []
     },
     {
       "name": "tulipTvl",
@@ -1270,8 +1492,7 @@
           "isSigner": false
         }
       ],
-      "args": [],
-      "returns": null
+      "args": []
     },
     {
       "name": "franciumInitialize",
@@ -1327,8 +1548,7 @@
           "isSigner": false
         }
       ],
-      "args": [],
-      "returns": null
+      "args": []
     },
     {
       "name": "franciumDeposit",
@@ -1444,8 +1664,7 @@
           "isSigner": false
         }
       ],
-      "args": [],
-      "returns": null
+      "args": []
     },
     {
       "name": "franciumWithdraw",
@@ -1556,8 +1775,7 @@
           "isSigner": false
         }
       ],
-      "args": [],
-      "returns": null
+      "args": []
     },
     {
       "name": "franciumTvl",
@@ -1583,8 +1801,7 @@
           "isSigner": false
         }
       ],
-      "args": [],
-      "returns": null
+      "args": []
     }
   ],
   "accounts": [
@@ -1873,6 +2090,36 @@
       ]
     },
     {
+      "name": "ProtocolRewardsEvent",
+      "fields": [
+        {
+          "name": "protocolId",
+          "type": "u8",
+          "index": false
+        },
+        {
+          "name": "token",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "rewards",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "lamports",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "initialSlot",
+          "type": "u64",
+          "index": false
+        }
+      ]
+    },
+    {
       "name": "RefreshWeightsEvent",
       "fields": [
         {
@@ -1983,8 +2230,5 @@
       "name": "UnauthorizedUser",
       "msg": "Unauthorized user"
     }
-  ],
-  "metadata": {
-    "address": "GGo1dnYpjKfe9omzUaFtaCyizvwpAMf3NhxSCMD61F3A"
-  }
+  ]
 }

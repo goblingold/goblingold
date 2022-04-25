@@ -7,10 +7,10 @@ use anchor_spl::token::{Token, TokenAccount};
 /// Deposit into the protocol
 pub trait ProtocolDepositIsolatedPool<'info> {
     /// Return a mutable refrence of the data
-    fn protocol_data_as_mut(&mut self) -> &mut ProtocolData;
+    fn protocol_data_as_mut(&mut self, protocol : Protocols) -> &mut ProtocolData;
 
     /// Compute the amount to deposit
-    fn get_amount(&self) -> Result<u64>;
+    fn get_amount(&self, protocol : Protocols) -> Result<u64>;
 
     /// Deposit into the protocol
     fn cpi_deposit(&self, amount: u64) -> Result<()>;
@@ -18,10 +18,10 @@ pub trait ProtocolDepositIsolatedPool<'info> {
 
 /// Deposit into the protocol and update protocol data
 pub fn handler<'info, T: ProtocolDepositIsolatedPool<'info>>(ctx: Context<T>, protocol : Protocols) -> Result<()> {
-    let amount = ctx.accounts.get_amount()?;
+    let amount = ctx.accounts.get_amount(protocol)?;
     ctx.accounts.cpi_deposit(amount)?;
     ctx.accounts
-        .protocol_data_as_mut()
+        .protocol_data_as_mut(protocol)
         .update_after_deposit(amount)?;
 
     Ok(())

@@ -1,7 +1,7 @@
 use crate::check_hash::*;
 use crate::error::ErrorCode;
 use crate::instructions::{
-    protocol_deposit::*, protocol_initialize::*, protocol_rewards::*, protocol_withdraw::*,
+    protocol_deposit_isolated_pool::*, protocol_initialize::*, protocol_rewards_isolated_pool::*, protocol_withdraw_isolated_pool::*,
 };
 use crate::macros::generate_seeds;
 use crate::protocols::Protocols;
@@ -135,7 +135,7 @@ pub struct SolendDeposit<'info> {
     pub solend_switchboard_price_feed_oracle_account: AccountInfo<'info>,
 }
 
-impl<'info> CheckHash<'info> for SolendDeposit<'info> {
+impl<'info> CheckHashIsolatedPool<'info> for SolendDeposit<'info> {
     fn hash(&self) -> Hash {
         hashv(&[
             self.vault_solend_destination_collateral_token_account
@@ -261,7 +261,7 @@ pub struct SolendWithdraw<'info> {
     pub solend_reserve_liquidity_supply_spl_token_account: AccountInfo<'info>,
 }
 
-impl<'info> CheckHash<'info> for SolendWithdraw<'info> {
+impl<'info> CheckHashIsolatedPool<'info> for SolendWithdraw<'info> {
     fn hash(&self) -> Hash {
         hashv(&[
             self.vault_solend_destination_collateral_token_account
@@ -288,7 +288,7 @@ impl<'info> CheckHash<'info> for SolendWithdraw<'info> {
     }
 }
 
-impl<'info> ProtocolWithdraw<'info> for SolendWithdraw<'info> {
+impl<'info> ProtocolWithdrawIsolatedPool<'info> for SolendWithdraw<'info> {
     fn protocol_data_as_mut(&mut self, protocol: Protocols) -> &mut ProtocolData {
         &mut self.generic_accs.vault_account.protocols[protocol as usize]
     }
@@ -378,7 +378,7 @@ pub struct SolendTVL<'info> {
     pub obligation: AccountInfo<'info>,
 }
 
-impl<'info> CheckHash<'info> for SolendTVL<'info> {
+impl<'info> CheckHashIsolatedPool<'info> for SolendTVL<'info> {
     fn hash(&self) -> Hash {
         hashv(&[self.reserve.key.as_ref(), self.obligation.key.as_ref()])
     }
@@ -390,7 +390,7 @@ impl<'info> CheckHash<'info> for SolendTVL<'info> {
     }
 }
 
-impl<'info> ProtocolRewards<'info> for SolendTVL<'info> {
+impl<'info> ProtocolRewardsIsolatedPool<'info> for SolendTVL<'info> {
     fn protocol_id(&self, protocol: Protocols) -> usize {
         protocol as usize
     }
