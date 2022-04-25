@@ -373,7 +373,7 @@ impl AccumulatedRewards {
         self.amount = rewards;
         self.deposited_avg_wad = self
             .deposited_integral
-            .get_average(current_slot, deposited_amount)?;
+            .get_average_wad(current_slot, deposited_amount)?;
         Ok(())
     }
 
@@ -438,8 +438,8 @@ impl SlotIntegrated {
         Ok(())
     }
 
-    /// Compute the average value
-    pub fn get_average(&mut self, current_slot: u64, deposited_amount: u64) -> Result<u128> {
+    /// Compute the average value scaled by WAD
+    pub fn get_average_wad(&mut self, current_slot: u64, deposited_amount: u64) -> Result<u128> {
         self.accumulate(deposited_amount)?;
 
         let elapsed_slots = current_slot
