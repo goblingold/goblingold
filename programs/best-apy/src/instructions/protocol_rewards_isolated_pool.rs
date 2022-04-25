@@ -1,7 +1,7 @@
+use crate::protocols::Protocols;
 use crate::vault::ProtocolData;
 use crate::VaultAccount;
 use crate::VAULT_ACCOUNT_SEED;
-use crate::protocols::Protocols;
 use anchor_lang::prelude::*;
 
 #[event]
@@ -16,20 +16,23 @@ pub struct ProtocolRewardsEvent {
 /// Get the rewards produced by the protocol
 pub trait ProtocolRewardsIsolatedPool<'info> {
     /// Get the protocol ID
-    fn protocol_id(&self, protocol : Protocols) -> usize;
+    fn protocol_id(&self, protocol: Protocols) -> usize;
 
     /// Get the input token mint pubkey
     fn input_mint_pubkey(&self) -> Pubkey;
 
     /// Return a mutable refrence of the data
-    fn protocol_data_as_mut(&mut self, protocol : Protocols) -> &mut ProtocolData;
+    fn protocol_data_as_mut(&mut self, protocol: Protocols) -> &mut ProtocolData;
 
     /// Compute the maximam withdrawable units
     fn max_withdrawable(&self) -> Result<u64>;
 }
 
 /// Update the rewards
-pub fn handler<'info, T: ProtocolRewardsIsolatedPool<'info>>(ctx: Context<T>, protocol : Protocols) -> Result<()> {
+pub fn handler<'info, T: ProtocolRewardsIsolatedPool<'info>>(
+    ctx: Context<T>,
+    protocol: Protocols,
+) -> Result<()> {
     let token = ctx.accounts.input_mint_pubkey();
 
     let tvl = ctx.accounts.max_withdrawable()?;

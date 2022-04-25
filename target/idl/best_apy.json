@@ -75,7 +75,8 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": null
     },
     {
       "name": "setHashes",
@@ -110,7 +111,8 @@
             ]
           }
         }
-      ]
+      ],
+      "returns": null
     },
     {
       "name": "setRefreshParams",
@@ -133,7 +135,8 @@
             "defined": "RefreshParams"
           }
         }
-      ]
+      ],
+      "returns": null
     },
     {
       "name": "setProtocolWeights",
@@ -159,7 +162,8 @@
             ]
           }
         }
-      ]
+      ],
+      "returns": null
     },
     {
       "name": "deposit",
@@ -205,7 +209,8 @@
           "name": "amount",
           "type": "u64"
         }
-      ]
+      ],
+      "returns": null
     },
     {
       "name": "withdraw",
@@ -256,7 +261,8 @@
           "name": "lpAmount",
           "type": "u64"
         }
-      ]
+      ],
+      "returns": null
     },
     {
       "name": "refreshWeights",
@@ -282,7 +288,8 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": null
     },
     {
       "name": "mangoInitialize",
@@ -318,7 +325,8 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": null
     },
     {
       "name": "mangoDeposit",
@@ -384,7 +392,8 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": null
     },
     {
       "name": "mangoWithdraw",
@@ -465,7 +474,8 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": null
     },
     {
       "name": "mangoTvl",
@@ -506,7 +516,8 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": null
     },
     {
       "name": "solendInitialize",
@@ -557,7 +568,8 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": null
     },
     {
       "name": "solendDeposit",
@@ -643,7 +655,8 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": null
     },
     {
       "name": "solendWithdraw",
@@ -724,7 +737,8 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": null
     },
     {
       "name": "solendTvl",
@@ -750,7 +764,8 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": null
     },
     {
       "name": "solendIsolatedPoolInitialize",
@@ -801,7 +816,8 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": null
     },
     {
       "name": "solendIsolatedPoolDeposit",
@@ -887,7 +903,8 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": null
     },
     {
       "name": "solendIsolatedPoolWithdraw",
@@ -968,7 +985,8 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": null
     },
     {
       "name": "solendIsolatedPoolTvl",
@@ -994,7 +1012,8 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": null
     },
     {
       "name": "portInitialize",
@@ -1060,7 +1079,8 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": null
     },
     {
       "name": "portDeposit",
@@ -1151,7 +1171,8 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": null
     },
     {
       "name": "portWithdraw",
@@ -1247,7 +1268,8 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": null
     },
     {
       "name": "portTvl",
@@ -1273,7 +1295,8 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": null
     },
     {
       "name": "portClaimRewards",
@@ -1329,7 +1352,8 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": null
     },
     {
       "name": "tulipDeposit",
@@ -1395,7 +1419,8 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": null
     },
     {
       "name": "tulipWithdraw",
@@ -1466,7 +1491,8 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": null
     },
     {
       "name": "tulipTvl",
@@ -1492,7 +1518,8 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": null
     },
     {
       "name": "franciumInitialize",
@@ -1548,7 +1575,8 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": null
     },
     {
       "name": "franciumDeposit",
@@ -1664,7 +1692,8 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": null
     },
     {
       "name": "franciumWithdraw",
@@ -1775,7 +1804,8 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": null
     },
     {
       "name": "franciumTvl",
@@ -1801,7 +1831,8 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": null
     }
   ],
   "accounts": [
@@ -2230,5 +2261,8 @@
       "name": "UnauthorizedUser",
       "msg": "Unauthorized user"
     }
-  ]
+  ],
+  "metadata": {
+    "address": "GGo1dnYpjKfe9omzUaFtaCyizvwpAMf3NhxSCMD61F3A"
+  }
 }

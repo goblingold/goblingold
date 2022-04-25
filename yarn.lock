@@ -1449,7 +1449,7 @@
   "version" "3.0.1"
 
 "wen-token-client@github:goblingold/goblin-sdk#feature/token-addresses":
-  "resolved" "git+ssh://git@github.com/goblingold/goblin-sdk.git#cb6be3d8fdd01a18268cae9a90b2b8bb35f9d92c"
+  "resolved" "git+ssh://git@github.com/goblingold/goblin-sdk.git#183f7a32f32a11bfc8a2b3f59388f701ad8e2b6d"
   "version" "1.1.44"
   dependencies:
     "@project-serum/anchor" "^0.23.0"

@@ -118,13 +118,18 @@ describe("best_apy", () => {
     const userSigner = program.provider.wallet.publicKey;
 
     const wrappedKeypair = anchor.web3.Keypair.generate();
-    const userInputTokenAccount = wrappedKeypair.publicKey;
+    const userInputTokenAccount = await spl.getAssociatedTokenAddress(
+      new anchor.web3.PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"),
+      userSigner,
+      false
+    );
 
     const userLpTokenAccount = await spl.getAssociatedTokenAddress(
       program.vaultKeys[tokenInput].vaultLpTokenMintAddress,
       userSigner,
       false
     );
+
 
     const userLpTokenAccountInfo =
       await program.provider.connection.getAccountInfo(userLpTokenAccount);
@@ -141,37 +146,10 @@ describe("best_apy", () => {
       lpAmount,
     });
 
-    const lamports = await spl.getMinimumBalanceForRentExemptAccount(
-      client.provider.connection
-    );
-
     for (let i = 0; i < txs.length; ++i) {
       const tx = new anchor.web3.Transaction()
-        .add(
-          anchor.web3.SystemProgram.createAccount({
-            fromPubkey: userSigner,
-            newAccountPubkey: userInputTokenAccount,
-            space: spl.ACCOUNT_SIZE,
-            lamports,
-            programId: spl.TOKEN_PROGRAM_ID,
-          }),
-          spl.createInitializeAccountInstruction(
-            userInputTokenAccount,
-            spl.NATIVE_MINT,
-            userSigner
-          )
-        )
-        .add(txs[i])
-        .add(
-          spl.createCloseAccountInstruction(
-            userInputTokenAccount,
-            userSigner,
-            userSigner,
-            []
-          )
-        );
-
-      const txSig = await program.provider.send(tx, [wrappedKeypair]);
+        .add(txs[i]);
+      const txSig = await program.provider.send(tx);
       console.log("tx withdraw_protocols_" + i.toString() + ":", txSig);
     }
   });

@@ -1,7 +1,8 @@
 use crate::check_hash::*;
 use crate::error::ErrorCode;
 use crate::instructions::{
-    protocol_deposit_isolated_pool::*, protocol_initialize::*, protocol_rewards_isolated_pool::*, protocol_withdraw_isolated_pool::*,
+    protocol_deposit_isolated_pool::*, protocol_initialize::*, protocol_rewards_isolated_pool::*,
+    protocol_withdraw_isolated_pool::*,
 };
 use crate::macros::generate_seeds;
 use crate::protocols::Protocols;
