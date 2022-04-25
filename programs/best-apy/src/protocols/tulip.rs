@@ -1,7 +1,8 @@
 use crate::check_hash::*;
 use crate::error::ErrorCode;
 use crate::instructions::{
-    protocol_deposit_isolated_pool::*, protocol_rewards::*, protocol_rewards_isolated_pool::*, protocol_withdraw_isolated_pool::*,
+    protocol_deposit_isolated_pool::*, protocol_rewards_isolated_pool::*,
+    protocol_withdraw_isolated_pool::*,
 };
 
 use crate::macros::generate_seeds;
@@ -316,17 +317,19 @@ impl<'info> CheckHash<'info> for TulipTVL<'info> {
     }
 }
 
-impl<'info> ProtocolRewards<'info> for TulipTVL<'info> {
-    fn protocol_id(&self) -> usize {
-        Protocols::Tulip as usize
+impl<'info> ProtocolId<'info> for TulipTVL<'info> {
+    fn protocol_id(&self) -> Protocols {
+        Protocols::Tulip
     }
+}
 
+impl<'info> ProtocolRewardsIsolatedPool<'info> for TulipTVL<'info> {
     fn input_mint_pubkey(&self) -> Pubkey {
         self.generic_accs.vault_account.input_mint_pubkey
     }
 
-    fn protocol_data_as_mut(&mut self) -> &mut ProtocolData {
-        &mut self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
+    fn protocol_data_as_mut(&mut self, protocol: Protocols) -> &mut ProtocolData {
+        &mut self.generic_accs.vault_account.protocols[protocol as usize]
     }
 
     fn max_withdrawable(&self) -> Result<u64> {

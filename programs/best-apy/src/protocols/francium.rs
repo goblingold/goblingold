@@ -2,13 +2,13 @@ use crate::check_hash::*;
 use crate::error::ErrorCode;
 use crate::instructions::{
     protocol_deposit_2_ixs::ProtocolDeposit2Ixs, protocol_deposit_isolated_pool::*,
-    protocol_initialize::*, protocol_rewards::*, protocol_rewards_isolated_pool::*,
+    protocol_initialize::*, protocol_rewards_isolated_pool::*,
     protocol_withdraw_2_ixs::ProtocolWithdraw2Ixs, protocol_withdraw_isolated_pool::*,
 };
 use crate::macros::generate_seeds;
 use crate::protocols::{
     state::{francium_farming_user, francium_lending_pool},
-    Protocols,
+    ProtocolId, Protocols,
 };
 use crate::vault::{ProtocolData, VaultAccount};
 use crate::VAULT_ACCOUNT_SEED;
@@ -557,17 +557,19 @@ impl<'info> CheckHash<'info> for FranciumTVL<'info> {
     }
 }
 
-impl<'info> ProtocolRewards<'info> for FranciumTVL<'info> {
-    fn protocol_id(&self) -> usize {
-        Protocols::Francium as usize
+impl<'info> ProtocolId<'info> for FranciumTVL<'info> {
+    fn protocol_id(&self) -> Protocols {
+        Protocols::Francium
     }
+}
 
+impl<'info> ProtocolRewardsIsolatedPool<'info> for FranciumTVL<'info> {
     fn input_mint_pubkey(&self) -> Pubkey {
         self.generic_accs.vault_account.input_mint_pubkey
     }
 
-    fn protocol_data_as_mut(&mut self) -> &mut ProtocolData {
-        &mut self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
+    fn protocol_data_as_mut(&mut self, protocol: Protocols) -> &mut ProtocolData {
+        &mut self.generic_accs.vault_account.protocols[protocol as usize]
     }
 
     fn max_withdrawable(&self) -> Result<u64> {
