@@ -1,12 +1,11 @@
 use crate::check_hash::*;
 use crate::error::ErrorCode;
 use crate::instructions::{
-    protocol_deposit::*, protocol_deposit_isolated_pool::*, protocol_initialize::*,
-    protocol_rewards::*, protocol_rewards_isolated_pool::*, protocol_withdraw::*,
-    protocol_withdraw_isolated_pool::*,
+    protocol_deposit_isolated_pool::*, protocol_initialize::*, protocol_rewards::*,
+    protocol_rewards_isolated_pool::*, protocol_withdraw::*, protocol_withdraw_isolated_pool::*,
 };
 use crate::macros::generate_seeds;
-use crate::protocols::Protocols;
+use crate::protocols::{ProtocolId, Protocols};
 use crate::vault::{ProtocolData, VaultAccount};
 use crate::{TREASURY_PUBKEY, VAULT_ACCOUNT_SEED};
 use anchor_lang::prelude::*;
@@ -214,13 +213,19 @@ impl<'info> CheckHash<'info> for PortDeposit<'info> {
     }
 }
 
-impl<'info> ProtocolDeposit<'info> for PortDeposit<'info> {
-    fn protocol_data_as_mut(&mut self) -> &mut ProtocolData {
-        &mut self.generic_accs.vault_account.protocols[Protocols::Port as usize]
+impl<'info> ProtocolId<'info> for PortDeposit<'info> {
+    fn protocol_id(&self) -> Protocols {
+        Protocols::Port
+    }
+}
+
+impl<'info> ProtocolDepositIsolatedPool<'info> for PortDeposit<'info> {
+    fn protocol_data_as_mut(&mut self, protocol: Protocols) -> &mut ProtocolData {
+        &mut self.generic_accs.vault_account.protocols[protocol as usize]
     }
 
-    fn get_amount(&self) -> Result<u64> {
-        self.generic_accs.amount_to_deposit(Protocols::Port)
+    fn get_amount(&self, protocol: Protocols) -> Result<u64> {
+        self.generic_accs.amount_to_deposit(protocol)
     }
 
     fn cpi_deposit(&self, amount: u64) -> Result<()> {
