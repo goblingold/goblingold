@@ -1739,7 +1739,7 @@
             "type": "u64"
           },
           {
-            "name": "depositedAvg",
+            "name": "depositedAvgWad",
             "type": "u128"
           },
           {
