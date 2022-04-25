@@ -2,7 +2,7 @@ use crate::check_hash::*;
 use crate::error::ErrorCode;
 use crate::instructions::{
     protocol_deposit_isolated_pool::*, protocol_initialize::*, protocol_rewards::*,
-    protocol_rewards_isolated_pool::*, protocol_withdraw::*, protocol_withdraw_isolated_pool::*,
+    protocol_rewards_isolated_pool::*, protocol_withdraw_isolated_pool::*,
 };
 use crate::macros::generate_seeds;
 use crate::protocols::{ProtocolId, Protocols};
@@ -214,17 +214,23 @@ impl<'info> CheckHash<'info> for MangoWithdraw<'info> {
     }
 }
 
-impl<'info> ProtocolWithdraw<'info> for MangoWithdraw<'info> {
-    fn protocol_data_as_mut(&mut self) -> &mut ProtocolData {
-        &mut self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
+impl<'info> ProtocolId<'info> for MangoWithdraw<'info> {
+    fn protocol_id(&self) -> Protocols {
+        Protocols::Mango
+    }
+}
+
+impl<'info> ProtocolWithdrawIsolatedPool<'info> for MangoWithdraw<'info> {
+    fn protocol_data_as_mut(&mut self, protocol: Protocols) -> &mut ProtocolData {
+        &mut self.generic_accs.vault_account.protocols[protocol as usize]
     }
 
     fn input_token_account_as_mut(&mut self) -> &mut Account<'info, TokenAccount> {
         &mut self.generic_accs.vault_input_token_account
     }
 
-    fn get_amount(&self) -> Result<u64> {
-        self.generic_accs.amount_to_withdraw(Protocols::Mango)
+    fn get_amount(&self, protocol: Protocols) -> Result<u64> {
+        self.generic_accs.amount_to_withdraw(protocol)
     }
 
     fn cpi_withdraw(&self, amount: u64) -> Result<()> {

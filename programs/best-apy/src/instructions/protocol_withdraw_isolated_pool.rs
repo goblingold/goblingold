@@ -6,7 +6,7 @@ use anchor_lang::prelude::*;
 use anchor_lang::solana_program::sysvar;
 use anchor_spl::token::{Token, TokenAccount};
 
-/// Deposit into the protocol
+/// Withdraw from the protocol and update protocol data
 pub trait ProtocolWithdrawIsolatedPool<'info> {
     /// Return a mutable refrence of the data
     fn protocol_data_as_mut(&mut self, protocol: Protocols) -> &mut ProtocolData;
@@ -26,7 +26,7 @@ pub trait ProtocolWithdrawIsolatedPool<'info> {
     fn cpi_withdraw(&self, amount: u64) -> Result<()>;
 }
 
-/// Deposit into the protocol and update protocol data
+/// Withdraw from the protocol and update protocol data
 pub fn handler<'info, T: ProtocolWithdrawIsolatedPool<'info>>(
     ctx: Context<T>,
     protocol: Protocols,
