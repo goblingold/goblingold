@@ -3,6 +3,7 @@ use crate::vault::ProtocolData;
 use crate::VaultAccount;
 use crate::VAULT_ACCOUNT_SEED;
 use anchor_lang::prelude::*;
+use std::convert::TryInto;
 
 #[event]
 pub struct ProtocolRewardsEvent {
@@ -30,6 +31,7 @@ pub fn handler<'info, T: ProtocolRewardsIsolatedPool<'info>>(
     ctx: Context<T>,
     protocol: Protocols,
 ) -> Result<()> {
+    let protocol_id: u8 = (protocol as usize).try_into().unwrap();
     let token = ctx.accounts.input_mint_pubkey();
 
     let tvl = ctx.accounts.max_withdrawable()?;
@@ -38,7 +40,7 @@ pub fn handler<'info, T: ProtocolRewardsIsolatedPool<'info>>(
     protocol_data.rewards.update(rewards)?;
 
     emit!(ProtocolRewardsEvent {
-        protocol_id: protocol as u8,
+        protocol_id,
         token,
         rewards: protocol_data.rewards.amount,
         lamports: protocol_data.rewards.deposited_avg,
