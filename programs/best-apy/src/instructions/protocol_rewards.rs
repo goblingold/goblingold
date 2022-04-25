@@ -1,7 +1,9 @@
+use crate::error::ErrorCode;
 use crate::vault::ProtocolData;
 use crate::VaultAccount;
 use crate::VAULT_ACCOUNT_SEED;
 use anchor_lang::prelude::*;
+use solana_maths::WAD;
 use std::convert::TryInto;
 
 #[event]
@@ -9,7 +11,7 @@ pub struct ProtocolRewardsEvent {
     protocol_id: u8,
     token: Pubkey,
     rewards: u64,
-    lamports_wad: u128,
+    lamports: u64,
     initial_slot: u64,
 }
 
@@ -38,11 +40,19 @@ pub fn handler<'info, T: ProtocolRewards<'info>>(ctx: Context<T>) -> Result<()> 
     let rewards = tvl.saturating_sub(protocol.amount);
     protocol.rewards.update(rewards)?;
 
+    let deposited_lamports: u64 = protocol
+        .rewards
+        .deposited_avg
+        .checked_div(WAD as u128)
+        .ok_or_else(|| error!(ErrorCode::MathOverflow))?
+        .try_into()
+        .map_err(|_| ErrorCode::MathOverflow)?;
+
     emit!(ProtocolRewardsEvent {
         protocol_id,
         token,
         rewards: protocol.rewards.amount,
-        lamports_wad: protocol.rewards.deposited_avg,
+        lamports: deposited_lamports,
         initial_slot: protocol.rewards.deposited_integral.initial_slot
     });
 
