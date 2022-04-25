@@ -15,9 +15,6 @@ pub struct ProtocolRewardsEvent {
 
 /// Get the rewards produced by the protocol
 pub trait ProtocolRewardsIsolatedPool<'info> {
-    /// Get the protocol ID
-    fn protocol_id(&self, protocol: Protocols) -> usize;
-
     /// Get the input token mint pubkey
     fn input_mint_pubkey(&self) -> Pubkey;
 
