@@ -433,7 +433,7 @@ impl SlotIntegrated {
     }
 
     /// Compute the average value
-    pub fn get_average(&mut self, current_slot: u64, deposited_amount: u64) -> Result<u64> {
+    pub fn get_average(&mut self, current_slot: u64, deposited_amount: u64) -> Result<u128> {
         self.accumulate(deposited_amount)?;
 
         let elapsed_slots = current_slot
