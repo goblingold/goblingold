@@ -38,7 +38,7 @@ pub fn handler<'info, T: ProtocolRewards<'info>>(ctx: Context<T>) -> Result<()> 
     let tvl = ctx.accounts.max_withdrawable()?;
     let protocol = ctx.accounts.protocol_data_as_mut();
     let rewards = tvl.saturating_sub(protocol.amount);
-    protocol.rewards.update(rewards)?;
+    protocol.rewards.update(rewards, protocol.amount)?;
 
     let deposited_lamports: u64 = protocol
         .rewards
