@@ -90,7 +90,7 @@ impl VaultAccount {
             .map(|protocol| {
                 protocol
                     .rewards
-                    .deposited_avg
+                    .deposited_avg_wad
                     .checked_div(WAD as u128)
                     .unwrap()
             })
@@ -358,7 +358,7 @@ pub struct AccumulatedRewards {
     /// Last accumulated rewards
     pub amount: u64,
     /// Slot-average deposited amount that generates these rewards
-    pub deposited_avg: u128,
+    pub deposited_avg_wad: u128,
     /// Slot-integrated deposited amount
     pub deposited_integral: SlotIntegrated,
 }
@@ -371,7 +371,7 @@ impl AccumulatedRewards {
         let current_slot = Clock::get()?.slot;
         self.last_slot = current_slot;
         self.amount = rewards;
-        self.deposited_avg = self
+        self.deposited_avg_wad = self
             .deposited_integral
             .get_average(current_slot, deposited_amount)?;
         Ok(())
@@ -384,7 +384,7 @@ impl AccumulatedRewards {
             .checked_sub(self.deposited_integral.initial_slot)
             .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
-        let acc_at_rewards: u128 = (U192::from(self.deposited_avg))
+        let acc_at_rewards: u128 = (U192::from(self.deposited_avg_wad))
             .checked_mul(U192::from(elapsed_slots_while_rewards))
             .ok_or_else(|| error!(ErrorCode::MathOverflow))?
             .checked_div(U192::from(WAD))

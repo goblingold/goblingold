@@ -42,7 +42,7 @@ pub fn handler<'info, T: ProtocolRewards<'info>>(ctx: Context<T>) -> Result<()> 
 
     let deposited_lamports: u64 = protocol
         .rewards
-        .deposited_avg
+        .deposited_avg_wad
         .checked_div(WAD as u128)
         .ok_or_else(|| error!(ErrorCode::MathOverflow))?
         .try_into()
