@@ -1831,8 +1831,8 @@
           "index": false
         },
         {
-          "name": "lamportsWad",
-          "type": "u128",
+          "name": "lamports",
+          "type": "u64",
           "index": false
         },
         {
