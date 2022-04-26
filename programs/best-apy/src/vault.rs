@@ -83,7 +83,7 @@ impl VaultAccount {
             .try_into()
             .map_err(|_| ErrorCode::MathOverflow)?;
 
-        Ok(std::cmp::max(1, min_weight))
+        Ok(std::cmp::max(10, min_weight))
     }
 
     /// Update protocol weights
