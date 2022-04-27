@@ -1,12 +1,9 @@
 use crate::check_hash::*;
 use crate::error::ErrorCode;
-use crate::instructions::{
-    protocol_deposit::*, protocol_rewards::*,
-    protocol_withdraw::*,
-};
+use crate::instructions::{protocol_deposit::*, protocol_rewards::*, protocol_withdraw::*};
 
 use crate::macros::generate_seeds;
-use crate::protocols::{state::tulip_reserve, ProtocolId, Protocols};
+use crate::protocols::{state::tulip_reserve, Protocols};
 use crate::vault::ProtocolData;
 use anchor_lang::prelude::borsh::{BorshDeserialize, BorshSerialize};
 use anchor_lang::prelude::*;
@@ -79,16 +76,10 @@ impl<'info> CheckHash<'info> for TulipDeposit<'info> {
         ])
     }
 
-    fn target_hash(&self, _protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
+    fn target_hash(&self, protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[protocol as usize]
             .hash_pubkey
             .hash_deposit
-    }
-}
-
-impl<'info> ProtocolId<'info> for TulipDeposit<'info> {
-    fn protocol_id(&self) -> Protocols {
-        Protocols::Tulip
     }
 }
 
@@ -183,12 +174,6 @@ pub struct TulipWithdraw<'info> {
     pub tulip_reserve_authority: AccountInfo<'info>,
 }
 
-impl<'info> ProtocolId<'info> for TulipWithdraw<'info> {
-    fn protocol_id(&self) -> Protocols {
-        Protocols::Tulip
-    }
-}
-
 impl<'info> ProtocolWithdraw<'info> for TulipWithdraw<'info> {
     fn protocol_data_as_mut(&mut self, protocol: Protocols) -> &mut ProtocolData {
         &mut self.generic_accs.vault_account.protocols[protocol as usize]
@@ -281,8 +266,8 @@ impl<'info> CheckHash<'info> for TulipWithdraw<'info> {
         ])
     }
 
-    fn target_hash(&self, _protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
+    fn target_hash(&self, protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[protocol as usize]
             .hash_pubkey
             .hash_withdraw
     }
@@ -310,16 +295,10 @@ impl<'info> CheckHash<'info> for TulipTVL<'info> {
         ])
     }
 
-    fn target_hash(&self, _protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
+    fn target_hash(&self, protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[protocol as usize]
             .hash_pubkey
             .hash_tvl
-    }
-}
-
-impl<'info> ProtocolId<'info> for TulipTVL<'info> {
-    fn protocol_id(&self) -> Protocols {
-        Protocols::Tulip
     }
 }
 

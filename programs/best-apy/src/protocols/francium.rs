@@ -1,14 +1,13 @@
 use crate::check_hash::*;
 use crate::error::ErrorCode;
 use crate::instructions::{
-    protocol_deposit_2_ixs::ProtocolDeposit2Ixs, protocol_deposit::*,
-    protocol_initialize::*, protocol_rewards::*,
-    protocol_withdraw_2_ixs::ProtocolWithdraw2Ixs, protocol_withdraw::*,
+    protocol_deposit::*, protocol_deposit_2_ixs::ProtocolDeposit2Ixs, protocol_initialize::*,
+    protocol_rewards::*, protocol_withdraw::*, protocol_withdraw_2_ixs::ProtocolWithdraw2Ixs,
 };
 use crate::macros::generate_seeds;
 use crate::protocols::{
     state::{francium_farming_user, francium_lending_pool},
-    ProtocolId, Protocols,
+    Protocols,
 };
 use crate::vault::{ProtocolData, VaultAccount};
 use crate::VAULT_ACCOUNT_SEED;
@@ -216,8 +215,8 @@ impl<'info> CheckHash<'info> for FranciumDeposit<'info> {
         ])
     }
 
-    fn target_hash(&self, _protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
+    fn target_hash(&self, protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[protocol as usize]
             .hash_pubkey
             .hash_deposit
     }
@@ -404,8 +403,8 @@ impl<'info> CheckHash<'info> for FranciumWithdraw<'info> {
         ])
     }
 
-    fn target_hash(&self, _protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
+    fn target_hash(&self, protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[protocol as usize]
             .hash_pubkey
             .hash_withdraw
     }
@@ -550,16 +549,10 @@ impl<'info> CheckHash<'info> for FranciumTVL<'info> {
         ])
     }
 
-    fn target_hash(&self, _protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
+    fn target_hash(&self, protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[protocol as usize]
             .hash_pubkey
             .hash_tvl
-    }
-}
-
-impl<'info> ProtocolId<'info> for FranciumTVL<'info> {
-    fn protocol_id(&self) -> Protocols {
-        Protocols::Francium
     }
 }
 

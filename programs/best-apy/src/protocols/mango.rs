@@ -1,11 +1,10 @@
 use crate::check_hash::*;
 use crate::error::ErrorCode;
 use crate::instructions::{
-    protocol_deposit::*, protocol_initialize::*, protocol_rewards::*,
-    protocol_withdraw::*,
+    protocol_deposit::*, protocol_initialize::*, protocol_rewards::*, protocol_withdraw::*,
 };
 use crate::macros::generate_seeds;
-use crate::protocols::{ProtocolId, Protocols};
+use crate::protocols::Protocols;
 use crate::vault::{ProtocolData, VaultAccount};
 use crate::VAULT_ACCOUNT_SEED;
 use anchor_lang::prelude::*;
@@ -109,16 +108,10 @@ impl<'info> CheckHash<'info> for MangoDeposit<'info> {
         ])
     }
 
-    fn target_hash(&self, _protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
+    fn target_hash(&self, protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[protocol as usize]
             .hash_pubkey
             .hash_deposit
-    }
-}
-
-impl<'info> ProtocolId<'info> for MangoDeposit<'info> {
-    fn protocol_id(&self) -> Protocols {
-        Protocols::Mango
     }
 }
 
@@ -207,16 +200,10 @@ impl<'info> CheckHash<'info> for MangoWithdraw<'info> {
         ])
     }
 
-    fn target_hash(&self, _protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
+    fn target_hash(&self, protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[protocol as usize]
             .hash_pubkey
             .hash_withdraw
-    }
-}
-
-impl<'info> ProtocolId<'info> for MangoWithdraw<'info> {
-    fn protocol_id(&self) -> Protocols {
-        Protocols::Mango
     }
 }
 
@@ -300,16 +287,10 @@ impl<'info> CheckHash<'info> for MangoTVL<'info> {
         ])
     }
 
-    fn target_hash(&self, _protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
+    fn target_hash(&self, protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[protocol as usize]
             .hash_pubkey
             .hash_tvl
-    }
-}
-
-impl<'info> ProtocolId<'info> for MangoTVL<'info> {
-    fn protocol_id(&self) -> Protocols {
-        Protocols::Mango
     }
 }
 
