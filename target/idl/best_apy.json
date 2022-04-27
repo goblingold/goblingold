@@ -78,6 +78,27 @@
       "args": []
     },
     {
+      "name": "addProtocol",
+      "accounts": [
+        {
+          "name": "userSigner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "vaultAccount",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "protocolId",
+          "type": "u8"
+        }
+      ]
+    },
+    {
       "name": "setHashes",
       "accounts": [
         {
@@ -2205,6 +2226,16 @@
       "code": 6018,
       "name": "ProtocolNotFoundInVault",
       "msg": "Protocol not found in vault"
+    },
+    {
+      "code": 6019,
+      "name": "ProtocolAlreadyExists",
+      "msg": "Protocol already exists in vault"
+    },
+    {
+      "code": 6020,
+      "name": "InvalidProtocolId",
+      "msg": "Invalid protocol id"
     }
   ]
 }

@@ -1,5 +1,4 @@
 use crate::error::ErrorCode;
-
 use crate::vault::{VaultAccount, WEIGHTS_SCALE};
 use crate::VAULT_ACCOUNT_SEED;
 use anchor_lang::prelude::*;

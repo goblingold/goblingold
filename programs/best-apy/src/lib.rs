@@ -44,6 +44,12 @@ pub mod best_apy {
         instructions::initialize_vault::handler(ctx)
     }
 
+    /// Add a new protocol to the vault_account
+    #[access_control(is_admin(ctx.accounts.user_signer.key))]
+    pub fn add_protocol(ctx: Context<AddProtocol>, protocol_id: u8) -> Result<()> {
+        instructions::add_protocol::handler(ctx, protocol_id)
+    }
+
     /// Set protocol hashes
     #[access_control(is_admin(ctx.accounts.user_signer.key))]
     pub fn set_hashes(

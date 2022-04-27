@@ -6,7 +6,7 @@ use anchor_lang::prelude::*;
 use anchor_lang::solana_program::sysvar;
 use anchor_spl::token::{Token, TokenAccount};
 
-/// Withdraw from the protocol and update protocol data
+/// Withdraw from the protocol
 pub trait ProtocolWithdraw<'info> {
     /// Return the protcol position in the vector
     fn protocol_position(&self, protocol: Protocols) -> Result<usize>;
