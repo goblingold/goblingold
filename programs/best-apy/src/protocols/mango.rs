@@ -108,8 +108,8 @@ impl<'info> CheckHash<'info> for MangoDeposit<'info> {
         ])
     }
 
-    fn target_hash(&self, _protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
+    fn target_hash(&self, protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[protocol as usize]
             .hash_pubkey
             .hash_deposit
     }
@@ -206,8 +206,8 @@ impl<'info> CheckHash<'info> for MangoWithdraw<'info> {
         ])
     }
 
-    fn target_hash(&self, _protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
+    fn target_hash(&self, protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[protocol as usize]
             .hash_pubkey
             .hash_withdraw
     }
@@ -299,8 +299,8 @@ impl<'info> CheckHash<'info> for MangoTVL<'info> {
         ])
     }
 
-    fn target_hash(&self, _protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
+    fn target_hash(&self, protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[protocol as usize]
             .hash_pubkey
             .hash_tvl
     }

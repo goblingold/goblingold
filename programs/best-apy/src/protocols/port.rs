@@ -205,8 +205,8 @@ impl<'info> CheckHash<'info> for PortDeposit<'info> {
         ])
     }
 
-    fn target_hash(&self, _protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[Protocols::Port as usize]
+    fn target_hash(&self, protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[protocol as usize]
             .hash_pubkey
             .hash_deposit
     }
@@ -328,8 +328,8 @@ impl<'info> CheckHash<'info> for PortWithdraw<'info> {
         ])
     }
 
-    fn target_hash(&self, _protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[Protocols::Port as usize]
+    fn target_hash(&self, protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[protocol as usize]
             .hash_pubkey
             .hash_withdraw
     }
@@ -442,8 +442,8 @@ impl<'info> CheckHash<'info> for PortTVL<'info> {
         hashv(&[self.reserve.key.as_ref(), self.obligation.key.as_ref()])
     }
 
-    fn target_hash(&self, _protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[Protocols::Port as usize]
+    fn target_hash(&self, protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
+        self.generic_accs.vault_account.protocols[protocol as usize]
             .hash_pubkey
             .hash_tvl
     }
