@@ -160,7 +160,12 @@ impl<'info> CheckHash<'info> for SolendDeposit<'info> {
     }
 
     fn target_hash(&self, protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[protocol as usize]
+        let protocol_pos = self
+            .generic_accs
+            .vault_account
+            .protocol_position(protocol)
+            .unwrap();
+        self.generic_accs.vault_account.protocols[protocol_pos]
             .hash_pubkey
             .hash_deposit
     }
@@ -282,7 +287,12 @@ impl<'info> CheckHash<'info> for SolendWithdraw<'info> {
     }
 
     fn target_hash(&self, protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[protocol as usize]
+        let protocol_pos = self
+            .generic_accs
+            .vault_account
+            .protocol_position(protocol)
+            .unwrap();
+        self.generic_accs.vault_account.protocols[protocol_pos]
             .hash_pubkey
             .hash_withdraw
     }
@@ -384,7 +394,12 @@ impl<'info> CheckHash<'info> for SolendTVL<'info> {
     }
 
     fn target_hash(&self, protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[protocol as usize]
+        let protocol_pos = self
+            .generic_accs
+            .vault_account
+            .protocol_position(protocol)
+            .unwrap();
+        self.generic_accs.vault_account.protocols[protocol_pos]
             .hash_pubkey
             .hash_tvl
     }

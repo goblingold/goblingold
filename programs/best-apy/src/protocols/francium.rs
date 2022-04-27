@@ -216,7 +216,12 @@ impl<'info> CheckHash<'info> for FranciumDeposit<'info> {
     }
 
     fn target_hash(&self, protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[protocol as usize]
+        let protocol_pos = self
+            .generic_accs
+            .vault_account
+            .protocol_position(protocol)
+            .unwrap();
+        self.generic_accs.vault_account.protocols[protocol_pos]
             .hash_pubkey
             .hash_deposit
     }
@@ -405,7 +410,12 @@ impl<'info> CheckHash<'info> for FranciumWithdraw<'info> {
     }
 
     fn target_hash(&self, protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[protocol as usize]
+        let protocol_pos = self
+            .generic_accs
+            .vault_account
+            .protocol_position(protocol)
+            .unwrap();
+        self.generic_accs.vault_account.protocols[protocol_pos]
             .hash_pubkey
             .hash_withdraw
     }
@@ -551,7 +561,12 @@ impl<'info> CheckHash<'info> for FranciumTVL<'info> {
     }
 
     fn target_hash(&self, protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[protocol as usize]
+        let protocol_pos = self
+            .generic_accs
+            .vault_account
+            .protocol_position(protocol)
+            .unwrap();
+        self.generic_accs.vault_account.protocols[protocol_pos]
             .hash_pubkey
             .hash_tvl
     }

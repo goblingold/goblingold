@@ -1,6 +1,6 @@
 use crate::check_hash::CHECKHASH_BYTES;
 use crate::error::ErrorCode;
-use crate::protocols::PROTOCOLS_LEN;
+use crate::protocols::{Protocols, PROTOCOLS_LEN};
 use anchor_lang::prelude::*;
 use solana_maths::{U192, WAD};
 use std::{
@@ -71,6 +71,15 @@ impl VaultAccount {
             },
             ..Self::default()
         }
+    }
+
+    /// Find the position of the protocol in the protocol_data vector
+    pub fn protocol_position(&self, protocol: Protocols) -> Result<usize> {
+        let protocol_id: u8 = (protocol as usize).try_into().unwrap();
+        self.protocols
+            .iter()
+            .position(|protocol| protocol.protocol_id == protocol_id)
+            .ok_or_else(|| error!(ErrorCode::ProtocolNotFoundInVault))
     }
 
     /// Compute the minimum weight
@@ -275,12 +284,15 @@ pub struct ProtocolData {
     /// Accumulated rewards
     pub rewards: AccumulatedRewards,
 
+    /// Protocol ID
+    pub protocol_id: u8,
+
     /// Padding for other future field
-    pub _padding: [u64; 4],
+    pub _padding: [u8; 31],
 }
 
 impl ProtocolData {
-    pub const SIZE: usize = HashPubkey::SIZE + 4 + 8 + AccumulatedRewards::SIZE + 8 * 4;
+    pub const SIZE: usize = HashPubkey::SIZE + 4 + 8 + AccumulatedRewards::SIZE + 1 + 31;
 
     /// Check the protocol is active
     pub fn is_active(&self) -> bool {
