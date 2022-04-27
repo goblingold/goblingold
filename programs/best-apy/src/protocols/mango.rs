@@ -116,12 +116,12 @@ impl<'info> CheckHash<'info> for MangoDeposit<'info> {
 }
 
 impl<'info> ProtocolDeposit<'info> for MangoDeposit<'info> {
-    fn protocol_data_as_mut(&mut self, protocol: Protocols) -> &mut ProtocolData {
-        &mut self.generic_accs.vault_account.protocols[protocol as usize]
+    fn protocol_data_as_mut(&mut self, protocol_pos: usize) -> &mut ProtocolData {
+        &mut self.generic_accs.vault_account.protocols[protocol_pos]
     }
 
-    fn get_amount(&self, protocol: Protocols) -> Result<u64> {
-        self.generic_accs.amount_to_deposit(protocol)
+    fn get_amount(&self, protocol_pos: usize) -> Result<u64> {
+        self.generic_accs.amount_to_deposit(protocol_pos)
     }
 
     fn cpi_deposit(&self, amount: u64) -> Result<()> {
@@ -208,16 +208,16 @@ impl<'info> CheckHash<'info> for MangoWithdraw<'info> {
 }
 
 impl<'info> ProtocolWithdraw<'info> for MangoWithdraw<'info> {
-    fn protocol_data_as_mut(&mut self, protocol: Protocols) -> &mut ProtocolData {
-        &mut self.generic_accs.vault_account.protocols[protocol as usize]
+    fn protocol_data_as_mut(&mut self, protocol_pos: usize) -> &mut ProtocolData {
+        &mut self.generic_accs.vault_account.protocols[protocol_pos]
     }
 
     fn input_token_account_as_mut(&mut self) -> &mut Account<'info, TokenAccount> {
         &mut self.generic_accs.vault_input_token_account
     }
 
-    fn get_amount(&self, protocol: Protocols) -> Result<u64> {
-        self.generic_accs.amount_to_withdraw(protocol)
+    fn get_amount(&self, protocol_pos: usize) -> Result<u64> {
+        self.generic_accs.amount_to_withdraw(protocol_pos)
     }
 
     fn cpi_withdraw(&self, amount: u64) -> Result<()> {
@@ -299,8 +299,8 @@ impl<'info> ProtocolRewards<'info> for MangoTVL<'info> {
         self.generic_accs.vault_account.input_mint_pubkey
     }
 
-    fn protocol_data_as_mut(&mut self, protocol: Protocols) -> &mut ProtocolData {
-        &mut self.generic_accs.vault_account.protocols[protocol as usize]
+    fn protocol_data_as_mut(&mut self, protocol_pos: usize) -> &mut ProtocolData {
+        &mut self.generic_accs.vault_account.protocols[protocol_pos]
     }
 
     fn max_withdrawable(&self) -> Result<u64> {

@@ -22,7 +22,7 @@ pub trait ProtocolRewards<'info> {
     fn input_mint_pubkey(&self) -> Pubkey;
 
     /// Return a mutable refrence of the data
-    fn protocol_data_as_mut(&mut self, protocol: Protocols) -> &mut ProtocolData;
+    fn protocol_data_as_mut(&mut self, protocol_pos: usize) -> &mut ProtocolData;
 
     /// Compute the maximam withdrawable units
     fn max_withdrawable(&self) -> Result<u64>;
@@ -38,7 +38,7 @@ pub fn handler<'info, T: ProtocolRewards<'info>>(
 
     let tvl = ctx.accounts.max_withdrawable()?;
 
-    let protocol_data = ctx.accounts.protocol_data_as_mut(protocol);
+    let protocol_data = ctx.accounts.protocol_data_as_mut(protocol as usize);
     let rewards = tvl.saturating_sub(protocol_data.amount);
     protocol_data
         .rewards

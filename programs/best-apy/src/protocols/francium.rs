@@ -232,7 +232,8 @@ impl<'info> ProtocolDeposit2Ixs<'info> for FranciumDeposit<'info> {
     }
 
     fn get_amount(&self) -> Result<u64> {
-        self.generic_accs.amount_to_deposit(Protocols::Francium)
+        self.generic_accs
+            .amount_to_deposit(Protocols::Francium as usize)
     }
 
     fn cpi_deposit(&self, amount: u64, is_last_deposit_ix: bool) -> Result<()> {
@@ -425,7 +426,7 @@ impl<'info> ProtocolWithdraw2Ixs<'info> for FranciumWithdraw<'info> {
 
     fn get_amount(&self, target_withdraw_ix: usize) -> Result<u64> {
         self.generic_accs
-            .amount_to_withdraw_in_n_txs(Protocols::Francium, target_withdraw_ix)
+            .amount_to_withdraw_in_n_txs(Protocols::Francium as usize, target_withdraw_ix)
     }
 
     fn liquidity_to_collateral(&self, amount: u64) -> Result<u64> {
@@ -561,8 +562,8 @@ impl<'info> ProtocolRewards<'info> for FranciumTVL<'info> {
         self.generic_accs.vault_account.input_mint_pubkey
     }
 
-    fn protocol_data_as_mut(&mut self, protocol: Protocols) -> &mut ProtocolData {
-        &mut self.generic_accs.vault_account.protocols[protocol as usize]
+    fn protocol_data_as_mut(&mut self, protocol_pos: usize) -> &mut ProtocolData {
+        &mut self.generic_accs.vault_account.protocols[protocol_pos]
     }
 
     fn max_withdrawable(&self) -> Result<u64> {

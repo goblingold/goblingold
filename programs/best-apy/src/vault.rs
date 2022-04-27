@@ -1,6 +1,6 @@
 use crate::check_hash::CHECKHASH_BYTES;
 use crate::error::ErrorCode;
-use crate::protocols::{Protocols, PROTOCOLS_LEN};
+use crate::protocols::PROTOCOLS_LEN;
 use anchor_lang::prelude::*;
 use solana_maths::{U192, WAD};
 use std::{
@@ -192,8 +192,8 @@ impl VaultAccount {
     }
 
     /// Calculate amount to deposit in the given protocol
-    pub fn calculate_deposit(&self, protocol: Protocols, available_amount: u64) -> Result<u64> {
-        let protocol = &self.protocols[protocol as usize];
+    pub fn calculate_deposit(&self, protocol_pos: usize, available_amount: u64) -> Result<u64> {
+        let protocol = &self.protocols[protocol_pos];
 
         let deposited_amount = protocol.amount;
         let target_amount = protocol.amount_should_be_deposited(self.current_tvl)?;
@@ -210,8 +210,8 @@ impl VaultAccount {
     }
 
     /// Calculate amount to withdraw from the given protocol
-    pub fn calculate_withdraw(&self, protocol: Protocols) -> Result<u64> {
-        let protocol = &self.protocols[protocol as usize];
+    pub fn calculate_withdraw(&self, protocol_pos: usize) -> Result<u64> {
+        let protocol = &self.protocols[protocol_pos];
 
         let deposited_amount = protocol.amount;
         let target_amount = protocol.amount_should_be_deposited(self.current_tvl)?;
