@@ -172,6 +172,10 @@ impl<'info> CheckHash<'info> for SolendDeposit<'info> {
 }
 
 impl<'info> ProtocolDeposit<'info> for SolendDeposit<'info> {
+    fn protocol_position(&self, protocol: Protocols) -> Result<usize> {
+        self.generic_accs.vault_account.protocol_position(protocol)
+    }
+
     fn protocol_data_as_mut(&mut self, protocol_pos: usize) -> &mut ProtocolData {
         &mut self.generic_accs.vault_account.protocols[protocol_pos]
     }
@@ -299,6 +303,10 @@ impl<'info> CheckHash<'info> for SolendWithdraw<'info> {
 }
 
 impl<'info> ProtocolWithdraw<'info> for SolendWithdraw<'info> {
+    fn protocol_position(&self, protocol: Protocols) -> Result<usize> {
+        self.generic_accs.vault_account.protocol_position(protocol)
+    }
+
     fn protocol_data_as_mut(&mut self, protocol_pos: usize) -> &mut ProtocolData {
         &mut self.generic_accs.vault_account.protocols[protocol_pos]
     }
@@ -406,6 +414,10 @@ impl<'info> CheckHash<'info> for SolendTVL<'info> {
 }
 
 impl<'info> ProtocolRewards<'info> for SolendTVL<'info> {
+    fn protocol_position(&self, protocol: Protocols) -> Result<usize> {
+        self.generic_accs.vault_account.protocol_position(protocol)
+    }
+
     fn input_mint_pubkey(&self) -> Pubkey {
         self.generic_accs.vault_account.input_mint_pubkey
     }

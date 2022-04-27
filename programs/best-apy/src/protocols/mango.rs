@@ -121,6 +121,10 @@ impl<'info> CheckHash<'info> for MangoDeposit<'info> {
 }
 
 impl<'info> ProtocolDeposit<'info> for MangoDeposit<'info> {
+    fn protocol_position(&self, protocol: Protocols) -> Result<usize> {
+        self.generic_accs.vault_account.protocol_position(protocol)
+    }
+
     fn protocol_data_as_mut(&mut self, protocol_pos: usize) -> &mut ProtocolData {
         &mut self.generic_accs.vault_account.protocols[protocol_pos]
     }
@@ -218,6 +222,10 @@ impl<'info> CheckHash<'info> for MangoWithdraw<'info> {
 }
 
 impl<'info> ProtocolWithdraw<'info> for MangoWithdraw<'info> {
+    fn protocol_position(&self, protocol: Protocols) -> Result<usize> {
+        self.generic_accs.vault_account.protocol_position(protocol)
+    }
+
     fn protocol_data_as_mut(&mut self, protocol_pos: usize) -> &mut ProtocolData {
         &mut self.generic_accs.vault_account.protocols[protocol_pos]
     }
@@ -310,6 +318,10 @@ impl<'info> CheckHash<'info> for MangoTVL<'info> {
 }
 
 impl<'info> ProtocolRewards<'info> for MangoTVL<'info> {
+    fn protocol_position(&self, protocol: Protocols) -> Result<usize> {
+        self.generic_accs.vault_account.protocol_position(protocol)
+    }
+
     fn input_mint_pubkey(&self) -> Pubkey {
         self.generic_accs.vault_account.input_mint_pubkey
     }

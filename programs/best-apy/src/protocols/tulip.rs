@@ -89,6 +89,10 @@ impl<'info> CheckHash<'info> for TulipDeposit<'info> {
 }
 
 impl<'info> ProtocolDeposit<'info> for TulipDeposit<'info> {
+    fn protocol_position(&self, protocol: Protocols) -> Result<usize> {
+        self.generic_accs.vault_account.protocol_position(protocol)
+    }
+
     fn protocol_data_as_mut(&mut self, protocol_pos: usize) -> &mut ProtocolData {
         &mut self.generic_accs.vault_account.protocols[protocol_pos]
     }
@@ -180,6 +184,10 @@ pub struct TulipWithdraw<'info> {
 }
 
 impl<'info> ProtocolWithdraw<'info> for TulipWithdraw<'info> {
+    fn protocol_position(&self, protocol: Protocols) -> Result<usize> {
+        self.generic_accs.vault_account.protocol_position(protocol)
+    }
+
     fn protocol_data_as_mut(&mut self, protocol_pos: usize) -> &mut ProtocolData {
         &mut self.generic_accs.vault_account.protocols[protocol_pos]
     }
@@ -318,6 +326,10 @@ impl<'info> CheckHash<'info> for TulipTVL<'info> {
 }
 
 impl<'info> ProtocolRewards<'info> for TulipTVL<'info> {
+    fn protocol_position(&self, protocol: Protocols) -> Result<usize> {
+        self.generic_accs.vault_account.protocol_position(protocol)
+    }
+
     fn input_mint_pubkey(&self) -> Pubkey {
         self.generic_accs.vault_account.input_mint_pubkey
     }

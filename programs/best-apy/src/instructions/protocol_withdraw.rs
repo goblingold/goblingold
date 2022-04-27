@@ -8,6 +8,9 @@ use anchor_spl::token::{Token, TokenAccount};
 
 /// Withdraw from the protocol and update protocol data
 pub trait ProtocolWithdraw<'info> {
+    /// Return the protcol position in the vector
+    fn protocol_position(&self, protocol: Protocols) -> Result<usize>;
+
     /// Return a mutable refrence of the data
     fn protocol_data_as_mut(&mut self, protocol_pos: usize) -> &mut ProtocolData;
 
@@ -31,12 +34,13 @@ pub fn handler<'info, T: ProtocolWithdraw<'info>>(
     ctx: Context<T>,
     protocol: Protocols,
 ) -> Result<()> {
-    let amount = ctx.accounts.get_amount(protocol as usize)?;
+    let protocol_pos = ctx.accounts.protocol_position(protocol)?;
+    let amount = ctx.accounts.get_amount(protocol_pos)?;
     let mut lp_amount = ctx.accounts.liquidity_to_collateral(amount)?;
 
     // Add 1 as due to rounding. Otherwise it might happens that there wasn't enough funds
     // withdrawn from the protocol
-    if amount < ctx.accounts.protocol_data_as_mut(protocol as usize).amount {
+    if amount < ctx.accounts.protocol_data_as_mut(protocol_pos).amount {
         lp_amount = lp_amount
             .checked_add(1)
             .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
@@ -60,7 +64,7 @@ pub fn handler<'info, T: ProtocolWithdraw<'info>>(
         .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
     ctx.accounts
-        .protocol_data_as_mut(protocol as usize)
+        .protocol_data_as_mut(protocol_pos)
         .update_after_withdraw(amount_diff)?;
 
     Ok(())

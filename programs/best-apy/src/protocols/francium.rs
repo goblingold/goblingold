@@ -573,6 +573,10 @@ impl<'info> CheckHash<'info> for FranciumTVL<'info> {
 }
 
 impl<'info> ProtocolRewards<'info> for FranciumTVL<'info> {
+    fn protocol_position(&self, protocol: Protocols) -> Result<usize> {
+        self.generic_accs.vault_account.protocol_position(protocol)
+    }
+
     fn input_mint_pubkey(&self) -> Pubkey {
         self.generic_accs.vault_account.input_mint_pubkey
     }

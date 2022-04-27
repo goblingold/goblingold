@@ -6,6 +6,9 @@ use anchor_spl::token::{Token, TokenAccount};
 
 /// Deposit into the protocol
 pub trait ProtocolDeposit<'info> {
+    /// Return the protcol position in the vector
+    fn protocol_position(&self, protocol: Protocols) -> Result<usize>;
+
     /// Return a mutable refrence of the data
     fn protocol_data_as_mut(&mut self, protocol_pos: usize) -> &mut ProtocolData;
 
@@ -21,10 +24,11 @@ pub fn handler<'info, T: ProtocolDeposit<'info>>(
     ctx: Context<T>,
     protocol: Protocols,
 ) -> Result<()> {
-    let amount = ctx.accounts.get_amount(protocol as usize)?;
+    let protocol_pos = ctx.accounts.protocol_position(protocol)?;
+    let amount = ctx.accounts.get_amount(protocol_pos)?;
     ctx.accounts.cpi_deposit(amount)?;
     ctx.accounts
-        .protocol_data_as_mut(protocol as usize)
+        .protocol_data_as_mut(protocol_pos)
         .update_after_deposit(amount)?;
 
     Ok(())
