@@ -228,17 +228,20 @@ impl<'info> CheckHash<'info> for FranciumDeposit<'info> {
 }
 
 impl<'info> ProtocolDeposit2Ixs<'info> for FranciumDeposit<'info> {
-    fn protocol_data_as_mut(&mut self) -> &mut ProtocolData {
-        &mut self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
+    fn protocol_position(&self, protocol: Protocols) -> Result<usize> {
+        self.generic_accs.vault_account.protocol_position(protocol)
+    }
+
+    fn protocol_data_as_mut(&mut self, protocol_pos: usize) -> &mut ProtocolData {
+        &mut self.generic_accs.vault_account.protocols[protocol_pos]
     }
 
     fn instructions_account(&self) -> AccountInfo<'info> {
         self.instructions.to_account_info()
     }
 
-    fn get_amount(&self) -> Result<u64> {
-        self.generic_accs
-            .amount_to_deposit(Protocols::Francium as usize)
+    fn get_amount(&self, protocol_pos: usize) -> Result<u64> {
+        self.generic_accs.amount_to_deposit(protocol_pos)
     }
 
     fn cpi_deposit(&self, amount: u64, is_last_deposit_ix: bool) -> Result<()> {
@@ -422,8 +425,12 @@ impl<'info> CheckHash<'info> for FranciumWithdraw<'info> {
 }
 
 impl<'info> ProtocolWithdraw2Ixs<'info> for FranciumWithdraw<'info> {
-    fn protocol_data_as_mut(&mut self) -> &mut ProtocolData {
-        &mut self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
+    fn protocol_position(&self, protocol: Protocols) -> Result<usize> {
+        self.generic_accs.vault_account.protocol_position(protocol)
+    }
+
+    fn protocol_data_as_mut(&mut self, protocol_pos: usize) -> &mut ProtocolData {
+        &mut self.generic_accs.vault_account.protocols[protocol_pos]
     }
 
     fn instructions_account(&self) -> AccountInfo<'info> {
@@ -434,9 +441,9 @@ impl<'info> ProtocolWithdraw2Ixs<'info> for FranciumWithdraw<'info> {
         &mut self.generic_accs.vault_input_token_account
     }
 
-    fn get_amount(&self, target_withdraw_ix: usize) -> Result<u64> {
+    fn get_amount(&self, protocol_pos: usize, target_withdraw_ix: usize) -> Result<u64> {
         self.generic_accs
-            .amount_to_withdraw_in_n_txs(Protocols::Francium as usize, target_withdraw_ix)
+            .amount_to_withdraw_in_n_txs(protocol_pos, target_withdraw_ix)
     }
 
     fn liquidity_to_collateral(&self, amount: u64) -> Result<u64> {
