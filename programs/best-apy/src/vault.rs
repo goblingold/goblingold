@@ -2,6 +2,7 @@ use crate::check_hash::CHECKHASH_BYTES;
 use crate::error::ErrorCode;
 use crate::protocols::{Protocols, PROTOCOLS_LEN};
 use anchor_lang::prelude::*;
+use solana_maths::{U192, WAD};
 use std::{
     cmp::{self, Ordering},
     convert::TryInto,
@@ -28,7 +29,7 @@ pub struct VaultAccount {
     pub dao_treasury_lp_token_account: Pubkey,
 
     /// Last refresh slot in which protocol weights were updated
-    pub last_refresh_slot: u64,
+    pub last_refresh_time: i64,
 
     /// Strategy refresh parameters
     pub refresh: RefreshParams,
@@ -64,6 +65,10 @@ impl VaultAccount {
             bumps: params.bumps,
             input_mint_pubkey: params.input_mint_pubkey,
             dao_treasury_lp_token_account: params.dao_treasury_lp_token_account,
+            refresh: RefreshParams {
+                min_elapsed_time: 3000,
+                min_deposit_lamports: 0,
+            },
             ..Self::default()
         }
     }
@@ -78,7 +83,7 @@ impl VaultAccount {
             .try_into()
             .map_err(|_| ErrorCode::MathOverflow)?;
 
-        Ok(std::cmp::max(1, min_weight))
+        Ok(std::cmp::max(10, min_weight))
     }
 
     /// Update protocol weights
@@ -86,7 +91,13 @@ impl VaultAccount {
         let mut deposit: Vec<u128> = self
             .protocols
             .iter()
-            .map(|protocol| protocol.rewards.deposited_avg as u128)
+            .map(|protocol| {
+                protocol
+                    .rewards
+                    .deposited_avg_wad
+                    .checked_div(WAD as u128)
+                    .unwrap()
+            })
             .collect();
 
         let rewards: Vec<u128> = self
@@ -242,7 +253,7 @@ impl Bumps {
 #[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default)]
 pub struct RefreshParams {
     /// Minimum elapsed slots for updating the protocol weights
-    pub min_elapsed_slots: u64,
+    pub min_elapsed_time: i64,
     /// Minimum amount of lamports to deposit in each protocol
     pub min_deposit_lamports: u64,
 }
@@ -265,11 +276,11 @@ pub struct ProtocolData {
     pub rewards: AccumulatedRewards,
 
     /// Padding for other future field
-    pub _padding: [u64; 5],
+    pub _padding: [u64; 4],
 }
 
 impl ProtocolData {
-    pub const SIZE: usize = HashPubkey::SIZE + 4 + 8 + AccumulatedRewards::SIZE + 8 * 5;
+    pub const SIZE: usize = HashPubkey::SIZE + 4 + 8 + AccumulatedRewards::SIZE + 8 * 4;
 
     /// Check the protocol is active
     pub fn is_active(&self) -> bool {
@@ -351,20 +362,22 @@ pub struct AccumulatedRewards {
     /// Last accumulated rewards
     pub amount: u64,
     /// Slot-average deposited amount that generates these rewards
-    pub deposited_avg: u64,
+    pub deposited_avg_wad: u128,
     /// Slot-integrated deposited amount
     pub deposited_integral: SlotIntegrated,
 }
 
 impl AccumulatedRewards {
-    pub const SIZE: usize = 8 + 8 + 8 + SlotIntegrated::SIZE;
+    pub const SIZE: usize = 8 + 8 + 16 + SlotIntegrated::SIZE;
 
     /// Update the rewards
-    pub fn update(&mut self, rewards: u64) -> Result<()> {
+    pub fn update(&mut self, rewards: u64, deposited_amount: u64) -> Result<()> {
         let current_slot = Clock::get()?.slot;
         self.last_slot = current_slot;
         self.amount = rewards;
-        self.deposited_avg = self.deposited_integral.get_average(current_slot)?;
+        self.deposited_avg_wad = self
+            .deposited_integral
+            .get_average_wad(current_slot, deposited_amount)?;
         Ok(())
     }
 
@@ -375,9 +388,12 @@ impl AccumulatedRewards {
             .checked_sub(self.deposited_integral.initial_slot)
             .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
-        let acc_at_rewards = (self.deposited_avg as u128)
-            .checked_mul(elapsed_slots_while_rewards as u128)
-            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+        let acc_at_rewards: u128 = (U192::from(self.deposited_avg_wad))
+            .checked_mul(U192::from(elapsed_slots_while_rewards))
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?
+            .checked_div(U192::from(WAD))
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?
+            .as_u128();
 
         let acc_since_last_rewards = self
             .deposited_integral
@@ -426,18 +442,20 @@ impl SlotIntegrated {
         Ok(())
     }
 
-    /// Compute the average value
-    pub fn get_average(&self, current_slot: u64) -> Result<u64> {
+    /// Compute the average value scaled by WAD
+    pub fn get_average_wad(&mut self, current_slot: u64, deposited_amount: u64) -> Result<u128> {
+        self.accumulate(deposited_amount)?;
+
         let elapsed_slots = current_slot
             .checked_sub(self.initial_slot)
             .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
-        let avg: u64 = self
-            .accumulator
-            .checked_div(elapsed_slots as u128)
+        let avg: u128 = (U192::from(self.accumulator))
+            .checked_mul(U192::from(WAD))
             .ok_or_else(|| error!(ErrorCode::MathOverflow))?
-            .try_into()
-            .map_err(|_| ErrorCode::MathOverflow)?;
+            .checked_div(U192::from(elapsed_slots))
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?
+            .as_u128();
 
         Ok(avg)
     }

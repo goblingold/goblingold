@@ -104,25 +104,27 @@ impl<'info> RefreshWeights<'info> {
 
 /// Refresh the protocol weights
 pub fn handler(ctx: Context<RefreshWeights>) -> Result<()> {
-    let current_slot = Clock::get()?.slot;
+    let current_time = Clock::get()?.unix_timestamp;
 
-    if ctx.accounts.vault_account.refresh.min_elapsed_slots != u64::default() {
-        let elapsed_slots = current_slot
-            .checked_sub(ctx.accounts.vault_account.last_refresh_slot)
+    if ctx.accounts.vault_account.refresh.min_elapsed_time != i64::default() {
+        let elapsed_time = Clock::get()?
+            .unix_timestamp
+            .checked_sub(ctx.accounts.vault_account.last_refresh_time)
             .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
         require!(
-            elapsed_slots > ctx.accounts.vault_account.refresh.min_elapsed_slots,
+            elapsed_time > ctx.accounts.vault_account.refresh.min_elapsed_time,
             ErrorCode::ForbiddenRefresh
         );
     }
 
-    if ctx.accounts.vault_account.last_refresh_slot != u64::default() {
+    if ctx.accounts.vault_account.last_refresh_time != i64::default() {
         for protocol in ctx.accounts.vault_account.protocols.iter() {
             if protocol.is_active() {
                 let last_updated = protocol.rewards.last_slot;
                 require!(
-                    current_slot
+                    Clock::get()?
+                        .slot
                         .checked_sub(last_updated)
                         .ok_or_else(|| error!(ErrorCode::MathOverflow))?
                         < MAX_ELAPSED_SLOTS_FOR_TVL,
@@ -132,7 +134,7 @@ pub fn handler(ctx: Context<RefreshWeights>) -> Result<()> {
         }
     }
 
-    ctx.accounts.vault_account.last_refresh_slot = current_slot;
+    ctx.accounts.vault_account.last_refresh_time = current_time;
     ctx.accounts.vault_account.rewards_sum = ctx
         .accounts
         .vault_account

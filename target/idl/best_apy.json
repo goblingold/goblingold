@@ -1829,8 +1829,8 @@
             "type": "publicKey"
           },
           {
-            "name": "lastRefreshSlot",
-            "type": "u64"
+            "name": "lastRefreshTime",
+            "type": "i64"
           },
           {
             "name": "refresh",
@@ -1887,8 +1887,8 @@
         "kind": "struct",
         "fields": [
           {
-            "name": "minElapsedSlots",
-            "type": "u64"
+            "name": "minElapsedTime",
+            "type": "i64"
           },
           {
             "name": "minDepositLamports",
@@ -1927,7 +1927,7 @@
             "type": {
               "array": [
                 "u64",
-                5
+                4
               ]
             }
           }
@@ -1983,8 +1983,8 @@
             "type": "u64"
           },
           {
-            "name": "depositedAvg",
-            "type": "u64"
+            "name": "depositedAvgWad",
+            "type": "u128"
           },
           {
             "name": "depositedIntegral",
