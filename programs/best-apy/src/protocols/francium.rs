@@ -1,9 +1,8 @@
 use crate::check_hash::*;
 use crate::error::ErrorCode;
 use crate::instructions::{
-    protocol_deposit_2_ixs::ProtocolDeposit2Ixs, protocol_deposit::*,
-    protocol_initialize::*, protocol_rewards::*,
-    protocol_withdraw_2_ixs::ProtocolWithdraw2Ixs, protocol_withdraw::*,
+    protocol_deposit::*, protocol_deposit_2_ixs::ProtocolDeposit2Ixs, protocol_initialize::*,
+    protocol_rewards::*, protocol_withdraw::*, protocol_withdraw_2_ixs::ProtocolWithdraw2Ixs,
 };
 use crate::macros::generate_seeds;
 use crate::protocols::{

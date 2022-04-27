@@ -1,5 +1,5 @@
-use crate::protocols::Protocols;
 use crate::error::ErrorCode;
+use crate::protocols::Protocols;
 use crate::vault::ProtocolData;
 use crate::VaultAccount;
 use crate::VAULT_ACCOUNT_SEED;
@@ -40,7 +40,9 @@ pub fn handler<'info, T: ProtocolRewards<'info>>(
 
     let protocol_data = ctx.accounts.protocol_data_as_mut(protocol);
     let rewards = tvl.saturating_sub(protocol_data.amount);
-    protocol_data.rewards.update(rewards, protocol_data.amount)?;
+    protocol_data
+        .rewards
+        .update(rewards, protocol_data.amount)?;
 
     let deposited_lamports: u64 = protocol_data
         .rewards

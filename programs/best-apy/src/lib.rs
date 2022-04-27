@@ -208,7 +208,7 @@ pub mod best_apy {
     /// Francium: Initialize protocol accounts
     #[access_control(is_admin(ctx.accounts.user_signer.key))]
     pub fn francium_initialize(ctx: Context<FranciumInitialize>) -> Result<()> {
-        instructions::protocol_initialize::handler(ctx,)
+        instructions::protocol_initialize::handler(ctx)
     }
 
     /// Francium: Deposit from the vault account
@@ -226,7 +226,7 @@ pub mod best_apy {
     /// Francium: Compute the TVL
     #[access_control(ctx.accounts.check_hash(Protocols::Francium))]
     pub fn francium_tvl(ctx: Context<FranciumTVL>) -> Result<()> {
-        instructions::protocol_rewards::handler(ctx,Protocols::Francium)
+        instructions::protocol_rewards::handler(ctx, Protocols::Francium)
     }
 }
 
