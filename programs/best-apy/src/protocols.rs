@@ -5,8 +5,6 @@ pub mod solend;
 pub mod state;
 pub mod tulip;
 
-pub const PROTOCOLS_LEN: usize = 6;
-
 /// List of supported protocols
 #[repr(usize)]
 #[derive(Copy, Clone, Debug)]

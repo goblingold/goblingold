@@ -4,7 +4,7 @@ use anchor_lang::solana_program::pubkey::Pubkey;
 use check_hash::{CheckHash, CHECKHASH_BYTES};
 use error::ErrorCode;
 use instructions::*;
-use protocols::{francium::*, mango::*, port::*, solend::*, tulip::*, Protocols, PROTOCOLS_LEN};
+use protocols::{francium::*, mango::*, port::*, solend::*, tulip::*, Protocols};
 use vault::{RefreshParams, VaultAccount};
 
 mod check_hash;
