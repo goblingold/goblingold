@@ -18,3 +18,8 @@ pub enum Protocols {
     Francium = 4,
     SolendStablePool = 5,
 }
+
+/// Return the protocol id
+pub trait ProtocolId<'info> {
+    fn protocol_id(&self) -> Protocols;
+}
