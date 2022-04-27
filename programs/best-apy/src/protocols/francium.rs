@@ -1,9 +1,9 @@
 use crate::check_hash::*;
 use crate::error::ErrorCode;
 use crate::instructions::{
-    protocol_deposit_2_ixs::ProtocolDeposit2Ixs, protocol_deposit_isolated_pool::*,
-    protocol_initialize::*, protocol_rewards_isolated_pool::*,
-    protocol_withdraw_2_ixs::ProtocolWithdraw2Ixs, protocol_withdraw_isolated_pool::*,
+    protocol_deposit_2_ixs::ProtocolDeposit2Ixs, protocol_deposit::*,
+    protocol_initialize::*, protocol_rewards::*,
+    protocol_withdraw_2_ixs::ProtocolWithdraw2Ixs, protocol_withdraw::*,
 };
 use crate::macros::generate_seeds;
 use crate::protocols::{
@@ -216,7 +216,7 @@ impl<'info> CheckHash<'info> for FranciumDeposit<'info> {
         ])
     }
 
-    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
+    fn target_hash(&self, _protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
         self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
             .hash_pubkey
             .hash_deposit
@@ -404,7 +404,7 @@ impl<'info> CheckHash<'info> for FranciumWithdraw<'info> {
         ])
     }
 
-    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
+    fn target_hash(&self, _protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
         self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
             .hash_pubkey
             .hash_withdraw
@@ -550,7 +550,7 @@ impl<'info> CheckHash<'info> for FranciumTVL<'info> {
         ])
     }
 
-    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
+    fn target_hash(&self, _protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
         self.generic_accs.vault_account.protocols[Protocols::Francium as usize]
             .hash_pubkey
             .hash_tvl
@@ -563,7 +563,7 @@ impl<'info> ProtocolId<'info> for FranciumTVL<'info> {
     }
 }
 
-impl<'info> ProtocolRewardsIsolatedPool<'info> for FranciumTVL<'info> {
+impl<'info> ProtocolRewards<'info> for FranciumTVL<'info> {
     fn input_mint_pubkey(&self) -> Pubkey {
         self.generic_accs.vault_account.input_mint_pubkey
     }

@@ -1,8 +1,8 @@
 use crate::check_hash::*;
 use crate::error::ErrorCode;
 use crate::instructions::{
-    protocol_deposit_isolated_pool::*, protocol_initialize::*, protocol_rewards_isolated_pool::*,
-    protocol_withdraw_isolated_pool::*,
+    protocol_deposit::*, protocol_initialize::*, protocol_rewards::*,
+    protocol_withdraw::*,
 };
 use crate::macros::generate_seeds;
 use crate::protocols::{ProtocolId, Protocols};
@@ -206,7 +206,7 @@ impl<'info> CheckHash<'info> for PortDeposit<'info> {
         ])
     }
 
-    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
+    fn target_hash(&self, _protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
         self.generic_accs.vault_account.protocols[Protocols::Port as usize]
             .hash_pubkey
             .hash_deposit
@@ -219,7 +219,7 @@ impl<'info> ProtocolId<'info> for PortDeposit<'info> {
     }
 }
 
-impl<'info> ProtocolDepositIsolatedPool<'info> for PortDeposit<'info> {
+impl<'info> ProtocolDeposit<'info> for PortDeposit<'info> {
     fn protocol_data_as_mut(&mut self, protocol: Protocols) -> &mut ProtocolData {
         &mut self.generic_accs.vault_account.protocols[protocol as usize]
     }
@@ -329,7 +329,7 @@ impl<'info> CheckHash<'info> for PortWithdraw<'info> {
         ])
     }
 
-    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
+    fn target_hash(&self, _protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
         self.generic_accs.vault_account.protocols[Protocols::Port as usize]
             .hash_pubkey
             .hash_withdraw
@@ -342,7 +342,7 @@ impl<'info> ProtocolId<'info> for PortWithdraw<'info> {
     }
 }
 
-impl<'info> ProtocolWithdrawIsolatedPool<'info> for PortWithdraw<'info> {
+impl<'info> ProtocolWithdraw<'info> for PortWithdraw<'info> {
     fn protocol_data_as_mut(&mut self, protocol: Protocols) -> &mut ProtocolData {
         &mut self.generic_accs.vault_account.protocols[protocol as usize]
     }
@@ -443,7 +443,7 @@ impl<'info> CheckHash<'info> for PortTVL<'info> {
         hashv(&[self.reserve.key.as_ref(), self.obligation.key.as_ref()])
     }
 
-    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
+    fn target_hash(&self, _protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
         self.generic_accs.vault_account.protocols[Protocols::Port as usize]
             .hash_pubkey
             .hash_tvl
@@ -456,7 +456,7 @@ impl<'info> ProtocolId<'info> for PortTVL<'info> {
     }
 }
 
-impl<'info> ProtocolRewardsIsolatedPool<'info> for PortTVL<'info> {
+impl<'info> ProtocolRewards<'info> for PortTVL<'info> {
     fn input_mint_pubkey(&self) -> Pubkey {
         self.generic_accs.vault_account.input_mint_pubkey
     }

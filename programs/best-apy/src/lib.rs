@@ -1,7 +1,7 @@
 use anchor_lang::prelude::borsh::{BorshDeserialize, BorshSerialize};
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::pubkey::Pubkey;
-use check_hash::{CheckHash, CheckHashIsolatedPool, CHECKHASH_BYTES};
+use check_hash::{CheckHash, CHECKHASH_BYTES};
 use error::ErrorCode;
 use instructions::*;
 use protocols::{francium::*, mango::*, port::*, solend::*, tulip::*, Protocols, PROTOCOLS_LEN};
@@ -93,21 +93,21 @@ pub mod best_apy {
     }
 
     /// Mango: Deposit from the vault account
-    #[access_control(ctx.accounts.check_hash())]
+    #[access_control(ctx.accounts.check_hash(Protocols::Mango))]
     pub fn mango_deposit(ctx: Context<MangoDeposit>) -> Result<()> {
-        instructions::protocol_deposit::handler(ctx)
+        instructions::protocol_deposit::handler(ctx, Protocols::Mango)
     }
 
     /// Mango: Withdraw to the vault account
-    #[access_control(ctx.accounts.check_hash())]
+    #[access_control(ctx.accounts.check_hash(Protocols::Mango))]
     pub fn mango_withdraw(ctx: Context<MangoWithdraw>) -> Result<()> {
-        instructions::protocol_withdraw::handler(ctx)
+        instructions::protocol_withdraw::handler(ctx, Protocols::Mango)
     }
 
     /// Mango: Compute the TVL
-    #[access_control(ctx.accounts.check_hash())]
+    #[access_control(ctx.accounts.check_hash(Protocols::Mango))]
     pub fn mango_tvl(ctx: Context<MangoTVL>) -> Result<()> {
-        instructions::protocol_rewards::handler(ctx)
+        instructions::protocol_rewards::handler(ctx, Protocols::Mango)
     }
 
     /// Solend: Initialize protocol accounts
@@ -119,19 +119,19 @@ pub mod best_apy {
     /// Solend: Deposit from the vault account
     #[access_control(ctx.accounts.check_hash(Protocols::Solend))]
     pub fn solend_deposit(ctx: Context<SolendDeposit>) -> Result<()> {
-        instructions::protocol_deposit_isolated_pool::handler(ctx, Protocols::Solend)
+        instructions::protocol_deposit::handler(ctx, Protocols::Solend)
     }
 
     /// Solend: Withdraw to the vault account
     #[access_control(ctx.accounts.check_hash(Protocols::Solend))]
     pub fn solend_withdraw(ctx: Context<SolendWithdraw>) -> Result<()> {
-        instructions::protocol_withdraw_isolated_pool::handler(ctx, Protocols::Solend)
+        instructions::protocol_withdraw::handler(ctx, Protocols::Solend)
     }
 
     /// Solend: Compute the TVL
     #[access_control(ctx.accounts.check_hash(Protocols::Solend))]
     pub fn solend_tvl(ctx: Context<SolendTVL>) -> Result<()> {
-        instructions::protocol_rewards_isolated_pool::handler(ctx, Protocols::Solend)
+        instructions::protocol_rewards::handler(ctx, Protocols::Solend)
     }
 
     /// Solend: Initialize protocol accounts
@@ -143,19 +143,19 @@ pub mod best_apy {
     /// SolendIsolatedPool: Deposit from the vault account
     #[access_control(ctx.accounts.check_hash(Protocols::SolendStablePool))]
     pub fn solend_isolated_pool_deposit(ctx: Context<SolendDeposit>) -> Result<()> {
-        instructions::protocol_deposit_isolated_pool::handler(ctx, Protocols::SolendStablePool)
+        instructions::protocol_deposit::handler(ctx, Protocols::SolendStablePool)
     }
 
     /// SolendIsolatedPool: Withdraw to the vault account
     #[access_control(ctx.accounts.check_hash(Protocols::SolendStablePool))]
     pub fn solend_isolated_pool_withdraw(ctx: Context<SolendWithdraw>) -> Result<()> {
-        instructions::protocol_withdraw_isolated_pool::handler(ctx, Protocols::SolendStablePool)
+        instructions::protocol_withdraw::handler(ctx, Protocols::SolendStablePool)
     }
 
     /// SolendIsolatedPool: Compute the TVL
     #[access_control(ctx.accounts.check_hash(Protocols::SolendStablePool))]
     pub fn solend_isolated_pool_tvl(ctx: Context<SolendTVL>) -> Result<()> {
-        instructions::protocol_rewards_isolated_pool::handler(ctx, Protocols::SolendStablePool)
+        instructions::protocol_rewards::handler(ctx, Protocols::SolendStablePool)
     }
 
     /// Port: Initialize protocol accounts
@@ -165,21 +165,21 @@ pub mod best_apy {
     }
 
     /// Port: Deposit from the vault account
-    #[access_control(ctx.accounts.check_hash())]
+    #[access_control(ctx.accounts.check_hash(Protocols::Port))]
     pub fn port_deposit(ctx: Context<PortDeposit>) -> Result<()> {
-        instructions::protocol_deposit::handler(ctx)
+        instructions::protocol_deposit::handler(ctx, Protocols::Port)
     }
 
     /// Port: Withdraw to the vault account
-    #[access_control(ctx.accounts.check_hash())]
+    #[access_control(ctx.accounts.check_hash(Protocols::Port))]
     pub fn port_withdraw(ctx: Context<PortWithdraw>) -> Result<()> {
-        instructions::protocol_withdraw::handler(ctx)
+        instructions::protocol_withdraw::handler(ctx, Protocols::Port)
     }
 
     /// Port: Compute the TVL
-    #[access_control(ctx.accounts.check_hash())]
+    #[access_control(ctx.accounts.check_hash(Protocols::Port))]
     pub fn port_tvl(ctx: Context<PortTVL>) -> Result<()> {
-        instructions::protocol_rewards::handler(ctx)
+        instructions::protocol_rewards::handler(ctx, Protocols::Port)
     }
 
     /// Port: Claim rewards
@@ -188,45 +188,45 @@ pub mod best_apy {
     }
 
     /// Tulip: Deposit from the vault account
-    #[access_control(ctx.accounts.check_hash())]
+    #[access_control(ctx.accounts.check_hash(Protocols::Tulip))]
     pub fn tulip_deposit(ctx: Context<TulipDeposit>) -> Result<()> {
-        instructions::protocol_deposit::handler(ctx)
+        instructions::protocol_deposit::handler(ctx, Protocols::Tulip)
     }
 
     /// Tulip: Withdraw to the vault account
-    #[access_control(ctx.accounts.check_hash())]
+    #[access_control(ctx.accounts.check_hash(Protocols::Tulip))]
     pub fn tulip_withdraw(ctx: Context<TulipWithdraw>) -> Result<()> {
-        instructions::protocol_withdraw::handler(ctx)
+        instructions::protocol_withdraw::handler(ctx, Protocols::Tulip)
     }
 
     /// Tulip: Compute the TVL
-    #[access_control(ctx.accounts.check_hash())]
+    #[access_control(ctx.accounts.check_hash(Protocols::Tulip))]
     pub fn tulip_tvl(ctx: Context<TulipTVL>) -> Result<()> {
-        instructions::protocol_rewards::handler(ctx)
+        instructions::protocol_rewards::handler(ctx, Protocols::Tulip)
     }
 
     /// Francium: Initialize protocol accounts
     #[access_control(is_admin(ctx.accounts.user_signer.key))]
     pub fn francium_initialize(ctx: Context<FranciumInitialize>) -> Result<()> {
-        instructions::protocol_initialize::handler(ctx)
+        instructions::protocol_initialize::handler(ctx,)
     }
 
     /// Francium: Deposit from the vault account
-    #[access_control(ctx.accounts.check_hash())]
+    #[access_control(ctx.accounts.check_hash(Protocols::Francium))]
     pub fn francium_deposit(ctx: Context<FranciumDeposit>) -> Result<()> {
         instructions::protocol_deposit_2_ixs::handler(ctx)
     }
 
     /// Francium: Withdraw to the vault account
-    #[access_control(ctx.accounts.check_hash())]
+    #[access_control(ctx.accounts.check_hash(Protocols::Francium))]
     pub fn francium_withdraw(ctx: Context<FranciumWithdraw>) -> Result<()> {
         instructions::protocol_withdraw_2_ixs::handler(ctx)
     }
 
     /// Francium: Compute the TVL
-    #[access_control(ctx.accounts.check_hash())]
+    #[access_control(ctx.accounts.check_hash(Protocols::Francium))]
     pub fn francium_tvl(ctx: Context<FranciumTVL>) -> Result<()> {
-        instructions::protocol_rewards::handler(ctx)
+        instructions::protocol_rewards::handler(ctx,Protocols::Francium)
     }
 }
 

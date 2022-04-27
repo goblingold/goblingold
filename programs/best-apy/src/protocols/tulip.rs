@@ -1,8 +1,8 @@
 use crate::check_hash::*;
 use crate::error::ErrorCode;
 use crate::instructions::{
-    protocol_deposit_isolated_pool::*, protocol_rewards_isolated_pool::*,
-    protocol_withdraw_isolated_pool::*,
+    protocol_deposit::*, protocol_rewards::*,
+    protocol_withdraw::*,
 };
 
 use crate::macros::generate_seeds;
@@ -79,7 +79,7 @@ impl<'info> CheckHash<'info> for TulipDeposit<'info> {
         ])
     }
 
-    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
+    fn target_hash(&self, _protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
         self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
             .hash_pubkey
             .hash_deposit
@@ -92,7 +92,7 @@ impl<'info> ProtocolId<'info> for TulipDeposit<'info> {
     }
 }
 
-impl<'info> ProtocolDepositIsolatedPool<'info> for TulipDeposit<'info> {
+impl<'info> ProtocolDeposit<'info> for TulipDeposit<'info> {
     fn protocol_data_as_mut(&mut self, protocol: Protocols) -> &mut ProtocolData {
         &mut self.generic_accs.vault_account.protocols[protocol as usize]
     }
@@ -189,7 +189,7 @@ impl<'info> ProtocolId<'info> for TulipWithdraw<'info> {
     }
 }
 
-impl<'info> ProtocolWithdrawIsolatedPool<'info> for TulipWithdraw<'info> {
+impl<'info> ProtocolWithdraw<'info> for TulipWithdraw<'info> {
     fn protocol_data_as_mut(&mut self, protocol: Protocols) -> &mut ProtocolData {
         &mut self.generic_accs.vault_account.protocols[protocol as usize]
     }
@@ -281,7 +281,7 @@ impl<'info> CheckHash<'info> for TulipWithdraw<'info> {
         ])
     }
 
-    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
+    fn target_hash(&self, _protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
         self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
             .hash_pubkey
             .hash_withdraw
@@ -310,7 +310,7 @@ impl<'info> CheckHash<'info> for TulipTVL<'info> {
         ])
     }
 
-    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
+    fn target_hash(&self, _protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
         self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
             .hash_pubkey
             .hash_tvl
@@ -323,7 +323,7 @@ impl<'info> ProtocolId<'info> for TulipTVL<'info> {
     }
 }
 
-impl<'info> ProtocolRewardsIsolatedPool<'info> for TulipTVL<'info> {
+impl<'info> ProtocolRewards<'info> for TulipTVL<'info> {
     fn input_mint_pubkey(&self) -> Pubkey {
         self.generic_accs.vault_account.input_mint_pubkey
     }

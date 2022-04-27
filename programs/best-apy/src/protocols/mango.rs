@@ -1,8 +1,8 @@
 use crate::check_hash::*;
 use crate::error::ErrorCode;
 use crate::instructions::{
-    protocol_deposit_isolated_pool::*, protocol_initialize::*, protocol_rewards_isolated_pool::*,
-    protocol_withdraw_isolated_pool::*,
+    protocol_deposit::*, protocol_initialize::*, protocol_rewards::*,
+    protocol_withdraw::*,
 };
 use crate::macros::generate_seeds;
 use crate::protocols::{ProtocolId, Protocols};
@@ -109,7 +109,7 @@ impl<'info> CheckHash<'info> for MangoDeposit<'info> {
         ])
     }
 
-    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
+    fn target_hash(&self, _protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
         self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
             .hash_pubkey
             .hash_deposit
@@ -122,7 +122,7 @@ impl<'info> ProtocolId<'info> for MangoDeposit<'info> {
     }
 }
 
-impl<'info> ProtocolDepositIsolatedPool<'info> for MangoDeposit<'info> {
+impl<'info> ProtocolDeposit<'info> for MangoDeposit<'info> {
     fn protocol_data_as_mut(&mut self, protocol: Protocols) -> &mut ProtocolData {
         &mut self.generic_accs.vault_account.protocols[protocol as usize]
     }
@@ -207,7 +207,7 @@ impl<'info> CheckHash<'info> for MangoWithdraw<'info> {
         ])
     }
 
-    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
+    fn target_hash(&self, _protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
         self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
             .hash_pubkey
             .hash_withdraw
@@ -220,7 +220,7 @@ impl<'info> ProtocolId<'info> for MangoWithdraw<'info> {
     }
 }
 
-impl<'info> ProtocolWithdrawIsolatedPool<'info> for MangoWithdraw<'info> {
+impl<'info> ProtocolWithdraw<'info> for MangoWithdraw<'info> {
     fn protocol_data_as_mut(&mut self, protocol: Protocols) -> &mut ProtocolData {
         &mut self.generic_accs.vault_account.protocols[protocol as usize]
     }
@@ -300,7 +300,7 @@ impl<'info> CheckHash<'info> for MangoTVL<'info> {
         ])
     }
 
-    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
+    fn target_hash(&self, _protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
         self.generic_accs.vault_account.protocols[Protocols::Mango as usize]
             .hash_pubkey
             .hash_tvl
@@ -313,7 +313,7 @@ impl<'info> ProtocolId<'info> for MangoTVL<'info> {
     }
 }
 
-impl<'info> ProtocolRewardsIsolatedPool<'info> for MangoTVL<'info> {
+impl<'info> ProtocolRewards<'info> for MangoTVL<'info> {
     fn input_mint_pubkey(&self) -> Pubkey {
         self.generic_accs.vault_account.input_mint_pubkey
     }
