@@ -1,3 +1,4 @@
+pub mod add_protocol;
 pub mod deposit;
 pub mod initialize_vault;
 pub mod refresh_weights;
@@ -6,6 +7,7 @@ pub mod set_protocol_weights;
 pub mod set_refresh_params;
 pub mod withdraw;
 
+pub use add_protocol::*;
 pub use deposit::*;
 pub use initialize_vault::*;
 pub use refresh_weights::*;

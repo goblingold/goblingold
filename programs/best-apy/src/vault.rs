@@ -1,6 +1,6 @@
 use crate::check_hash::CHECKHASH_BYTES;
 use crate::error::ErrorCode;
-use crate::protocols::{Protocols, PROTOCOLS_LEN};
+use crate::protocols::Protocols;
 use anchor_lang::prelude::*;
 use solana_maths::{U192, WAD};
 use std::{
@@ -73,6 +73,15 @@ impl VaultAccount {
         }
     }
 
+    /// Find the position of the protocol in the protocol_data vector
+    pub fn protocol_position(&self, protocol: Protocols) -> Result<usize> {
+        let protocol_id: u8 = (protocol as usize).try_into().unwrap();
+        self.protocols
+            .iter()
+            .position(|protocol| protocol.protocol_id == protocol_id)
+            .ok_or_else(|| error!(ErrorCode::ProtocolNotFoundInVault))
+    }
+
     /// Compute the minimum weight
     fn minimum_weight(&self, total_deposit: u128) -> Result<u32> {
         let min_weight = (self.refresh.min_deposit_lamports as u128)
@@ -117,7 +126,7 @@ impl VaultAccount {
             .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
         if total_deposit != 0 && total_rewards != 0 {
-            for i in 0..PROTOCOLS_LEN {
+            for i in 0..self.protocols.len() {
                 if self.protocols[i].is_active() {
                     let rewards_wo_i: u128 = total_rewards
                         .checked_sub(rewards[i])
@@ -152,7 +161,7 @@ impl VaultAccount {
             let min_weight = self.minimum_weight(total_deposit)?;
 
             #[allow(clippy::needless_range_loop)]
-            for i in 0..PROTOCOLS_LEN {
+            for i in 0..self.protocols.len() {
                 if self.protocols[i].is_active() {
                     self.protocols[i].weight = deposit[i]
                         .checked_mul(WEIGHTS_SCALE.into())
@@ -192,8 +201,8 @@ impl VaultAccount {
     }
 
     /// Calculate amount to deposit in the given protocol
-    pub fn calculate_deposit(&self, protocol: Protocols, available_amount: u64) -> Result<u64> {
-        let protocol = &self.protocols[protocol as usize];
+    pub fn calculate_deposit(&self, protocol_idx: usize, available_amount: u64) -> Result<u64> {
+        let protocol = &self.protocols[protocol_idx];
 
         let deposited_amount = protocol.amount;
         let target_amount = protocol.amount_should_be_deposited(self.current_tvl)?;
@@ -210,8 +219,8 @@ impl VaultAccount {
     }
 
     /// Calculate amount to withdraw from the given protocol
-    pub fn calculate_withdraw(&self, protocol: Protocols) -> Result<u64> {
-        let protocol = &self.protocols[protocol as usize];
+    pub fn calculate_withdraw(&self, protocol_idx: usize) -> Result<u64> {
+        let protocol = &self.protocols[protocol_idx];
 
         let deposited_amount = protocol.amount;
         let target_amount = protocol.amount_should_be_deposited(self.current_tvl)?;
@@ -275,12 +284,15 @@ pub struct ProtocolData {
     /// Accumulated rewards
     pub rewards: AccumulatedRewards,
 
+    /// Protocol ID
+    pub protocol_id: u8,
+
     /// Padding for other future field
-    pub _padding: [u64; 4],
+    pub _padding: [u8; 31],
 }
 
 impl ProtocolData {
-    pub const SIZE: usize = HashPubkey::SIZE + 4 + 8 + AccumulatedRewards::SIZE + 8 * 4;
+    pub const SIZE: usize = HashPubkey::SIZE + 4 + 8 + AccumulatedRewards::SIZE + 1 + 31;
 
     /// Check the protocol is active
     pub fn is_active(&self) -> bool {

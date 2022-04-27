@@ -160,19 +160,28 @@ impl<'info> CheckHash<'info> for SolendDeposit<'info> {
     }
 
     fn target_hash(&self, protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[protocol as usize]
+        let protocol_idx = self
+            .generic_accs
+            .vault_account
+            .protocol_position(protocol)
+            .unwrap();
+        self.generic_accs.vault_account.protocols[protocol_idx]
             .hash_pubkey
             .hash_deposit
     }
 }
 
 impl<'info> ProtocolDeposit<'info> for SolendDeposit<'info> {
-    fn protocol_data_as_mut(&mut self, protocol: Protocols) -> &mut ProtocolData {
-        &mut self.generic_accs.vault_account.protocols[protocol as usize]
+    fn protocol_position(&self, protocol: Protocols) -> Result<usize> {
+        self.generic_accs.vault_account.protocol_position(protocol)
     }
 
-    fn get_amount(&self, protocol: Protocols) -> Result<u64> {
-        self.generic_accs.amount_to_deposit(protocol)
+    fn protocol_data_as_mut(&mut self, protocol_idx: usize) -> &mut ProtocolData {
+        &mut self.generic_accs.vault_account.protocols[protocol_idx]
+    }
+
+    fn get_amount(&self, protocol_idx: usize) -> Result<u64> {
+        self.generic_accs.amount_to_deposit(protocol_idx)
     }
 
     fn cpi_deposit(&self, amount: u64) -> Result<()> {
@@ -282,23 +291,32 @@ impl<'info> CheckHash<'info> for SolendWithdraw<'info> {
     }
 
     fn target_hash(&self, protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[protocol as usize]
+        let protocol_idx = self
+            .generic_accs
+            .vault_account
+            .protocol_position(protocol)
+            .unwrap();
+        self.generic_accs.vault_account.protocols[protocol_idx]
             .hash_pubkey
             .hash_withdraw
     }
 }
 
 impl<'info> ProtocolWithdraw<'info> for SolendWithdraw<'info> {
-    fn protocol_data_as_mut(&mut self, protocol: Protocols) -> &mut ProtocolData {
-        &mut self.generic_accs.vault_account.protocols[protocol as usize]
+    fn protocol_position(&self, protocol: Protocols) -> Result<usize> {
+        self.generic_accs.vault_account.protocol_position(protocol)
+    }
+
+    fn protocol_data_as_mut(&mut self, protocol_idx: usize) -> &mut ProtocolData {
+        &mut self.generic_accs.vault_account.protocols[protocol_idx]
     }
 
     fn input_token_account_as_mut(&mut self) -> &mut Account<'info, TokenAccount> {
         &mut self.generic_accs.vault_input_token_account
     }
 
-    fn get_amount(&self, protocol: Protocols) -> Result<u64> {
-        self.generic_accs.amount_to_withdraw(protocol)
+    fn get_amount(&self, protocol_idx: usize) -> Result<u64> {
+        self.generic_accs.amount_to_withdraw(protocol_idx)
     }
 
     fn liquidity_to_collateral(&self, amount: u64) -> Result<u64> {
@@ -384,19 +402,28 @@ impl<'info> CheckHash<'info> for SolendTVL<'info> {
     }
 
     fn target_hash(&self, protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[protocol as usize]
+        let protocol_idx = self
+            .generic_accs
+            .vault_account
+            .protocol_position(protocol)
+            .unwrap();
+        self.generic_accs.vault_account.protocols[protocol_idx]
             .hash_pubkey
             .hash_tvl
     }
 }
 
 impl<'info> ProtocolRewards<'info> for SolendTVL<'info> {
+    fn protocol_position(&self, protocol: Protocols) -> Result<usize> {
+        self.generic_accs.vault_account.protocol_position(protocol)
+    }
+
     fn input_mint_pubkey(&self) -> Pubkey {
         self.generic_accs.vault_account.input_mint_pubkey
     }
 
-    fn protocol_data_as_mut(&mut self, protocol: Protocols) -> &mut ProtocolData {
-        &mut self.generic_accs.vault_account.protocols[protocol as usize]
+    fn protocol_data_as_mut(&mut self, protocol_idx: usize) -> &mut ProtocolData {
+        &mut self.generic_accs.vault_account.protocols[protocol_idx]
     }
 
     fn max_withdrawable(&self) -> Result<u64> {

@@ -4,7 +4,7 @@ use anchor_lang::solana_program::pubkey::Pubkey;
 use check_hash::{CheckHash, CHECKHASH_BYTES};
 use error::ErrorCode;
 use instructions::*;
-use protocols::{francium::*, mango::*, port::*, solend::*, tulip::*, Protocols, PROTOCOLS_LEN};
+use protocols::{francium::*, mango::*, port::*, solend::*, tulip::*, Protocols};
 use vault::{RefreshParams, VaultAccount};
 
 mod check_hash;
@@ -44,6 +44,12 @@ pub mod best_apy {
         instructions::initialize_vault::handler(ctx)
     }
 
+    /// Add a new protocol to the vault_account
+    #[access_control(is_admin(ctx.accounts.user_signer.key))]
+    pub fn add_protocol(ctx: Context<AddProtocol>, protocol_id: u8) -> Result<()> {
+        instructions::add_protocol::handler(ctx, protocol_id)
+    }
+
     /// Set protocol hashes
     #[access_control(is_admin(ctx.accounts.user_signer.key))]
     pub fn set_hashes(
@@ -62,10 +68,7 @@ pub mod best_apy {
 
     /// Set the protocol weights
     #[access_control(is_admin(ctx.accounts.user_signer.key))]
-    pub fn set_protocol_weights(
-        ctx: Context<SetProtocolWeights>,
-        weights: [u32; PROTOCOLS_LEN],
-    ) -> Result<()> {
+    pub fn set_protocol_weights(ctx: Context<SetProtocolWeights>, weights: Vec<u32>) -> Result<()> {
         instructions::set_protocol_weights::handler(ctx, weights)
     }
 
@@ -214,13 +217,13 @@ pub mod best_apy {
     /// Francium: Deposit from the vault account
     #[access_control(ctx.accounts.check_hash(Protocols::Francium))]
     pub fn francium_deposit(ctx: Context<FranciumDeposit>) -> Result<()> {
-        instructions::protocol_deposit_2_ixs::handler(ctx)
+        instructions::protocol_deposit_2_ixs::handler(ctx, Protocols::Francium)
     }
 
     /// Francium: Withdraw to the vault account
     #[access_control(ctx.accounts.check_hash(Protocols::Francium))]
     pub fn francium_withdraw(ctx: Context<FranciumWithdraw>) -> Result<()> {
-        instructions::protocol_withdraw_2_ixs::handler(ctx)
+        instructions::protocol_withdraw_2_ixs::handler(ctx, Protocols::Francium)
     }
 
     /// Francium: Compute the TVL
