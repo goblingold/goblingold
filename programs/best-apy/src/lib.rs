@@ -62,10 +62,7 @@ pub mod best_apy {
 
     /// Set the protocol weights
     #[access_control(is_admin(ctx.accounts.user_signer.key))]
-    pub fn set_protocol_weights(
-        ctx: Context<SetProtocolWeights>,
-        weights: [u32; PROTOCOLS_LEN],
-    ) -> Result<()> {
+    pub fn set_protocol_weights(ctx: Context<SetProtocolWeights>, weights: Vec<u32>) -> Result<()> {
         instructions::set_protocol_weights::handler(ctx, weights)
     }
 

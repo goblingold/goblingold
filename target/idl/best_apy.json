@@ -153,10 +153,7 @@
         {
           "name": "weights",
           "type": {
-            "array": [
-              "u32",
-              6
-            ]
+            "vec": "u32"
           }
         }
       ]
@@ -1923,11 +1920,15 @@
             }
           },
           {
+            "name": "protocolId",
+            "type": "u8"
+          },
+          {
             "name": "padding",
             "type": {
               "array": [
-                "u64",
-                4
+                "u8",
+                31
               ]
             }
           }
@@ -2199,6 +2200,11 @@
       "code": 6017,
       "name": "UnauthorizedUser",
       "msg": "Unauthorized user"
+    },
+    {
+      "code": 6018,
+      "name": "ProtocolNotFoundInVault",
+      "msg": "Protocol not found in vault"
     }
   ]
 }
