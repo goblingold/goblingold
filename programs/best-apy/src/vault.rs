@@ -1,6 +1,6 @@
 use crate::check_hash::CHECKHASH_BYTES;
 use crate::error::ErrorCode;
-use crate::protocols::{Protocols, PROTOCOLS_LEN};
+use crate::protocols::Protocols;
 use anchor_lang::prelude::*;
 use solana_maths::{U192, WAD};
 use std::{
@@ -126,7 +126,7 @@ impl VaultAccount {
             .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
         if total_deposit != 0 && total_rewards != 0 {
-            for i in 0..PROTOCOLS_LEN {
+            for i in 0..self.protocols.len() {
                 if self.protocols[i].is_active() {
                     let rewards_wo_i: u128 = total_rewards
                         .checked_sub(rewards[i])
@@ -161,7 +161,7 @@ impl VaultAccount {
             let min_weight = self.minimum_weight(total_deposit)?;
 
             #[allow(clippy::needless_range_loop)]
-            for i in 0..PROTOCOLS_LEN {
+            for i in 0..self.protocols.len() {
                 if self.protocols[i].is_active() {
                     self.protocols[i].weight = deposit[i]
                         .checked_mul(WEIGHTS_SCALE.into())
