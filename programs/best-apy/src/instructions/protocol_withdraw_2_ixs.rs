@@ -11,7 +11,7 @@ pub trait ProtocolWithdraw2Ixs<'info> {
     fn protocol_position(&self, protocol: Protocols) -> Result<usize>;
 
     /// Return a mutable refrence of the data
-    fn protocol_data_as_mut(&mut self, protocol_pos: usize) -> &mut ProtocolData;
+    fn protocol_data_as_mut(&mut self, protocol_idx: usize) -> &mut ProtocolData;
 
     /// Return the input token account
     fn input_token_account_as_mut(&mut self) -> &mut Account<'info, TokenAccount>;
@@ -20,7 +20,7 @@ pub trait ProtocolWithdraw2Ixs<'info> {
     fn instructions_account(&self) -> AccountInfo<'info>;
 
     /// Compute the amount to deposit
-    fn get_amount(&self, protocol_pos: usize, target_withdraw_ix: usize) -> Result<u64>;
+    fn get_amount(&self, protocol_idx: usize, target_withdraw_ix: usize) -> Result<u64>;
 
     /// Convert reserve liquidity to collateral (if any)
     fn liquidity_to_collateral(&self, amount: u64) -> Result<u64> {
@@ -37,17 +37,17 @@ pub fn handler<'info, T: ProtocolWithdraw2Ixs<'info>>(
     ctx: Context<T>,
     protocol: Protocols,
 ) -> Result<()> {
-    let protocol_pos = ctx.accounts.protocol_position(protocol)?;
+    let protocol_idx = ctx.accounts.protocol_position(protocol)?;
 
     let is_last_withdraw_ix = is_last_of_duplicated_ixs(ctx.accounts.instructions_account())?;
     let target_withdraw_ix: usize = if is_last_withdraw_ix { 1 } else { 2 };
 
-    let amount = ctx.accounts.get_amount(protocol_pos, target_withdraw_ix)?;
+    let amount = ctx.accounts.get_amount(protocol_idx, target_withdraw_ix)?;
     let mut lp_amount = ctx.accounts.liquidity_to_collateral(amount)?;
 
     // Add 1 as due to rounding. Otherwise it might happens that there wasn't enough funds
     // withdrawn from the protocol
-    if amount < ctx.accounts.protocol_data_as_mut(protocol_pos).amount {
+    if amount < ctx.accounts.protocol_data_as_mut(protocol_idx).amount {
         lp_amount = lp_amount
             .checked_add(1)
             .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
@@ -74,7 +74,7 @@ pub fn handler<'info, T: ProtocolWithdraw2Ixs<'info>>(
             .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
         ctx.accounts
-            .protocol_data_as_mut(protocol_pos)
+            .protocol_data_as_mut(protocol_idx)
             .update_after_withdraw(amount_diff)?;
     }
 

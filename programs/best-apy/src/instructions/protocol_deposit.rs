@@ -10,10 +10,10 @@ pub trait ProtocolDeposit<'info> {
     fn protocol_position(&self, protocol: Protocols) -> Result<usize>;
 
     /// Return a mutable refrence of the data
-    fn protocol_data_as_mut(&mut self, protocol_pos: usize) -> &mut ProtocolData;
+    fn protocol_data_as_mut(&mut self, protocol_idx: usize) -> &mut ProtocolData;
 
     /// Compute the amount to deposit
-    fn get_amount(&self, protocol_pos: usize) -> Result<u64>;
+    fn get_amount(&self, protocol_idx: usize) -> Result<u64>;
 
     /// Deposit into the protocol
     fn cpi_deposit(&self, amount: u64) -> Result<()>;
@@ -24,11 +24,11 @@ pub fn handler<'info, T: ProtocolDeposit<'info>>(
     ctx: Context<T>,
     protocol: Protocols,
 ) -> Result<()> {
-    let protocol_pos = ctx.accounts.protocol_position(protocol)?;
-    let amount = ctx.accounts.get_amount(protocol_pos)?;
+    let protocol_idx = ctx.accounts.protocol_position(protocol)?;
+    let amount = ctx.accounts.get_amount(protocol_idx)?;
     ctx.accounts.cpi_deposit(amount)?;
     ctx.accounts
-        .protocol_data_as_mut(protocol_pos)
+        .protocol_data_as_mut(protocol_idx)
         .update_after_deposit(amount)?;
 
     Ok(())
@@ -54,8 +54,8 @@ pub struct GenericDepositAccounts<'info> {
 
 impl<'info> GenericDepositAccounts<'info> {
     /// Compute the amount to deposit into the protocol
-    pub fn amount_to_deposit(&self, protocol_pos: usize) -> Result<u64> {
+    pub fn amount_to_deposit(&self, protocol_idx: usize) -> Result<u64> {
         self.vault_account
-            .calculate_deposit(protocol_pos, self.vault_input_token_account.amount)
+            .calculate_deposit(protocol_idx, self.vault_input_token_account.amount)
     }
 }

@@ -216,12 +216,12 @@ impl<'info> CheckHash<'info> for FranciumDeposit<'info> {
     }
 
     fn target_hash(&self, protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
-        let protocol_pos = self
+        let protocol_idx = self
             .generic_accs
             .vault_account
             .protocol_position(protocol)
             .unwrap();
-        self.generic_accs.vault_account.protocols[protocol_pos]
+        self.generic_accs.vault_account.protocols[protocol_idx]
             .hash_pubkey
             .hash_deposit
     }
@@ -232,16 +232,16 @@ impl<'info> ProtocolDeposit2Ixs<'info> for FranciumDeposit<'info> {
         self.generic_accs.vault_account.protocol_position(protocol)
     }
 
-    fn protocol_data_as_mut(&mut self, protocol_pos: usize) -> &mut ProtocolData {
-        &mut self.generic_accs.vault_account.protocols[protocol_pos]
+    fn protocol_data_as_mut(&mut self, protocol_idx: usize) -> &mut ProtocolData {
+        &mut self.generic_accs.vault_account.protocols[protocol_idx]
     }
 
     fn instructions_account(&self) -> AccountInfo<'info> {
         self.instructions.to_account_info()
     }
 
-    fn get_amount(&self, protocol_pos: usize) -> Result<u64> {
-        self.generic_accs.amount_to_deposit(protocol_pos)
+    fn get_amount(&self, protocol_idx: usize) -> Result<u64> {
+        self.generic_accs.amount_to_deposit(protocol_idx)
     }
 
     fn cpi_deposit(&self, amount: u64, is_last_deposit_ix: bool) -> Result<()> {
@@ -413,12 +413,12 @@ impl<'info> CheckHash<'info> for FranciumWithdraw<'info> {
     }
 
     fn target_hash(&self, protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
-        let protocol_pos = self
+        let protocol_idx = self
             .generic_accs
             .vault_account
             .protocol_position(protocol)
             .unwrap();
-        self.generic_accs.vault_account.protocols[protocol_pos]
+        self.generic_accs.vault_account.protocols[protocol_idx]
             .hash_pubkey
             .hash_withdraw
     }
@@ -429,8 +429,8 @@ impl<'info> ProtocolWithdraw2Ixs<'info> for FranciumWithdraw<'info> {
         self.generic_accs.vault_account.protocol_position(protocol)
     }
 
-    fn protocol_data_as_mut(&mut self, protocol_pos: usize) -> &mut ProtocolData {
-        &mut self.generic_accs.vault_account.protocols[protocol_pos]
+    fn protocol_data_as_mut(&mut self, protocol_idx: usize) -> &mut ProtocolData {
+        &mut self.generic_accs.vault_account.protocols[protocol_idx]
     }
 
     fn instructions_account(&self) -> AccountInfo<'info> {
@@ -441,9 +441,9 @@ impl<'info> ProtocolWithdraw2Ixs<'info> for FranciumWithdraw<'info> {
         &mut self.generic_accs.vault_input_token_account
     }
 
-    fn get_amount(&self, protocol_pos: usize, target_withdraw_ix: usize) -> Result<u64> {
+    fn get_amount(&self, protocol_idx: usize, target_withdraw_ix: usize) -> Result<u64> {
         self.generic_accs
-            .amount_to_withdraw_in_n_txs(protocol_pos, target_withdraw_ix)
+            .amount_to_withdraw_in_n_txs(protocol_idx, target_withdraw_ix)
     }
 
     fn liquidity_to_collateral(&self, amount: u64) -> Result<u64> {
@@ -568,12 +568,12 @@ impl<'info> CheckHash<'info> for FranciumTVL<'info> {
     }
 
     fn target_hash(&self, protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
-        let protocol_pos = self
+        let protocol_idx = self
             .generic_accs
             .vault_account
             .protocol_position(protocol)
             .unwrap();
-        self.generic_accs.vault_account.protocols[protocol_pos]
+        self.generic_accs.vault_account.protocols[protocol_idx]
             .hash_pubkey
             .hash_tvl
     }
@@ -588,8 +588,8 @@ impl<'info> ProtocolRewards<'info> for FranciumTVL<'info> {
         self.generic_accs.vault_account.input_mint_pubkey
     }
 
-    fn protocol_data_as_mut(&mut self, protocol_pos: usize) -> &mut ProtocolData {
-        &mut self.generic_accs.vault_account.protocols[protocol_pos]
+    fn protocol_data_as_mut(&mut self, protocol_idx: usize) -> &mut ProtocolData {
+        &mut self.generic_accs.vault_account.protocols[protocol_idx]
     }
 
     fn max_withdrawable(&self) -> Result<u64> {

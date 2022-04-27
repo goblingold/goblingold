@@ -201,8 +201,8 @@ impl VaultAccount {
     }
 
     /// Calculate amount to deposit in the given protocol
-    pub fn calculate_deposit(&self, protocol_pos: usize, available_amount: u64) -> Result<u64> {
-        let protocol = &self.protocols[protocol_pos];
+    pub fn calculate_deposit(&self, protocol_idx: usize, available_amount: u64) -> Result<u64> {
+        let protocol = &self.protocols[protocol_idx];
 
         let deposited_amount = protocol.amount;
         let target_amount = protocol.amount_should_be_deposited(self.current_tvl)?;
@@ -219,8 +219,8 @@ impl VaultAccount {
     }
 
     /// Calculate amount to withdraw from the given protocol
-    pub fn calculate_withdraw(&self, protocol_pos: usize) -> Result<u64> {
-        let protocol = &self.protocols[protocol_pos];
+    pub fn calculate_withdraw(&self, protocol_idx: usize) -> Result<u64> {
+        let protocol = &self.protocols[protocol_idx];
 
         let deposited_amount = protocol.amount;
         let target_amount = protocol.amount_should_be_deposited(self.current_tvl)?;

@@ -15,7 +15,7 @@ pub trait ProtocolDeposit2Ixs<'info> {
     fn instructions_account(&self) -> AccountInfo<'info>;
 
     /// Compute the amount to deposit
-    fn get_amount(&self, protocol_pos: usize) -> Result<u64>;
+    fn get_amount(&self, protocol_idx: usize) -> Result<u64>;
 
     /// Deposit into the protocol
     fn cpi_deposit(&self, amount: u64, is_last_deposit_ix: bool) -> Result<()>;
@@ -27,19 +27,19 @@ pub fn handler<'info, T: ProtocolDeposit2Ixs<'info>>(
     ctx: Context<T>,
     protocol: Protocols,
 ) -> Result<()> {
-    let protocol_pos = ctx.accounts.protocol_position(protocol)?;
+    let protocol_idx = ctx.accounts.protocol_position(protocol)?;
 
     let is_last_deposit_ix = is_last_of_duplicated_ixs(ctx.accounts.instructions_account())?;
 
     let amount: u64 = if is_last_deposit_ix {
         0
     } else {
-        ctx.accounts.get_amount(protocol_pos)?
+        ctx.accounts.get_amount(protocol_idx)?
     };
 
     ctx.accounts.cpi_deposit(amount, is_last_deposit_ix)?;
     ctx.accounts
-        .protocol_data_as_mut(protocol_pos)
+        .protocol_data_as_mut(protocol_idx)
         .update_after_deposit(amount)?;
 
     Ok(())
