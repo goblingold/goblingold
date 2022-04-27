@@ -7,7 +7,7 @@ use crate::instructions::{
 use crate::macros::generate_seeds;
 use crate::protocols::{
     state::{francium_farming_user, francium_lending_pool},
-    ProtocolId, Protocols,
+    Protocols,
 };
 use crate::vault::{ProtocolData, VaultAccount};
 use crate::VAULT_ACCOUNT_SEED;
@@ -553,12 +553,6 @@ impl<'info> CheckHash<'info> for FranciumTVL<'info> {
         self.generic_accs.vault_account.protocols[protocol as usize]
             .hash_pubkey
             .hash_tvl
-    }
-}
-
-impl<'info> ProtocolId<'info> for FranciumTVL<'info> {
-    fn protocol_id(&self) -> Protocols {
-        Protocols::Francium
     }
 }
 

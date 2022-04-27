@@ -3,7 +3,7 @@ use crate::error::ErrorCode;
 use crate::instructions::{protocol_deposit::*, protocol_rewards::*, protocol_withdraw::*};
 
 use crate::macros::generate_seeds;
-use crate::protocols::{state::tulip_reserve, ProtocolId, Protocols};
+use crate::protocols::{state::tulip_reserve, Protocols};
 use crate::vault::ProtocolData;
 use anchor_lang::prelude::borsh::{BorshDeserialize, BorshSerialize};
 use anchor_lang::prelude::*;
@@ -80,12 +80,6 @@ impl<'info> CheckHash<'info> for TulipDeposit<'info> {
         self.generic_accs.vault_account.protocols[protocol as usize]
             .hash_pubkey
             .hash_deposit
-    }
-}
-
-impl<'info> ProtocolId<'info> for TulipDeposit<'info> {
-    fn protocol_id(&self) -> Protocols {
-        Protocols::Tulip
     }
 }
 
@@ -178,12 +172,6 @@ pub struct TulipWithdraw<'info> {
     pub tulip_lending_market_account: AccountInfo<'info>,
     /// CHECK: Tulip CPI
     pub tulip_reserve_authority: AccountInfo<'info>,
-}
-
-impl<'info> ProtocolId<'info> for TulipWithdraw<'info> {
-    fn protocol_id(&self) -> Protocols {
-        Protocols::Tulip
-    }
 }
 
 impl<'info> ProtocolWithdraw<'info> for TulipWithdraw<'info> {
@@ -311,12 +299,6 @@ impl<'info> CheckHash<'info> for TulipTVL<'info> {
         self.generic_accs.vault_account.protocols[protocol as usize]
             .hash_pubkey
             .hash_tvl
-    }
-}
-
-impl<'info> ProtocolId<'info> for TulipTVL<'info> {
-    fn protocol_id(&self) -> Protocols {
-        Protocols::Tulip
     }
 }
 

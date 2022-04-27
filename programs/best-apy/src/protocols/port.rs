@@ -4,7 +4,7 @@ use crate::instructions::{
     protocol_deposit::*, protocol_initialize::*, protocol_rewards::*, protocol_withdraw::*,
 };
 use crate::macros::generate_seeds;
-use crate::protocols::{ProtocolId, Protocols};
+use crate::protocols::Protocols;
 use crate::vault::{ProtocolData, VaultAccount};
 use crate::{TREASURY_PUBKEY, VAULT_ACCOUNT_SEED};
 use anchor_lang::prelude::*;
@@ -212,12 +212,6 @@ impl<'info> CheckHash<'info> for PortDeposit<'info> {
     }
 }
 
-impl<'info> ProtocolId<'info> for PortDeposit<'info> {
-    fn protocol_id(&self) -> Protocols {
-        Protocols::Port
-    }
-}
-
 impl<'info> ProtocolDeposit<'info> for PortDeposit<'info> {
     fn protocol_data_as_mut(&mut self, protocol: Protocols) -> &mut ProtocolData {
         &mut self.generic_accs.vault_account.protocols[protocol as usize]
@@ -335,12 +329,6 @@ impl<'info> CheckHash<'info> for PortWithdraw<'info> {
     }
 }
 
-impl<'info> ProtocolId<'info> for PortWithdraw<'info> {
-    fn protocol_id(&self) -> Protocols {
-        Protocols::Port
-    }
-}
-
 impl<'info> ProtocolWithdraw<'info> for PortWithdraw<'info> {
     fn protocol_data_as_mut(&mut self, protocol: Protocols) -> &mut ProtocolData {
         &mut self.generic_accs.vault_account.protocols[protocol as usize]
@@ -446,12 +434,6 @@ impl<'info> CheckHash<'info> for PortTVL<'info> {
         self.generic_accs.vault_account.protocols[protocol as usize]
             .hash_pubkey
             .hash_tvl
-    }
-}
-
-impl<'info> ProtocolId<'info> for PortTVL<'info> {
-    fn protocol_id(&self) -> Protocols {
-        Protocols::Port
     }
 }
 
