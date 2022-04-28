@@ -1,8 +1,11 @@
 use crate::check_hash::CHECKHASH_BYTES;
+use crate::error::ErrorCode;
+use crate::protocols::Protocols;
 use crate::vault::VaultAccount;
 use crate::VAULT_ACCOUNT_SEED;
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::pubkey::Pubkey;
+use std::convert::TryInto;
 
 #[derive(Accounts)]
 pub struct SetHashes<'info> {
@@ -21,6 +24,12 @@ pub fn handler(
     protocol_id: u8,
     hashes: [[u8; CHECKHASH_BYTES]; 3],
 ) -> Result<()> {
-    ctx.accounts.vault_account.protocols[protocol_id as usize].set_hashes(hashes);
+    let protocol: Protocols = usize::from(protocol_id)
+        .try_into()
+        .map_err(|_| error!(ErrorCode::InvalidProtocolId))?;
+
+    let protocol_idx = ctx.accounts.vault_account.protocol_position(protocol)?;
+    ctx.accounts.vault_account.protocols[protocol_idx].set_hashes(hashes);
+
     Ok(())
 }
