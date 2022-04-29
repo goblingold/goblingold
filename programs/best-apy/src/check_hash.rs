@@ -1,4 +1,5 @@
 use crate::error::ErrorCode;
+use crate::protocols::Protocols;
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::hash::Hash;
 
@@ -12,12 +13,12 @@ pub trait CheckHash<'info> {
     fn hash(&self) -> Hash;
 
     /// Target truncated hash
-    fn target_hash(&self) -> [u8; CHECKHASH_BYTES];
+    fn target_hash(&self, protocol: Protocols) -> [u8; CHECKHASH_BYTES];
 
     /// Check the integrity of the hash
-    fn check_hash(&self) -> Result<()> {
+    fn check_hash(&self, protocol: Protocols) -> Result<()> {
         let hash = &self.hash().to_bytes()[..CHECKHASH_BYTES];
-        require!(hash == self.target_hash(), ErrorCode::InvalidHash);
+        require!(hash == self.target_hash(protocol), ErrorCode::InvalidHash);
         Ok(())
     }
 }

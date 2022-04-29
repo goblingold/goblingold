@@ -7,7 +7,7 @@ import {
   Protocols,
   TokenName,
   decodeAccount,
-} from "goblin-sdk";
+} from "goblin-sdk-local";
 import { BestApy } from "../target/types/best_apy";
 
 describe("best_apy", () => {
@@ -22,28 +22,50 @@ describe("best_apy", () => {
 
   const program = client.BestApy;
   const tokenInput = TokenName.WSOL;
+  const userSigner = program.provider.wallet.publicKey;
 
   it("Initialize vault with weights", async () => {
     const protocolWeights = [2000, 2000, 2000, 2000, 2000];
+    const protocolList = [
+      Protocols.Mango,
+      Protocols.Solend,
+      Protocols.Port,
+      Protocols.Tulip,
+      Protocols.Francium,
+    ];
 
-    const txVault = await program.initializeVault();
-    const txWeights = await program.setProtocolWeights(protocolWeights);
-    txVault.add(txWeights);
+    const tx = new anchor.web3.Transaction().add(
+      await program.initializeVault()
+    );
 
-    const txSigVault = await program.provider.send(txVault);
-    console.log("tx init_vault:", txSigVault);
+    for (const protocol of protocolList) {
+      tx.add(
+        await program.methods
+          .addProtocol(protocol)
+          .accounts({
+            userSigner,
+            vaultAccount: program.vaultKeys[tokenInput].vaultAccount,
+          })
+          .transaction()
+      );
+    }
+
+    tx.add(await program.setProtocolWeights(protocolWeights));
+
+    const txSig = await program.provider.send(tx);
 
     const vaultData = await program.decodeVault();
     const vaultWeights = vaultData.protocols.map((data) => data.weight);
+    const vaultProtocols = vaultData.protocols.map((data) => data.protocolId);
 
     assert.deepStrictEqual(vaultWeights, protocolWeights);
+    assert.deepStrictEqual(vaultProtocols, protocolList);
   });
 
   it("Initialize protocol accounts", async () => {
     const txsProtocols = await program.initializeProtocolAccounts();
     for (let i = 0; i < txsProtocols.length; ++i) {
       const txSig = await program.provider.send(txsProtocols[i]);
-      console.log("tx init_protocols_" + Protocols[i] + ":", txSig);
     }
   });
 
@@ -55,7 +77,6 @@ describe("best_apy", () => {
     );
 
     const txSigHashes = await program.provider.send(txHashes);
-    console.log("tx set_hashes:", txSigHashes);
   });
 
   it("Deposit", async () => {
@@ -120,21 +141,24 @@ describe("best_apy", () => {
       );
 
     const txsAll = await program.provider.send(tx, [wrappedKeypair]);
-    console.log("tx deposit:", txsAll);
+  });
+
+  it("Disable Mango & Port", async () => {
+    const protocolWeights = [0, 6000, 0, 2000, 2000];
+    const tx = await program.setProtocolWeights(protocolWeights);
+    const txSig = await program.provider.send(tx);
   });
 
   it("Deposit into the protocols", async () => {
     const txs = await program.rebalance();
     for (let i = 0; i < txs.length; ++i) {
       const txSig = await program.provider.send(txs[i]);
-      console.log("tx deposit_protocols_" + i.toString() + ":", txSig);
     }
   });
 
   it("Refresh weights", async () => {
     const tx = await program.refreshWeights();
     const txSig = await program.provider.send(tx);
-    console.log("tx refresh:", txSig);
   });
 
   it("Withdraw from the protocols", async () => {
@@ -195,7 +219,6 @@ describe("best_apy", () => {
         );
 
       const txSig = await program.provider.send(tx, [wrappedKeypair]);
-      console.log("tx withdraw_protocols_" + i.toString() + ":", txSig);
     }
   });
 });

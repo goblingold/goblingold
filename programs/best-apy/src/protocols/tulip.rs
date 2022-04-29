@@ -1,6 +1,7 @@
 use crate::check_hash::*;
 use crate::error::ErrorCode;
 use crate::instructions::{protocol_deposit::*, protocol_rewards::*, protocol_withdraw::*};
+
 use crate::macros::generate_seeds;
 use crate::protocols::{state::tulip_reserve, Protocols};
 use crate::vault::ProtocolData;
@@ -75,20 +76,29 @@ impl<'info> CheckHash<'info> for TulipDeposit<'info> {
         ])
     }
 
-    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
+    fn target_hash(&self, protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
+        let protocol_idx = self
+            .generic_accs
+            .vault_account
+            .protocol_position(protocol)
+            .unwrap();
+        self.generic_accs.vault_account.protocols[protocol_idx]
             .hash_pubkey
             .hash_deposit
     }
 }
 
 impl<'info> ProtocolDeposit<'info> for TulipDeposit<'info> {
-    fn protocol_data_as_mut(&mut self) -> &mut ProtocolData {
-        &mut self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
+    fn protocol_position(&self, protocol: Protocols) -> Result<usize> {
+        self.generic_accs.vault_account.protocol_position(protocol)
     }
 
-    fn get_amount(&self) -> Result<u64> {
-        self.generic_accs.amount_to_deposit(Protocols::Tulip)
+    fn protocol_data_as_mut(&mut self, protocol_idx: usize) -> &mut ProtocolData {
+        &mut self.generic_accs.vault_account.protocols[protocol_idx]
+    }
+
+    fn get_amount(&self, protocol_idx: usize) -> Result<u64> {
+        self.generic_accs.amount_to_deposit(protocol_idx)
     }
 
     fn cpi_deposit(&self, amount: u64) -> Result<()> {
@@ -174,16 +184,20 @@ pub struct TulipWithdraw<'info> {
 }
 
 impl<'info> ProtocolWithdraw<'info> for TulipWithdraw<'info> {
-    fn protocol_data_as_mut(&mut self) -> &mut ProtocolData {
-        &mut self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
+    fn protocol_position(&self, protocol: Protocols) -> Result<usize> {
+        self.generic_accs.vault_account.protocol_position(protocol)
+    }
+
+    fn protocol_data_as_mut(&mut self, protocol_idx: usize) -> &mut ProtocolData {
+        &mut self.generic_accs.vault_account.protocols[protocol_idx]
     }
 
     fn input_token_account_as_mut(&mut self) -> &mut Account<'info, TokenAccount> {
         &mut self.generic_accs.vault_input_token_account
     }
 
-    fn get_amount(&self) -> Result<u64> {
-        self.generic_accs.amount_to_withdraw(Protocols::Tulip)
+    fn get_amount(&self, protocol_idx: usize) -> Result<u64> {
+        self.generic_accs.amount_to_withdraw(protocol_idx)
     }
 
     fn liquidity_to_collateral(&self, amount: u64) -> Result<u64> {
@@ -265,8 +279,13 @@ impl<'info> CheckHash<'info> for TulipWithdraw<'info> {
         ])
     }
 
-    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
+    fn target_hash(&self, protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
+        let protocol_idx = self
+            .generic_accs
+            .vault_account
+            .protocol_position(protocol)
+            .unwrap();
+        self.generic_accs.vault_account.protocols[protocol_idx]
             .hash_pubkey
             .hash_withdraw
     }
@@ -294,24 +313,29 @@ impl<'info> CheckHash<'info> for TulipTVL<'info> {
         ])
     }
 
-    fn target_hash(&self) -> [u8; CHECKHASH_BYTES] {
-        self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
+    fn target_hash(&self, protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
+        let protocol_idx = self
+            .generic_accs
+            .vault_account
+            .protocol_position(protocol)
+            .unwrap();
+        self.generic_accs.vault_account.protocols[protocol_idx]
             .hash_pubkey
             .hash_tvl
     }
 }
 
 impl<'info> ProtocolRewards<'info> for TulipTVL<'info> {
-    fn protocol_id(&self) -> usize {
-        Protocols::Tulip as usize
+    fn protocol_position(&self, protocol: Protocols) -> Result<usize> {
+        self.generic_accs.vault_account.protocol_position(protocol)
     }
 
     fn input_mint_pubkey(&self) -> Pubkey {
         self.generic_accs.vault_account.input_mint_pubkey
     }
 
-    fn protocol_data_as_mut(&mut self) -> &mut ProtocolData {
-        &mut self.generic_accs.vault_account.protocols[Protocols::Tulip as usize]
+    fn protocol_data_as_mut(&mut self, protocol_idx: usize) -> &mut ProtocolData {
+        &mut self.generic_accs.vault_account.protocols[protocol_idx]
     }
 
     fn max_withdrawable(&self) -> Result<u64> {

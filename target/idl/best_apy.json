@@ -78,6 +78,27 @@
       "args": []
     },
     {
+      "name": "addProtocol",
+      "accounts": [
+        {
+          "name": "userSigner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "vaultAccount",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "protocolId",
+          "type": "u8"
+        }
+      ]
+    },
+    {
       "name": "setHashes",
       "accounts": [
         {
@@ -153,10 +174,7 @@
         {
           "name": "weights",
           "type": {
-            "array": [
-              "u32",
-              5
-            ]
+            "vec": "u32"
           }
         }
       ]
@@ -728,6 +746,250 @@
     },
     {
       "name": "solendTvl",
+      "accounts": [
+        {
+          "name": "genericAccs",
+          "accounts": [
+            {
+              "name": "vaultAccount",
+              "isMut": true,
+              "isSigner": false
+            }
+          ]
+        },
+        {
+          "name": "reserve",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "obligation",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "solendIsolatedPoolInitialize",
+      "accounts": [
+        {
+          "name": "userSigner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "vaultAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "vaultSolendObligationAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "solendLendingMarketAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "solendProgramId",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "clock",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "solendIsolatedPoolDeposit",
+      "accounts": [
+        {
+          "name": "genericAccs",
+          "accounts": [
+            {
+              "name": "vaultAccount",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "vaultInputTokenAccount",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "tokenProgram",
+              "isMut": false,
+              "isSigner": false
+            },
+            {
+              "name": "clock",
+              "isMut": false,
+              "isSigner": false
+            }
+          ]
+        },
+        {
+          "name": "solendProgramId",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "vaultSolendDestinationCollateralTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultSolendObligationAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "solendReserveAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "solendReserveLiquiditySupplySplTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "solendReserveCollateralSplTokenMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "solendLendingMarketAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "solendDerivedLendingMarketAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "solendDestinationDepositReserveCollateralSupplySplTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "solendPythPriceOracleAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "solendSwitchboardPriceFeedOracleAccount",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "solendIsolatedPoolWithdraw",
+      "accounts": [
+        {
+          "name": "genericAccs",
+          "accounts": [
+            {
+              "name": "vaultAccount",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "vaultInputTokenAccount",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "tokenProgram",
+              "isMut": false,
+              "isSigner": false
+            },
+            {
+              "name": "clock",
+              "isMut": false,
+              "isSigner": false
+            },
+            {
+              "name": "instructions",
+              "isMut": false,
+              "isSigner": false
+            }
+          ]
+        },
+        {
+          "name": "solendProgramId",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "vaultSolendDestinationCollateralTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultSolendObligationAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "solendSourceWithdrawReserveCollateralSupplySplTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "solendWithdrawReserveAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "solendLendingMarketAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "solendDerivedLendingMarketAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "solendReserveCollateralSplTokenMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "solendReserveLiquiditySupplySplTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "solendIsolatedPoolTvl",
       "accounts": [
         {
           "name": "genericAccs",
@@ -1679,11 +1941,15 @@
             }
           },
           {
+            "name": "protocolId",
+            "type": "u8"
+          },
+          {
             "name": "padding",
             "type": {
               "array": [
-                "u64",
-                4
+                "u8",
+                31
               ]
             }
           }
@@ -1806,6 +2072,9 @@
           },
           {
             "name": "Francium"
+          },
+          {
+            "name": "SolendStablePool"
           }
         ]
       }
@@ -1952,6 +2221,21 @@
       "code": 6017,
       "name": "UnauthorizedUser",
       "msg": "Unauthorized user"
+    },
+    {
+      "code": 6018,
+      "name": "ProtocolNotFoundInVault",
+      "msg": "Protocol not found in vault"
+    },
+    {
+      "code": 6019,
+      "name": "ProtocolAlreadyExists",
+      "msg": "Protocol already exists in vault"
+    },
+    {
+      "code": 6020,
+      "name": "InvalidProtocolId",
+      "msg": "Invalid protocol id"
     }
   ]
 }

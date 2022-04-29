@@ -39,4 +39,10 @@ pub enum ErrorCode {
     InvalidObligationReserve,
     #[msg("Unauthorized user")]
     UnauthorizedUser,
+    #[msg("Protocol not found in vault")]
+    ProtocolNotFoundInVault,
+    #[msg("Protocol already exists in vault")]
+    ProtocolAlreadyExists,
+    #[msg("Invalid protocol id")]
+    InvalidProtocolId,
 }

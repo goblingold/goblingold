@@ -1,14 +1,13 @@
-use crate::check_hash::CHECKHASH_BYTES;
 use crate::error::ErrorCode;
 use crate::protocols::Protocols;
-use crate::vault::VaultAccount;
+use crate::vault::{ProtocolData, VaultAccount};
 use crate::VAULT_ACCOUNT_SEED;
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::pubkey::Pubkey;
 use std::convert::TryInto;
 
 #[derive(Accounts)]
-pub struct SetHashes<'info> {
+pub struct AddProtocol<'info> {
     pub user_signer: Signer<'info>,
     #[account(
         mut,
@@ -18,18 +17,22 @@ pub struct SetHashes<'info> {
     pub vault_account: Box<Account<'info, VaultAccount>>,
 }
 
-/// Set hash of a protocol for a specific action
-pub fn handler(
-    ctx: Context<SetHashes>,
-    protocol_id: u8,
-    hashes: [[u8; CHECKHASH_BYTES]; 3],
-) -> Result<()> {
+/// Add a new protocol to the vault account
+pub fn handler(ctx: Context<AddProtocol>, protocol_id: u8) -> Result<()> {
     let protocol: Protocols = usize::from(protocol_id)
         .try_into()
         .map_err(|_| error!(ErrorCode::InvalidProtocolId))?;
 
-    let protocol_idx = ctx.accounts.vault_account.protocol_position(protocol)?;
-    ctx.accounts.vault_account.protocols[protocol_idx].set_hashes(hashes);
+    let vault = &mut ctx.accounts.vault_account;
+
+    if vault.protocol_position(protocol).is_ok() {
+        return Err(error!(ErrorCode::ProtocolAlreadyExists));
+    } else {
+        vault.protocols.push(ProtocolData {
+            protocol_id,
+            ..ProtocolData::default()
+        });
+    }
 
     Ok(())
 }

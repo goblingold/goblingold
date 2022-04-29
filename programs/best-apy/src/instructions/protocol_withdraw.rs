@@ -6,16 +6,19 @@ use anchor_lang::prelude::*;
 use anchor_lang::solana_program::sysvar;
 use anchor_spl::token::{Token, TokenAccount};
 
-/// Deposit into the protocol
+/// Withdraw from the protocol
 pub trait ProtocolWithdraw<'info> {
+    /// Return the protcol position in the vector
+    fn protocol_position(&self, protocol: Protocols) -> Result<usize>;
+
     /// Return a mutable refrence of the data
-    fn protocol_data_as_mut(&mut self) -> &mut ProtocolData;
+    fn protocol_data_as_mut(&mut self, protocol_idx: usize) -> &mut ProtocolData;
 
     /// Return the input token account
     fn input_token_account_as_mut(&mut self) -> &mut Account<'info, TokenAccount>;
 
     /// Compute the amount to deposit
-    fn get_amount(&self) -> Result<u64>;
+    fn get_amount(&self, protocol_idx: usize) -> Result<u64>;
 
     /// Convert reserve liquidity to collateral (if any)
     fn liquidity_to_collateral(&self, amount: u64) -> Result<u64> {
@@ -26,14 +29,18 @@ pub trait ProtocolWithdraw<'info> {
     fn cpi_withdraw(&self, amount: u64) -> Result<()>;
 }
 
-/// Deposit into the protocol and update protocol data
-pub fn handler<'info, T: ProtocolWithdraw<'info>>(ctx: Context<T>) -> Result<()> {
-    let amount = ctx.accounts.get_amount()?;
+/// Withdraw from the protocol and update protocol data
+pub fn handler<'info, T: ProtocolWithdraw<'info>>(
+    ctx: Context<T>,
+    protocol: Protocols,
+) -> Result<()> {
+    let protocol_idx = ctx.accounts.protocol_position(protocol)?;
+    let amount = ctx.accounts.get_amount(protocol_idx)?;
     let mut lp_amount = ctx.accounts.liquidity_to_collateral(amount)?;
 
     // Add 1 as due to rounding. Otherwise it might happens that there wasn't enough funds
     // withdrawn from the protocol
-    if amount < ctx.accounts.protocol_data_as_mut().amount {
+    if amount < ctx.accounts.protocol_data_as_mut(protocol_idx).amount {
         lp_amount = lp_amount
             .checked_add(1)
             .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
@@ -57,7 +64,7 @@ pub fn handler<'info, T: ProtocolWithdraw<'info>>(ctx: Context<T>) -> Result<()>
         .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
     ctx.accounts
-        .protocol_data_as_mut()
+        .protocol_data_as_mut(protocol_idx)
         .update_after_withdraw(amount_diff)?;
 
     Ok(())
@@ -93,19 +100,19 @@ impl<'info> GenericWithdrawAccounts<'info> {
     /// Compute the amount to withdraw from the protocol depending on whether the instruction comes
     /// from the bot or from a user, assuming for the latter that the following ix corresponds to
     /// the `withdraw` one
-    pub fn amount_to_withdraw(&self, protocol: Protocols) -> Result<u64> {
-        self.amount_to_withdraw_in_n_txs(protocol, 1)
+    pub fn amount_to_withdraw(&self, protocol_idx: usize) -> Result<u64> {
+        self.amount_to_withdraw_in_n_txs(protocol_idx, 1)
     }
 
     pub fn amount_to_withdraw_in_n_txs(
         &self,
-        protocol: Protocols,
+        protocol_idx: usize,
         ix_offset: usize,
     ) -> Result<u64> {
         if let Some(amount) = self.read_amount_from_withdraw_ix(ix_offset)? {
             Ok(amount)
         } else {
-            Ok(self.vault_account.calculate_withdraw(protocol)?)
+            Ok(self.vault_account.calculate_withdraw(protocol_idx)?)
         }
     }
 

@@ -1,4 +1,5 @@
 use crate::error::ErrorCode;
+use crate::protocols::Protocols;
 use crate::vault::ProtocolData;
 use crate::VaultAccount;
 use crate::VAULT_ACCOUNT_SEED;
@@ -17,30 +18,37 @@ pub struct ProtocolRewardsEvent {
 
 /// Get the rewards produced by the protocol
 pub trait ProtocolRewards<'info> {
-    /// Get the protocol ID
-    fn protocol_id(&self) -> usize;
+    /// Return the protcol position in the vector
+    fn protocol_position(&self, protocol: Protocols) -> Result<usize>;
 
     /// Get the input token mint pubkey
     fn input_mint_pubkey(&self) -> Pubkey;
 
     /// Return a mutable refrence of the data
-    fn protocol_data_as_mut(&mut self) -> &mut ProtocolData;
+    fn protocol_data_as_mut(&mut self, protocol_idx: usize) -> &mut ProtocolData;
 
     /// Compute the maximam withdrawable units
     fn max_withdrawable(&self) -> Result<u64>;
 }
 
 /// Update the rewards
-pub fn handler<'info, T: ProtocolRewards<'info>>(ctx: Context<T>) -> Result<()> {
-    let protocol_id: u8 = ctx.accounts.protocol_id().try_into().unwrap();
+pub fn handler<'info, T: ProtocolRewards<'info>>(
+    ctx: Context<T>,
+    protocol: Protocols,
+) -> Result<()> {
+    let protocol_idx = ctx.accounts.protocol_position(protocol)?;
+    let protocol_id: u8 = (protocol as usize).try_into().unwrap();
     let token = ctx.accounts.input_mint_pubkey();
 
     let tvl = ctx.accounts.max_withdrawable()?;
-    let protocol = ctx.accounts.protocol_data_as_mut();
-    let rewards = tvl.saturating_sub(protocol.amount);
-    protocol.rewards.update(rewards, protocol.amount)?;
 
-    let deposited_lamports: u64 = protocol
+    let protocol_data = ctx.accounts.protocol_data_as_mut(protocol_idx);
+    let rewards = tvl.saturating_sub(protocol_data.amount);
+    protocol_data
+        .rewards
+        .update(rewards, protocol_data.amount)?;
+
+    let deposited_lamports: u64 = protocol_data
         .rewards
         .deposited_avg_wad
         .checked_div(WAD as u128)
@@ -51,9 +59,9 @@ pub fn handler<'info, T: ProtocolRewards<'info>>(ctx: Context<T>) -> Result<()> 
     emit!(ProtocolRewardsEvent {
         protocol_id,
         token,
-        rewards: protocol.rewards.amount,
+        rewards: protocol_data.rewards.amount,
         lamports: deposited_lamports,
-        initial_slot: protocol.rewards.deposited_integral.initial_slot
+        initial_slot: protocol_data.rewards.deposited_integral.initial_slot
     });
 
     Ok(())
