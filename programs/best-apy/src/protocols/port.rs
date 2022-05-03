@@ -34,7 +34,7 @@ pub mod port_staking_program_id {
 pub struct PortInitialize<'info> {
     pub user_signer: Signer<'info>,
     #[account(
-        seeds = [VAULT_ACCOUNT_SEED, &[vault_account.seed_number], vault_account.input_mint_pubkey.as_ref()],
+        seeds = [VAULT_ACCOUNT_SEED, &[vault_account.seed_number][..], vault_account.input_mint_pubkey.as_ref()],
         bump = vault_account.bumps.vault
     )]
     pub vault_account: Box<Account<'info, VaultAccount>>,

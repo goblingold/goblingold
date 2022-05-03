@@ -74,7 +74,7 @@ pub fn handler<'info, T: ProtocolWithdraw<'info>>(
 pub struct GenericWithdrawAccounts<'info> {
     #[account(
         mut,
-        seeds = [VAULT_ACCOUNT_SEED, &[vault_account.seed_number], vault_account.input_mint_pubkey.as_ref()],
+        seeds = [VAULT_ACCOUNT_SEED, &[vault_account.seed_number][..], vault_account.input_mint_pubkey.as_ref()],
         bump = vault_account.bumps.vault
     )]
     pub vault_account: Box<Account<'info, VaultAccount>>,
