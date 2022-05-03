@@ -75,7 +75,12 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "accountNumber",
+          "type": "u8"
+        }
+      ]
     },
     {
       "name": "addProtocol",
@@ -1830,6 +1835,10 @@
         "fields": [
           {
             "name": "version",
+            "type": "u8"
+          },
+          {
+            "name": "seedNumber",
             "type": "u8"
           },
           {

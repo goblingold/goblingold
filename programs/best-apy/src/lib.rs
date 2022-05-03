@@ -17,7 +17,7 @@ mod vault;
 
 declare_id!("GGo1dnYpjKfe9omzUaFtaCyizvwpAMf3NhxSCMD61F3A");
 
-const PAUSED: bool = false;
+const PAUSED: bool = true;
 
 const VAULT_ACCOUNT_SEED: &[u8; 5] = b"vault";
 const VAULT_LP_TOKEN_MINT_SEED: &[u8; 4] = b"mint";
@@ -40,8 +40,8 @@ pub mod best_apy {
 
     /// Initialize the vault account and its fields
     #[access_control(is_admin(ctx.accounts.user_signer.key))]
-    pub fn initialize_vault(ctx: Context<InitializeVault>) -> Result<()> {
-        instructions::initialize_vault::handler(ctx)
+    pub fn initialize_vault(ctx: Context<InitializeVault>, account_number: u8) -> Result<()> {
+        instructions::initialize_vault::handler(ctx, account_number)
     }
 
     /// Add a new protocol to the vault_account

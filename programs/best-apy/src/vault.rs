@@ -21,6 +21,9 @@ pub struct VaultAccount {
     /// Vault version
     pub version: u8,
 
+    /// Account seed number
+    pub seed_number: u8,
+
     /// PDA bump seeds
     pub bumps: Bumps,
     /// Strategy input token mint address
@@ -48,6 +51,7 @@ pub struct VaultAccount {
 
 impl VaultAccount {
     pub const SIZE: usize = 1
+        + 1
         + Bumps::SIZE
         + 32
         + 32
@@ -239,6 +243,8 @@ impl VaultAccount {
 
 /// Initialize a new vault
 pub struct InitVaultAccountParams {
+    /// Account seed number
+    pub seed_number: u8,
     /// PDA bump seeds
     pub bumps: Bumps,
     /// Strategy input token mint address

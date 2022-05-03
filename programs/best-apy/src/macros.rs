@@ -4,6 +4,7 @@ macro_rules! generate_seeds {
         &[
             "vault".as_ref(),
             $account.input_mint_pubkey.as_ref(),
+            &[$account.seed_number],
             &[$account.bumps.vault],
         ]
     };
