@@ -17,7 +17,8 @@ mod vault;
 
 declare_id!("GGo1dnYpjKfe9omzUaFtaCyizvwpAMf3NhxSCMD61F3A");
 
-const PAUSED: bool = false;
+const PAUSED_DEPOSIT: bool = false;
+const PAUSED_WITHDRAW: bool = true;
 
 const VAULT_ACCOUNT_SEED: &[u8; 5] = b"vault";
 const VAULT_LP_TOKEN_MINT_SEED: &[u8; 4] = b"mint";
@@ -73,13 +74,13 @@ pub mod best_apy {
     }
 
     /// Deposit user input tokens into the vault account
-    #[access_control(program_not_paused())]
+    #[access_control(deposit_not_paused())]
     pub fn deposit(ctx: Context<Deposit>, amount: u64) -> Result<()> {
         instructions::deposit::handler(ctx, amount)
     }
 
     /// Withdraw the required input tokens from the vault and send them back to the user
-    #[access_control(program_not_paused())]
+    #[access_control(withdraw_not_paused())]
     pub fn withdraw(ctx: Context<Withdraw>, lp_amount: u64) -> Result<()> {
         instructions::withdraw::handler(ctx, lp_amount)
     }
@@ -233,9 +234,15 @@ pub mod best_apy {
     }
 }
 
-/// Check if the program is paused
-fn program_not_paused() -> Result<()> {
-    require!(!PAUSED, ErrorCode::OnPaused);
+/// Check if the deposit is paused
+fn deposit_not_paused() -> Result<()> {
+    require!(!PAUSED_DEPOSIT, ErrorCode::OnPaused);
+    Ok(())
+}
+
+/// Check if the withdraw is paused
+fn withdraw_not_paused() -> Result<()> {
+    require!(!PAUSED_WITHDRAW, ErrorCode::OnPaused);
     Ok(())
 }
 
