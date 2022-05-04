@@ -160,12 +160,6 @@ pub mod best_apy {
         instructions::protocol_rewards::handler(ctx, Protocols::SolendStablePool)
     }
 
-    /// Port: Initialize protocol accounts
-    #[access_control(is_admin(ctx.accounts.user_signer.key))]
-    pub fn port_initialize(ctx: Context<PortInitialize>) -> Result<()> {
-        instructions::protocol_initialize::handler(ctx)
-    }
-
     /// Port: Deposit from the vault account
     #[access_control(ctx.accounts.check_hash(Protocols::Port))]
     pub fn port_deposit(ctx: Context<PortDeposit>) -> Result<()> {
@@ -182,11 +176,6 @@ pub mod best_apy {
     #[access_control(ctx.accounts.check_hash(Protocols::Port))]
     pub fn port_tvl(ctx: Context<PortTVL>) -> Result<()> {
         instructions::protocol_rewards::handler(ctx, Protocols::Port)
-    }
-
-    /// Port: Claim rewards
-    pub fn port_claim_rewards(ctx: Context<PortClaimRewards>) -> Result<()> {
-        protocols::port::claim_rewards(ctx)
     }
 
     /// Tulip: Deposit from the vault account
