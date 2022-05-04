@@ -112,12 +112,6 @@ pub mod best_apy {
         instructions::protocol_rewards::handler(ctx, Protocols::Mango)
     }
 
-    /// Solend: Initialize protocol accounts
-    #[access_control(is_admin(ctx.accounts.user_signer.key))]
-    pub fn solend_initialize(ctx: Context<SolendInitialize>) -> Result<()> {
-        instructions::protocol_initialize::handler(ctx)
-    }
-
     /// Solend: Deposit from the vault account
     #[access_control(ctx.accounts.check_hash(Protocols::Solend))]
     pub fn solend_deposit(ctx: Context<SolendDeposit>) -> Result<()> {
@@ -134,12 +128,6 @@ pub mod best_apy {
     #[access_control(ctx.accounts.check_hash(Protocols::Solend))]
     pub fn solend_tvl(ctx: Context<SolendTVL>) -> Result<()> {
         instructions::protocol_rewards::handler(ctx, Protocols::Solend)
-    }
-
-    /// Solend: Initialize protocol accounts
-    #[access_control(is_admin(ctx.accounts.user_signer.key))]
-    pub fn solend_isolated_pool_initialize(ctx: Context<SolendInitialize>) -> Result<()> {
-        instructions::protocol_initialize::handler(ctx)
     }
 
     /// SolendIsolatedPool: Deposit from the vault account
