@@ -31,10 +31,10 @@ pub struct SolendDeposit<'info> {
     pub solend_program_id: AccountInfo<'info>,
     #[account(
         mut,
-        associated_token::mint = vault_solend_destination_collateral_token_account.mint,
+        associated_token::mint = vault_solend_collateral_token_account.mint,
         associated_token::authority = generic_accs.vault_account,
     )]
-    pub vault_solend_destination_collateral_token_account: Box<Account<'info, TokenAccount>>,
+    pub vault_solend_collateral_token_account: Box<Account<'info, TokenAccount>>,
     #[account(mut)]
     /// CHECK: Solend CPI
     pub solend_reserve_account: AccountInfo<'info>,
@@ -53,9 +53,7 @@ pub struct SolendDeposit<'info> {
 impl<'info> CheckHash<'info> for SolendDeposit<'info> {
     fn hash(&self) -> Hash {
         hashv(&[
-            self.vault_solend_destination_collateral_token_account
-                .key()
-                .as_ref(),
+            self.vault_solend_collateral_token_account.key().as_ref(),
             self.solend_reserve_account.key.as_ref(),
             self.solend_reserve_liquidity_supply_spl_token_account
                 .key
@@ -99,7 +97,7 @@ impl<'info> ProtocolDeposit<'info> for SolendDeposit<'info> {
             solend_program_id::ID,
             amount,
             self.generic_accs.vault_input_token_account.key(),
-            self.vault_solend_destination_collateral_token_account.key(),
+            self.vault_solend_collateral_token_account.key(),
             *self.solend_reserve_account.key,
             *self.solend_reserve_liquidity_supply_spl_token_account.key,
             *self.solend_reserve_collateral_spl_token_mint.key,
@@ -110,8 +108,7 @@ impl<'info> ProtocolDeposit<'info> for SolendDeposit<'info> {
             self.generic_accs
                 .vault_input_token_account
                 .to_account_info(),
-            self.vault_solend_destination_collateral_token_account
-                .to_account_info(),
+            self.vault_solend_collateral_token_account.to_account_info(),
             self.solend_reserve_account.to_account_info(),
             self.solend_reserve_liquidity_supply_spl_token_account
                 .to_account_info(),
@@ -138,10 +135,10 @@ pub struct SolendWithdraw<'info> {
     pub solend_program_id: AccountInfo<'info>,
     #[account(
         mut,
-        associated_token::mint = vault_solend_destination_collateral_token_account.mint,
+        associated_token::mint = vault_solend_collateral_token_account.mint,
         associated_token::authority = generic_accs.vault_account,
     )]
-    pub vault_solend_destination_collateral_token_account: Account<'info, TokenAccount>,
+    pub vault_solend_collateral_token_account: Account<'info, TokenAccount>,
     #[account(mut)]
     /// CHECK: Solend CPI
     pub solend_reserve_account: AccountInfo<'info>,
@@ -160,9 +157,7 @@ pub struct SolendWithdraw<'info> {
 impl<'info> CheckHash<'info> for SolendWithdraw<'info> {
     fn hash(&self) -> Hash {
         hashv(&[
-            self.vault_solend_destination_collateral_token_account
-                .key()
-                .as_ref(),
+            self.vault_solend_collateral_token_account.key().as_ref(),
             self.solend_reserve_account.key.as_ref(),
             self.solend_lending_market_account.key.as_ref(),
             self.solend_derived_lending_market_authority.key.as_ref(),
@@ -219,7 +214,7 @@ impl<'info> ProtocolWithdraw<'info> for SolendWithdraw<'info> {
         let ix = solend_token_lending::instruction::redeem_reserve_collateral(
             solend_program_id::ID,
             amount,
-            self.vault_solend_destination_collateral_token_account.key(),
+            self.vault_solend_collateral_token_account.key(),
             self.generic_accs.vault_input_token_account.key(),
             *self.solend_reserve_account.key,
             *self.solend_reserve_collateral_spl_token_mint.key,
@@ -228,8 +223,7 @@ impl<'info> ProtocolWithdraw<'info> for SolendWithdraw<'info> {
             self.generic_accs.vault_account.key(),
         );
         let accounts = [
-            self.vault_solend_destination_collateral_token_account
-                .to_account_info(),
+            self.vault_solend_collateral_token_account.to_account_info(),
             self.generic_accs
                 .vault_input_token_account
                 .to_account_info(),

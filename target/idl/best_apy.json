@@ -565,7 +565,7 @@
           "isSigner": false
         },
         {
-          "name": "vaultSolendDestinationCollateralTokenAccount",
+          "name": "vaultSolendCollateralTokenAccount",
           "isMut": true,
           "isSigner": false
         },
@@ -636,7 +636,7 @@
           "isSigner": false
         },
         {
-          "name": "vaultSolendDestinationCollateralTokenAccount",
+          "name": "vaultSolendCollateralTokenAccount",
           "isMut": true,
           "isSigner": false
         },
@@ -728,7 +728,7 @@
           "isSigner": false
         },
         {
-          "name": "vaultSolendDestinationCollateralTokenAccount",
+          "name": "vaultSolendCollateralTokenAccount",
           "isMut": true,
           "isSigner": false
         },
@@ -799,7 +799,7 @@
           "isSigner": false
         },
         {
-          "name": "vaultSolendDestinationCollateralTokenAccount",
+          "name": "vaultSolendCollateralTokenAccount",
           "isMut": true,
           "isSigner": false
         },
