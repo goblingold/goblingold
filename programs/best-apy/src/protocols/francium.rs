@@ -38,9 +38,6 @@ pub struct InstructionAmountData {
 #[derive(Accounts)]
 pub struct FranciumDeposit<'info> {
     pub generic_accs: GenericDepositAccounts<'info>,
-    #[account(address = sysvar::instructions::ID)]
-    /// CHECK: address is checked
-    pub instructions: AccountInfo<'info>,
     #[account(constraint = francium_lending_program_id.key == &francium_lending_program_id::ID)]
     /// CHECK: Francium CPI
     pub francium_lending_program_id: AccountInfo<'info>,
