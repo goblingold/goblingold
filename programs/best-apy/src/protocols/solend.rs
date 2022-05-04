@@ -1,4 +1,3 @@
-//#! cargo clippy
 use crate::check_hash::*;
 use crate::error::ErrorCode;
 use crate::instructions::{protocol_deposit::*, protocol_rewards::*, protocol_withdraw::*};
