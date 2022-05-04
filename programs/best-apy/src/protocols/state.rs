@@ -8,7 +8,6 @@ use anchor_lang::solana_program::{
 use arrayref::array_refs;
 use solana_maths::Decimal;
 
-pub mod francium_farming_user;
 pub mod francium_lending_pool;
 pub mod tulip_reserve;
 
