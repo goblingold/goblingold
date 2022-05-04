@@ -4,7 +4,6 @@ use crate::instructions::{protocol_deposit::*, protocol_rewards::*, protocol_wit
 use crate::macros::generate_seeds;
 use crate::protocols::{state::francium_lending_pool, Protocols};
 use crate::vault::ProtocolData;
-
 use anchor_lang::prelude::borsh::{BorshDeserialize, BorshSerialize};
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::{
@@ -12,7 +11,6 @@ use anchor_lang::solana_program::{
     instruction::Instruction,
     program::invoke_signed,
     program_pack::Pack,
-    sysvar,
 };
 use anchor_spl::token::TokenAccount;
 
