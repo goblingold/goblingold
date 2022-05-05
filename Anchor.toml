@@ -20,10 +20,6 @@ warp_slot = ""
 [[test.validator.clone]]
 address = "FC81tbGt6JWRXidaWYFXxGnTk4VgobhJHATvTRVMqgWj"
 
-# francium_lend_rewards_exe
-[[test.validator.clone]]
-address = "3Katmm9dhvLQijAvomteYMo6rfVbY5NaCRNq9ZBqBgr6"
-
 # mango_exe
 [[test.validator.clone]]
 address = "mv3ekLzLbnVPNxjSKvqBpU3ZeZXPQdEC3bp5MDEBG68"
@@ -31,10 +27,6 @@ address = "mv3ekLzLbnVPNxjSKvqBpU3ZeZXPQdEC3bp5MDEBG68"
 # port_exe
 [[test.validator.clone]]
 address = "Port7uDYB3wk6GJAw4KT1WpTeMtSu9bTcChBHkX2LfR"
-
-# port_staking_exe
-[[test.validator.clone]]
-address = "stkarvwmSzv2BygN5e2LeTwimTczLWHCKPKGC2zVLiq"
 
 # solend_exe
 [[test.validator.clone]]

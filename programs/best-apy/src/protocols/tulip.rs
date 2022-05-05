@@ -298,7 +298,6 @@ pub struct TulipTVL<'info> {
     /// CHECK: hash, owner and mint & collateral data fields are checked
     pub reserve: AccountInfo<'info>,
     #[account(
-        mut,
         associated_token::mint = vault_tulip_collateral_token_account.mint,
         associated_token::authority = generic_accs.vault_account,
     )]
