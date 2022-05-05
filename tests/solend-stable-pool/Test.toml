@@ -26,9 +26,6 @@ address = "4JZ6PXqRDp8jQxXUYX9cbAzHi6uzZk856aoAqPGdV5Da"
 address = "GktVYgkstojYd8nVXGXKJHi7SstvgZ6pkQqQhUPD7y7Q"
 
 [[test.validator.clone]]
-address = "7JF8e93t52SGFUHzMt5cD7vte4b8gWZHY99GLziAUeiP"
-
-[[test.validator.clone]]
 address = "Gnt27xtC473ZT2Mw5u8wZ68Z3gULkSTb5DuxJy7eJotD"
 
 [[test.validator.clone]]
