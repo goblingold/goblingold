@@ -1400,6 +1400,15 @@
             }
           },
           {
+            "name": "padding",
+            "type": {
+              "array": [
+                "u64",
+                8
+              ]
+            }
+          },
+          {
             "name": "protocols",
             "type": {
               "vec": {
@@ -1450,6 +1459,10 @@
         "kind": "struct",
         "fields": [
           {
+            "name": "protocolId",
+            "type": "u8"
+          },
+          {
             "name": "hashPubkey",
             "type": {
               "defined": "HashPubkey"
@@ -1470,15 +1483,11 @@
             }
           },
           {
-            "name": "protocolId",
-            "type": "u8"
-          },
-          {
             "name": "padding",
             "type": {
               "array": [
-                "u8",
-                31
+                "u64",
+                5
               ]
             }
           }
