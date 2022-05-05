@@ -45,6 +45,9 @@ pub struct VaultAccount {
     /// Price of the LP token in the previous interval
     pub previous_lp_price: LpPrice,
 
+    /// Additional padding
+    pub _padding: [u64; 8],
+
     /// Protocol data (maximum = 10)
     pub protocols: Vec<ProtocolData>,
 }
@@ -60,6 +63,7 @@ impl VaultAccount {
         + 8
         + 8
         + LpPrice::SIZE
+        + 8 * 8
         + 4
         + ProtocolData::SIZE * 10;
 
@@ -280,6 +284,9 @@ impl RefreshParams {
 /// Protocol data
 #[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default)]
 pub struct ProtocolData {
+    /// Protocol ID
+    pub protocol_id: u8,
+
     /// Hashes of Pubkey
     pub hash_pubkey: HashPubkey,
 
@@ -290,15 +297,12 @@ pub struct ProtocolData {
     /// Accumulated rewards
     pub rewards: AccumulatedRewards,
 
-    /// Protocol ID
-    pub protocol_id: u8,
-
     /// Padding for other future field
-    pub _padding: [u8; 31],
+    pub _padding: [u64; 5],
 }
 
 impl ProtocolData {
-    pub const SIZE: usize = HashPubkey::SIZE + 4 + 8 + AccumulatedRewards::SIZE + 1 + 31;
+    pub const SIZE: usize = 1 + HashPubkey::SIZE + 4 + 8 + AccumulatedRewards::SIZE + 8 * 5;
 
     /// Check the protocol is active
     pub fn is_active(&self) -> bool {
