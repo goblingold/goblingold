@@ -13,6 +13,7 @@ mod instructions;
 mod macros;
 mod protocols;
 mod vault;
+mod vault_old;
 
 declare_id!("GGo1dnYpjKfe9omzUaFtaCyizvwpAMf3NhxSCMD61F3A");
 
@@ -29,10 +30,10 @@ const ADMIN_PUBKEY: Pubkey = Pubkey::new_from_array([
 ]);
 
 // 8XhNoDjjNoLP5Rys1pBJKGdE8acEC1HJsWGkfkMt6JP1
-const TREASURY_PUBKEY: Pubkey = Pubkey::new_from_array([
-    111, 222, 226, 197, 174, 64, 51, 181, 235, 205, 56, 138, 76, 105, 173, 158, 191, 43, 143, 141,
-    91, 145, 78, 45, 130, 86, 102, 175, 146, 188, 82, 152,
-]);
+//const TREASURY_PUBKEY: Pubkey = Pubkey::new_from_array([
+//    111, 222, 226, 197, 174, 64, 51, 181, 235, 205, 56, 138, 76, 105, 173, 158, 191, 43, 143, 141,
+//    91, 145, 78, 45, 130, 86, 102, 175, 146, 188, 82, 152,
+//]);
 
 #[program]
 pub mod best_apy {
@@ -58,6 +59,11 @@ pub mod best_apy {
         hashes: [[u8; CHECKHASH_BYTES]; 3],
     ) -> Result<()> {
         instructions::set_hashes::handler(ctx, protocol_id, hashes)
+    }
+
+    #[access_control(is_admin(ctx.accounts.user_signer.key))]
+    pub fn vault_transfer(ctx: Context<VaultTransfer>) -> Result<()> {
+        instructions::vault_transfer::handler(ctx)
     }
 
     /// Set the strategy refresh paraemeters

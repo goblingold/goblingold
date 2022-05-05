@@ -5,6 +5,7 @@ pub mod refresh_weights;
 pub mod set_hashes;
 pub mod set_protocol_weights;
 pub mod set_refresh_params;
+pub mod vault_transfer;
 pub mod withdraw;
 
 pub use add_protocol::*;
@@ -14,6 +15,7 @@ pub use refresh_weights::*;
 pub use set_hashes::*;
 pub use set_protocol_weights::*;
 pub use set_refresh_params::*;
+pub use vault_transfer::*;
 pub use withdraw::*;
 
 pub mod protocol_deposit;
