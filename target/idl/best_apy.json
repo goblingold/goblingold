@@ -139,6 +139,47 @@
       ]
     },
     {
+      "name": "vaultTransfer",
+      "accounts": [
+        {
+          "name": "userSigner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "inputTokenMintAddress",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "newVault",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "newAta",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "oldVault",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "oldAta",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "setRefreshParams",
       "accounts": [
         {
@@ -1349,6 +1390,64 @@
   ],
   "accounts": [
     {
+      "name": "OldVaultAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "version",
+            "type": "u8"
+          },
+          {
+            "name": "bumps",
+            "type": {
+              "defined": "OldBumps"
+            }
+          },
+          {
+            "name": "inputMintPubkey",
+            "type": "publicKey"
+          },
+          {
+            "name": "daoTreasuryLpTokenAccount",
+            "type": "publicKey"
+          },
+          {
+            "name": "lastRefreshTime",
+            "type": "i64"
+          },
+          {
+            "name": "refresh",
+            "type": {
+              "defined": "OldRefreshParams"
+            }
+          },
+          {
+            "name": "currentTvl",
+            "type": "u64"
+          },
+          {
+            "name": "rewardsSum",
+            "type": "u64"
+          },
+          {
+            "name": "previousLpPrice",
+            "type": {
+              "defined": "OldLpPrice"
+            }
+          },
+          {
+            "name": "protocols",
+            "type": {
+              "vec": {
+                "defined": "OldProtocolData"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "VaultAccount",
       "type": {
         "kind": "struct",
@@ -1425,6 +1524,176 @@
     }
   ],
   "types": [
+    {
+      "name": "OldBumps",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "vault",
+            "type": "u8"
+          },
+          {
+            "name": "lpTokenMint",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "OldRefreshParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "minElapsedTime",
+            "type": "i64"
+          },
+          {
+            "name": "minDepositLamports",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "OldProtocolData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "hashPubkey",
+            "type": {
+              "defined": "OldHashPubkey"
+            }
+          },
+          {
+            "name": "weight",
+            "type": "u32"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "rewards",
+            "type": {
+              "defined": "OldAccumulatedRewards"
+            }
+          },
+          {
+            "name": "protocolId",
+            "type": "u8"
+          },
+          {
+            "name": "padding",
+            "type": {
+              "array": [
+                "u8",
+                31
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "OldHashPubkey",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "hashDeposit",
+            "type": {
+              "array": [
+                "u8",
+                16
+              ]
+            }
+          },
+          {
+            "name": "hashWithdraw",
+            "type": {
+              "array": [
+                "u8",
+                16
+              ]
+            }
+          },
+          {
+            "name": "hashTvl",
+            "type": {
+              "array": [
+                "u8",
+                16
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "OldAccumulatedRewards",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "lastSlot",
+            "type": "u64"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "depositedAvgWad",
+            "type": "u128"
+          },
+          {
+            "name": "depositedIntegral",
+            "type": {
+              "defined": "OldSlotIntegrated"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "OldSlotIntegrated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "initialSlot",
+            "type": "u64"
+          },
+          {
+            "name": "lastSlot",
+            "type": "u64"
+          },
+          {
+            "name": "accumulator",
+            "type": "u128"
+          }
+        ]
+      }
+    },
+    {
+      "name": "OldLpPrice",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "totalTokens",
+            "type": "u64"
+          },
+          {
+            "name": "mintedTokens",
+            "type": "u64"
+          }
+        ]
+      }
+    },
     {
       "name": "Bumps",
       "type": {

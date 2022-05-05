@@ -85,9 +85,9 @@ impl<'info> RefreshWeights<'info> {
                 .map_err(|_| ErrorCode::MathOverflow)?;
 
             if lp_fee > 0 {
-                let seeds = generate_seeds!(self.vault_account);
-                let signer = &[&seeds[..]];
-                token::mint_to(self.mint_lps_to_treasury_ctx().with_signer(signer), lp_fee)?;
+                //let seeds = generate_seeds!(self.vault_account);
+                //let signer = &[&seeds[..]];
+                //token::mint_to(self.mint_lps_to_treasury_ctx().with_signer(signer), lp_fee)?;
 
                 self.vault_account.current_tvl = self
                     .vault_account
