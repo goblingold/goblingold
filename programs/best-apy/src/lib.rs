@@ -61,6 +61,13 @@ pub mod best_apy {
         instructions::set_hashes::handler(ctx, protocol_id, hashes)
     }
 
+    /// Set protocol tvl and LP prices after migration
+    #[access_control(is_admin(ctx.accounts.user_signer.key))]
+    pub fn set_tvl_and_prices(ctx: Context<SetTVLAndPrices>) -> Result<()> {
+        instructions::set_tvl_and_prices::handler(ctx)
+    }
+
+    /// Transfer the funds to the new vault
     #[access_control(is_admin(ctx.accounts.user_signer.key))]
     pub fn vault_transfer(ctx: Context<VaultTransfer>) -> Result<()> {
         instructions::vault_transfer::handler(ctx)
