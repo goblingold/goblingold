@@ -1540,7 +1540,7 @@
           },
           {
             "name": "amount",
-            "type": "u64"
+            "type": "i64"
           },
           {
             "name": "depositedAvgWad",
@@ -1634,7 +1634,7 @@
         },
         {
           "name": "rewards",
-          "type": "u64",
+          "type": "i64",
           "index": false
         },
         {
