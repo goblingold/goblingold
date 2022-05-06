@@ -30,10 +30,10 @@ const ADMIN_PUBKEY: Pubkey = Pubkey::new_from_array([
 ]);
 
 // 8XhNoDjjNoLP5Rys1pBJKGdE8acEC1HJsWGkfkMt6JP1
-//const TREASURY_PUBKEY: Pubkey = Pubkey::new_from_array([
-//    111, 222, 226, 197, 174, 64, 51, 181, 235, 205, 56, 138, 76, 105, 173, 158, 191, 43, 143, 141,
-//    91, 145, 78, 45, 130, 86, 102, 175, 146, 188, 82, 152,
-//]);
+const TREASURY_PUBKEY: Pubkey = Pubkey::new_from_array([
+    111, 222, 226, 197, 174, 64, 51, 181, 235, 205, 56, 138, 76, 105, 173, 158, 191, 43, 143, 141,
+    91, 145, 78, 45, 130, 86, 102, 175, 146, 188, 82, 152,
+]);
 
 #[program]
 pub mod best_apy {

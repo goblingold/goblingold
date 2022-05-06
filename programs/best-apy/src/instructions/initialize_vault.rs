@@ -1,5 +1,5 @@
 use crate::vault::{Bumps, InitVaultAccountParams, VaultAccount};
-use crate::ADMIN_PUBKEY;
+use crate::{ADMIN_PUBKEY, TREASURY_PUBKEY};
 use crate::{VAULT_ACCOUNT_SEED, VAULT_LP_TOKEN_MINT_SEED};
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::pubkey::Pubkey;
@@ -31,7 +31,7 @@ pub struct InitializeVault<'info> {
         init,
         payer = user_signer,
         mint::decimals = input_token_mint_address.decimals,
-        mint::authority = vault_account.key(),
+        mint::authority = ADMIN_PUBKEY,
         seeds = [VAULT_LP_TOKEN_MINT_SEED, vault_account.key().as_ref()],
         bump,
     )]
@@ -43,7 +43,7 @@ pub struct InitializeVault<'info> {
         associated_token::authority = dao_treasury_owner,
     )]
     pub dao_treasury_lp_token_account: Account<'info, TokenAccount>,
-    #[account(constraint = dao_treasury_owner.key == &ADMIN_PUBKEY)]
+    #[account(constraint = dao_treasury_owner.key == &TREASURY_PUBKEY)]
     /// CHECKED: address is checked
     pub dao_treasury_owner: AccountInfo<'info>,
     pub system_program: Program<'info, System>,
