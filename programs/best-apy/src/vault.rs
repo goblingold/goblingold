@@ -21,6 +21,9 @@ pub struct VaultAccount {
     /// Vault version
     pub version: u8,
 
+    /// This vault is paused
+    pub is_paused: bool,
+
     /// Account seed number
     pub seed_number: u8,
 
@@ -54,6 +57,7 @@ pub struct VaultAccount {
 
 impl VaultAccount {
     pub const SIZE: usize = 1
+        + 1
         + 1
         + Bumps::SIZE
         + 32
