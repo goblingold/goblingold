@@ -5,7 +5,7 @@ use anchor_lang::prelude::*;
 use solana_maths::{U192, WAD};
 use std::{
     cmp::{self, Ordering},
-    convert::TryInto,
+    convert::{TryFrom, TryInto},
 };
 
 // not used yet, only one version available
@@ -20,6 +20,9 @@ pub const WEIGHTS_SCALE: u32 = 10_000;
 pub struct VaultAccount {
     /// Vault version
     pub version: u8,
+
+    /// This vault is paused
+    pub is_paused: bool,
 
     /// Account seed number
     pub seed_number: u8,
@@ -54,6 +57,7 @@ pub struct VaultAccount {
 
 impl VaultAccount {
     pub const SIZE: usize = 1
+        + 1
         + 1
         + Bumps::SIZE
         + 32
@@ -330,11 +334,13 @@ impl ProtocolData {
 
     /// Update the protocol tvl with the generated rewards
     pub fn update_tvl(&mut self) -> Result<()> {
-        self.amount = self
-            .amount
+        self.amount = i64::try_from(self.amount)
+            .unwrap()
             .checked_add(self.rewards.amount)
-            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
-        self.rewards.amount = 0_u64;
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?
+            .try_into()
+            .map_err(|_| ErrorCode::MathOverflow)?;
+        self.rewards.amount = 0_i64;
         Ok(())
     }
 
@@ -382,7 +388,7 @@ pub struct AccumulatedRewards {
     /// Last slot the rewards were accumulated
     pub last_slot: u64,
     /// Last accumulated rewards
-    pub amount: u64,
+    pub amount: i64,
     /// Slot-average deposited amount that generates these rewards
     pub deposited_avg_wad: u128,
     /// Slot-integrated deposited amount
@@ -393,7 +399,7 @@ impl AccumulatedRewards {
     pub const SIZE: usize = 8 + 8 + 16 + SlotIntegrated::SIZE;
 
     /// Update the rewards
-    pub fn update(&mut self, rewards: u64, deposited_amount: u64) -> Result<()> {
+    pub fn update(&mut self, rewards: i64, deposited_amount: u64) -> Result<()> {
         let current_slot = Clock::get()?.slot;
         self.last_slot = current_slot;
         self.amount = rewards;
