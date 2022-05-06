@@ -75,7 +75,12 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "accountNumber",
+          "type": "u8"
+        }
+      ]
     },
     {
       "name": "addProtocol",
@@ -527,57 +532,6 @@
       "args": []
     },
     {
-      "name": "solendInitialize",
-      "accounts": [
-        {
-          "name": "userSigner",
-          "isMut": false,
-          "isSigner": true
-        },
-        {
-          "name": "vaultAccount",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "vaultSolendObligationAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "solendLendingMarketAccount",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "solendProgramId",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "clock",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "rent",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "tokenProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": []
-    },
-    {
       "name": "solendDeposit",
       "accounts": [
         {
@@ -611,12 +565,7 @@
           "isSigner": false
         },
         {
-          "name": "vaultSolendDestinationCollateralTokenAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "vaultSolendObligationAccount",
+          "name": "vaultSolendCollateralTokenAccount",
           "isMut": true,
           "isSigner": false
         },
@@ -642,21 +591,6 @@
         },
         {
           "name": "solendDerivedLendingMarketAuthority",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "solendDestinationDepositReserveCollateralSupplySplTokenAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "solendPythPriceOracleAccount",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "solendSwitchboardPriceFeedOracleAccount",
           "isMut": false,
           "isSigner": false
         }
@@ -702,22 +636,12 @@
           "isSigner": false
         },
         {
-          "name": "vaultSolendDestinationCollateralTokenAccount",
+          "name": "vaultSolendCollateralTokenAccount",
           "isMut": true,
           "isSigner": false
         },
         {
-          "name": "vaultSolendObligationAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "solendSourceWithdrawReserveCollateralSupplySplTokenAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "solendWithdrawReserveAccount",
+          "name": "solendReserveAccount",
           "isMut": true,
           "isSigner": false
         },
@@ -763,58 +687,7 @@
           "isSigner": false
         },
         {
-          "name": "obligation",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": []
-    },
-    {
-      "name": "solendIsolatedPoolInitialize",
-      "accounts": [
-        {
-          "name": "userSigner",
-          "isMut": false,
-          "isSigner": true
-        },
-        {
-          "name": "vaultAccount",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "vaultSolendObligationAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "solendLendingMarketAccount",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "solendProgramId",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "clock",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "rent",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "tokenProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "systemProgram",
+          "name": "vaultSolendCollateralTokenAccount",
           "isMut": false,
           "isSigner": false
         }
@@ -855,12 +728,7 @@
           "isSigner": false
         },
         {
-          "name": "vaultSolendDestinationCollateralTokenAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "vaultSolendObligationAccount",
+          "name": "vaultSolendCollateralTokenAccount",
           "isMut": true,
           "isSigner": false
         },
@@ -886,21 +754,6 @@
         },
         {
           "name": "solendDerivedLendingMarketAuthority",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "solendDestinationDepositReserveCollateralSupplySplTokenAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "solendPythPriceOracleAccount",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "solendSwitchboardPriceFeedOracleAccount",
           "isMut": false,
           "isSigner": false
         }
@@ -946,22 +799,12 @@
           "isSigner": false
         },
         {
-          "name": "vaultSolendDestinationCollateralTokenAccount",
+          "name": "vaultSolendCollateralTokenAccount",
           "isMut": true,
           "isSigner": false
         },
         {
-          "name": "vaultSolendObligationAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "solendSourceWithdrawReserveCollateralSupplySplTokenAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "solendWithdrawReserveAccount",
+          "name": "solendReserveAccount",
           "isMut": true,
           "isSigner": false
         },
@@ -1007,73 +850,7 @@
           "isSigner": false
         },
         {
-          "name": "obligation",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": []
-    },
-    {
-      "name": "portInitialize",
-      "accounts": [
-        {
-          "name": "userSigner",
-          "isMut": false,
-          "isSigner": true
-        },
-        {
-          "name": "vaultAccount",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "vaultPortObligationAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "portLendingMarketAccount",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "vaultPortStakingAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "portLendingProgramId",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "portStakingProgramId",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "portStakingPoolAccount",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "tokenProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "clock",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "rent",
+          "name": "vaultSolendCollateralTokenAccount",
           "isMut": false,
           "isSigner": false
         }
@@ -1114,22 +891,7 @@
           "isSigner": false
         },
         {
-          "name": "portStakingProgramId",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
           "name": "vaultPortCollateralTokenAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "vaultPortObligationAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "vaultPortStakingAccount",
           "isMut": true,
           "isSigner": false
         },
@@ -1156,16 +918,6 @@
         {
           "name": "portLendingMarketAuthorityAccount",
           "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "portDestinationDepositCollateralAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "portStakingPoolAccount",
-          "isMut": true,
           "isSigner": false
         }
       ],
@@ -1210,27 +962,7 @@
           "isSigner": false
         },
         {
-          "name": "portStakingProgramId",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
           "name": "vaultPortCollateralTokenAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "vaultPortObligationAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "vaultPortStakingAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "portSourceCollateralAccount",
           "isMut": true,
           "isSigner": false
         },
@@ -1258,11 +990,6 @@
           "name": "portLendingMarketAuthorityAccount",
           "isMut": false,
           "isSigner": false
-        },
-        {
-          "name": "portStakingPoolAccount",
-          "isMut": true,
-          "isSigner": false
         }
       ],
       "args": []
@@ -1286,63 +1013,7 @@
           "isSigner": false
         },
         {
-          "name": "obligation",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": []
-    },
-    {
-      "name": "portClaimRewards",
-      "accounts": [
-        {
-          "name": "vaultAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "daoTreasuryOwner",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "portStakingProgramId",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "vaultPortStakingAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "vaultPortRewardsAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "portStakingPoolAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "portRewardsTokenPool",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "portRewardsAccountAuthority",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "tokenProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "clock",
+          "name": "vaultPortCollateralTokenAccount",
           "isMut": false,
           "isSigner": false
         }
@@ -1506,62 +1177,6 @@
         },
         {
           "name": "vaultTulipCollateralTokenAccount",
-          "isMut": true,
-          "isSigner": false
-        }
-      ],
-      "args": []
-    },
-    {
-      "name": "franciumInitialize",
-      "accounts": [
-        {
-          "name": "userSigner",
-          "isMut": false,
-          "isSigner": true
-        },
-        {
-          "name": "vaultAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "vaultFranciumCollateralTokenAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "franciumLendingRewardProgramId",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "franciumFarmingPoolAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "vaultFranciumFarmingAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "vaultFranciumAccountMintRewards",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "vaultFranciumAccountMintBRewards",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "rent",
           "isMut": false,
           "isSigner": false
         }
@@ -1597,37 +1212,12 @@
           ]
         },
         {
-          "name": "instructions",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
           "name": "franciumLendingProgramId",
           "isMut": false,
           "isSigner": false
         },
         {
-          "name": "franciumLendingRewardProgramId",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
           "name": "vaultFranciumCollateralTokenAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "vaultFranciumAccountMintRewards",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "vaultFranciumAccountMintBRewards",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "vaultFranciumFarmingAccount",
           "isMut": true,
           "isSigner": false
         },
@@ -1653,31 +1243,6 @@
         },
         {
           "name": "franciumLendingMarketAuthority",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "franciumFarmingPoolAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "franciumFarmingPoolAuthority",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "franciumFarmingPoolStakeTokenAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "franciumFarmingPoolRewardsTokenAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "franciumFarmingPoolRewardsBTokenAccount",
           "isMut": true,
           "isSigner": false
         }
@@ -1723,22 +1288,7 @@
           "isSigner": false
         },
         {
-          "name": "franciumLendingRewardProgramId",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
           "name": "vaultFranciumCollateralTokenAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "vaultFranciumAccountMintRewards",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "vaultFranciumFarmingAccount",
           "isMut": true,
           "isSigner": false
         },
@@ -1766,31 +1316,6 @@
           "name": "franciumLendingMarketAuthority",
           "isMut": true,
           "isSigner": false
-        },
-        {
-          "name": "franciumFarmingPoolAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "franciumFarmingPoolAuthority",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "franciumFarmingPoolStakeTokenAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "franciumFarmingPoolRewardsTokenAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "franciumFarmingPoolRewardsBTokenAccount",
-          "isMut": true,
-          "isSigner": false
         }
       ],
       "args": []
@@ -1814,7 +1339,7 @@
           "isSigner": false
         },
         {
-          "name": "farmingUser",
+          "name": "vaultFranciumCollateralTokenAccount",
           "isMut": false,
           "isSigner": false
         }
@@ -1830,6 +1355,14 @@
         "fields": [
           {
             "name": "version",
+            "type": "u8"
+          },
+          {
+            "name": "isPaused",
+            "type": "bool"
+          },
+          {
+            "name": "seedNumber",
             "type": "u8"
           },
           {
@@ -1868,6 +1401,15 @@
             "name": "previousLpPrice",
             "type": {
               "defined": "LpPrice"
+            }
+          },
+          {
+            "name": "padding",
+            "type": {
+              "array": [
+                "u64",
+                8
+              ]
             }
           },
           {
@@ -1921,6 +1463,10 @@
         "kind": "struct",
         "fields": [
           {
+            "name": "protocolId",
+            "type": "u8"
+          },
+          {
             "name": "hashPubkey",
             "type": {
               "defined": "HashPubkey"
@@ -1941,15 +1487,11 @@
             }
           },
           {
-            "name": "protocolId",
-            "type": "u8"
-          },
-          {
             "name": "padding",
             "type": {
               "array": [
-                "u8",
-                31
+                "u64",
+                5
               ]
             }
           }
@@ -2002,7 +1544,7 @@
           },
           {
             "name": "amount",
-            "type": "u64"
+            "type": "i64"
           },
           {
             "name": "depositedAvgWad",
@@ -2096,7 +1638,7 @@
         },
         {
           "name": "rewards",
-          "type": "u64",
+          "type": "i64",
           "index": false
         },
         {

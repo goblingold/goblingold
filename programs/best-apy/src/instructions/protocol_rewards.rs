@@ -5,13 +5,14 @@ use crate::VaultAccount;
 use crate::VAULT_ACCOUNT_SEED;
 use anchor_lang::prelude::*;
 use solana_maths::WAD;
+use std::convert::TryFrom;
 use std::convert::TryInto;
 
 #[event]
 pub struct ProtocolRewardsEvent {
     protocol_id: u8,
     token: Pubkey,
-    rewards: u64,
+    rewards: i64,
     lamports: u64,
     initial_slot: u64,
 }
@@ -43,7 +44,11 @@ pub fn handler<'info, T: ProtocolRewards<'info>>(
     let tvl = ctx.accounts.max_withdrawable()?;
 
     let protocol_data = ctx.accounts.protocol_data_as_mut(protocol_idx);
-    let rewards = tvl.saturating_sub(protocol_data.amount);
+    let rewards: i64 = i64::try_from(tvl)
+        .unwrap()
+        .checked_sub(i64::try_from(protocol_data.amount).unwrap())
+        .unwrap();
+
     protocol_data
         .rewards
         .update(rewards, protocol_data.amount)?;
@@ -71,7 +76,7 @@ pub fn handler<'info, T: ProtocolRewards<'info>>(
 pub struct GenericTVLAccounts<'info> {
     #[account(
         mut,
-        seeds = [VAULT_ACCOUNT_SEED, vault_account.input_mint_pubkey.as_ref()],
+        seeds = [VAULT_ACCOUNT_SEED, &[vault_account.seed_number][..], vault_account.input_mint_pubkey.as_ref()],
         bump = vault_account.bumps.vault
     )]
     pub vault_account: Box<Account<'info, VaultAccount>>,

@@ -31,7 +31,7 @@ describe("best_apy: solend-isolated-pool (USDC)", () => {
 
   it("Initialize solend isolated pool", async () => {
     const tx = new anchor.web3.Transaction()
-      .add(await program.initializeVault())
+      .add(await program.initializeVault(new anchor.BN(0)))
       .add(
         await program.methods
           .addProtocol(Protocols.SolendStablePool)

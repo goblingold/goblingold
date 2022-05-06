@@ -37,19 +37,7 @@ address = "8ezDtNNhX91t1NbSLe8xV2PcCEfoQjEm2qDVGjt3rjhg"
 address = "BLAFX12cDmsumyB6k3L6whJZqNqySaWeCmS5rVuzy3SS"
 
 [[test.validator.clone]]
-address = "DAkXbEKmiLtLKQWq9XNscsmjpkNsR18TfpcqnGNa9hTY"
-
-[[test.validator.clone]]
-address = "zqSd6GnFmEW6usPSR92aLHCm4JLKNGARUp8shTkyPBE"
-
-[[test.validator.clone]]
 address = "H6ARHf6YXhGYeQfUzQNGk6rDNnLBQKrenN712K4AQJEG"
-
-[[test.validator.clone]]
-address = "PoRTjZMPXb9T7dyU7tpLEZRQj7e6ssfAE62j2oQuc6y"
-
-[[test.validator.clone]]
-address = "6bUuedxRxLPjDELwt3x8enbhL1N3cJDTJQ1zxkhxd8u2"
 
 
 # solend
@@ -64,9 +52,6 @@ address = "5h6ssFpeDeRbzsEHDbTQNH7nVGgsKrZydxdSTnLm6QdV"
 
 [[test.validator.clone]]
 address = "4UpD2fh7xH3VP9QQaXtsS1YY3bxzWhtfpks7FatyKvdY"
-
-[[test.validator.clone]]
-address = "B1ATuYXNkacjjJS78MAmqu8Lu8PvEPt51u4oBasH1m1g"
 
 [[test.validator.clone]]
 address = "H6ARHf6YXhGYeQfUzQNGk6rDNnLBQKrenN712K4AQJEG"
@@ -106,21 +91,3 @@ address = "92Zst3rEoJsyZUW2yNc2811GtkBwFrm3tqgxMTtFWuSB"
 
 [[test.validator.clone]]
 address = "4XNif294wbrxj6tJ8K5Rg7SuaEACnu9s2L27i28MQB6E"
-
-[[test.validator.clone]]
-address = "G8MpQfTa18RcGK6xdKxKqG3u9NXWwqEMN3YM4MAFSukS"
-
-[[test.validator.clone]]
-address = "5Dwb6bW6nJ7tawnXXuJLRRsHnpDWrsQGMBNePsi2HHNc"
-
-[[test.validator.clone]]
-address = "CRmaS1yBemFcHAooAfRUM41ZCBpnM7FCRKi7x71YXnTj"
-
-[[test.validator.clone]]
-address = "CRmaS1yBemFcHAooAfRUM41ZCBpnM7FCRKi7x71YXnTj"
-
-[[test.validator.clone]]
-address = "Hjibp1cn2bSk1dkTdpbxez3YAiBGTLjzc8xZ8LbCCUHS"
-
-[[test.validator.clone]]
-address = "Hjibp1cn2bSk1dkTdpbxez3YAiBGTLjzc8xZ8LbCCUHS"

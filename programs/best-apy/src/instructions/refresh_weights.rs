@@ -5,7 +5,7 @@ use crate::{VAULT_ACCOUNT_SEED, VAULT_LP_TOKEN_MINT_SEED};
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::{program_option::COption, pubkey::Pubkey};
 use anchor_spl::token::{self, Mint, MintTo, Token, TokenAccount};
-use std::convert::TryInto;
+use std::convert::{TryFrom, TryInto};
 
 /// Maximum elapsed slots for computing the protocols TVL
 const MAX_ELAPSED_SLOTS_FOR_TVL: u64 = 30;
@@ -23,7 +23,7 @@ pub struct RefreshWeightsEvent {
 pub struct RefreshWeights<'info> {
     #[account(
         mut,
-        seeds = [VAULT_ACCOUNT_SEED, vault_account.input_mint_pubkey.as_ref()],
+        seeds = [VAULT_ACCOUNT_SEED, &[vault_account.seed_number][..], vault_account.input_mint_pubkey.as_ref()],
         bump = vault_account.bumps.vault
     )]
     pub vault_account: Box<Account<'info, VaultAccount>>,
@@ -140,10 +140,13 @@ pub fn handler(ctx: Context<RefreshWeights>) -> Result<()> {
         .vault_account
         .protocols
         .iter()
-        .try_fold(ctx.accounts.vault_account.rewards_sum, |acc, protocol| {
-            acc.checked_add(protocol.rewards.amount)
-        })
-        .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+        .try_fold(
+            i64::try_from(ctx.accounts.vault_account.rewards_sum).unwrap(),
+            |acc, protocol| acc.checked_add(protocol.rewards.amount),
+        )
+        .ok_or_else(|| error!(ErrorCode::MathOverflow))?
+        .try_into()
+        .unwrap();
 
     ctx.accounts.vault_account.update_protocol_weights()?;
     ctx.accounts

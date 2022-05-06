@@ -48,7 +48,7 @@ describe("best_apy (USDT)", () => {
       return indx === 0 ? WEIGHTS_SCALE - w * (len - 1) : w;
     });
 
-    const tx = await program.initializeVault();
+    const tx = await program.initializeVault(new anchor.BN(0));
     for (const protocol of PROTOCOLS) {
       tx.add(
         await program.methods

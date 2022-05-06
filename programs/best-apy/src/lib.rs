@@ -8,7 +8,6 @@ use protocols::{francium::*, mango::*, port::*, solend::*, tulip::*, Protocols};
 use vault::{RefreshParams, VaultAccount};
 
 mod check_hash;
-mod duplicated_ixs;
 mod error;
 mod instructions;
 mod macros;
@@ -17,7 +16,7 @@ mod vault;
 
 declare_id!("GGo1dnYpjKfe9omzUaFtaCyizvwpAMf3NhxSCMD61F3A");
 
-const PAUSED_DEPOSIT: bool = false;
+const PAUSED_DEPOSIT: bool = true;
 const PAUSED_WITHDRAW: bool = true;
 
 const VAULT_ACCOUNT_SEED: &[u8; 5] = b"vault";
@@ -41,8 +40,8 @@ pub mod best_apy {
 
     /// Initialize the vault account and its fields
     #[access_control(is_admin(ctx.accounts.user_signer.key))]
-    pub fn initialize_vault(ctx: Context<InitializeVault>) -> Result<()> {
-        instructions::initialize_vault::handler(ctx)
+    pub fn initialize_vault(ctx: Context<InitializeVault>, account_number: u8) -> Result<()> {
+        instructions::initialize_vault::handler(ctx, account_number)
     }
 
     /// Add a new protocol to the vault_account
@@ -114,12 +113,6 @@ pub mod best_apy {
         instructions::protocol_rewards::handler(ctx, Protocols::Mango)
     }
 
-    /// Solend: Initialize protocol accounts
-    #[access_control(is_admin(ctx.accounts.user_signer.key))]
-    pub fn solend_initialize(ctx: Context<SolendInitialize>) -> Result<()> {
-        instructions::protocol_initialize::handler(ctx)
-    }
-
     /// Solend: Deposit from the vault account
     #[access_control(ctx.accounts.check_hash(Protocols::Solend))]
     pub fn solend_deposit(ctx: Context<SolendDeposit>) -> Result<()> {
@@ -136,12 +129,6 @@ pub mod best_apy {
     #[access_control(ctx.accounts.check_hash(Protocols::Solend))]
     pub fn solend_tvl(ctx: Context<SolendTVL>) -> Result<()> {
         instructions::protocol_rewards::handler(ctx, Protocols::Solend)
-    }
-
-    /// Solend: Initialize protocol accounts
-    #[access_control(is_admin(ctx.accounts.user_signer.key))]
-    pub fn solend_isolated_pool_initialize(ctx: Context<SolendInitialize>) -> Result<()> {
-        instructions::protocol_initialize::handler(ctx)
     }
 
     /// SolendIsolatedPool: Deposit from the vault account
@@ -162,12 +149,6 @@ pub mod best_apy {
         instructions::protocol_rewards::handler(ctx, Protocols::SolendStablePool)
     }
 
-    /// Port: Initialize protocol accounts
-    #[access_control(is_admin(ctx.accounts.user_signer.key))]
-    pub fn port_initialize(ctx: Context<PortInitialize>) -> Result<()> {
-        instructions::protocol_initialize::handler(ctx)
-    }
-
     /// Port: Deposit from the vault account
     #[access_control(ctx.accounts.check_hash(Protocols::Port))]
     pub fn port_deposit(ctx: Context<PortDeposit>) -> Result<()> {
@@ -184,11 +165,6 @@ pub mod best_apy {
     #[access_control(ctx.accounts.check_hash(Protocols::Port))]
     pub fn port_tvl(ctx: Context<PortTVL>) -> Result<()> {
         instructions::protocol_rewards::handler(ctx, Protocols::Port)
-    }
-
-    /// Port: Claim rewards
-    pub fn port_claim_rewards(ctx: Context<PortClaimRewards>) -> Result<()> {
-        protocols::port::claim_rewards(ctx)
     }
 
     /// Tulip: Deposit from the vault account
@@ -209,22 +185,16 @@ pub mod best_apy {
         instructions::protocol_rewards::handler(ctx, Protocols::Tulip)
     }
 
-    /// Francium: Initialize protocol accounts
-    #[access_control(is_admin(ctx.accounts.user_signer.key))]
-    pub fn francium_initialize(ctx: Context<FranciumInitialize>) -> Result<()> {
-        instructions::protocol_initialize::handler(ctx)
-    }
-
     /// Francium: Deposit from the vault account
     #[access_control(ctx.accounts.check_hash(Protocols::Francium))]
     pub fn francium_deposit(ctx: Context<FranciumDeposit>) -> Result<()> {
-        instructions::protocol_deposit_2_ixs::handler(ctx, Protocols::Francium)
+        instructions::protocol_deposit::handler(ctx, Protocols::Francium)
     }
 
     /// Francium: Withdraw to the vault account
     #[access_control(ctx.accounts.check_hash(Protocols::Francium))]
     pub fn francium_withdraw(ctx: Context<FranciumWithdraw>) -> Result<()> {
-        instructions::protocol_withdraw_2_ixs::handler(ctx, Protocols::Francium)
+        instructions::protocol_withdraw::handler(ctx, Protocols::Francium)
     }
 
     /// Francium: Compute the TVL
