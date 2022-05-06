@@ -1358,6 +1358,10 @@
             "type": "u8"
           },
           {
+            "name": "isPaused",
+            "type": "bool"
+          },
+          {
             "name": "seedNumber",
             "type": "u8"
           },
