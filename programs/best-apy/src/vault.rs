@@ -124,7 +124,13 @@ impl VaultAccount {
         let rewards: Vec<u128> = self
             .protocols
             .iter()
-            .map(|protocol| protocol.rewards.amount as u128)
+            .map(|protocol| {
+                if protocol.rewards.amount < 0 {
+                    0_u128
+                } else {
+                    u128::try_from(protocol.rewards.amount).unwrap()
+                }
+            })
             .collect();
 
         let total_deposit: u128 = deposit
