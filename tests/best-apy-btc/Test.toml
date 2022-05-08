@@ -1,0 +1,75 @@
+extends = ["../../Anchor.toml"]
+
+[scripts]
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/best-apy-usdt/**/*.ts"
+
+# BTC_mint
+[[test.validator.clone]]
+address = "9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E"
+
+# BTC_ata for DrrB1 with 10^12 lamports
+[[test.validator.account]]
+address = "C3s7DKRLsr4YjdzDeKvQW47BoKcD8QzzThRNqV9Z71qm"
+filename = "../accounts/C3s7DKRLsr4YjdzDeKvQW47BoKcD8QzzThRNqV9Z71qm.json"
+
+# mango
+[[test.validator.clone]]
+address = "EBDRoayCDDUvDgCimta45ajQeXbexv7aKqJubruqpyvu"
+[[test.validator.clone]]
+address = "98pjRuQjK3qA6gXts96PqZT4Ze5QmnCmt3QYjhbUSPue"
+[[test.validator.clone]]
+address = "9BVcYqEQxyccuwznvxXqDkSJFavvTyheiTYk231T1A8S"
+[[test.validator.clone]]
+address = "7CfvGCV7qMf7im7mcqftZxQZGTweGappvL1maH7PMZ3Q"
+[[test.validator.clone]]
+address = "8VwAANqu3t4KQKpMq7wrS6yg5GTHwJBFsrK4Tk2cFN3q"
+[[test.validator.clone]]
+address = "F5Y6KhypBcCZ9MvyHvWhaXtbdcBs3YKrTAhwoycDtyPV"
+
+# port
+[[test.validator.clone]]
+address = "6T4XxKerq744sSuj3jaoV6QiZ8acirf4TrPwQzHAoSy5"
+[[test.validator.clone]]
+address = "DSST29PMCVkxo8cf5ht9LxrPoMc8jAZt98t6nuJywz8p"
+[[test.validator.clone]]
+address = "QN2HkkBaWHfYSU5bybyups9z1UHu8Eu7QeeyMbjD2JA"
+[[test.validator.clone]]
+address = "FZKP27Zxz9GbW86hhq3d1egzpBH5ZnYkyjQZVf86NQJ8"
+[[test.validator.clone]]
+address = "GVXRSBjFk6e6J3NbVPXohDJetcTjaeeuykUpbQF8UoMU"
+
+# solend
+[[test.validator.clone]]
+address = "GYzjMCXTDue12eUGKKWAqtF5jcBYNmewr6Db6LaguEaX"
+[[test.validator.clone]]
+address = "4jkyJVWQm8NUkiJFJQx6ZJQhfKLGpeZsNrXoT4bAPrRv"
+[[test.validator.clone]]
+address = "Gqu3TFmJXfnfSX84kqbZ5u9JjSBVoesaHjfTsaPjRSnZ"
+[[test.validator.clone]]
+address = "4UpD2fh7xH3VP9QQaXtsS1YY3bxzWhtfpks7FatyKvdY"
+[[test.validator.clone]]
+address = "GVXRSBjFk6e6J3NbVPXohDJetcTjaeeuykUpbQF8UoMU"
+[[test.validator.clone]]
+address = "74YzQPGUT9VnjrBz8MuyDLKgKpbDqGot5xZJvTtMi6Ng"
+
+# tulip
+[[test.validator.clone]]
+address = "D1cqtVThyebK9KXKGXrCEuiqaNf5L4UfM1vHgCqiJxym"
+[[test.validator.clone]]
+address = "5CXZ2xKG1i2w3fBXsCEC6zhpK5j164gxJ3bzhyoRB3ZP"
+[[test.validator.clone]]
+address = "dW1q2V7uooHkYBVQ5a6zdKiZVJ4qNWrRqEYy5NmyLoW"
+[[test.validator.clone]]
+address = "5HtZVJNr4GnQuvcbjj6nVX4EQZod8ptazaKSfFvZgRzC"
+[[test.validator.clone]]
+address = "G5V7t3ZHTUGi6xGfk5nc42P1iRkNN3JhaFwFXkvyDmz5"
+
+# francium
+[[test.validator.clone]]
+address = "DxAuEAxKYXsKMYG5Ma4TM8AsrAo7LQBSnbEGicU7i1ek"
+[[test.validator.clone]]
+address = "2MN34BxuLVrjZpKYKHmW1c6ZGeQs4aWQRrEvmrYfZdtG"
+[[test.validator.clone]]
+address = "2G9iwy9zfLaXB2bFiqSA7YbKEvtAEXVmdvGTF28jQVgg"
+[[test.validator.clone]]
+address = "4XNif294wbrxj6tJ8K5Rg7SuaEACnu9s2L27i28MQB6E"

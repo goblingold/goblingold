@@ -1,0 +1,843 @@
+
+Address: BnQ4ypJJk9aJuMiQFgLsZek3HftCnFZm97Q8vcAtFdho
+Balance: 1
+Mint: 2EgUJGmAN4shg5P1FwwAeMWeLFkU4HXa69ZxPa7eQgEQ
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+
+Address: 2WToPKsFzf31ZVdzfZ7sq21non8CkDs6jMapAjyENn2D
+Balance: 0.000004
+Mint: 2Kc38rfQ49DFaKHQaWbijkE7fcymUMLY5guUiUsDmFfn
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+
+Address: AQZEk2e51JYM6v9krixZKhfrt6NKE5ZcGPr5Ub2rFqwx
+Balance: 0
+Mint: 2nPG7acLPiH5veTGkEAWZ6TgiXCgSjZBNYobmQip5vGi
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+
+Address: Ew1wbbf6dG4GwH9wzGL2CtzPXQTGJGixrsd7nHmhLFUT
+Balance: 0
+Mint: 2y1ftrjiEyp57Nn9t3zBPiSEqnGKCTQhCMaSKACYBnco
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+
+Address: DdAywbt9zbQVnTTgCb4QnTLNQ5BZShtajVKocfEDwTaa
+Balance: 1
+Mint: 2znw8JBTW1w2HBNiRwsTpbunjZVZ3uiGdHUt9M72i2oN
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+
+Address: AXcYUV2hiMAgHw8Hcb5HNGUXpCbefPEDyPe8Gad9LB7N
+Balance: 500
+Mint: 3Fxu8FTfvH3UEFXKJQ5fiS1KAzdDG6utZy3uYBYHcXmU
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+
+Address: 8VTajARhMY1LdjHZGoGAFpDeJpiEnixYSxuKtBkXKJKr  (Aux*)
+Balance: 0.280611
+Mint: 3Fxu8FTfvH3UEFXKJQ5fiS1KAzdDG6utZy3uYBYHcXmU
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+* Please run `spl-token gc` to clean up Aux accounts
+
+
+Address: 6JbKyvjy8VRC9LaDcWAoWH2rhwawL7f3csttMHTwojBw
+Balance: 0
+Mint: 3JFC4cB56Er45nWVe29Bhnn5GnwQzSmHVf6eUq9ac91h
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+
+Address: 2JzrZYoRfW22uEXX3ubXotiR73zzvgyx2tuZmFpkeEZp
+Balance: 27.692863
+Mint: 3XHMExk25PEY4mBSyNGmjTePvirMytzoHemCymXftvfR
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+
+Address: 51PvAfuecDkeD5ubVFpagQazPmAcACEd46i1rUpCkrvR  (Aux*)
+Balance: 0
+Mint: 3XHMExk25PEY4mBSyNGmjTePvirMytzoHemCymXftvfR
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+* Please run `spl-token gc` to clean up Aux accounts
+
+
+Address: F4Gghpk3fdMkR4hs9goEU4AhzUfdzL5vqXnwRJwWRtkP
+Balance: 0
+Mint: 3rj8j7uXNb92P9k4KjRS8xb9GpyNBnavfGwt6weGQCzt
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+
+Address: 4pFn1g1KtiFQgP7Lc1zdHHu8DdT2dbQDhxadTmiy3x6j
+Balance: 0
+Mint: 41QjLJeujusXHG24KMAyxaozBht7Z4AtLY5tmgUGbEbv
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+
+Address: ELRrgFWeBsUQuShvBUDfXoGHnbXQbrBBp3g6UgcY4Xoo  (Aux*)
+Balance: 0
+Mint: 47xndLR9g4fKZPKkLiGbrNURBKyZneaWomhJvRrRZPQg
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+* Please run `spl-token gc` to clean up Aux accounts
+
+
+Address: Dgk2fXjprKnjFDAJgdWJetBqYq26PiAzwWHMrnmRnASf  (Aux*)
+Balance: 0
+Mint: 487CS4wCgPAd7Rx3586yUv3rVhhGLTEjV572pq8MPfTj
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+* Please run `spl-token gc` to clean up Aux accounts
+
+
+Address: Dfw4vRtwTgWSM68RoB9W3NxuqVpQnanX7AvvSnie5RKg
+Balance: 0.002401
+Mint: 4U2RiKVyZmowFW72ojBkQLeMDPbL9sNm2udicREBnxyy
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+
+Address: H9qHRiG1xgZfNHBndNvLPydsqeF1VeGr1mWLHxGQHeo8  (Aux*)
+Balance: 0
+Mint: 4U2RiKVyZmowFW72ojBkQLeMDPbL9sNm2udicREBnxyy
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+* Please run `spl-token gc` to clean up Aux accounts
+
+
+Address: 2Joismky2qMoXXbgRK9fd1UPKVyPFwVBEmtyrw35FujF
+Balance: 0
+Mint: 5h6ssFpeDeRbzsEHDbTQNH7nVGgsKrZydxdSTnLm6QdV
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+
+Address: 9GxBbuNUmfTbktLJFRmrpzHhQzsfmwcMHWgVB98ezgVE
+Balance: 27.692863
+Mint: 6JC9vFueQuj45N2eusmL6cxKT6wyY2rymBkcKWtowEAo
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+
+Address: 2eZRcWJFHYci6SEb6sT2KcHYEEGgTbHNF44uvi56Z4Ea
+Balance: 0
+Mint: 6VYF5jXq6rfq4QRgGMG6co7b1Ev1Lj7KSbHBxfQ9e1L3
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+
+Address: BoVmFjfoNKo8K6buWz2Poyh5UYS1MZtp6PckpSbrhuo7
+Balance: 0
+Mint: 6qcipRABGCPWSFrtZkgqi3qY1onoqWPBQTkUJDhApL2w
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+
+Address: CimaRXG6ZSJ7piPj2H3GHe9KjKWqnRhJUrdJNjQy7J5v  (Aux*)
+Balance: 0
+Mint: 7iVhKAZhToiewok1VyDSVT2L8SJuvWAxvdd2oH7HC6um
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+* Please run `spl-token gc` to clean up Aux accounts
+
+
+Address: 4BcTVRoCd4GxSmCUpX24gWS3aK4cx8T2dYpzvPMjTZbs
+Balance: 0.000505783
+Mint: 7o65ELtrx8B6oQ1HVbAcGbbDWguJnyoFPUL9PBWAymZY
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+
+Address: ANsxoBkFkmWPvQQ82D9SyQvvSLQAvWqdWjMUadAQsHos
+Balance: 0.099943
+Mint: 81Kz1BPg98xPsGMS8AtqVuC5eJDLyTi4Q4RNQUTRUVPi
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+
+Address: BM79iFGHkDnqV5XRDJRGGRhA2vU92dG2m1AQ93wbV8Dh
+Balance: 2
+Mint: 8PYkbcenAWxniMCPKAAuQyxpvnw681nL9nJjwTHA6c7j
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+
+Address: AgVBCg8g8P8UroLEUXpffoqRmZ5HrM6x6fSuaAVKB36o  (Aux*)
+Balance: 0
+Mint: 8VaXX1v4DuucAKMB28XynbcvCe2YxPN79qAs51YB9W1G
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+* Please run `spl-token gc` to clean up Aux accounts
+
+
+Address: AEQTdkRsqudkFSgUxJoA5NcHauiSj7ZQMxmBec6YYkFL
+Balance: 0
+Mint: 8ezDtNNhX91t1NbSLe8xV2PcCEfoQjEm2qDVGjt3rjhg
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+
+Address: 6nz1dmoC4ku2ZQm7zNuo48XPREjnoLQGmzftL1fw25Nz
+Balance: 2500
+Mint: 8s5dCP5kzDVpNcar6vdQ4J4Mddwah3mWXr9E59Aj6CH2
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+
+Address: 5vz7PqoiKEZZa58N31fSQucudJp6rfGeqkzds8m9uxeV  (Aux*)
+Balance: 0.332177
+Mint: 8s5dCP5kzDVpNcar6vdQ4J4Mddwah3mWXr9E59Aj6CH2
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+* Please run `spl-token gc` to clean up Aux accounts
+
+
+Address: F8BsMaZ3VwLjQsL3dvEUVsKnBpPXPLs5V2CubGxju5KF
+Balance: 0
+Mint: 993dVFL2uXWYeoXuEBFXR4BijeXdTv4s6BzsCjJZuwqk
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+
+Address: CGc1bd3UQqYJJintU2dFREAJScQzkGTFJrjkG32CGfi9
+Balance: 0
+Mint: 9RMokyCcYaun3HVxkZZEFcoKM4jkinArNZNZfJjUFefL
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+
+Address: 5KmvBsthC2jNrN1MWkwYspMzCgdvQyyzDKf3C8A3JetG
+Balance: 0
+Mint: A5LLdgFtZJbFsijgmvhz2xLLkVVozm2hFTMR4W5Uv65o
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+
+Address: AwQb9EPbKtVEMbkk6KWhxgmqByYwBEKRfsAKcFRZsKE8  (Aux*)
+Balance: 0.000003
+Mint: A5LLdgFtZJbFsijgmvhz2xLLkVVozm2hFTMR4W5Uv65o
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+* Please run `spl-token gc` to clean up Aux accounts
+
+
+Address: 3G27x9FxuEB5uC8sRPAKJp212PEtUDPYgp7xaHcY7HG4  (Aux*)
+Balance: 0
+Mint: AF7o7skLi84ZpmrYqchQms1rSKDu875BppQyfKedfzrq
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+* Please run `spl-token gc` to clean up Aux accounts
+
+
+Address: 8i5fyGPaa6Yqf73EScmePVWcQuVRLWHW7NDnTmRkaFAD
+Balance: 0
+Mint: Amig8TisuLpzun8XyGfC5HJHHGUQEscjLgoTWsCCKihg
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+
+Address: 8SDHFRfs3jxT6g4FtDANbsxgpLhrY5vZKXKihoYbv4YD
+Balance: 264.420015
+Mint: BCFYHst7MWJAmcM7zq2bd1WoFHhBcdtB3syuu9bQY5wR
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+
+Address: djZ5b29W2g73HAg14S7U3BxSxx6gPGW2b67o2UMjszk  (Aux*)
+Balance: 0
+Mint: BCFYHst7MWJAmcM7zq2bd1WoFHhBcdtB3syuu9bQY5wR
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+* Please run `spl-token gc` to clean up Aux accounts
+
+
+Address: 5G94FKiGMQ5Yzafqv6pkEKkigwZNDi78DNRD92Fjd2dv
+Balance: 1001.063768
+Mint: BVtr3CoLdR3frnUqJNRQxhepdHnXAC8B6cBHngZuabtB
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+
+Address: 7yQLQprf9K4d5HUaDVJkrZLzf9TpUG5Q2zZV2EjhxPCD
+Balance: 1.324072324
+Mint: BhxkMZCx6nMhiSC53Cbb9rbro3SBwDoopzdCquqJeHpJ
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+
+Address: 8bPzgFyqevQomLc8bL3mTFb181WHPeiwftJUfc7anpzY
+Balance: 0
+Mint: CkbXFBmjM3J99yjxbRRYKQkmaV7o34Ho7jF3ZHryArgQ
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+
+Address: ENTjeBK9FnhdRTDJxBfS7jSGxWebQUTGiVN9z1jvUEwe
+Balance: 0
+Mint: Cq3Kc9Atjnwwwp5oCn61nw2GK8MAaSCYfYYPYVSicVrg
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+
+Address: FpeKxiTxo6MksKSpyHRUSbBCEmLGVZBDBxVTsRXr84jo  (Aux*)
+Balance: 0.000001
+Mint: Cq3Kc9Atjnwwwp5oCn61nw2GK8MAaSCYfYYPYVSicVrg
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+* Please run `spl-token gc` to clean up Aux accounts
+
+
+Address: 7xeRprjLyvVwNvXFk3cg3gJThyF7xpvDwq1uEijudiPK
+Balance: 4
+Mint: DL23jAY3qCG7G9W1fSQETzMjLmwUL9hKmiwEedCDK9ww
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+
+Address: CSu3Hv1sRoNx9eP6UReH3TETHsyjqF3UkHLu5zEDwHZ
+Balance: 0
+Mint: DRw3ckDiL8HFRjpeCfqNRoWqc3e7F85bZ4dDxAvCRnFa
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+
+Address: HAAwy6H3i9xuat9rmMP29sYNijMKPfk4ExGrPtGUFzYJ  (Aux*)
+Balance: 0.000001
+Mint: DRw3ckDiL8HFRjpeCfqNRoWqc3e7F85bZ4dDxAvCRnFa
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+* Please run `spl-token gc` to clean up Aux accounts
+
+
+Address: ELNTVbkEKVYKW1UZztkBX8Nc16AU4esqXyYDiQEHZTF5  (Aux*)
+Balance: 0
+Mint: Diff1xasPinumto36rghVL5Ad8sftGTQFRrGyXKcgpVs
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+* Please run `spl-token gc` to clean up Aux accounts
+
+
+Address: HBuwtQUxvQAcge4GgMWMTErx5wAXfi5WgtZSmMJG687H  (Aux*)
+Balance: 0
+Mint: DoznZvhoLTNUj8Sp1Ngw8J87VHVERfsMgq9K3Lt2uZJ3
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+* Please run `spl-token gc` to clean up Aux accounts
+
+
+Address: EBGMdsqDB6Rz2fZrV9yNdYMjpAHBoW6zsib5huTPTnha
+Balance: 0
+Mint: Dt1Cuau5m5CSmun8hZstjEh9RszxAmejnq7ZaHNcuXfA
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+
+Address: CL6TVscze5qrzhb9vJjydDWxj8dB2kj5YUAK5j1s2cAW
+Balance: 12.397427
+Mint: EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+
+Address: AVKUyQCr84aRXJ5kdcHRY4hr7RVujBEz3DGRmcgV9MQV
+Balance: 0.264420015
+Mint: Eaz9Q3jBv3fR3Mq2DsJWQ4TqDaGhsBcq3XoQWahnEwFd
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+
+Address: E94CjPBZsVkB6Us57tZMj31j82ETortWwTQPtFmz5qJj
+Balance: 0
+Mint: F2fdt668xsRxkpgGBobip6zn18h9jduyMTXLxJ9vytJ5
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+
+Address: BVY5Biop6zR5Mu9DywJdUTX94b5XZpwjb1LjWu5eqSte  (Aux*)
+Balance: 0.000249
+Mint: F2fdt668xsRxkpgGBobip6zn18h9jduyMTXLxJ9vytJ5
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+* Please run `spl-token gc` to clean up Aux accounts
+
+
+Address: BaTPtp4ii46utB4nmwjohytrXY47ngFQpLjusNVX6gr8
+Balance: 0.000002
+Mint: F3mtK3vEDhfoSTTd8vGaA62CjCni5UxWgeyfgjFFeqLW
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+
+Address: 91qfoo8xQ2AsKuD81YcMEV9RxSJ8APcYZBvHU5b8MUc9  (Aux*)
+Balance: 0.000004
+Mint: F3mtK3vEDhfoSTTd8vGaA62CjCni5UxWgeyfgjFFeqLW
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+* Please run `spl-token gc` to clean up Aux accounts
+
+
+Address: AXSz41nADkxjk9jsiAvHzC5hqxQPZSiMF5BEHVHbu3ru  (Aux*)
+Balance: 0
+Mint: FSLMCVhzXnFAAKiPeRhunHz6efBswQCk7o7b6yw4EYNW
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+* Please run `spl-token gc` to clean up Aux accounts
+
+
+Address: GxP883pgYeLL7GGFnuC3jY67X5b7GSPKuTcVEBGNE9nL
+Balance: 0
+Mint: FgSsGV8GByPaMERxeQJPvZRZHf7zCBhrdYtztKorJS58
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+
+Address: 2dkxKzRYDvcMRiWt3b6fbHqH1Gb9wby88oHAYwka6Dea
+Balance: 0
+Mint: FmF8nPbmSBENygBQouGwynCJP25TEPYSQVTLmvupGfY1
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+
+Address: 3px3wLuy3fr2q6M59hRdvqp9kXvskzDUYr91PUnKGJkk
+Balance: 0
+Mint: G9RHadzZnQh4jEemkn8CGFhdVZ4kiQ1sfLssyQpDTmND
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+
+Address: 3D7mTfavpxQ7gvMgGktvEgdA8Lq9SqiLG3NGt9Wi7rXz  (Aux*)
+Balance: 0
+Mint: GGFiWEK1ECpxoipho5V9XzGVpXDmdPBPKorqitTHUNtU
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+* Please run `spl-token gc` to clean up Aux accounts
+
+
+Address: 4M6dyufRhL1dUu5WdafjDz55vi5rkDpBT6VxhS34uzhi
+Balance: 2500
+Mint: GoNbiy44nD5hKeDKbPo1WA2bGAhFC98m6Vk5z7T4FcHo
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+
+Address: E62FsHdGU5WgApvBmSUfCJjiKQKeDKvMGm8xZKwutbx3  (Aux*)
+Balance: 1.927424
+Mint: GoNbiy44nD5hKeDKbPo1WA2bGAhFC98m6Vk5z7T4FcHo
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+* Please run `spl-token gc` to clean up Aux accounts
+
+
+Address: HxDJa2DLK8yByvFLdv8fYgJwyR5xRWzQ8eLgKUs9ckYT  (Aux*)
+Balance: 0
+Mint: H29dGFRgvHY3uwxTD6xcHv4AToSMEugL2gB4rzf7DqUA
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+* Please run `spl-token gc` to clean up Aux accounts
+
+
+Address: DPFYJh4N8fAiW9QwdqNskSNt2WxGfkz2nLj8112uEgAV
+Balance: 0.000002
+Mint: PoRTjZMPXb9T7dyU7tpLEZRQj7e6ssfAE62j2oQuc6y
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+
+Address: 5RZaTxKG5zm1jqqqtVjcZ2eLV8Efkiwxu3XjcTbmudxV
+Balance: 0
+Mint: SUNNYWgPQmFxe9wTZzNK7iPnJ3vYDrkgnxJRJm1s3ag
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+
+Address: 2yvJNw3bcmMfuJqvVTJKN88ubwtCXDxoqkZgcdbAXWGP
+Balance: 0
+Mint: Saber2gLauYim4Mvftnrasomsv6NvAuncvMEZwcLpD1
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+
+Address: HSukW1kCjGVS8TkgEJZS3vsfjeDqhWz35QdiBWTn8Phu  (Aux*)
+Balance: 0.003609151
+Mint: So11111111111111111111111111111111111111112 (native)
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+* Please run `spl-token gc` to clean up Aux accounts
+
+
+Address: AeT3yJZFK27EthrTmQLDG7o6AVHpR3QVaaZ9acGiYCMc  (Aux*)
+Balance: 0
+Mint: So11111111111111111111111111111111111111112 (native)
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+* Please run `spl-token gc` to clean up Aux accounts
+
+
+Address: FoMVUEcNPFP4ySjRtETnyN25kjWHxcosAmK3ZtKPcakP  (Aux*)
+Balance: 0
+Mint: So11111111111111111111111111111111111111112 (native)
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+* Please run `spl-token gc` to clean up Aux accounts
+
+
+Address: 5A7LarW6x1EknX92eg7Ap4xaAexZrkb6iVT9zqiUoYdG  (Aux*)
+Balance: 0
+Mint: So11111111111111111111111111111111111111112 (native)
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+* Please run `spl-token gc` to clean up Aux accounts
+
+
+Address: 5zn8TaUM6u6sk92y9Tg9JdNBccGR3pN9QfZLTafaFRbf  (Aux*)
+Balance: 0
+Mint: So11111111111111111111111111111111111111112 (native)
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+* Please run `spl-token gc` to clean up Aux accounts
+
+
+Address: 3USUSRsdSumMp6ML9JN1ZzBp87VmfwXquSmPq7TNQ7tS  (Aux*)
+Balance: 0
+Mint: So11111111111111111111111111111111111111112 (native)
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+* Please run `spl-token gc` to clean up Aux accounts
+
+
+Address: 9bzcJpDi61MPiVuLQWbmzAgyK2xieu7J4vPS4NsjC5xK  (Aux*)
+Balance: 0.021564268
+Mint: So11111111111111111111111111111111111111112 (native)
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+* Please run `spl-token gc` to clean up Aux accounts
+
+
+Address: 4Dk7CUMn2xdnY5PbvED3GhHuqq6KB4jCj6RxJFcEXrq1  (Aux*)
+Balance: 0.002218705
+Mint: So11111111111111111111111111111111111111112 (native)
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+* Please run `spl-token gc` to clean up Aux accounts
+
+
+Address: BfMjV7Ldt7tZEZyxzugbFwfJcdKQbAcEMo1fzWjfxQDY  (Aux*)
+Balance: 0
+Mint: So11111111111111111111111111111111111111112 (native)
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+* Please run `spl-token gc` to clean up Aux accounts
+
+
+Address: vQaRSbjQ219pDn8Sn1gTkwyG9dPyT42cmLZJPqBnSEE  (Aux*)
+Balance: 0
+Mint: So11111111111111111111111111111111111111112 (native)
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+* Please run `spl-token gc` to clean up Aux accounts
+
+
+Address: 8nYUmYW9bsgWKwFZgVYCaxHvnJTZSVGwbMwM46QvRtVE  (Aux*)
+Balance: 0.001469664
+Mint: So11111111111111111111111111111111111111112 (native)
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+* Please run `spl-token gc` to clean up Aux accounts
+
+
+Address: GeVq7Tjta2gvYspFQhYPo3DYjjvh4jGwz6u3BCkEhhMA  (Aux*)
+Balance: 0
+Mint: So11111111111111111111111111111111111111112 (native)
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+* Please run `spl-token gc` to clean up Aux accounts
+
+
+Address: 94Zjz1Wr8ySpGeCZJUSENs4f3a2tDkYP4gP2WB34jLSz  (Aux*)
+Balance: 0.001340381
+Mint: So11111111111111111111111111111111111111112 (native)
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+* Please run `spl-token gc` to clean up Aux accounts
+
+
+Address: BD7yeJJTRt5Ebi7ypwe3zMTHnBbr6ZZGyjvEowg47Zu5  (Aux*)
+Balance: 0.004407715
+Mint: So11111111111111111111111111111111111111112 (native)
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+* Please run `spl-token gc` to clean up Aux accounts
+
+
+Address: HpiCiHDAGHqMZjVocu2B47d2pgn5Pvpoi7cv5YMrjJpz  (Aux*)
+Balance: 0.00590981
+Mint: So11111111111111111111111111111111111111112 (native)
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+* Please run `spl-token gc` to clean up Aux accounts
+
+
+Address: 2rExikARM4c2pK21jETUiHp7FXR2xcBGbhUet2JMYpdv  (Aux*)
+Balance: 0
+Mint: So11111111111111111111111111111111111111112 (native)
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+* Please run `spl-token gc` to clean up Aux accounts
+
+
+Address: AvoaacxJRbDaYmfST4E6Nwj1U2rfnsPRu1ZMVjW1sYPb  (Aux*)
+Balance: 0
+Mint: So11111111111111111111111111111111111111112 (native)
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+* Please run `spl-token gc` to clean up Aux accounts
+
+
+Address: 3UfVJ14BYaRGFUMxk2E8EEWzFUHQhNPjhG7XChC2yWoY
+Balance: 2
+Mint: XzR7CUMqhDBzbAm4aUNvwhVCxjWGn1KEvqTp3Y8fFCD
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+
+Address: Gocm6EXB2SBs3tGowBWxrWRRFRAyAZyeZynVnFz1kDvJ
+Balance: 1324.072324
+Mint: YUBuEkMx2DzsEVp5m8LNQpXJpTQGLnHxGLW6ycx3tfq
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+
+Address: 6t25BRHd7wXH5mNmUrAr9Dqxf4mg316ZreouzDV7AKXN  (Aux*)
+Balance: 0
+Mint: YUBuEkMx2DzsEVp5m8LNQpXJpTQGLnHxGLW6ycx3tfq
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
+* Please run `spl-token gc` to clean up Aux accounts
+
+
+Address: FKxc5oQmbXGqPmNNpijDWZgiNu9zQw4pyAoc299mxzyT
+Balance: 0.002203751
+Mint: mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So
+Owner: DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
+State: Initialized
+Delegation: (not set)
+Close authority: (not set)
+
