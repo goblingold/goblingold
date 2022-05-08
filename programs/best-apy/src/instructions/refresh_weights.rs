@@ -106,17 +106,17 @@ impl<'info> RefreshWeights<'info> {
 pub fn handler(ctx: Context<RefreshWeights>) -> Result<()> {
     let current_time = Clock::get()?.unix_timestamp;
 
-    if ctx.accounts.vault_account.refresh.min_elapsed_time != i64::default() {
-        let elapsed_time = Clock::get()?
-            .unix_timestamp
-            .checked_sub(ctx.accounts.vault_account.last_refresh_time)
-            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+    //if ctx.accounts.vault_account.refresh.min_elapsed_time != i64::default() {
+    //    let elapsed_time = Clock::get()?
+    //        .unix_timestamp
+    //        .checked_sub(ctx.accounts.vault_account.last_refresh_time)
+    //        .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
-        require!(
-            elapsed_time > ctx.accounts.vault_account.refresh.min_elapsed_time,
-            ErrorCode::ForbiddenRefresh
-        );
-    }
+    //    require!(
+    //        elapsed_time > ctx.accounts.vault_account.refresh.min_elapsed_time,
+    //        ErrorCode::ForbiddenRefresh
+    //    );
+    //}
 
     if ctx.accounts.vault_account.last_refresh_time != i64::default() {
         for protocol in ctx.accounts.vault_account.protocols.iter() {
