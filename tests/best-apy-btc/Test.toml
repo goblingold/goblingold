@@ -1,7 +1,7 @@
 extends = ["../../Anchor.toml"]
 
 [scripts]
-test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/best-apy-usdt/**/*.ts"
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/best-apy-btc/**/*.ts"
 
 # BTC_mint
 [[test.validator.clone]]

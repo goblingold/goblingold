@@ -1,7 +1,7 @@
 extends = ["../../Anchor.toml"]
 
 [scripts]
-test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/best-apy-usdt/**/*.ts"
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/best-apy-eth/**/*.ts"
 
 # ETH_mint
 [[test.validator.clone]]
@@ -9,8 +9,8 @@ address = "2FPyTwcZLUg1MDrwsyoP4D6s1tM7hAkHYRjkNb5w6Pxk"
 
 # ETH_ata for DrrB1 with 10^12 lamports
 [[test.validator.account]]
-address = "Cpwn5VVk7yvS5tgGJMKvuUfyaBQHiubCxMeHVvtLByw9"
-filename = "../accounts/Cpwn5VVk7yvS5tgGJMKvuUfyaBQHiubCxMeHVvtLByw9.json"
+address = "G3KMonQud4FPMVfbKASKxQ5bqq8f4BSFY6sRdM9Ymra5"
+filename = "../accounts/G3KMonQud4FPMVfbKASKxQ5bqq8f4BSFY6sRdM9Ymra5.json"
 
 # mango
 [[test.validator.clone]]
@@ -26,17 +26,6 @@ address = "FDpHjPQnUkmYVpAEVBpzb3sQgjZM7fanJoRb1VVtjF6u"
 [[test.validator.clone]]
 address = "9ZLpGUxuUwsGyi2RWKS5eY2UVVFx46qAyKdd1pbgyoxj"
 
-# # port
-# [[test.validator.clone]]
-# address = "6T4XxKerq744sSuj3jaoV6QiZ8acirf4TrPwQzHAoSy5"
-# [[test.validator.clone]]
-# address = "4tqY9Hv7e8YhNQXuH75WKrZ7tTckbv2GfFVxmVcScW5s"
-# [[test.validator.clone]]
-# address = "3RudPTAkfcq9Q9Jk8SVeCoecCBmdKMj6q5smsWzxqtqZ"
-# [[test.validator.clone]]
-# address = "QyvfrbqH7Mo8W5tHN31nzbfNiwFwqPqahjm9fnzo5EJ"
-# [[test.validator.clone]]
-# address = "3vxLXJqLqF3JG5TCbYycbKWRBbCJQLxQmBGCkyqEEefL"
 
 # solend
 [[test.validator.clone]]
