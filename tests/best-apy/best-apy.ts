@@ -23,7 +23,6 @@ describe("best_apy", () => {
   const program = client.BestApy;
   const tokenInput = TokenName.WSOL;
   const userSigner = program.provider.wallet.publicKey;
-  console.log(program.vaultKeys[tokenInput].vaultAccount.toString());
 
   it("Initialize vault with weights", async () => {
     const protocolWeights = [2000, 2000, 2000, 2000, 2000];
@@ -62,8 +61,6 @@ describe("best_apy", () => {
     assert.deepStrictEqual(vaultWeights, protocolWeights);
     assert.deepStrictEqual(vaultProtocols, protocolList);
   });
-
-  console.log(program.vaultKeys[tokenInput].vaultAccount.toString());
 
   it("Initialize protocol accounts", async () => {
     const txsProtocols = await program.initializeProtocolAccounts();
