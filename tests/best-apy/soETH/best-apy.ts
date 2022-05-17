@@ -37,7 +37,7 @@ describe("best_apy (soETH)", () => {
   const program = client.BestApy;
   const userSigner = program.provider.wallet.publicKey;
 
-  client.setToken(TOKEN_INPUT);
+  program.setToken(TOKEN_INPUT);
 
   it("Initialize vault with weights", async () => {
     const protocolWeights = PROTOCOLS.map((_, indx) => {
