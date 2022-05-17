@@ -3,11 +3,11 @@ extends = ["../../Anchor.toml"]
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/best-apy-eth/**/*.ts"
 
-# ETH_mint
+# soETH_mint
 [[test.validator.clone]]
 address = "2FPyTwcZLUg1MDrwsyoP4D6s1tM7hAkHYRjkNb5w6Pxk"
 
-# ETH_ata for DrrB1 with 10^12 lamports
+# soETH_ata for DrrB1 with 10^12 lamports
 [[test.validator.account]]
 address = "G3KMonQud4FPMVfbKASKxQ5bqq8f4BSFY6sRdM9Ymra5"
 filename = "../accounts/G3KMonQud4FPMVfbKASKxQ5bqq8f4BSFY6sRdM9Ymra5.json"
@@ -25,7 +25,6 @@ address = "B6mYWs6PKda8DtJwvkvk2UV88NCChdmFGhcWSrgxY5vb"
 address = "FDpHjPQnUkmYVpAEVBpzb3sQgjZM7fanJoRb1VVtjF6u"
 [[test.validator.clone]]
 address = "9ZLpGUxuUwsGyi2RWKS5eY2UVVFx46qAyKdd1pbgyoxj"
-
 
 # solend
 [[test.validator.clone]]

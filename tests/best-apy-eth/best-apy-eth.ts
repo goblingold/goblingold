@@ -10,22 +10,21 @@ import {
 } from "goblin-sdk-local";
 import { BestApy } from "../target/types/best_apy";
 
-const ETH_MINT_PUBKEY = new anchor.web3.PublicKey(
+const soETH_MINT_PUBKEY = new anchor.web3.PublicKey(
   "2FPyTwcZLUg1MDrwsyoP4D6s1tM7hAkHYRjkNb5w6Pxk"
 );
 
-const TOKEN_INPUT = TokenName.ETH;
+const TOKEN_INPUT = TokenName.soETH;
 const PROTOCOLS = [
   Protocols.Mango,
   Protocols.Solend,
-  // Protocols.Port,
   Protocols.Tulip,
   Protocols.Francium,
 ];
 
 const WEIGHTS_SCALE = 10_000;
 
-describe("best_apy (ETH)", () => {
+describe("best_apy (soETH)", () => {
   const testingProgram = anchor.workspace.BestApy as anchor.Program<BestApy>;
 
   const client = new GoblinGold(
@@ -92,7 +91,7 @@ describe("best_apy (ETH)", () => {
     const amount = new anchor.BN(1_000_000_000);
 
     const userInputTokenAccount = await spl.getAssociatedTokenAddress(
-      ETH_MINT_PUBKEY,
+      soETH_MINT_PUBKEY,
       userSigner,
       false
     );
@@ -124,7 +123,7 @@ describe("best_apy (ETH)", () => {
   });
 
   it("Disable Mango", async () => {
-    const protocolWeights = [0, 2500, 2500, 2500, 2500];
+    const protocolWeights = [0, 4_000, 3_000, 3_000];
     const tx = await program.setProtocolWeights(protocolWeights);
     const txSig = await program.provider.send(tx);
   });
@@ -143,7 +142,7 @@ describe("best_apy (ETH)", () => {
 
   it("Withdraw from the protocols", async () => {
     const userInputTokenAccount = await spl.getAssociatedTokenAddress(
-      ETH_MINT_PUBKEY,
+      soETH_MINT_PUBKEY,
       userSigner,
       false
     );
