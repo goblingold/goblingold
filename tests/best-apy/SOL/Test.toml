@@ -1,18 +1,9 @@
-extends = ["../../Anchor.toml"]
+extends = ["../Test.protocols.toml"]
 
 [scripts]
-test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/best-apy/**/*.ts"
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/best-apy/SOL/**/*.ts"
 
 # mango
-[[test.validator.clone]]
-address = "EBDRoayCDDUvDgCimta45ajQeXbexv7aKqJubruqpyvu"
-
-[[test.validator.clone]]
-address = "98pjRuQjK3qA6gXts96PqZT4Ze5QmnCmt3QYjhbUSPue"
-
-[[test.validator.clone]]
-address = "9BVcYqEQxyccuwznvxXqDkSJFavvTyheiTYk231T1A8S"
-
 [[test.validator.clone]]
 address = "2bqJYcA1A8gw4qJFjyE2G4akiUunpd9rP6QzfnxHqSqr"
 
@@ -24,9 +15,6 @@ address = "AVn3JRGhifPCxjxZsU3tQuo4U4dTHizHzBDGW983tx47"
 
 
 # port
-[[test.validator.clone]]
-address = "6T4XxKerq744sSuj3jaoV6QiZ8acirf4TrPwQzHAoSy5"
-
 [[test.validator.clone]]
 address = "X9ByyhmtQH3Wjku9N5obPy54DbVjZV7Z99TPJZ2rwcs"
 
@@ -51,9 +39,6 @@ address = "8UviNr47S8eL6J3WfDxMRa3hvLta1VDJwNWqsDgtN3Cv"
 address = "5h6ssFpeDeRbzsEHDbTQNH7nVGgsKrZydxdSTnLm6QdV"
 
 [[test.validator.clone]]
-address = "4UpD2fh7xH3VP9QQaXtsS1YY3bxzWhtfpks7FatyKvdY"
-
-[[test.validator.clone]]
 address = "H6ARHf6YXhGYeQfUzQNGk6rDNnLBQKrenN712K4AQJEG"
 
 [[test.validator.clone]]
@@ -62,9 +47,6 @@ address = "AdtRGGhmqvom3Jemp5YNrxd9q9unX36BZk1pujkkXijL"
 # tulip
 [[test.validator.clone]]
 address = "4bcFeLv4nydFrsZqV5CgwCVrPhkQKsXtzfy2KyMz7ozM"
-
-[[test.validator.clone]]
-address = "D1cqtVThyebK9KXKGXrCEuiqaNf5L4UfM1vHgCqiJxym"
 
 [[test.validator.clone]]
 address = "FzbfXR7sopQL29Ubu312tkqWMxSre4dYSrFyYAjUYiC4"
@@ -89,5 +71,3 @@ address = "GiJwrxQW5NQWWAva4rnDMXwHxfrhyUzwMX5to1pmCCgF"
 [[test.validator.clone]]
 address = "92Zst3rEoJsyZUW2yNc2811GtkBwFrm3tqgxMTtFWuSB"
 
-[[test.validator.clone]]
-address = "4XNif294wbrxj6tJ8K5Rg7SuaEACnu9s2L27i28MQB6E"

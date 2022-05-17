@@ -1,7 +1,7 @@
-extends = ["../../Anchor.toml"]
+extends = ["../Test.protocols.toml"]
 
 [scripts]
-test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/best-apy-eth/**/*.ts"
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/best-apy/soETH/**/*.ts"
 
 # soETH_mint
 [[test.validator.clone]]
@@ -10,15 +10,9 @@ address = "2FPyTwcZLUg1MDrwsyoP4D6s1tM7hAkHYRjkNb5w6Pxk"
 # soETH_ata for DrrB1 with 10^12 lamports
 [[test.validator.account]]
 address = "G3KMonQud4FPMVfbKASKxQ5bqq8f4BSFY6sRdM9Ymra5"
-filename = "../accounts/G3KMonQud4FPMVfbKASKxQ5bqq8f4BSFY6sRdM9Ymra5.json"
+filename = "../../accounts/G3KMonQud4FPMVfbKASKxQ5bqq8f4BSFY6sRdM9Ymra5.json"
 
 # mango
-[[test.validator.clone]]
-address = "EBDRoayCDDUvDgCimta45ajQeXbexv7aKqJubruqpyvu"
-[[test.validator.clone]]
-address = "98pjRuQjK3qA6gXts96PqZT4Ze5QmnCmt3QYjhbUSPue"
-[[test.validator.clone]]
-address = "9BVcYqEQxyccuwznvxXqDkSJFavvTyheiTYk231T1A8S"
 [[test.validator.clone]]
 address = "B6mYWs6PKda8DtJwvkvk2UV88NCChdmFGhcWSrgxY5vb"
 [[test.validator.clone]]
@@ -34,15 +28,11 @@ address = "B7Lg4cJZHPLFaGdqfaAWG35KFFaEtBMmRAGf98kNaogt"
 [[test.validator.clone]]
 address = "AppJPZka33cu4DyUenFe9Dc1ZmZ3oQju6mBn9k37bNAa"
 [[test.validator.clone]]
-address = "4UpD2fh7xH3VP9QQaXtsS1YY3bxzWhtfpks7FatyKvdY"
-[[test.validator.clone]]
 address = "JBu1AL4obBcCMqKBBxhpWCNUt136ijcuMZLFvTP7iWdB"
 [[test.validator.clone]]
 address = "QJc2HgGhdtW4e7zjvLB1TGRuwEpTre2agU5Lap2UqYz"
 
 # tulip
-[[test.validator.clone]]
-address = "D1cqtVThyebK9KXKGXrCEuiqaNf5L4UfM1vHgCqiJxym"
 [[test.validator.clone]]
 address = "FxH3A2Bw9q3MDivXuWtr8zxiN3S7dGTEkK4Mm95NR2yB"
 [[test.validator.clone]]
@@ -59,5 +49,3 @@ address = "CKMQxUz1nkn3NS5B9AUD1uyWNL8iN2piG9LVt1RvWXzj"
 address = "9MH38iiDX4Pk37U6TXLqz2783RspNhwBTYwBNHp8WUzP"
 [[test.validator.clone]]
 address = "B8QXcUv5FFwyHH5V88g6PhYBc8fQvwSpza4C9PsiRpQD"
-[[test.validator.clone]]
-address = "4XNif294wbrxj6tJ8K5Rg7SuaEACnu9s2L27i28MQB6E"

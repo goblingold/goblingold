@@ -1,7 +1,7 @@
-extends = ["../../Anchor.toml"]
+extends = ["../Test.protocols.toml"]
 
 [scripts]
-test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/best-apy-usdt/**/*.ts"
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/best-apy/USDT/**/*.ts"
 
 # USDT_mint
 [[test.validator.clone]]
@@ -10,15 +10,9 @@ address = "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB"
 # USDT_ata for DrrB1 with 10^12 lamports
 [[test.validator.account]]
 address = "DTQQ6a2P3RgGgAkmPaXDuAoCcpiWvvKWLHmNZQQrc1MW"
-filename = "../accounts/DTQQ6a2P3RgGgAkmPaXDuAoCcpiWvvKWLHmNZQQrc1MW.json"
+filename = "../../accounts/DTQQ6a2P3RgGgAkmPaXDuAoCcpiWvvKWLHmNZQQrc1MW.json"
 
 # mango
-[[test.validator.clone]]
-address = "EBDRoayCDDUvDgCimta45ajQeXbexv7aKqJubruqpyvu"
-[[test.validator.clone]]
-address = "98pjRuQjK3qA6gXts96PqZT4Ze5QmnCmt3QYjhbUSPue"
-[[test.validator.clone]]
-address = "9BVcYqEQxyccuwznvxXqDkSJFavvTyheiTYk231T1A8S"
 [[test.validator.clone]]
 address = "FYFJ4YHDEJnX7yVPoejUTAcKstnovTZpLq5zWAM7c6Uz"
 [[test.validator.clone]]
@@ -27,8 +21,6 @@ address = "4GYDmgvMpBx2n2iSmaS1xhZnwebR2gJ5V7UYUBA1PkJi"
 address = "GZGmwCc3CWrS2guzfTrvQNhiWcW4TVwSPo9Y8VVRxVXY"
 
 # port
-[[test.validator.clone]]
-address = "6T4XxKerq744sSuj3jaoV6QiZ8acirf4TrPwQzHAoSy5"
 [[test.validator.clone]]
 address = "4tqY9Hv7e8YhNQXuH75WKrZ7tTckbv2GfFVxmVcScW5s"
 [[test.validator.clone]]
@@ -46,8 +38,6 @@ address = "3CdpSW5dxM7RTxBgxeyt8nnnjqoDbZe48tsBs9QUrmuN"
 [[test.validator.clone]]
 address = "BTsbZDV7aCMRJ3VNy9ygV4Q2UeEo9GpR8D6VvmMZzNr8"
 [[test.validator.clone]]
-address = "4UpD2fh7xH3VP9QQaXtsS1YY3bxzWhtfpks7FatyKvdY"
-[[test.validator.clone]]
 address = "3vxLXJqLqF3JG5TCbYycbKWRBbCJQLxQmBGCkyqEEefL"
 [[test.validator.clone]]
 address = "5mp8kbkTYwWWCsKSte8rURjTuyinsqBpJ9xAQsewPDD"
@@ -60,15 +50,11 @@ address = "E2cfK7KdG5NRzsFzD8o3pib7af7DmFLrfP6WbU44H3Cw"
 [[test.validator.clone]]
 address = "9wCxum1oB9JpgPUuVmsPTqDDvKeQqP3rnGFg3GEMrUGT"
 [[test.validator.clone]]
-address = "GktVYgkstojYd8nVXGXKJHi7SstvgZ6pkQqQhUPD7y7Q"
-[[test.validator.clone]]
 address = "3vxLXJqLqF3JG5TCbYycbKWRBbCJQLxQmBGCkyqEEefL"
 [[test.validator.clone]]
 address = "5mp8kbkTYwWWCsKSte8rURjTuyinsqBpJ9xAQsewPDD"
 
 # tulip
-[[test.validator.clone]]
-address = "D1cqtVThyebK9KXKGXrCEuiqaNf5L4UfM1vHgCqiJxym"
 [[test.validator.clone]]
 address = "Csn3exasdhDzxYApmnci3d8Khb629VmgK4NQqdeyZBNt"
 [[test.validator.clone]]
@@ -85,5 +71,3 @@ address = "EyqWUeme2B1dhuwJvJVi2coYPcGWmWrakcpsSFeikrhb"
 address = "Acx3Ky9pk8CyYftA9HYF31EbVhBDi21EqJsFtMW2XxXW"
 [[test.validator.clone]]
 address = "8TtsTZQ6mU4YSW5jw4sDjSDEG1CW8QLpK7C9g5TVgBvn"
-[[test.validator.clone]]
-address = "4XNif294wbrxj6tJ8K5Rg7SuaEACnu9s2L27i28MQB6E"
