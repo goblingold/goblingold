@@ -2,7 +2,6 @@ import * as anchor from "@project-serum/anchor";
 import * as spl from "@solana/spl-token";
 import { assert } from "chai";
 import { GoblinGold, Protocols, TOKENS, decodeAccount } from "goblin-sdk-local";
-import { NetworkName } from "goblin-sdk-local";
 import { getProtocols } from "./protocols";
 
 const INPUT_TOKEN = process.env.ASSET;
@@ -29,7 +28,6 @@ describe("best_apy (" + INPUT_TOKEN + ")", () => {
 
   const client = new GoblinGold(
     userSigner,
-    NetworkName.Mainnet,
     provider.connection,
     provider.wallet
   );
