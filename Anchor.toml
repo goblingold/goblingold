@@ -9,7 +9,7 @@ cluster = "localnet"
 wallet = "~/.config/solana/id.json"
 
 [test]
-startup_wait = 20_000
+startup_wait = 30_000
 
 [test.validator]
 url = "https://api.mainnet-beta.solana.com"

@@ -1,0 +1,29 @@
+extends = ["../../Anchor.toml"]
+
+# francium
+[[test.validator.clone]]
+address = "4XNif294wbrxj6tJ8K5Rg7SuaEACnu9s2L27i28MQB6E"
+
+# mango
+[[test.validator.clone]]
+address = "EBDRoayCDDUvDgCimta45ajQeXbexv7aKqJubruqpyvu"
+[[test.validator.clone]]
+address = "98pjRuQjK3qA6gXts96PqZT4Ze5QmnCmt3QYjhbUSPue"
+[[test.validator.clone]]
+address = "9BVcYqEQxyccuwznvxXqDkSJFavvTyheiTYk231T1A8S"
+
+# port
+[[test.validator.clone]]
+address = "6T4XxKerq744sSuj3jaoV6QiZ8acirf4TrPwQzHAoSy5"
+
+# solend
+[[test.validator.clone]]
+address = "4UpD2fh7xH3VP9QQaXtsS1YY3bxzWhtfpks7FatyKvdY"
+
+# solend_stable_pool
+[[test.validator.clone]]
+address = "GktVYgkstojYd8nVXGXKJHi7SstvgZ6pkQqQhUPD7y7Q"
+
+# tulip
+[[test.validator.clone]]
+address = "D1cqtVThyebK9KXKGXrCEuiqaNf5L4UfM1vHgCqiJxym"

@@ -1,0 +1,71 @@
+extends = ["../Test.protocols.toml"]
+
+[scripts]
+test = "bash tests/best-apy/launcher.sh USDC"
+
+# USDC_mint
+[[test.validator.clone]]
+address = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+
+# USDC_ata for DrrB1 with 10^12 lamports
+[[test.validator.account]]
+address = "CL6TVscze5qrzhb9vJjydDWxj8dB2kj5YUAK5j1s2cAW"
+filename = "../../accounts/CL6TVscze5qrzhb9vJjydDWxj8dB2kj5YUAK5j1s2cAW.json"
+
+#francium
+[[test.validator.clone]]
+address = "62fDf5daUJ9jBz8Xtj6Bmw1bh1DvHn8AG4L9hMmxCzpu"
+[[test.validator.clone]]
+address = "Hx6LbkMHe69DYawhPyVNs8Apa6tyfogfzQV6a7XkwBUU"
+[[test.validator.clone]]
+address = "CFp9kt8z3Epb1QSiEp3xA44KbSwuJxhFR3wQoerFqYS9"
+
+# mango
+[[test.validator.clone]]
+address = "BGcwkj1WudQwUUjFk78hAjwd1uAm8trh1N4CJSa51euh"
+[[test.validator.clone]]
+address = "AMzanZxMirPCgGcBoH9kw4Jzi9LFMomyUCXbpzDeL2T8"
+[[test.validator.clone]]
+address = "8Vw25ZackDzaJzzBBqcgcpDsCsDfRSkMGgwFQ3gbReWF"
+
+# port
+[[test.validator.clone]]
+address = "DcENuKuYd6BWGhKfGr7eARxodqG12Bz1sN5WA8NwvLRx"
+[[test.validator.clone]]
+address = "FgSsGV8GByPaMERxeQJPvZRZHf7zCBhrdYtztKorJS58"
+[[test.validator.clone]]
+address = "2xPnqU4bWhUSjZ74CibY63NrtkHHw5eKntsxf8dzwiid"
+
+# solend
+[[test.validator.clone]]
+address = "Gnt27xtC473ZT2Mw5u8wZ68Z3gULkSTb5DuxJy7eJotD"
+[[test.validator.clone]]
+address = "BgxfHJDzm44T7XG68MYKx7YisTjZu73tVovyZSjJMpmw"
+[[test.validator.clone]]
+address = "993dVFL2uXWYeoXuEBFXR4BijeXdTv4s6BzsCjJZuwqk"
+[[test.validator.clone]]
+address = "8SheGtsopRUDzdiD6v6BR9a6bqZ9QwywYQY99Fp5meNf"
+[[test.validator.clone]]
+address = "CZx29wKMUxaJDq6aLVQTdViPL754tTR64NAgQBUGxxHb"
+
+# solend_stable_pool
+[[test.validator.clone]]
+address = "Gnt27xtC473ZT2Mw5u8wZ68Z3gULkSTb5DuxJy7eJotD"
+[[test.validator.clone]]
+address = "JCRDg9T5mUUxazdJ2nGWDN2pdcXVQc5VM8XDp1DW6Aoa"
+[[test.validator.clone]]
+address = "4JZ6PXqRDp8jQxXUYX9cbAzHi6uzZk856aoAqPGdV5Da"
+[[test.validator.clone]]
+address = "z7yTesDCUkvheHnULMjS6dggiiVczpX5JjfTx5atRgQ"
+[[test.validator.clone]]
+address = "CZx29wKMUxaJDq6aLVQTdViPL754tTR64NAgQBUGxxHb"
+
+# tulip
+[[test.validator.clone]]
+address = "Amig8TisuLpzun8XyGfC5HJHHGUQEscjLgoTWsCCKihg"
+[[test.validator.clone]]
+address = "64QJd6MYXUjCBvCaZKaqxiKmaMkPUdNonE1KuY1YoGGb"
+[[test.validator.clone]]
+address = "ExzpbWgczTgd8J58BrnESndmzBkRVfc6PhFjSGiQXgAB"
+[[test.validator.clone]]
+address = "FTkSmGsJ3ZqDSHdcnY7ejN1pWV3Ej7i88MYpZyyaqgGt"
