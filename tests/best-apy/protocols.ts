@@ -3,6 +3,7 @@ import { Protocols } from "goblin-sdk-local";
 export function getProtocols(token: string): Protocols[] {
   switch (token) {
     case "BTC":
+    case "SRM":
     case "WSOL":
       return [
         Protocols.Mango,
@@ -11,6 +12,9 @@ export function getProtocols(token: string): Protocols[] {
         Protocols.Tulip,
         Protocols.Francium,
       ];
+
+    case "MNGO":
+      return [Protocols.Mango];
 
     case "USDC":
     case "USDT":

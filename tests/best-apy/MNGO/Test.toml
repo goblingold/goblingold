@@ -1,0 +1,21 @@
+extends = ["../Test.protocols.toml"]
+
+[scripts]
+test = "bash tests/best-apy/launcher.sh MNGO"
+
+# MNGO_mint
+[[test.validator.clone]]
+address = "MangoCzJ36AjZyKwVj3VnYU4GTonjfVEnJmvvWaxLac"
+
+# MNGO_ata for DrrB1 with 10^12 lamports
+[[test.validator.account]]
+address = "DmsfRjs2p5WLFLicPV8FWXLKuyMkroa7zBzL4ntkWmnu"
+filename = "../../accounts/DmsfRjs2p5WLFLicPV8FWXLKuyMkroa7zBzL4ntkWmnu.json"
+
+# mango
+[[test.validator.clone]]
+address = "8XZx15vqdUbt3eVTXsxPfEMS3o2KXJ5sM7G2qXmmkETk"
+[[test.validator.clone]]
+address = "8HjXYFntHMDNJKCJpHFufDaFYXfuAk6c6odfFnWc4xWy"
+[[test.validator.clone]]
+address = "6ETXD4pvQaBxmabNY3vRKwdLPVEdveuxG2GcKVfg1ayg"
