@@ -1,0 +1,23 @@
+extends = ["../Test.protocols.toml"]
+
+[scripts]
+test = "bash tests/best-apy/launcher.sh scnSOL"
+
+# scnSOL_mint
+[[test.validator.clone]]
+address = "5oVNBeEEQvYi1cX3ir8Dx5n1P7pdxydbGF2X4TxVusJm"
+
+# scnSOL_ata for DrrB1 with 10^12 lamports
+[[test.validator.account]]
+address = "GtTQahMH2N8NZQUHiSEQft8XM95qXs3UNybSdr9gisL2"
+filename = "../../accounts/GtTQahMH2N8NZQUHiSEQft8XM95qXs3UNybSdr9gisL2.json"
+
+# solend
+[[test.validator.clone]]
+address = "DUExYJG5sc1SQdMMdq6LdUYW9ULXbo2fFFTbedywgjNN"
+[[test.validator.clone]]
+address = "AFq1sSdevxfqWGcmcz7XpPbfjHevcJY7baZf9RkyrzoR"
+[[test.validator.clone]]
+address = "5Ynq25D3t124WkQZaaWHBXkWkMGJchVg2sCRgfu1PYbs"
+[[test.validator.clone]]
+address = "DpzEKDSszosuzRUdRYzEcEbt6iZ4xhVEANQSRAYDYw8h"

@@ -27,6 +27,9 @@ export function getProtocols(token: string): Protocols[] {
         Protocols.SolendStablePool,
       ];
 
+    case "scnSOL":
+      return [Protocols.Solend];
+
     case "soETH":
       return [
         Protocols.Mango,
