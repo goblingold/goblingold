@@ -1,0 +1,51 @@
+extends = ["../Test.protocols.toml"]
+
+[scripts]
+test = "bash tests/best-apy/launcher.sh stSOL"
+
+# stSOL_mint
+[[test.validator.clone]]
+address = "7dHbWXmci3dT8UFYWYZweBLXgycu7Y3iL6trKn1Y7ARj"
+
+# stSOL_ata for DrrB1 with 10^12 lamports
+[[test.validator.account]]
+address = "3sVfNvRtM6zYdpgkpYYDMva6kGovFKbdwYR2tw5YLasU"
+filename = "../../accounts/3sVfNvRtM6zYdpgkpYYDMva6kGovFKbdwYR2tw5YLasU.json"
+
+# francium
+[[test.validator.clone]]
+address = "HyxfDg47HKS1rQUXWvJH2XQhwEJM3AqrHU7sK9bSNt5h"
+[[test.validator.clone]]
+address = "9ogtxmnUF94KaPn3dB3unT5yyu7rpzSwc5igysgqFxrU"
+[[test.validator.clone]]
+address = "85pJTrAVdjHNvgCcUtefwkSe9RDKnHueyvs2uTocWmWs"
+
+# port
+[[test.validator.clone]]
+address = "Bt1hEbY62aMriY1SyQqbeZbm8VmSbQVGBFzSzMuVNWzN"
+[[test.validator.clone]]
+address = "AH4PS75H3LAGDd48HQBgGo78gv3nk2LVZjNrUgiueUrh"
+[[test.validator.clone]]
+address = "ESzkdUN8jvJxMqBjWADUomRxHn2ECxLFeeEvrcteLMnY"
+[[test.validator.clone]]
+address = "4TBd3qeBX4CpDucsshh8trmNa1Mqtp2EqYzd18NmzHYK"
+
+# solend
+[[test.validator.clone]]
+address = "5sjkv6HD8wycocJ4tC4U36HHbvgcXYqcyiPRUkncnwWs"
+[[test.validator.clone]]
+address = "QQ6WK86aUCBvNPkGeYBKikk15sUg6aMUEi5PTL6eB4i"
+[[test.validator.clone]]
+address = "7ma18yBbX37RbFHQXiq1XhP6c561nDnYSmF84mwiY7Wo"
+[[test.validator.clone]]
+address = "9r2p6vyF8Wp5YB2DASK95yuXEakQth6wmUmV2DpH91WX"
+
+# tulip
+[[test.validator.clone]]
+address = "27CaAiuFW3EwLcTCaiBnexqm5pxht845AHgSuq36byKX"
+[[test.validator.clone]]
+address = "87YN1wkWLKnWANkPAkhSq3T2xwmj3qbjudKaanCAiZNt"
+[[test.validator.clone]]
+address = "S34N4RBvtzJnKYG6V7W49aX4ghAAVoyp4oJiZYDhKei"
+[[test.validator.clone]]
+address = "BsCdKC2ncgS3VnuibTiA5Etx6MZGRnUL2w88iDee3A6Z"

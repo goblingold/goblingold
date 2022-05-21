@@ -35,6 +35,14 @@ export function getProtocols(token: string): Protocols[] {
         Protocols.Francium,
       ];
 
+    case "stSOL":
+      return [
+        Protocols.Solend,
+        Protocols.Port,
+        Protocols.Tulip,
+        Protocols.Francium,
+      ];
+
     default:
       throw new Error("Invalidid asset '" + token + "':");
   }
