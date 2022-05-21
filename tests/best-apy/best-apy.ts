@@ -162,11 +162,11 @@ describe("best_apy (" + INPUT_TOKEN + ")", () => {
   });
 
   it("Disable Mango & Port", async () => {
-    const iposMango = PROTOCOLS.find((p) => p === Protocols.Mango);
-    const iposPort = PROTOCOLS.find((p) => p === Protocols.Port);
+    const iposMango = PROTOCOLS.findIndex((p) => p === Protocols.Mango);
+    const iposPort = PROTOCOLS.findIndex((p) => p === Protocols.Port);
 
     for (const ipos of [iposMango, iposPort]) {
-      if (ipos !== undefined) {
+      if (ipos !== -1) {
         WEIGHTS[ipos] = 0;
       }
     }
