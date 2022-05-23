@@ -1,0 +1,63 @@
+extends = ["../Test.protocols.toml"]
+
+[scripts]
+test = "bash tests/best-apy/launcher.sh SRM"
+
+# SRM_mint
+[[test.validator.clone]]
+address = "SRMuApVNdxXokk5GT7XD5cUUgXMBCoAz2LHeuAoKWRt"
+
+# SRM_ata for DrrB1 with 10^12 lamports
+[[test.validator.account]]
+address = "HU5PdADJc2cD9NvzqjEihyjC4qAQ66kLrJNzzTYD8YFf"
+filename = "../../accounts/HU5PdADJc2cD9NvzqjEihyjC4qAQ66kLrJNzzTYD8YFf.json"
+
+# francium
+[[test.validator.clone]]
+address = "6CZhCFwA7hbqDEoVUQdFpHaCGQU7fSSwhaJWdG4DmsQ6"
+[[test.validator.clone]]
+address = "B1zB1EuTjnFPLdwySeBYhzeAf3h9buWLbDoG7AHcUTMF"
+[[test.validator.clone]]
+address = "FLQtBThLEVvhXdKqq2CREL8sFt8jAFS8szm4HaMYqmJk"
+[[test.validator.clone]]
+address = "6CZhCFwA7hbqDEoVUQdFpHaCGQU7fSSwhaJWdG4DmsQ6"
+
+# mango
+[[test.validator.clone]]
+address = "qsGcM7VLiywm1wvvvjzWd7SynnyMcg8Pc7QxKUW4CUY"
+[[test.validator.clone]]
+address = "AjMbjA1JsHh574Eo1RRV2XXtB8St139oBXKPXPo2HLdU"
+[[test.validator.clone]]
+address = "75pjC1Z3PkZNbiYtLztQ5cYygpYDQcaVrXhXMFgfFtKz"
+
+# port
+[[test.validator.clone]]
+address = "3NBReDRTLKMQEKiLD5tGcx4kXbTf88b7f2xLS9UuGjym"
+[[test.validator.clone]]
+address = "ZgS3sv1tJAor2rbGMFLeJwxsEGDiHkcrR2ZaNHZUpyF"
+[[test.validator.clone]]
+address = "77TBgKmTNtMdGrt1ewNRb56F2Xw6fNLZZj33JZ3oGwXh"
+[[test.validator.clone]]
+address = "DjhMNdgdbxNud1gmc4DUwrQqJxNbjhxiwNnhc4usSXmQ"
+
+# solend
+[[test.validator.clone]]
+address = "3NBReDRTLKMQEKiLD5tGcx4kXbTf88b7f2xLS9UuGjym"
+[[test.validator.clone]]
+address = "5suXmvdbKQ98VonxGCXqViuWRu8k4zgZRxndYKsH2fJg"
+[[test.validator.clone]]
+address = "4CxGuD2NMr6zM8f18gr6kRhgd748pnmkAhkY1YJtkup1"
+[[test.validator.clone]]
+address = "4JHVBtmMPFyRpidxHtM8gVjGuLBXhaXCF4jNFFKBdGpb"
+[[test.validator.clone]]
+address = "BAoygKcKN7wk8yKzLD6sxzUQUqLvhBV1rjMA4UJqfZuH"
+
+# tulip
+[[test.validator.clone]]
+address = "4QSK13NTKxTBExbMjHFsj3QfHBn4Hfp3DGLSba8GvFvh"
+[[test.validator.clone]]
+address = "93JKmnXMYHQ9KPkKRRJ5Mb7bqSv4newhDFvz9QE2suRG"
+[[test.validator.clone]]
+address = "9wrKnvGNaSB3ppbpEYcvWfvtTZq7AAW5J4HYfEEciUVT"
+[[test.validator.clone]]
+address = "9AiGVt7Qtap2ijvim4JSudDYgTrSWhwaZmKv8BWGFms9"
