@@ -27,7 +27,8 @@ describe("best_apy (" + INPUT_TOKEN + ")", () => {
   const userSigner = provider.wallet.publicKey;
 
   const client = new GoblinGold({
-    provider: provider,
+    connection: provider.connection,
+    user: userSigner,
   });
 
   const program = client.BestApy;
