@@ -15,7 +15,7 @@ const FEE: u128 = 100; // in per mil
 
 #[event]
 pub struct RefreshWeightsEvent {
-    previous_price: LpPrice,
+    token: Pubkey,
     current_price: LpPrice,
 }
 
@@ -164,7 +164,7 @@ pub fn handler(ctx: Context<RefreshWeights>) -> Result<()> {
     ctx.accounts.vault_lp_token_mint_pubkey.reload()?;
 
     emit!(RefreshWeightsEvent {
-        previous_price: ctx.accounts.vault_account.previous_lp_price,
+        token: ctx.accounts.vault_account.input_mint_pubkey,
         current_price: ctx.accounts.current_lp_price(),
     });
 

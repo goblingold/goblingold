@@ -1657,10 +1657,8 @@
       "name": "RefreshWeightsEvent",
       "fields": [
         {
-          "name": "previousPrice",
-          "type": {
-            "defined": "LpPrice"
-          },
+          "name": "token",
+          "type": "publicKey",
           "index": false
         },
         {
