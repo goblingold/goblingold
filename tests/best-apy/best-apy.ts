@@ -28,7 +28,7 @@ describe("best_apy (" + INPUT_TOKEN + ")", () => {
 
   const client = new GoblinGold({
     connection: provider.connection,
-    user: userSigner,
+    wallet: provider.wallet,
   });
 
   const program = client.BestApy;
@@ -50,7 +50,7 @@ describe("best_apy (" + INPUT_TOKEN + ")", () => {
     }
     tx.add(await program.setProtocolWeights(WEIGHTS));
 
-    await provider.send(tx, [], CONFIRM_OPTS);
+    await program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS);
     const vaultData = await program.decodeVault();
     const vaultWeights = vaultData.protocols.map((data) => data.weight);
     const vaultProtocols = vaultData.protocols.map((data) => data.protocolId);
@@ -62,7 +62,7 @@ describe("best_apy (" + INPUT_TOKEN + ")", () => {
   it("Initialize protocol accounts", async () => {
     const txsProtocols = await program.initializeProtocolAccounts();
     for (const tx of txsProtocols) {
-      await provider.send(tx, [], CONFIRM_OPTS);
+      await program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS);
     }
   });
 
@@ -72,7 +72,7 @@ describe("best_apy (" + INPUT_TOKEN + ")", () => {
       (acc, tx) => acc.add(tx),
       new anchor.web3.Transaction()
     );
-    await provider.send(txHashes, [], CONFIRM_OPTS);
+    await program.provider.sendAndConfirm(txHashes, [], CONFIRM_OPTS);
   });
 
   it("Deposit", async () => {
@@ -90,7 +90,7 @@ describe("best_apy (" + INPUT_TOKEN + ")", () => {
       const wrappedKeypair = anchor.web3.Keypair.generate();
       const userInputTokenAccount = wrappedKeypair.publicKey;
       const lamports = await spl.getMinimumBalanceForRentExemptAccount(
-        provider.connection
+        program.provider.connection
       );
 
       tx.add(
@@ -135,7 +135,7 @@ describe("best_apy (" + INPUT_TOKEN + ")", () => {
             []
           )
         );
-      await provider.send(tx, [wrappedKeypair], CONFIRM_OPTS);
+      await program.provider.sendAndConfirm(tx, [wrappedKeypair], CONFIRM_OPTS);
     } else {
       const userInputTokenAccount = await spl.getAssociatedTokenAddress(
         INPUT_TOKEN_MINT,
@@ -157,7 +157,7 @@ describe("best_apy (" + INPUT_TOKEN + ")", () => {
           amount,
         })
       );
-      await provider.send(tx, [], CONFIRM_OPTS);
+      await program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS);
     }
   });
 
@@ -177,19 +177,19 @@ describe("best_apy (" + INPUT_TOKEN + ")", () => {
     WEIGHTS[iposFirstNotNull] += WEIGHTS_SCALE - weightsSum;
 
     const tx = await program.setProtocolWeights(WEIGHTS);
-    await provider.send(tx, [], CONFIRM_OPTS);
+    await program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS);
   });
 
   it("Deposit into the protocols", async () => {
     const txs = await program.rebalance();
     for (const tx of txs) {
-      await provider.send(tx, [], CONFIRM_OPTS);
+      await program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS);
     }
   });
 
   xit("Refresh weights", async () => {
     const tx = await program.refreshWeights();
-    await provider.send(tx, [], CONFIRM_OPTS);
+    await program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS);
   });
 
   it("Withdraw from the protocols", async () => {
@@ -199,9 +199,8 @@ describe("best_apy (" + INPUT_TOKEN + ")", () => {
       false
     );
 
-    const userLpTokenAccountInfo = await provider.connection.getAccountInfo(
-      userLpTokenAccount
-    );
+    const userLpTokenAccountInfo =
+      await program.provider.connection.getAccountInfo(userLpTokenAccount);
     if (!userLpTokenAccountInfo) {
       throw new Error("Error: user_lp_token_account not found");
     }
@@ -213,7 +212,7 @@ describe("best_apy (" + INPUT_TOKEN + ")", () => {
       const wrappedKeypair = anchor.web3.Keypair.generate();
       const userInputTokenAccount = wrappedKeypair.publicKey;
       const lamports = await spl.getMinimumBalanceForRentExemptAccount(
-        provider.connection
+        program.provider.connection
       );
 
       const txs = await program.withdraw({
@@ -247,7 +246,11 @@ describe("best_apy (" + INPUT_TOKEN + ")", () => {
               []
             )
           );
-        await provider.send(txAll, [wrappedKeypair], CONFIRM_OPTS);
+        await program.provider.sendAndConfirm(
+          txAll,
+          [wrappedKeypair],
+          CONFIRM_OPTS
+        );
       }
     } else {
       const userInputTokenAccount = await spl.getAssociatedTokenAddress(
@@ -263,7 +266,7 @@ describe("best_apy (" + INPUT_TOKEN + ")", () => {
       });
 
       for (const tx of txs) {
-        await provider.send(tx, [], CONFIRM_OPTS);
+        await program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS);
       }
     }
   });
