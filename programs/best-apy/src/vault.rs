@@ -496,7 +496,7 @@ impl SlotIntegrated {
 }
 
 /// Strategy LP token price
-#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default, Debug, PartialEq, Eq)]
+#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default, Debug)]
 pub struct LpPrice {
     /// Total amount of tokens to be distributed
     pub total_tokens: u64,
@@ -538,6 +538,20 @@ impl LpPrice {
     }
 }
 
+impl PartialEq for LpPrice {
+    fn eq(&self, other: &Self) -> bool {
+        let lhs = (self.total_tokens as u128)
+            .checked_mul(other.minted_tokens as u128)
+            .unwrap();
+
+        let rhs = (other.total_tokens as u128)
+            .checked_mul(self.minted_tokens as u128)
+            .unwrap();
+
+        lhs == rhs
+    }
+}
+
 impl PartialOrd for LpPrice {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         let lhs = (self.total_tokens as u128)
@@ -549,5 +563,31 @@ impl PartialOrd for LpPrice {
             .unwrap();
 
         lhs.partial_cmp(&rhs)
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_lp_price_cmp() {
+        let price = LpPrice {
+            minted_tokens: 10_000,
+            total_tokens: 10_000,
+        };
+
+        let same_price = LpPrice {
+            minted_tokens: 20_000,
+            total_tokens: 20_000,
+        };
+
+        let greater_price = LpPrice {
+            minted_tokens: 10_000,
+            total_tokens: 15_000,
+        };
+
+        assert_eq!(price, same_price);
+        assert!(greater_price > price);
     }
 }
