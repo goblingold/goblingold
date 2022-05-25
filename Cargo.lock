@@ -421,6 +421,7 @@ dependencies = [
  "port-anchor-adaptor",
  "solana-maths",
  "solend-token-lending",
+ "spl-token",
 ]
 
 [[package]]

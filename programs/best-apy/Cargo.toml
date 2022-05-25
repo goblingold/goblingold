@@ -20,6 +20,7 @@ test = []
 anchor-lang = "0.23.0"
 anchor-spl = "0.23.0"
 solana-maths = "0.1.2"
+spl-token = { version = "^3.1.1", features = ["no-entrypoint"] }
 port-anchor-adaptor = "0.3.4"
 mango = {package = "mango", git = "https://github.com/blockworks-foundation/mango-v3", features = ["no-entrypoint"], rev = "ae5fe3b"} # v3.4.1
 solend-token-lending = { version = "0.1.1", features = ["no-entrypoint"] }
