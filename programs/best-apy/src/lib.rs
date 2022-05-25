@@ -78,6 +78,15 @@ pub mod best_apy {
         instructions::deposit::handler(ctx, amount)
     }
 
+    /// Deposit user input native SOL into the vault account
+    #[access_control(deposit_not_paused())]
+    pub fn deposit_from_native<'info>(
+        ctx: Context<'_, '_, '_, 'info, DepositFromNative<'info>>,
+        amount: u64,
+    ) -> Result<()> {
+        instructions::deposit_from_native::handler(ctx, amount)
+    }
+
     /// Withdraw the required input tokens from the vault and send them back to the user
     #[access_control(withdraw_not_paused())]
     pub fn withdraw(ctx: Context<Withdraw>, lp_amount: u64) -> Result<()> {

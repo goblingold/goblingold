@@ -1,5 +1,6 @@
 pub mod add_protocol;
 pub mod deposit;
+pub mod deposit_from_native;
 pub mod initialize_vault;
 pub mod refresh_weights;
 pub mod set_hashes;
@@ -9,6 +10,7 @@ pub mod withdraw;
 
 pub use add_protocol::*;
 pub use deposit::*;
+pub use deposit_from_native::*;
 pub use initialize_vault::*;
 pub use refresh_weights::*;
 pub use set_hashes::*;

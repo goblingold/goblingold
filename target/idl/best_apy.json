@@ -231,6 +231,57 @@
       ]
     },
     {
+      "name": "depositFromNative",
+      "accounts": [
+        {
+          "name": "userSigner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "userWrappedAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "userLpTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultLpTokenMintPubkey",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultInputTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
       "name": "withdraw",
       "accounts": [
         {
@@ -1657,10 +1708,8 @@
       "name": "RefreshWeightsEvent",
       "fields": [
         {
-          "name": "previousPrice",
-          "type": {
-            "defined": "LpPrice"
-          },
+          "name": "token",
+          "type": "publicKey",
           "index": false
         },
         {
