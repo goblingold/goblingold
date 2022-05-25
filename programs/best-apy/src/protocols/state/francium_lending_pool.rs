@@ -17,7 +17,7 @@ const PROGRAM_VERSION: u8 = 1;
 const UNINITIALIZED_VERSION: u8 = 0;
 
 /// Lending market reserve state
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct LendingPool {
     /// Version of the struct
     pub version: u8,
@@ -55,7 +55,7 @@ impl LendingPool {
 }
 
 /// Reserve liquidity
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct ReserveLiquidity {
     /// Reserve liquidity mint address
     pub mint_pubkey: Pubkey,
@@ -85,7 +85,7 @@ impl ReserveLiquidity {
 }
 
 /// Reserve collateral
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct ReserveCollateral {
     /// Reserve collateral mint address
     pub mint_pubkey: Pubkey,

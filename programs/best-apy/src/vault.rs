@@ -496,7 +496,7 @@ impl SlotIntegrated {
 }
 
 /// Strategy LP token price
-#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default, Debug, PartialEq)]
+#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default, Debug, PartialEq, Eq)]
 pub struct LpPrice {
     /// Total amount of tokens to be distributed
     pub total_tokens: u64,

@@ -12,7 +12,7 @@ pub mod francium_lending_pool;
 pub mod tulip_reserve;
 
 /// Last update state
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct LastUpdate {
     /// Last slot when updated
     pub slot: Slot,
