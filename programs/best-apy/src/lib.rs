@@ -96,6 +96,16 @@ pub mod best_apy {
         instructions::withdraw::handler(ctx, lp_amount)
     }
 
+    /// Withdraw to the ticket reserve account
+    #[access_control(withdraw_not_paused())]
+    pub fn withdraw_ticket_reeserve(
+        ctx: Context<WithdrawTicketReserve>,
+        bump_ticket: u8,
+        bump_reserve: u8,
+    ) -> Result<()> {
+        instructions::withdraw_ticket_reserve::handler(ctx, bump_ticket, bump_reserve)
+    }
+
     /// Open a withdrawal ticket (for delayed withdrawals)
     #[access_control(withdraw_not_paused())]
     pub fn open_withdraw_ticket(

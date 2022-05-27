@@ -9,6 +9,7 @@ pub mod set_hashes;
 pub mod set_protocol_weights;
 pub mod set_refresh_params;
 pub mod withdraw;
+pub mod withdraw_ticket_reserve;
 
 pub use add_protocol::*;
 pub use close_withdraw_ticket::*;
@@ -21,6 +22,7 @@ pub use set_hashes::*;
 pub use set_protocol_weights::*;
 pub use set_refresh_params::*;
 pub use withdraw::*;
+pub use withdraw_ticket_reserve::*;
 
 pub mod protocol_deposit;
 pub mod protocol_initialize;

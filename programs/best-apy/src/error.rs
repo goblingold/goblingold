@@ -45,4 +45,6 @@ pub enum ErrorCode {
     ProtocolAlreadyExists,
     #[msg("Invalid protocol id")]
     InvalidProtocolId,
+    #[msg("Invalid ticket amount")]
+    InvalidTicketAmount,
 }

@@ -333,6 +333,56 @@
       ]
     },
     {
+      "name": "withdrawTicketReeserve",
+      "accounts": [
+        {
+          "name": "userSigner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "vaultInputTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultTicketReserveAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultLpTokenMintPubkey",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultTicketMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bumpTicket",
+          "type": "u8"
+        },
+        {
+          "name": "bumpReserve",
+          "type": "u8"
+        }
+      ]
+    },
+    {
       "name": "openWithdrawTicket",
       "accounts": [
         {
@@ -1940,6 +1990,11 @@
       "code": 6020,
       "name": "InvalidProtocolId",
       "msg": "Invalid protocol id"
+    },
+    {
+      "code": 6021,
+      "name": "InvalidTicketAmount",
+      "msg": "Invalid ticket amount"
     }
   ]
 }
