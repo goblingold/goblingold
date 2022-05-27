@@ -1,0 +1,53 @@
+extends = ["../Test.protocols.toml"]
+
+[scripts]
+test = "bash tests/best-apy/launcher.sh RAY"
+
+# RAY_mint
+[[test.validator.clone]]
+address = "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R"
+
+# RAY_ata for DrrB1 with 10^12 lamports
+[[test.validator.account]]
+address = "5UmDHvpGpL8hCMCuGQhaNbmFdDHchwLRiVB8yAtxPewJ"
+filename = "../../accounts/5UmDHvpGpL8hCMCuGQhaNbmFdDHchwLRiVB8yAtxPewJ.json"
+
+# francium
+[[test.validator.clone]]
+address = "5uZERkJVyhCABEdocEssPZyMXYa8GJpLhngi95yXr9jc"
+[[test.validator.clone]]
+address = "ENZ7vdrvNGdAfVa8DoGpT2GrfoSFUtWKRoesf2dvqpuq"
+[[test.validator.clone]]
+address = "BUK8XbZeEqVULYRxGp4Va2R1BRqrYzXDrCVnWt6B7TZf"
+
+# mango
+[[test.validator.clone]]
+address = "GDNCSCaVzhD2L164GwUv8JqTdaHCuYGg21JjXQDtuofk"
+[[test.validator.clone]]
+address = "7TNHrBUDH3FL9uy9hxjmRcKNNaCBG9sYPuDJSJuj3LGs"
+[[test.validator.clone]]
+address = "4XgHdo9zTMm42bYTPjNgq8FwR3yVwL67kvCFjWVurW44"
+
+# solend
+[[test.validator.clone]]
+address = "AnLf8tVYCM816gmBjiy8n53eXKKEDydT5piYjjQDPgTB"
+[[test.validator.clone]]
+address = "9n2exoMQwMTzfw6NFoFFujxYPndWVLtKREJePssrKb36"
+[[test.validator.clone]]
+address = "2d95ZC8L5XP6xCnaKx8D5U5eX6rKbboBBAwuBLxaFmmJ"
+[[test.validator.clone]]
+address = "5JT6EK5wLEYGpAXMY2BXvhoeuQCp93eo4os2EtXwnPG1"
+[[test.validator.clone]]
+address = "CppyF6264uKZkGua1brTUa2fSVdMFSCszwzDs76HCuzU"
+[[test.validator.clone]]
+address = "DpzEKDSszosuzRUdRYzEcEbt6iZ4xhVEANQSRAYDYw8h"
+
+# tulip
+[[test.validator.clone]]
+address = "8Lg7TowFuMQoGiTsLE6qV9x3czRgDmVy8f8Vv8KS4uW"
+[[test.validator.clone]]
+address = "9SG6E3jBTTHLNgpV6ueUYypMYMkm4K5zyS9tk9Rsjm8Y"
+[[test.validator.clone]]
+address = "83fYH17UZaTCpr6GNcPcS5pZkfxwR1CaEVhYKfkqE8YF"
+[[test.validator.clone]]
+address = "9Bm8d2izGsf9eT6Wr79DTnXBkW2LHYVQa57QzeoTbsAF"
