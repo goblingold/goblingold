@@ -387,6 +387,65 @@
       ]
     },
     {
+      "name": "closeWithdrawTicket",
+      "accounts": [
+        {
+          "name": "userSigner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "userInputTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultUserTicketAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultTicketReserveAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultLpTokenMintPubkey",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultTicketMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bumpUser",
+          "type": "u8"
+        },
+        {
+          "name": "bumpTicket",
+          "type": "u8"
+        },
+        {
+          "name": "bumpReserve",
+          "type": "u8"
+        }
+      ]
+    },
+    {
       "name": "refreshWeights",
       "accounts": [
         {

@@ -1,6 +1,7 @@
+use crate::error::ErrorCode;
 use crate::macros::generate_seeds;
-use crate::vault::VaultAccount;
-use crate::{VAULT_ACCOUNT_SEED, VAULT_LP_TOKEN_MINT_SEED, VAULT_TICKET_SEED};
+use crate::vault::{LpPrice, VaultAccount};
+use crate::{VAULT_ACCOUNT_SEED, VAULT_LP_TOKEN_MINT_SEED, VAULT_TICKET_MINT_SEED};
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::{program_option::COption, pubkey::Pubkey};
 use anchor_spl::token::{self, Burn, Mint, MintTo, Token, TokenAccount};
@@ -19,7 +20,7 @@ pub struct OpenWithdrawTicket<'info> {
     #[account(
         mut,
         constraint = vault_user_ticket_account.owner == vault_account.key(),
-        seeds = [VAULT_TICKET_SEED, vault_lp_token_mint_pubkey.key().as_ref(), user_signer.key().as_ref()],
+        seeds = [VAULT_TICKET_MINT_SEED, vault_lp_token_mint_pubkey.key().as_ref(), user_signer.key().as_ref()],
         bump = bump_user
     )]
     pub vault_user_ticket_account: Account<'info, TokenAccount>,
@@ -39,7 +40,7 @@ pub struct OpenWithdrawTicket<'info> {
     #[account(
         mut,
         constraint = vault_lp_token_mint_pubkey.mint_authority == COption::Some(vault_account.key()),
-        seeds = [VAULT_TICKET_SEED, vault_lp_token_mint_pubkey.key().as_ref()],
+        seeds = [VAULT_TICKET_MINT_SEED, vault_lp_token_mint_pubkey.key().as_ref()],
         bump = bump_ticket
     )]
     pub vault_ticket_mint: Account<'info, Mint>,
@@ -47,6 +48,13 @@ pub struct OpenWithdrawTicket<'info> {
 }
 
 impl<'info> OpenWithdrawTicket<'info> {
+    fn current_lp_price(&self) -> LpPrice {
+        LpPrice {
+            total_tokens: self.vault_account.current_tvl,
+            minted_tokens: self.vault_lp_token_mint_pubkey.supply,
+        }
+    }
+
     fn burn_user_lps_ctx(&self) -> CpiContext<'_, '_, '_, 'info, Burn<'info>> {
         CpiContext::new(
             self.token_program.to_account_info(),
@@ -77,13 +85,25 @@ pub fn handler(
     _bump_user: u8,
     _bump_ticket: u8,
 ) -> Result<()> {
+    let current_price = ctx.accounts.current_lp_price();
+    let previous_price = ctx.accounts.vault_account.previous_lp_price;
+
+    if previous_price != LpPrice::default() {
+        require!(current_price >= previous_price, ErrorCode::InvalidLpPrice);
+    }
+
+    // Use previous value of LP in order to avoid depositors.
+    // Also add a 1 lamport fee due precision errors when withdrawing from lending protocols
+    let amount = previous_price.lp_to_token(lp_amount)?;
+    let amount_conservative = amount.saturating_sub(1);
+
     let seeds = generate_seeds!(ctx.accounts.vault_account);
     let signer = &[&seeds[..]];
 
     token::burn(ctx.accounts.burn_user_lps_ctx(), lp_amount)?;
     token::mint_to(
         ctx.accounts.mint_ticket_ctx().with_signer(signer),
-        lp_amount,
+        amount_conservative,
     )?;
 
     Ok(())

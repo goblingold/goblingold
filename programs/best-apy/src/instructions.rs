@@ -1,4 +1,5 @@
 pub mod add_protocol;
+pub mod close_withdraw_ticket;
 pub mod deposit;
 pub mod deposit_from_native;
 pub mod initialize_vault;
@@ -10,6 +11,7 @@ pub mod set_refresh_params;
 pub mod withdraw;
 
 pub use add_protocol::*;
+pub use close_withdraw_ticket::*;
 pub use deposit::*;
 pub use deposit_from_native::*;
 pub use initialize_vault::*;
