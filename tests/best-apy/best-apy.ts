@@ -60,10 +60,12 @@ describe("best_apy (" + INPUT_TOKEN + ")", () => {
   });
 
   it("Initialize protocol accounts", async () => {
-    const txsProtocols = await program.initializeProtocolAccounts();
-    for (const tx of txsProtocols) {
-      await program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS);
-    }
+    const txs = await program.initializeProtocolAccounts();
+    await Promise.all(
+      txs.map(async (tx) =>
+        program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS)
+      )
+    );
   });
 
   it("Set hashes", async () => {
@@ -181,10 +183,12 @@ describe("best_apy (" + INPUT_TOKEN + ")", () => {
   });
 
   it("Deposit into the protocols", async () => {
-    const txs = await program.rebalance();
-    for (const tx of txs) {
-      await program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS);
-    }
+    const [_txsWithdraw, txsDeposit] = await program.rebalance();
+    await Promise.all(
+      txsDeposit.map(async (tx) =>
+        program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS)
+      )
+    );
   });
 
   xit("Refresh weights", async () => {
