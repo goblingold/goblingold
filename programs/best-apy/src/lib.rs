@@ -21,6 +21,7 @@ const PAUSED_WITHDRAW: bool = false;
 
 const VAULT_ACCOUNT_SEED: &[u8; 5] = b"vault";
 const VAULT_LP_TOKEN_MINT_SEED: &[u8; 4] = b"mint";
+const VAULT_TICKET_SEED: &[u8; 6] = b"ticket";
 
 // DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
 const ADMIN_PUBKEY: Pubkey = Pubkey::new_from_array([
@@ -91,6 +92,17 @@ pub mod best_apy {
     #[access_control(withdraw_not_paused())]
     pub fn withdraw(ctx: Context<Withdraw>, lp_amount: u64) -> Result<()> {
         instructions::withdraw::handler(ctx, lp_amount)
+    }
+
+    /// Open a withdrawal ticket (for delayed withdrawals)
+    #[access_control(withdraw_not_paused())]
+    pub fn open_withdraw_ticket(
+        ctx: Context<OpenWithdrawTicket>,
+        lp_amount: u64,
+        bump_user: u8,
+        bump_ticket: u8,
+    ) -> Result<()> {
+        instructions::open_withdraw_ticket::handler(ctx, lp_amount, bump_user, bump_ticket)
     }
 
     /// Refresh the protocol weights
