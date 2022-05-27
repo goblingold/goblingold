@@ -10,6 +10,7 @@ use anchor_spl::token::{Mint, Token, TokenAccount};
 
 #[derive(Accounts)]
 pub struct DepositFromNative<'info> {
+    #[account(mut)]
     pub user_signer: Signer<'info>,
     #[account(
         mut,

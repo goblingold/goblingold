@@ -235,7 +235,7 @@
       "accounts": [
         {
           "name": "userSigner",
-          "isMut": false,
+          "isMut": true,
           "isSigner": true
         },
         {
