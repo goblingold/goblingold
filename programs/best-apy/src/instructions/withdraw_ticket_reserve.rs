@@ -92,7 +92,7 @@ pub fn handler(
         amount,
     )?;
 
-    // Update total withdraw 
+    // Update total withdraw
     // TODO check 1 lamport diff in withdraw.rs
     ctx.accounts.vault_account.current_tvl = ctx
         .accounts
