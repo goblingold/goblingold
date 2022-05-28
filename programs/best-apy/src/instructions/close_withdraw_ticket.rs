@@ -1,3 +1,4 @@
+use crate::error::ErrorCode;
 use crate::macros::generate_seeds;
 use crate::vault::VaultAccount;
 use crate::{
@@ -98,6 +99,13 @@ pub fn handler(
             .with_signer(signer),
         amount,
     )?;
+
+    ctx.accounts.vault_account.delayed_withdrawn_amount = ctx
+        .accounts
+        .vault_account
+        .delayed_withdrawn_amount
+        .checked_sub(amount)
+        .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
     Ok(())
 }

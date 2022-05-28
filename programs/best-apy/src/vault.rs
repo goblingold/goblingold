@@ -48,8 +48,11 @@ pub struct VaultAccount {
     /// Price of the LP token in the previous interval
     pub previous_lp_price: LpPrice,
 
+    /// Amount request for delayed withdrawn
+    pub delayed_withdrawn_amount: u64,
+
     /// Additional padding
-    pub _padding: [u64; 8],
+    pub _padding: [u64; 7],
 
     /// Protocol data (maximum = 10)
     pub protocols: Vec<ProtocolData>,
