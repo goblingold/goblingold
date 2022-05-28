@@ -37,17 +37,19 @@ describe("best_apy (" + INPUT_TOKEN + ")", () => {
 
   it("Initialize vault with weights", async () => {
     const tx = await program.initializeVault(new anchor.BN(0));
-    for (const protocol of PROTOCOLS) {
-      tx.add(
-        await program.methods
+
+    const txProtocols = await Promise.all(
+      PROTOCOLS.map(async (protocol) =>
+        program.methods
           .addProtocol(protocol)
           .accounts({
             userSigner,
             vaultAccount: program.vaultKeys[INPUT_TOKEN].vaultAccount,
           })
           .transaction()
-      );
-    }
+      )
+    );
+    txProtocols.reduce((acc, txProtocol) => acc.add(txProtocol), tx);
     tx.add(await program.setProtocolWeights(WEIGHTS));
 
     await program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS);
@@ -225,37 +227,40 @@ describe("best_apy (" + INPUT_TOKEN + ")", () => {
         lpAmount,
       });
 
-      for (const tx of txs) {
-        const txAll = new anchor.web3.Transaction()
-          .add(
-            anchor.web3.SystemProgram.createAccount({
-              fromPubkey: userSigner,
-              newAccountPubkey: userInputTokenAccount,
-              space: spl.ACCOUNT_SIZE,
-              lamports,
-              programId: spl.TOKEN_PROGRAM_ID,
-            }),
-            spl.createInitializeAccountInstruction(
-              userInputTokenAccount,
-              spl.NATIVE_MINT,
-              userSigner
+      await Promise.all(
+        txs.map(async (tx) => {
+          const txAll = new anchor.web3.Transaction()
+            .add(
+              anchor.web3.SystemProgram.createAccount({
+                fromPubkey: userSigner,
+                newAccountPubkey: userInputTokenAccount,
+                space: spl.ACCOUNT_SIZE,
+                lamports,
+                programId: spl.TOKEN_PROGRAM_ID,
+              }),
+              spl.createInitializeAccountInstruction(
+                userInputTokenAccount,
+                spl.NATIVE_MINT,
+                userSigner
+              )
             )
-          )
-          .add(tx)
-          .add(
-            spl.createCloseAccountInstruction(
-              userInputTokenAccount,
-              userSigner,
-              userSigner,
-              []
-            )
+            .add(tx)
+            .add(
+              spl.createCloseAccountInstruction(
+                userInputTokenAccount,
+                userSigner,
+                userSigner,
+                []
+              )
+            );
+
+          return program.provider.sendAndConfirm(
+            txAll,
+            [wrappedKeypair],
+            CONFIRM_OPTS
           );
-        await program.provider.sendAndConfirm(
-          txAll,
-          [wrappedKeypair],
-          CONFIRM_OPTS
-        );
-      }
+        })
+      );
     } else {
       const userInputTokenAccount = await spl.getAssociatedTokenAddress(
         INPUT_TOKEN_MINT,
@@ -269,9 +274,11 @@ describe("best_apy (" + INPUT_TOKEN + ")", () => {
         lpAmount,
       });
 
-      for (const tx of txs) {
-        await program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS);
-      }
+      await Promise.all(
+        txs.map(async (tx) =>
+          program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS)
+        )
+      );
     }
   });
 });
