@@ -106,12 +106,5 @@ pub fn handler(
         amount_conservative,
     )?;
 
-    ctx.accounts.vault_account.delayed_withdrawn_amount = ctx
-        .accounts
-        .vault_account
-        .delayed_withdrawn_amount
-        .checked_add(amount_conservative)
-        .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
-
     Ok(())
 }
