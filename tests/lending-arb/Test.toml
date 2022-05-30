@@ -1,0 +1,2 @@
+[test]
+startup_wait = 30_000
