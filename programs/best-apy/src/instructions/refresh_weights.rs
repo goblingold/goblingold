@@ -146,7 +146,7 @@ pub fn handler(ctx: Context<RefreshWeights>) -> Result<()> {
         })
         .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
-    // Due to precision errors, we loosed some lamports. We may need to reduce the TVL
+    // Due to precision errors, we lost some lamports. We may need to reduce the TVL
     if protocol_rewards < 0 {
         // Check if we can compensate with the accumulated rewards
         let rewards_with_losses = i64::try_from(ctx.accounts.vault_account.rewards_sum)
