@@ -1,0 +1,487 @@
+use crate::check_hash::CHECKHASH_BYTES;
+use crate::error::ErrorCode;
+use crate::protocols::Protocols;
+use anchor_lang::prelude::*;
+use solana_maths::{U192, WAD};
+use std::{
+    cmp::{self, Ordering},
+    convert::{TryFrom, TryInto},
+};
+
+// not used yet, only one version available
+pub const _VAULT_VERSION: u8 = 1;
+
+#[constant]
+pub const WEIGHTS_SCALE: u32 = 10_000;
+
+const VAULT_TICKET_MINT_SEED: &[u8; 11] = b"ticket_mint";
+
+/// Strategy vault account
+#[account]
+#[derive(Default)]
+pub struct VaultAccount {
+    /// Vault version
+    pub version: u8,
+
+    /// This vault is paused
+    pub is_paused: bool,
+
+    /// Account seed number
+    pub seed_number: u8,
+
+    /// PDA bump seeds
+    pub bumps: Bumps,
+    /// Strategy input token mint address
+    pub input_mint_pubkey: Pubkey,
+    /// Destination fee account
+    pub dao_treasury_lp_token_account: Pubkey,
+    /// Strategy borrow token mint address
+    pub borrow_mint_pubkey: Pubkey,
+
+    /// Last refresh slot in which protocol weights were updated
+    pub last_refresh_time: i64,
+
+    /// Strategy refresh parameters
+    pub refresh: RefreshParams,
+
+    /// Current TVL deposited in the strategy (considering deposits/withdraws)
+    pub current_tvl: u64,
+    /// Accumulated rewards until fee is minted (not accounted in current_tvl)
+    pub rewards_sum: u64,
+
+    /// Price of the LP token in the previous interval
+    pub previous_lp_price: LpPrice,
+
+    /// Additional padding
+    pub _padding: [u64; 8],
+
+    /// Protocol data (maximum = 10)
+    pub protocols: Vec<ProtocolData>,
+}
+
+impl VaultAccount {
+    pub const SIZE: usize = 1
+        + 1
+        + 1
+        + Bumps::SIZE
+        + 32
+        + 32
+        + 8
+        + RefreshParams::SIZE
+        + 8
+        + 8
+        + LpPrice::SIZE
+        + 8 * 8
+        + 4
+        + ProtocolData::SIZE * 10;
+
+    /// Initialize a new vault
+    pub fn init(params: InitVaultAccountParams) -> Self {
+        Self {
+            bumps: params.bumps,
+            input_mint_pubkey: params.input_mint_pubkey,
+            dao_treasury_lp_token_account: params.dao_treasury_lp_token_account,
+            refresh: RefreshParams {
+                min_elapsed_time: 3000,
+                min_deposit_lamports: 0,
+            },
+            ..Self::default()
+        }
+    }
+
+    /// Find the position of the protocol in the protocol_data vector
+    pub fn protocol_position(&self, protocol: Protocols) -> Result<usize> {
+        let protocol_id: u8 = (protocol as usize).try_into().unwrap();
+        self.protocols
+            .iter()
+            .position(|protocol| protocol.protocol_id == protocol_id)
+            .ok_or_else(|| error!(ErrorCode::ProtocolNotFoundInVault))
+    }
+
+    /// Calculate amount to deposit in the given protocol
+    pub fn calculate_deposit(&self, protocol_idx: usize, available_amount: u64) -> Result<u64> {
+        Ok(100)
+    }
+
+    /// Calculate amount to withdraw in the given protocol
+    pub fn calculate_withdraw(&self, protocol_idx: usize, available_amount: u64) -> Result<u64> {
+        Ok(100)
+    }
+
+    /// Calculate amount to borrow in the given protocol
+    pub fn calculate_borrow(&self, protocol_idx: usize) -> Result<u64> {
+
+
+        Ok(100)
+    }
+
+    /// Calculate amount to repay in the given protocol
+    pub fn calculate_repay(&self, protocol_idx: usize) -> Result<u64> {
+
+
+        Ok(100)
+    }
+
+}
+
+/// Initialize a new vault
+pub struct InitVaultAccountParams {
+    /// Account seed number
+    pub seed_number: u8,
+    /// PDA bump seeds
+    pub bumps: Bumps,
+    /// Strategy input token mint address
+    pub input_mint_pubkey: Pubkey,
+    /// Destination fee account
+    pub dao_treasury_lp_token_account: Pubkey,
+}
+
+/// PDA bump seeds
+#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default)]
+pub struct Bumps {
+    pub vault: u8,
+    pub lp_token_mint: u8,
+    pub ticket_mint : u8,
+}
+
+impl Bumps {
+    pub const SIZE: usize = 1 + 1 + 1;
+}
+
+/// Strategy refresh parameters
+#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default)]
+pub struct RefreshParams {
+    /// Minimum elapsed slots for updating the protocol weights
+    pub min_elapsed_time: i64,
+    /// Minimum amount of lamports to deposit in each protocol
+    pub min_deposit_lamports: u64,
+}
+
+impl RefreshParams {
+    pub const SIZE: usize = 8 + 8;
+}
+
+/// Protocol data
+#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default)]
+pub struct ProtocolData {
+    /// Protocol ID
+    pub protocol_id: u8,
+
+    /// Hashes of Pubkey
+    pub hash_pubkey: HashPubkey,
+
+    /// Percentage of the TVL that should be deposited in the protocol
+    pub weight: u32,
+    /// Deposited token amount in the protocol
+    pub amount: u64,
+    /// Accumulated rewards
+    pub rewards: AccumulatedRewards,
+
+    /// Padding for other future field
+    pub _padding: [u64; 5],
+}
+
+impl ProtocolData {
+    pub const SIZE: usize = 1 + HashPubkey::SIZE + 4 + 8 + AccumulatedRewards::SIZE + 8 * 5;
+
+    /// Check the protocol is active
+    pub fn is_active(&self) -> bool {
+        self.weight != u32::default()
+    }
+
+    /// Set the protocol pubkey hashes
+    pub fn set_hashes(&mut self, hashes: [[u8; CHECKHASH_BYTES]; 3]) {
+        self.hash_pubkey.hash_deposit = hashes[0];
+        self.hash_pubkey.hash_withdraw = hashes[1];
+        self.hash_pubkey.hash_tvl = hashes[2];
+    }
+
+    /// Amount that should be deposited according to the weight
+    fn amount_should_be_deposited(&self, total_amount: u64) -> Result<u64> {
+        let amount: u64 = (total_amount as u128)
+            .checked_mul(self.weight as u128)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?
+            .checked_div(WEIGHTS_SCALE.into())
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?
+            .try_into()
+            .map_err(|_| ErrorCode::MathOverflow)?;
+        Ok(amount)
+    }
+
+    /// Update the protocol tvl with the generated rewards
+    pub fn update_tvl(&mut self) -> Result<()> {
+        self.amount = i64::try_from(self.amount)
+            .unwrap()
+            .checked_add(self.rewards.amount)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?
+            .try_into()
+            .map_err(|_| ErrorCode::MathOverflow)?;
+        self.rewards.amount = 0_i64;
+        Ok(())
+    }
+
+    /// Update token amount after depositing in the protocol
+    pub fn update_after_deposit(&mut self, amount: u64) -> Result<()> {
+        self.rewards.deposited_integral.accumulate(self.amount)?;
+        self.amount = self
+            .amount
+            .checked_add(amount)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+
+        Ok(())
+    }
+
+    /// Update token amount after withdrawing from the protocol
+    pub fn update_after_withdraw(&mut self, amount: u64) -> Result<()> {
+        self.rewards.deposited_integral.accumulate(self.amount)?;
+        self.amount = self
+            .amount
+            .checked_sub(amount)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+
+        Ok(())
+    }
+
+     /// Update token amount after borrow from the protocol
+     pub fn update_after_borrow(&mut self, amount: u64) -> Result<()> {
+        self.rewards.borrowed_integral.accumulate(self.amount)?;
+        self.amount = self
+            .amount
+            .checked_add(amount)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+
+        Ok(())
+    }
+
+    /// Update token amount after borrow from the protocol
+    pub fn update_after_repay(&mut self, amount: u64) -> Result<()> {
+        self.rewards.borrowed_integral.accumulate(self.amount)?;
+        self.amount = self
+            .amount
+            .checked_sub(amount)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+
+        Ok(())
+    }
+}
+
+#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default)]
+pub struct HashPubkey {
+    /// Hash of important accounts for each protocol on deposit
+    pub hash_deposit: [u8; CHECKHASH_BYTES],
+    /// Hash of important accounts for each protocol on withdraw
+    pub hash_withdraw: [u8; CHECKHASH_BYTES],
+    /// Hash of important accounts for each protocol on tvl
+    pub hash_tvl: [u8; CHECKHASH_BYTES],
+    // TODO additional padding
+}
+
+impl HashPubkey {
+    pub const SIZE: usize = CHECKHASH_BYTES * 3;
+}
+
+/// Generated rewards
+#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default)]
+pub struct AccumulatedRewards {
+    /// Last slot the rewards were accumulated
+    pub last_slot: u64,
+    /// Last accumulated rewards
+    pub amount: i64,
+    /// Slot-average deposited amount that generates these rewards
+    pub deposited_avg_wad: u128,
+    /// Slot-integrated deposited amount
+    pub deposited_integral: SlotIntegrated,
+    /// Slot-integrated deposited amount
+    pub borrowed_integral: SlotIntegrated,
+}
+
+impl AccumulatedRewards {
+    pub const SIZE: usize = 8 + 8 + 16 + SlotIntegrated::SIZE + SlotIntegrated::SIZE;
+
+    /// Update the rewards
+    pub fn update(&mut self, rewards: i64, deposited_amount: u64) -> Result<()> {
+        let current_slot = Clock::get()?.slot;
+        self.last_slot = current_slot;
+        self.amount = rewards;
+        self.deposited_avg_wad = self
+            .deposited_integral
+            .get_average_wad(current_slot, deposited_amount)?;
+        Ok(())
+    }
+
+    /// Reset the initegral from the last rewards values
+    pub fn reset_integral(&mut self) -> Result<()> {
+        let elapsed_slots_while_rewards = self
+            .last_slot
+            .checked_sub(self.deposited_integral.initial_slot)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+
+        let acc_at_rewards: u128 = (U192::from(self.deposited_avg_wad))
+            .checked_mul(U192::from(elapsed_slots_while_rewards))
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?
+            .checked_div(U192::from(WAD))
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?
+            .as_u128();
+
+        let acc_since_last_rewards = self
+            .deposited_integral
+            .accumulator
+            .checked_sub(acc_at_rewards)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+
+        self.deposited_integral.accumulator = acc_since_last_rewards;
+        self.deposited_integral.initial_slot = self.last_slot;
+
+        Ok(())
+    }
+}
+
+/// Slot-integrated quantities
+#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default)]
+pub struct SlotIntegrated {
+    /// Initial slot from which the integral starts
+    pub initial_slot: u64,
+    /// Last slot the integral was updated
+    pub last_slot: u64,
+    /// Summation accumulator
+    pub accumulator: u128,
+}
+
+impl SlotIntegrated {
+    pub const SIZE: usize = 8 + 8 + 16;
+
+    /// Update the summation accumulator
+    pub fn accumulate(&mut self, amount: u64) -> Result<()> {
+        let current_slot = Clock::get()?.slot;
+        let elapsed_slots = current_slot
+            .checked_sub(self.last_slot)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+
+        let interval_avg: u128 = (elapsed_slots as u128)
+            .checked_mul(amount as u128)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+
+        self.accumulator = self
+            .accumulator
+            .checked_add(interval_avg)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+        self.last_slot = current_slot;
+
+        Ok(())
+    }
+
+    /// Compute the average value scaled by WAD
+    pub fn get_average_wad(&mut self, current_slot: u64, deposited_amount: u64) -> Result<u128> {
+        self.accumulate(deposited_amount)?;
+
+        let elapsed_slots = current_slot
+            .checked_sub(self.initial_slot)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+
+        let avg: u128 = (U192::from(self.accumulator))
+            .checked_mul(U192::from(WAD))
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?
+            .checked_div(U192::from(elapsed_slots))
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?
+            .as_u128();
+
+        Ok(avg)
+    }
+}
+
+/// Strategy LP token price
+#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default, Debug)]
+pub struct LpPrice {
+    /// Total amount of tokens to be distributed
+    pub total_tokens: u64,
+    /// Supply of strategy LP tokens
+    pub minted_tokens: u64,
+}
+
+impl LpPrice {
+    pub const SIZE: usize = 8 + 8;
+
+    /// Transform input token amount to LP amount
+    pub fn token_to_lp(&self, amount: u64) -> Result<u64> {
+        if self.minted_tokens == 0 {
+            Ok(amount)
+        } else {
+            Ok((amount as u128)
+                .checked_mul(self.minted_tokens as u128)
+                .ok_or_else(|| error!(ErrorCode::MathOverflow))?
+                .checked_div(self.total_tokens as u128)
+                .ok_or_else(|| error!(ErrorCode::MathOverflow))?
+                .try_into()
+                .map_err(|_| ErrorCode::MathOverflow)?)
+        }
+    }
+
+    /// Transform LP amount to input token amount
+    pub fn lp_to_token(&self, lp_amount: u64) -> Result<u64> {
+        if self.minted_tokens == 0 {
+            Ok(lp_amount)
+        } else {
+            Ok((lp_amount as u128)
+                .checked_mul(self.total_tokens as u128)
+                .ok_or_else(|| error!(ErrorCode::MathOverflow))?
+                .checked_div(self.minted_tokens as u128)
+                .ok_or_else(|| error!(ErrorCode::MathOverflow))?
+                .try_into()
+                .map_err(|_| ErrorCode::MathOverflow)?)
+        }
+    }
+}
+
+impl PartialEq for LpPrice {
+    fn eq(&self, other: &Self) -> bool {
+        let lhs = (self.total_tokens as u128)
+            .checked_mul(other.minted_tokens as u128)
+            .unwrap();
+
+        let rhs = (other.total_tokens as u128)
+            .checked_mul(self.minted_tokens as u128)
+            .unwrap();
+
+        lhs == rhs
+    }
+}
+
+impl PartialOrd for LpPrice {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        let lhs = (self.total_tokens as u128)
+            .checked_mul(other.minted_tokens as u128)
+            .unwrap();
+
+        let rhs = (other.total_tokens as u128)
+            .checked_mul(self.minted_tokens as u128)
+            .unwrap();
+
+        lhs.partial_cmp(&rhs)
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_lp_price_cmp() {
+        let price = LpPrice {
+            minted_tokens: 10_000,
+            total_tokens: 10_000,
+        };
+
+        let same_price = LpPrice {
+            minted_tokens: 20_000,
+            total_tokens: 20_000,
+        };
+
+        let greater_price = LpPrice {
+            minted_tokens: 10_000,
+            total_tokens: 15_000,
+        };
+
+        assert_eq!(price, same_price);
+        assert!(greater_price > price);
+    }
+}

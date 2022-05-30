@@ -1,0 +1,5 @@
+[scripts]
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/lending-arb/**/*.ts --exit"
+
+[test]
+startup_wait = 30_000

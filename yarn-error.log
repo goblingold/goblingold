@@ -1,0 +1,45 @@
+Arguments: 
+  /Users/manolo/.nvm/versions/node/v16.13.1/bin/node /Users/manolo/.node/corepack/yarn/1.22.15/bin/yarn.js
+
+PATH: 
+  /Users/manolo/.cargo/bin:/Users/manolo/Applications/google-cloud-sdk/bin:/Users/manolo/.local/share/solana/install/active_release/bin:/Users/manolo/.nvm/versions/node/v16.13.1/bin:/Users/manolo/Library/Android/sdk/cmdline-tools/latest:/Users/manolo/Library/Android/sdk/platform-tools:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/go/bin:/usr/local/MacGPG2/bin:/Library/Apple/usr/bin:/Users/manolo/go/bin:/Users/manolo/go/bin
+
+Yarn version: 
+  1.22.15
+
+Node version: 
+  16.13.1
+
+Platform: 
+  darwin x64
+
+Trace: 
+  Error: EEXIST: file already exists, mkdir '/Users/manolo/Workspace/goblingold/goblingold/node_modules/goblin-sdk-local'
+
+npm manifest: 
+  {
+    "dependencies": {
+      "@project-serum/anchor": "^0.23.0",
+      "@solana/buffer-layout": "^4.0.0",
+      "@solana/spl-token": "^0.2.0",
+      "goblin-sdk": "goblingold/goblin-sdk",
+      "goblin-sdk-local":  "link:../sdk/"
+    },
+    "devDependencies": {
+      "@types/chai": "^4.3.0",
+      "@types/mocha": "^9.0.0",
+      "chai": "^4.3.4",
+      "mocha": "^10.0.0",
+      "ts-mocha": "^8.0.0",
+      "typescript": "^4.3.5"
+    },
+    "scripts": {
+      "test": "anchor test -- --features test"
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile

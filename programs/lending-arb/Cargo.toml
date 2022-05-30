@@ -1,0 +1,26 @@
+[package]
+name = "lending-arb"
+version = "0.1.0"
+description = "Created with Anchor"
+edition = "2018"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "lending_arb"
+
+[features]
+no-entrypoint = []
+no-idl = []
+cpi = ["no-entrypoint"]
+default = []
+devnet = []
+test = []
+
+[dependencies]
+anchor-lang = "0.23.0"
+anchor-spl = "0.23.0"
+solana-maths = "0.1.2"
+solend-token-lending = { version = "0.1.1", features = ["no-entrypoint"] }
+arrayref = "^0.3.6"
+pyth-sdk-solana="0.4.1"
+
