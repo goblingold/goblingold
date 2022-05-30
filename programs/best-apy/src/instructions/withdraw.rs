@@ -3,7 +3,7 @@ use crate::macros::generate_seeds;
 use crate::vault::{LpPrice, VaultAccount};
 use crate::{VAULT_ACCOUNT_SEED, VAULT_LP_TOKEN_MINT_SEED};
 use anchor_lang::prelude::*;
-use anchor_lang::solana_program::{program_option::COption, pubkey::Pubkey, sysvar};
+use anchor_lang::solana_program::{program_option::COption, pubkey::Pubkey};
 use anchor_spl::token::{self, Burn, Mint, Token, TokenAccount, Transfer};
 
 #[derive(Accounts)]
@@ -33,9 +33,6 @@ pub struct Withdraw<'info> {
     )]
     pub vault_input_token_account: Account<'info, TokenAccount>,
     pub token_program: Program<'info, Token>,
-    #[account(address = sysvar::instructions::ID)]
-    /// CHECK: address is checked
-    pub instructions: AccountInfo<'info>,
 }
 
 impl<'info> Withdraw<'info> {
