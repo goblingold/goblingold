@@ -318,11 +318,6 @@
           "name": "tokenProgram",
           "isMut": false,
           "isSigner": false
-        },
-        {
-          "name": "instructions",
-          "isMut": false,
-          "isSigner": false
         }
       ],
       "args": [
