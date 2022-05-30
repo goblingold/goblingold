@@ -135,18 +135,44 @@ pub fn handler(ctx: Context<RefreshWeights>) -> Result<()> {
     }
 
     ctx.accounts.vault_account.last_refresh_time = current_time;
-    ctx.accounts.vault_account.rewards_sum = ctx
+
+    let protocol_rewards = ctx
         .accounts
         .vault_account
         .protocols
         .iter()
-        .try_fold(
-            i64::try_from(ctx.accounts.vault_account.rewards_sum).unwrap(),
-            |acc, protocol| acc.checked_add(protocol.rewards.amount),
-        )
-        .ok_or_else(|| error!(ErrorCode::MathOverflow))?
-        .try_into()
-        .unwrap();
+        .try_fold(0_i64, |acc, protocol| {
+            acc.checked_add(protocol.rewards.amount)
+        })
+        .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+
+    // Due to precision errors, we lost some lamports. We may need to reduce the TVL
+    if protocol_rewards < 0 {
+        // Check if we can compensate with the accumulated rewards
+        let rewards_with_losses = i64::try_from(ctx.accounts.vault_account.rewards_sum)
+            .unwrap()
+            .checked_add(protocol_rewards)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+
+        if rewards_with_losses >= 0 {
+            ctx.accounts.vault_account.rewards_sum = u64::try_from(rewards_with_losses).unwrap();
+        } else {
+            ctx.accounts.vault_account.rewards_sum = 0;
+            ctx.accounts.vault_account.current_tvl = ctx
+                .accounts
+                .vault_account
+                .current_tvl
+                .checked_sub(u64::try_from(rewards_with_losses.abs()).unwrap())
+                .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+        }
+    } else {
+        ctx.accounts.vault_account.rewards_sum = ctx
+            .accounts
+            .vault_account
+            .rewards_sum
+            .checked_add(u64::try_from(protocol_rewards).unwrap())
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+    }
 
     ctx.accounts.vault_account.update_protocol_weights()?;
     ctx.accounts
