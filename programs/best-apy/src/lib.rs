@@ -123,9 +123,8 @@ pub mod best_apy {
         ctx: Context<CloseWithdrawTicket>,
         bump_user: u8,
         bump_ticket: u8,
-        bump_reserve: u8,
     ) -> Result<()> {
-        instructions::close_withdraw_ticket::handler(ctx, bump_user, bump_ticket, bump_reserve)
+        instructions::close_withdraw_ticket::handler(ctx, bump_user, bump_ticket)
     }
 
     /// Refresh the protocol weights
