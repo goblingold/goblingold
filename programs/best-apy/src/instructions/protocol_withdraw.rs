@@ -91,11 +91,6 @@ pub struct GenericWithdrawAccounts<'info> {
     pub instructions: AccountInfo<'info>,
 }
 
-/// Anchor generated sighash
-const IX_WITHDRAW_SIGHASH: [u8; 8] = [183, 18, 70, 156, 148, 109, 161, 34];
-/// Instruction data length (sighash + u64)
-const IX_WITHDRAW_DATA_LEN: usize = 16;
-
 impl<'info> GenericWithdrawAccounts<'info> {
     /// Compute the amount to withdraw from the protocol depending on whether the instruction comes
     /// from the bot or from a user, assuming for the latter that the following ix corresponds
@@ -112,21 +107,14 @@ impl<'info> GenericWithdrawAccounts<'info> {
     fn read_amount_from_next_ix(&self) -> Result<Option<u64>> {
         if let Ok(next_ix) = sysvar::instructions::get_instruction_relative(1, &self.instructions) {
             let ix_data: &[u8] = &next_ix.data;
-            require!(
-                next_ix.data.len() == IX_WITHDRAW_DATA_LEN && ix_data[..8] == IX_WITHDRAW_SIGHASH,
-                ErrorCode::InvalidInstructions
-            );
 
-            // Anchor generated module
-            use crate::instruction;
-            let ix = instruction::Withdraw::deserialize(&mut &ix_data[8..])
-                .map_err(|_| ErrorCode::InvalidInstructions)?;
-            let instruction::Withdraw { lp_amount } = ix;
+            let lp_amount = read_amount_from_deserialized_ix(ix_data)?;
 
             let amount = self
                 .vault_account
                 .previous_lp_price
                 .lp_to_token(lp_amount)?;
+
             let vault_token_amount = self.vault_input_token_account.amount;
             require!(amount > vault_token_amount, ErrorCode::InvalidInstructions);
 
@@ -138,5 +126,51 @@ impl<'info> GenericWithdrawAccounts<'info> {
         } else {
             Ok(None)
         }
+    }
+}
+
+/// Anchor generated sighash
+const IX_WITHDRAW_SIGHASH: [u8; 8] = [183, 18, 70, 156, 148, 109, 161, 34];
+const IX_CLOSE_WITHDRAW_TICKET_SIGHASH: [u8; 8] = [59, 115, 209, 162, 26, 58, 153, 83];
+
+/// Instruction data length (sighash + args)
+const IX_WITHDRAW_DATA_LEN: usize = 8 + 8;
+const IX_CLOSE_WITHDRAW_TICKET_DATA_LEN: usize = 8 + 8 + 1 + 1;
+
+fn read_amount_from_deserialized_ix(ix_data: &[u8]) -> Result<u64> {
+    require!(ix_data.len() > 8, ErrorCode::InvalidInstructions);
+
+    let sighash: [u8; 8] = {
+        let mut sighash: [u8; 8] = [0; 8];
+        sighash.copy_from_slice(&ix_data[..8]);
+        sighash
+    };
+
+    // Anchor generated module
+    use crate::instruction;
+    match sighash {
+        IX_WITHDRAW_SIGHASH => {
+            require!(
+                ix_data.len() == IX_WITHDRAW_DATA_LEN,
+                ErrorCode::InvalidInstructions
+            );
+
+            let ix = instruction::Withdraw::deserialize(&mut &ix_data[8..])
+                .map_err(|_| ErrorCode::InvalidInstructions)?;
+            let instruction::Withdraw { lp_amount } = ix;
+            Ok(lp_amount)
+        }
+        IX_CLOSE_WITHDRAW_TICKET_SIGHASH => {
+            require!(
+                ix_data.len() == IX_CLOSE_WITHDRAW_TICKET_DATA_LEN,
+                ErrorCode::InvalidInstructions
+            );
+
+            let ix = instruction::CloseWithdrawTicket::deserialize(&mut &ix_data[8..])
+                .map_err(|_| ErrorCode::InvalidInstructions)?;
+            let instruction::CloseWithdrawTicket { lp_amount, .. } = ix;
+            Ok(lp_amount)
+        }
+        _ => err!(ErrorCode::InvalidInstructions),
     }
 }
