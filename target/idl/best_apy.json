@@ -374,10 +374,6 @@
         {
           "name": "bumpUser",
           "type": "u8"
-        },
-        {
-          "name": "bumpTicket",
-          "type": "u8"
         }
       ]
     },
@@ -432,10 +428,6 @@
         },
         {
           "name": "bumpUser",
-          "type": "u8"
-        },
-        {
-          "name": "bumpTicket",
           "type": "u8"
         }
       ]
@@ -1563,11 +1555,24 @@
             }
           },
           {
-            "name": "padding",
+            "name": "bumpTicketMint",
+            "type": "u8"
+          },
+          {
+            "name": "padding1",
+            "type": {
+              "array": [
+                "u8",
+                7
+              ]
+            }
+          },
+          {
+            "name": "padding2",
             "type": {
               "array": [
                 "u64",
-                8
+                7
               ]
             }
           },
