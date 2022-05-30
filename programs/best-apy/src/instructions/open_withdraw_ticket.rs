@@ -92,18 +92,13 @@ pub fn handler(
         require!(current_price >= previous_price, ErrorCode::InvalidLpPrice);
     }
 
-    // Use previous value of LP in order to avoid depositors.
-    // Also add a 1 lamport fee due precision errors when withdrawing from lending protocols
-    let amount = previous_price.lp_to_token(lp_amount)?;
-    let amount_conservative = amount.saturating_sub(1);
-
     let seeds = generate_seeds!(ctx.accounts.vault_account);
     let signer = &[&seeds[..]];
 
     token::burn(ctx.accounts.burn_user_lps_ctx(), lp_amount)?;
     token::mint_to(
         ctx.accounts.mint_ticket_ctx().with_signer(signer),
-        amount_conservative,
+        lp_amount,
     )?;
 
     Ok(())
