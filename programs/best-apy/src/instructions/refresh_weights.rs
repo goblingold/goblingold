@@ -11,7 +11,7 @@ use std::convert::{TryFrom, TryInto};
 const MAX_ELAPSED_SLOTS_FOR_TVL: u64 = 30;
 
 /// Protocol fee
-const FEE: u128 = 100; // in per mil
+const FEE: u128 = 0; // in per mil
 
 #[event]
 pub struct RefreshWeightsEvent {
@@ -58,47 +58,47 @@ impl<'info> RefreshWeights<'info> {
         )
     }
 
-    /// Mint LP tokens to the treasury account in order to take the fees
-    fn mint_fees_and_update_tvl(&mut self) -> Result<()> {
+    /// Mint LP tokens to the treasury account in order to take the fees (if any)
+    fn mint_or_zero_fees(&self) -> Result<bool> {
+        let mut tvl_is_stale = false;
+
         let rewards = self.vault_account.rewards_sum;
         if rewards > 0 {
-            let lp_fee: u64 = FEE
-                .checked_mul(rewards as u128)
-                .ok_or_else(|| error!(ErrorCode::MathOverflow))?
-                .checked_mul(self.vault_lp_token_mint_pubkey.supply as u128)
-                .ok_or_else(|| error!(ErrorCode::MathOverflow))?
-                .checked_div(
-                    (self.vault_account.current_tvl as u128)
-                        .checked_add(
-                            (1000 - FEE)
-                                .checked_mul(rewards as u128)
-                                .ok_or_else(|| error!(ErrorCode::MathOverflow))?
-                                .checked_div(1000)
-                                .ok_or_else(|| error!(ErrorCode::MathOverflow))?,
-                        )
-                        .ok_or_else(|| error!(ErrorCode::MathOverflow))?,
-                )
-                .ok_or_else(|| error!(ErrorCode::MathOverflow))?
-                .checked_div(1000)
-                .ok_or_else(|| error!(ErrorCode::MathOverflow))?
-                .try_into()
-                .map_err(|_| ErrorCode::MathOverflow)?;
+            if FEE == 0 {
+                tvl_is_stale = true;
+            } else {
+                let lp_fee: u64 = FEE
+                    .checked_mul(rewards as u128)
+                    .ok_or_else(|| error!(ErrorCode::MathOverflow))?
+                    .checked_mul(self.vault_lp_token_mint_pubkey.supply as u128)
+                    .ok_or_else(|| error!(ErrorCode::MathOverflow))?
+                    .checked_div(
+                        (self.vault_account.current_tvl as u128)
+                            .checked_add(
+                                (1000 - FEE)
+                                    .checked_mul(rewards as u128)
+                                    .ok_or_else(|| error!(ErrorCode::MathOverflow))?
+                                    .checked_div(1000)
+                                    .ok_or_else(|| error!(ErrorCode::MathOverflow))?,
+                            )
+                            .ok_or_else(|| error!(ErrorCode::MathOverflow))?,
+                    )
+                    .ok_or_else(|| error!(ErrorCode::MathOverflow))?
+                    .checked_div(1000)
+                    .ok_or_else(|| error!(ErrorCode::MathOverflow))?
+                    .try_into()
+                    .map_err(|_| ErrorCode::MathOverflow)?;
 
-            if lp_fee > 0 {
-                let seeds = generate_seeds!(self.vault_account);
-                let signer = &[&seeds[..]];
-                token::mint_to(self.mint_lps_to_treasury_ctx().with_signer(signer), lp_fee)?;
-
-                self.vault_account.current_tvl = self
-                    .vault_account
-                    .current_tvl
-                    .checked_add(rewards)
-                    .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
-                self.vault_account.rewards_sum = 0_u64;
+                if lp_fee > 0 {
+                    let seeds = generate_seeds!(self.vault_account);
+                    let signer = &[&seeds[..]];
+                    token::mint_to(self.mint_lps_to_treasury_ctx().with_signer(signer), lp_fee)?;
+                    tvl_is_stale = true;
+                }
             }
         }
 
-        Ok(())
+        Ok(tvl_is_stale)
     }
 }
 
@@ -160,8 +160,16 @@ pub fn handler(ctx: Context<RefreshWeights>) -> Result<()> {
 
     ctx.accounts.vault_account.previous_lp_price = ctx.accounts.current_lp_price();
 
-    ctx.accounts.mint_fees_and_update_tvl()?;
-    ctx.accounts.vault_lp_token_mint_pubkey.reload()?;
+    if ctx.accounts.mint_or_zero_fees()? {
+        ctx.accounts.vault_account.current_tvl = ctx
+            .accounts
+            .vault_account
+            .current_tvl
+            .checked_add(ctx.accounts.vault_account.rewards_sum)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+        ctx.accounts.vault_account.rewards_sum = 0_u64;
+        ctx.accounts.vault_lp_token_mint_pubkey.reload()?;
+    }
 
     emit!(RefreshWeightsEvent {
         token: ctx.accounts.vault_account.input_mint_pubkey,
