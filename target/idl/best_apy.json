@@ -328,56 +328,6 @@
       ]
     },
     {
-      "name": "withdrawTicketReeserve",
-      "accounts": [
-        {
-          "name": "userSigner",
-          "isMut": false,
-          "isSigner": true
-        },
-        {
-          "name": "vaultInputTokenAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "vaultTicketReserveAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "vaultAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "vaultLpTokenMintPubkey",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "vaultTicketMint",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "tokenProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "bumpTicket",
-          "type": "u8"
-        },
-        {
-          "name": "bumpReserve",
-          "type": "u8"
-        }
-      ]
-    },
-    {
       "name": "openWithdrawTicket",
       "accounts": [
         {
@@ -450,11 +400,6 @@
           "isSigner": false
         },
         {
-          "name": "vaultTicketReserveAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
           "name": "vaultAccount",
           "isMut": true,
           "isSigner": false
@@ -470,6 +415,11 @@
           "isSigner": false
         },
         {
+          "name": "vaultInputTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "tokenProgram",
           "isMut": false,
           "isSigner": false
@@ -477,15 +427,15 @@
       ],
       "args": [
         {
+          "name": "lpAmount",
+          "type": "u64"
+        },
+        {
           "name": "bumpUser",
           "type": "u8"
         },
         {
           "name": "bumpTicket",
-          "type": "u8"
-        },
-        {
-          "name": "bumpReserve",
           "type": "u8"
         }
       ]
