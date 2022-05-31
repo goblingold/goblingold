@@ -1,0 +1,41 @@
+extends = ["../Test.protocols.toml"]
+
+[scripts]
+test = "bash tests/best-apy/launcher.sh ORCA"
+
+# ORCA_mint
+[[test.validator.clone]]
+address = "orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE"
+
+# ORCA_ata for DrrB1 with 10^12 lamports
+[[test.validator.account]]
+address = "D2HP2mP4rGYaBbQSprhLYJu31hMXqsxTcmYQsMqBUjKb"
+filename = "../../accounts/D2HP2mP4rGYaBbQSprhLYJu31hMXqsxTcmYQsMqBUjKb.json"
+
+# francium
+[[test.validator.clone]]
+address = "DKoKBD7YheCGZjWp5CaHDPtheAcUveRSMvWkaivbNzWh"
+[[test.validator.clone]]
+address = "9bo5JunUhp4XD7TDeeS9ARvWTYGBYtuQKUHGUb7RRvkf"
+[[test.validator.clone]]
+address = "F3EhkuRuZaYNY2bLTosjv6V7QXiZ8db9nXTZeLnmHC7V"
+
+# solend
+[[test.validator.clone]]
+address = "FKZTsydxPShJ8baThobis6qFxTjALMkVC49EA88wqvm7"
+[[test.validator.clone]]
+address = "E9LAZYxBVhJr9Cdfi9Tn4GSiJHDWSZDsew5tfgJja6Cu"
+[[test.validator.clone]]
+address = "5grnVTzYxhhhbiSdbkznMff721ZPMP3SzYhy2Yzd37jt"
+[[test.validator.clone]]
+address = "EHwSRkm2ErRjWxCxrTxrmC7sT2kGb5jJcsiindUHAX7W"
+
+# tulip
+[[test.validator.clone]]
+address = "HRYfSMc1gYEvxo9zsh14jYHKxAcfJfoVakKtRtJEomb8"
+[[test.validator.clone]]
+address = "4LqykQes5scGz4bZLNaNm1bmgMutCCGqQZVni4VJjWhZ"
+[[test.validator.clone]]
+address = "ELHiqZR2cYkN2MerbfMSWGy3nwdPuHYiXbiKsQG7Uy9p"
+[[test.validator.clone]]
+address = "6sJg8f3zcAjrd38QhSA3C34n8MzLq1XVTiQr4msozAuv"

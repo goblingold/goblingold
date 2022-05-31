@@ -16,6 +16,9 @@ export function getProtocols(token: string): Protocols[] {
     case "MNGO":
       return [Protocols.Mango];
 
+    case "ORCA":
+      return [Protocols.Solend, Protocols.Tulip, Protocols.Francium];
+
     case "RAY":
       return [
         Protocols.Mango,
