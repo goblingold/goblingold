@@ -46,6 +46,12 @@ pub mod best_apy {
         instructions::initialize_vault::handler(ctx, account_number)
     }
 
+    /// Initialize the ticket mint
+    #[access_control(is_admin(ctx.accounts.user_signer.key))]
+    pub fn initialize_ticket_mint(ctx: Context<InitializeTicketMint>) -> Result<()> {
+        instructions::initialize_ticket_mint::handler(ctx)
+    }
+
     /// Add a new protocol to the vault_account
     #[access_control(is_admin(ctx.accounts.user_signer.key))]
     pub fn add_protocol(ctx: Context<AddProtocol>, protocol_id: u8) -> Result<()> {

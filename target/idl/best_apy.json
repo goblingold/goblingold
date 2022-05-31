@@ -83,6 +83,47 @@
       ]
     },
     {
+      "name": "initializeTicketMint",
+      "accounts": [
+        {
+          "name": "userSigner",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "vaultAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultLpTokenMintPubkey",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultTicketMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "addProtocol",
       "accounts": [
         {
