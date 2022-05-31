@@ -101,7 +101,7 @@
           "isSigner": false
         },
         {
-          "name": "vaultTicketMint",
+          "name": "vaultTicketMintPubkey",
           "isMut": true,
           "isSigner": false
         },
@@ -397,7 +397,7 @@
           "isSigner": false
         },
         {
-          "name": "vaultTicketMint",
+          "name": "vaultTicketMintPubkey",
           "isMut": true,
           "isSigner": false
         },
@@ -447,7 +447,7 @@
           "isSigner": false
         },
         {
-          "name": "vaultTicketMint",
+          "name": "vaultTicketMintPubkey",
           "isMut": true,
           "isSigner": false
         },

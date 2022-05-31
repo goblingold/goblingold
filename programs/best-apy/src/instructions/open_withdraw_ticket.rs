@@ -42,7 +42,7 @@ pub struct OpenWithdrawTicket<'info> {
         seeds = [VAULT_TICKET_MINT_SEED, vault_lp_token_mint_pubkey.key().as_ref()],
         bump = vault_account.bump_ticket_mint
     )]
-    pub vault_ticket_mint: Account<'info, Mint>,
+    pub vault_ticket_mint_pubkey: Account<'info, Mint>,
     pub token_program: Program<'info, Token>,
 }
 
@@ -69,7 +69,7 @@ impl<'info> OpenWithdrawTicket<'info> {
         CpiContext::new(
             self.token_program.to_account_info(),
             MintTo {
-                mint: self.vault_ticket_mint.to_account_info(),
+                mint: self.vault_ticket_mint_pubkey.to_account_info(),
                 to: self.vault_user_ticket_account.to_account_info(),
                 authority: self.vault_account.to_account_info(),
             },

@@ -29,13 +29,14 @@ pub struct InitializeTicketMint<'info> {
         seeds = [VAULT_TICKET_MINT_SEED, vault_lp_token_mint_pubkey.key().as_ref()],
         bump,
     )]
-    pub vault_ticket_mint: Account<'info, Mint>,
+    pub vault_ticket_mint_pubkey: Account<'info, Mint>,
     pub system_program: Program<'info, System>,
     pub token_program: Program<'info, Token>,
     pub rent: Sysvar<'info, Rent>,
 }
 
 pub fn handler(ctx: Context<InitializeTicketMint>) -> Result<()> {
-    ctx.accounts.vault_account.bump_ticket_mint = *ctx.bumps.get("vault_ticket_mint").unwrap();
+    ctx.accounts.vault_account.bump_ticket_mint =
+        *ctx.bumps.get("vault_ticket_mint_pubkey").unwrap();
     Ok(())
 }
