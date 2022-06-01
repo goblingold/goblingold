@@ -101,6 +101,13 @@ pub mod best_apy {
         instructions::withdraw::handler(ctx, lp_amount)
     }
 
+    /// Creates a vault_user_ticket_account
+    pub fn create_vault_user_ticket_account(
+        ctx: Context<CreateVaultUserTicketAccount>,
+    ) -> Result<()> {
+        instructions::create_vault_user_ticket_account::handler(ctx)
+    }
+
     /// Open a withdrawal ticket (for delayed withdrawals)
     #[access_control(withdraw_not_paused())]
     pub fn open_withdraw_ticket(

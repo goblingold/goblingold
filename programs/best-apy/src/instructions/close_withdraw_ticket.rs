@@ -18,7 +18,7 @@ pub struct CloseWithdrawTicket<'info> {
     #[account(
         mut,
         constraint = vault_user_ticket_account.owner == vault_account.key(),
-        seeds = [VAULT_TICKET_MINT_SEED, vault_lp_token_mint_pubkey.key().as_ref(), user_signer.key().as_ref()],
+        seeds = [VAULT_TICKET_MINT_SEED, vault_ticket_mint_pubkey.key().as_ref(), user_signer.key().as_ref()],
         bump = bump_user
     )]
     pub vault_user_ticket_account: Account<'info, TokenAccount>,
@@ -37,8 +37,8 @@ pub struct CloseWithdrawTicket<'info> {
     pub vault_lp_token_mint_pubkey: Account<'info, Mint>,
     #[account(
         mut,
-        constraint = vault_lp_token_mint_pubkey.mint_authority == COption::Some(vault_account.key()),
-        seeds = [VAULT_TICKET_MINT_SEED, vault_lp_token_mint_pubkey.key().as_ref()],
+        constraint = vault_ticket_mint_pubkey.mint_authority == COption::Some(vault_account.key()),
+        seeds = [VAULT_TICKET_MINT_SEED, vault_account.key().as_ref()],
         bump = vault_account.bump_ticket_mint
     )]
     pub vault_ticket_mint_pubkey: Account<'info, Mint>,

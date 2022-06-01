@@ -6,7 +6,6 @@ use anchor_lang::prelude::*;
 use anchor_lang::solana_program::{program_option::COption, pubkey::Pubkey};
 use anchor_spl::token::{self, Burn, Mint, MintTo, Token, TokenAccount};
 
-// TODO collision for vault_lp_token_mint_pubkey & vault_ticken_mint for using the same seed?
 #[derive(Accounts)]
 #[instruction(bump_user: u8)]
 pub struct OpenWithdrawTicket<'info> {
@@ -19,7 +18,7 @@ pub struct OpenWithdrawTicket<'info> {
     #[account(
         mut,
         constraint = vault_user_ticket_account.owner == vault_account.key(),
-        seeds = [VAULT_TICKET_MINT_SEED, vault_lp_token_mint_pubkey.key().as_ref(), user_signer.key().as_ref()],
+        seeds = [VAULT_TICKET_MINT_SEED, vault_ticket_mint_pubkey.key().as_ref(), user_signer.key().as_ref()],
         bump = bump_user
     )]
     pub vault_user_ticket_account: Account<'info, TokenAccount>,
@@ -38,8 +37,8 @@ pub struct OpenWithdrawTicket<'info> {
     pub vault_lp_token_mint_pubkey: Account<'info, Mint>,
     #[account(
         mut,
-        constraint = vault_lp_token_mint_pubkey.mint_authority == COption::Some(vault_account.key()),
-        seeds = [VAULT_TICKET_MINT_SEED, vault_lp_token_mint_pubkey.key().as_ref()],
+        constraint = vault_ticket_mint_pubkey.mint_authority == COption::Some(vault_account.key()),
+        seeds = [VAULT_TICKET_MINT_SEED, vault_account.key().as_ref()],
         bump = vault_account.bump_ticket_mint
     )]
     pub vault_ticket_mint_pubkey: Account<'info, Mint>,

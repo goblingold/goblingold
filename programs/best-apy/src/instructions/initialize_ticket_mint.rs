@@ -26,7 +26,7 @@ pub struct InitializeTicketMint<'info> {
         payer = user_signer,
         mint::decimals = vault_lp_token_mint_pubkey.decimals,
         mint::authority = vault_account.key(),
-        seeds = [VAULT_TICKET_MINT_SEED, vault_lp_token_mint_pubkey.key().as_ref()],
+        seeds = [VAULT_TICKET_MINT_SEED, vault_account.key().as_ref()],
         bump,
     )]
     pub vault_ticket_mint_pubkey: Account<'info, Mint>,

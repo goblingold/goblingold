@@ -1,5 +1,6 @@
 pub mod add_protocol;
 pub mod close_withdraw_ticket;
+pub mod create_vault_user_ticket_account;
 pub mod deposit;
 pub mod deposit_from_native;
 pub mod initialize_ticket_mint;
@@ -13,6 +14,7 @@ pub mod withdraw;
 
 pub use add_protocol::*;
 pub use close_withdraw_ticket::*;
+pub use create_vault_user_ticket_account::*;
 pub use deposit::*;
 pub use deposit_from_native::*;
 pub use initialize_ticket_mint::*;
