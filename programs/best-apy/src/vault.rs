@@ -11,6 +11,8 @@ use std::{
 // not used yet, only one version available
 pub const _VAULT_VERSION: u8 = 1;
 
+pub const USE_UTILISATION: bool = false;
+
 #[constant]
 pub const WEIGHTS_SCALE: u32 = 10_000;
 
@@ -200,19 +202,38 @@ impl VaultAccount {
                 .max_by_key(|&(_, protocol)| protocol.weight)
                 .unwrap();
 
-            let weights_sum: u32 = self
-                .protocols
-                .iter()
-                .try_fold(0_u32, |acc, &protocol| acc.checked_add(protocol.weight))
-                .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+            if USE_UTILISATION {
+                let weights_sum: u32 = self
+                    .protocols
+                    .iter()
+                    .try_fold(0_u32, |acc, &protocol| acc.checked_add(protocol.weight))
+                    .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
 
-            self.protocols[max_indx].weight = WEIGHTS_SCALE
-                .checked_sub(
-                    weights_sum
-                        .checked_sub(max_protocol.weight)
-                        .ok_or_else(|| error!(ErrorCode::MathOverflow))?,
-                )
-                .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+                self.protocols[max_indx].weight = WEIGHTS_SCALE
+                    .checked_sub(
+                        weights_sum
+                            .checked_sub(max_protocol.weight)
+                            .ok_or_else(|| error!(ErrorCode::MathOverflow))?,
+                    )
+                    .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+            } else {
+                let mut active: u32 = 0;
+                for i in 0..self.protocols.len() {
+                    if self.protocols[i].is_active() {
+                        active += 1;
+                        self.protocols[i].weight = min_weight;
+                    }
+                }
+                // Account for all lendings minus the max_indx one.
+                active -= 1;
+                self.protocols[max_indx].weight = WEIGHTS_SCALE
+                    .checked_sub(
+                        active
+                            .checked_mul(min_weight)
+                            .ok_or_else(|| error!(ErrorCode::MathOverflow))?,
+                    )
+                    .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+            }
         }
 
         Ok(())
