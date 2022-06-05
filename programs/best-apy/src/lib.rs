@@ -112,20 +112,20 @@ pub mod best_apy {
     #[access_control(withdraw_not_paused())]
     pub fn open_withdraw_ticket(
         ctx: Context<OpenWithdrawTicket>,
-        lp_amount: u64,
         bump_user: u8,
+        lp_amount: u64,
     ) -> Result<()> {
-        instructions::open_withdraw_ticket::handler(ctx, lp_amount, bump_user)
+        instructions::open_withdraw_ticket::handler(ctx, bump_user, lp_amount)
     }
 
     /// Close a withdrawal ticket
     #[access_control(withdraw_not_paused())]
     pub fn close_withdraw_ticket(
         ctx: Context<CloseWithdrawTicket>,
-        lp_amount: u64,
         bump_user: u8,
+        lp_amount: u64,
     ) -> Result<()> {
-        instructions::close_withdraw_ticket::handler(ctx, lp_amount, bump_user)
+        instructions::close_withdraw_ticket::handler(ctx, bump_user, lp_amount)
     }
 
     /// Refresh the protocol weights

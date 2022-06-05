@@ -83,7 +83,7 @@ impl<'info> CloseWithdrawTicket<'info> {
 }
 
 /// Close a withdrawal ticket
-pub fn handler(ctx: Context<CloseWithdrawTicket>, lp_amount: u64, _bump_user: u8) -> Result<()> {
+pub fn handler(ctx: Context<CloseWithdrawTicket>, _bump_user: u8, lp_amount: u64) -> Result<()> {
     let current_price = ctx.accounts.current_lp_price();
     let previous_price = ctx.accounts.vault_account.previous_lp_price;
 

@@ -77,7 +77,7 @@ impl<'info> OpenWithdrawTicket<'info> {
 }
 
 /// Open a withdrawal ticket (for delayed withdrawals)
-pub fn handler(ctx: Context<OpenWithdrawTicket>, lp_amount: u64, _bump_user: u8) -> Result<()> {
+pub fn handler(ctx: Context<OpenWithdrawTicket>, _bump_user: u8, lp_amount: u64) -> Result<()> {
     let current_price = ctx.accounts.current_lp_price();
     let previous_price = ctx.accounts.vault_account.previous_lp_price;
 

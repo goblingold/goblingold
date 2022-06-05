@@ -450,12 +450,12 @@
       ],
       "args": [
         {
-          "name": "lpAmount",
-          "type": "u64"
-        },
-        {
           "name": "bumpUser",
           "type": "u8"
+        },
+        {
+          "name": "lpAmount",
+          "type": "u64"
         }
       ]
     },
@@ -505,12 +505,12 @@
       ],
       "args": [
         {
-          "name": "lpAmount",
-          "type": "u64"
-        },
-        {
           "name": "bumpUser",
           "type": "u8"
+        },
+        {
+          "name": "lpAmount",
+          "type": "u64"
         }
       ]
     },
