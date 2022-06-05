@@ -12,7 +12,7 @@ pub struct CreateVaultUserTicketAccount<'info> {
         init,
         payer = user_signer,
         token::mint = vault_ticket_mint_pubkey,
-        token::authority = user_signer,
+        token::authority = vault_account,
         seeds = [VAULT_TICKET_MINT_SEED, vault_ticket_mint_pubkey.key().as_ref(), user_signer.key().as_ref()],
         bump,
     )]
