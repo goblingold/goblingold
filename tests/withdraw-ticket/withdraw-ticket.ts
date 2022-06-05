@@ -256,8 +256,6 @@ describe("withdraw-ticket", () => {
             )
           );
 
-        console.log("here");
-
         return program.provider.sendAndConfirm(
           txAll,
           [wrappedKeypair],

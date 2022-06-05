@@ -4,7 +4,7 @@ use crate::vault::{LpPrice, VaultAccount};
 use crate::{VAULT_ACCOUNT_SEED, VAULT_LP_TOKEN_MINT_SEED, VAULT_TICKET_MINT_SEED};
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::{program_option::COption, pubkey::Pubkey};
-use anchor_spl::token::{self, Burn, Mint, MintTo, Token, TokenAccount};
+use anchor_spl::token::{self, Mint, MintTo, Token, TokenAccount, Transfer};
 
 #[derive(Accounts)]
 #[instruction(bump_user: u8)]
@@ -42,6 +42,12 @@ pub struct OpenWithdrawTicket<'info> {
         bump = vault_account.bump_ticket_mint
     )]
     pub vault_ticket_mint_pubkey: Account<'info, Mint>,
+    #[account(
+        mut,
+        associated_token::mint = vault_lp_token_mint_pubkey,
+        associated_token::authority = vault_account,
+    )]
+    pub vault_lp_token_account: Account<'info, TokenAccount>,
     pub token_program: Program<'info, Token>,
 }
 
@@ -53,12 +59,12 @@ impl<'info> OpenWithdrawTicket<'info> {
         }
     }
 
-    fn burn_user_lps_ctx(&self) -> CpiContext<'_, '_, '_, 'info, Burn<'info>> {
+    fn transfer_from_user_to_vault_ctx(&self) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>> {
         CpiContext::new(
             self.token_program.to_account_info(),
-            Burn {
-                mint: self.vault_lp_token_mint_pubkey.to_account_info(),
-                to: self.user_lp_token_account.to_account_info(),
+            Transfer {
+                from: self.user_lp_token_account.to_account_info(),
+                to: self.vault_lp_token_account.to_account_info(),
                 authority: self.user_signer.to_account_info(),
             },
         )
@@ -88,7 +94,7 @@ pub fn handler(ctx: Context<OpenWithdrawTicket>, _bump_user: u8, lp_amount: u64)
     let seeds = generate_seeds!(ctx.accounts.vault_account);
     let signer = &[&seeds[..]];
 
-    token::burn(ctx.accounts.burn_user_lps_ctx(), lp_amount)?;
+    token::transfer(ctx.accounts.transfer_from_user_to_vault_ctx(), lp_amount)?;
     token::mint_to(
         ctx.accounts.mint_ticket_ctx().with_signer(signer),
         lp_amount,

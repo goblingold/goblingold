@@ -48,6 +48,12 @@ pub struct CloseWithdrawTicket<'info> {
         associated_token::authority = vault_account,
     )]
     pub vault_input_token_account: Account<'info, TokenAccount>,
+    #[account(
+        mut,
+        associated_token::mint = vault_account.input_mint_pubkey,
+        associated_token::authority = vault_account,
+    )]
+    pub vault_lp_token_account: Account<'info, TokenAccount>,
     pub token_program: Program<'info, Token>,
 }
 
@@ -65,6 +71,17 @@ impl<'info> CloseWithdrawTicket<'info> {
             Transfer {
                 from: self.vault_input_token_account.to_account_info(),
                 to: self.user_input_token_account.to_account_info(),
+                authority: self.vault_account.to_account_info(),
+            },
+        )
+    }
+
+    fn burn_lps_ctx(&self) -> CpiContext<'_, '_, '_, 'info, Burn<'info>> {
+        CpiContext::new(
+            self.token_program.to_account_info(),
+            Burn {
+                mint: self.vault_lp_token_mint_pubkey.to_account_info(),
+                to: self.vault_lp_token_account.to_account_info(),
                 authority: self.vault_account.to_account_info(),
             },
         )
@@ -101,6 +118,7 @@ pub fn handler(ctx: Context<CloseWithdrawTicket>, _bump_user: u8, lp_amount: u64
     let seeds = generate_seeds!(ctx.accounts.vault_account);
     let signer = &[&seeds[..]];
 
+    token::burn(ctx.accounts.burn_lps_ctx().with_signer(signer), amount)?;
     token::burn(ctx.accounts.burn_ticket_ctx().with_signer(signer), amount)?;
     token::transfer(
         ctx.accounts
