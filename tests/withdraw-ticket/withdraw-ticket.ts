@@ -92,16 +92,14 @@ describe("withdraw-ticket", () => {
       false
     );
 
-    const tx = new anchor.web3.Transaction();
+    const wrappedKeypair = anchor.web3.Keypair.generate();
+    const userInputTokenAccount = wrappedKeypair.publicKey;
+    const lamports = await spl.getMinimumBalanceForRentExemptAccount(
+      program.provider.connection
+    );
 
-    if (INPUT_TOKEN === "WSOL") {
-      const wrappedKeypair = anchor.web3.Keypair.generate();
-      const userInputTokenAccount = wrappedKeypair.publicKey;
-      const lamports = await spl.getMinimumBalanceForRentExemptAccount(
-        program.provider.connection
-      );
-
-      tx.add(
+    const tx = new anchor.web3.Transaction()
+      .add(
         anchor.web3.SystemProgram.createAccount({
           fromPubkey: userSigner,
           newAccountPubkey: userInputTokenAccount,
@@ -120,53 +118,30 @@ describe("withdraw-ticket", () => {
           userSigner
         )
       )
-        .add(
-          spl.createAssociatedTokenAccountInstruction(
-            userSigner,
-            userLpTokenAccount,
-            userSigner,
-            program.vaultKeys[INPUT_TOKEN].vaultLpTokenMintAddress
-          )
-        )
-        .add(
-          await program.deposit({
-            userInputTokenAccount,
-            userLpTokenAccount,
-            amount,
-          })
-        )
-        .add(
-          spl.createCloseAccountInstruction(
-            userInputTokenAccount,
-            userSigner,
-            userSigner,
-            []
-          )
-        );
-      await program.provider.sendAndConfirm(tx, [wrappedKeypair], CONFIRM_OPTS);
-    } else {
-      const userInputTokenAccount = await spl.getAssociatedTokenAddress(
-        INPUT_TOKEN_MINT,
-        userSigner,
-        false
-      );
-
-      tx.add(
+      .add(
         spl.createAssociatedTokenAccountInstruction(
           userSigner,
           userLpTokenAccount,
           userSigner,
           program.vaultKeys[INPUT_TOKEN].vaultLpTokenMintAddress
         )
-      ).add(
+      )
+      .add(
         await program.deposit({
           userInputTokenAccount,
           userLpTokenAccount,
           amount,
         })
+      )
+      .add(
+        spl.createCloseAccountInstruction(
+          userInputTokenAccount,
+          userSigner,
+          userSigner,
+          []
+        )
       );
-      await program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS);
-    }
+    await program.provider.sendAndConfirm(tx, [wrappedKeypair], CONFIRM_OPTS);
   });
 
   it("Deposit into the protocols", async () => {
@@ -243,69 +218,52 @@ describe("withdraw-ticket", () => {
     const data = decodeAccount(vaultUserTicketAccountInfo.data);
     const lpAmount = new anchor.BN(data.amount);
 
-    if (INPUT_TOKEN === "WSOL") {
-      const wrappedKeypair = anchor.web3.Keypair.generate();
-      const userInputTokenAccount = wrappedKeypair.publicKey;
-      const lamports = await spl.getMinimumBalanceForRentExemptAccount(
-        program.provider.connection
-      );
+    const wrappedKeypair = anchor.web3.Keypair.generate();
+    const userInputTokenAccount = wrappedKeypair.publicKey;
+    const lamports = await spl.getMinimumBalanceForRentExemptAccount(
+      program.provider.connection
+    );
 
-      const txs = await program.closeWithdrawTicket({
-        userInputTokenAccount,
-        lpAmount,
-      });
+    const txs = await program.closeWithdrawTicket({
+      userInputTokenAccount,
+      lpAmount,
+    });
 
-      await Promise.all(
-        txs.map(async (tx) => {
-          const txAll = new anchor.web3.Transaction()
-            .add(
-              anchor.web3.SystemProgram.createAccount({
-                fromPubkey: userSigner,
-                newAccountPubkey: userInputTokenAccount,
-                space: spl.ACCOUNT_SIZE,
-                lamports,
-                programId: spl.TOKEN_PROGRAM_ID,
-              }),
-              spl.createInitializeAccountInstruction(
-                userInputTokenAccount,
-                spl.NATIVE_MINT,
-                userSigner
-              )
+    await Promise.all(
+      txs.map(async (tx) => {
+        const txAll = new anchor.web3.Transaction()
+          .add(
+            anchor.web3.SystemProgram.createAccount({
+              fromPubkey: userSigner,
+              newAccountPubkey: userInputTokenAccount,
+              space: spl.ACCOUNT_SIZE,
+              lamports,
+              programId: spl.TOKEN_PROGRAM_ID,
+            }),
+            spl.createInitializeAccountInstruction(
+              userInputTokenAccount,
+              spl.NATIVE_MINT,
+              userSigner
             )
-            .add(tx)
-            .add(
-              spl.createCloseAccountInstruction(
-                userInputTokenAccount,
-                userSigner,
-                userSigner,
-                []
-              )
-            );
-
-          return program.provider.sendAndConfirm(
-            txAll,
-            [wrappedKeypair],
-            CONFIRM_OPTS
+          )
+          .add(tx)
+          .add(
+            spl.createCloseAccountInstruction(
+              userInputTokenAccount,
+              userSigner,
+              userSigner,
+              []
+            )
           );
-        })
-      );
-    } else {
-      const userInputTokenAccount = await spl.getAssociatedTokenAddress(
-        INPUT_TOKEN_MINT,
-        userSigner,
-        false
-      );
 
-      const txs = await program.closeWithdrawTicket({
-        userInputTokenAccount,
-        lpAmount,
-      });
+        console.log("here");
 
-      await Promise.all(
-        txs.map(async (tx) =>
-          program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS)
-        )
-      );
-    }
+        return program.provider.sendAndConfirm(
+          txAll,
+          [wrappedKeypair],
+          CONFIRM_OPTS
+        );
+      })
+    );
   });
 });
