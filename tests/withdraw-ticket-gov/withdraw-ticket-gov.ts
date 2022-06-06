@@ -31,10 +31,23 @@ describe("withdraw-ticket", () => {
   });
 
   const program = client.BestApy;
+  const governanceKeypair = anchor.web3.Keypair.generate();
+  const governance = governanceKeypair.publicKey;
+  const amount = new anchor.BN(1_000_000_000);
 
   program.setToken(INPUT_TOKEN);
 
   it("Initialize vault with weights", async () => {
+    const txTransfer = new anchor.web3.Transaction();
+    txTransfer.add(
+      anchor.web3.SystemProgram.transfer({
+        fromPubkey: userSigner,
+        toPubkey: governance,
+        lamports: new anchor.BN(2_000_000_000).toNumber(),
+      })
+    );
+    await program.provider.sendAndConfirm(txTransfer, [], CONFIRM_OPTS);
+
     const tx = await program.initializeVault(new anchor.BN(0));
 
     const txProtocols = await Promise.all(
@@ -84,64 +97,67 @@ describe("withdraw-ticket", () => {
   });
 
   it("Deposit", async () => {
-    const amount = new anchor.BN(1_000_000_000);
-
-    const userLpTokenAccount = await spl.getAssociatedTokenAddress(
+    const governanceLpTokenAccount = await spl.getAssociatedTokenAddress(
       program.vaultKeys[INPUT_TOKEN].vaultLpTokenMintAddress,
-      userSigner,
+      governance,
       false
     );
 
     const wrappedKeypair = anchor.web3.Keypair.generate();
-    const userInputTokenAccount = wrappedKeypair.publicKey;
+    const governanceInputTokenAccount = wrappedKeypair.publicKey;
     const lamports = await spl.getMinimumBalanceForRentExemptAccount(
       program.provider.connection
     );
+    program.user = governance;
 
     const tx = new anchor.web3.Transaction()
       .add(
         anchor.web3.SystemProgram.createAccount({
-          fromPubkey: userSigner,
-          newAccountPubkey: userInputTokenAccount,
+          fromPubkey: governance,
+          newAccountPubkey: governanceInputTokenAccount,
           space: spl.ACCOUNT_SIZE,
           lamports,
           programId: spl.TOKEN_PROGRAM_ID,
         }),
         anchor.web3.SystemProgram.transfer({
           fromPubkey: userSigner,
-          toPubkey: userInputTokenAccount,
+          toPubkey: governanceInputTokenAccount,
           lamports: amount.toNumber(),
         }),
         spl.createInitializeAccountInstruction(
-          userInputTokenAccount,
+          governanceInputTokenAccount,
           spl.NATIVE_MINT,
-          userSigner
+          governance
         )
       )
       .add(
         spl.createAssociatedTokenAccountInstruction(
           userSigner,
-          userLpTokenAccount,
-          userSigner,
+          governanceLpTokenAccount,
+          governance,
           program.vaultKeys[INPUT_TOKEN].vaultLpTokenMintAddress
         )
       )
       .add(
         await program.deposit({
-          userInputTokenAccount,
-          userLpTokenAccount,
+          userInputTokenAccount: governanceInputTokenAccount,
+          userLpTokenAccount: governanceLpTokenAccount,
           amount,
         })
       )
       .add(
         spl.createCloseAccountInstruction(
-          userInputTokenAccount,
-          userSigner,
-          userSigner,
+          governanceInputTokenAccount,
+          governance,
+          governance,
           []
         )
       );
-    await program.provider.sendAndConfirm(tx, [wrappedKeypair], CONFIRM_OPTS);
+    await program.provider.sendAndConfirm(
+      tx,
+      [wrappedKeypair, governanceKeypair],
+      CONFIRM_OPTS
+    );
   });
 
   it("Deposit into the protocols", async () => {
@@ -154,9 +170,9 @@ describe("withdraw-ticket", () => {
   });
 
   it("Open withdraw ticket", async () => {
-    const userLpTokenAccount = await spl.getAssociatedTokenAddress(
+    const governanceLpTokenAccount = await spl.getAssociatedTokenAddress(
       program.vaultKeys[INPUT_TOKEN].vaultLpTokenMintAddress,
-      userSigner,
+      governance,
       false
     );
 
@@ -170,17 +186,17 @@ describe("withdraw-ticket", () => {
         program.programId
       );
 
-    const [userLpTokenAccountInfo, vaultUserTicketAccountInfo] =
+    const [governanceLpTokenAccountInfo, vaultUserTicketAccountInfo] =
       await anchor.utils.rpc.getMultipleAccounts(program.provider.connection, [
-        userLpTokenAccount,
+        governanceLpTokenAccount,
         vaultUserTicketAccount,
       ]);
 
-    if (!userLpTokenAccountInfo) {
+    if (!governanceLpTokenAccountInfo) {
       throw new Error("Error: user_lp_token_account not found");
     }
 
-    const data = decodeAccount(userLpTokenAccountInfo.account.data);
+    const data = decodeAccount(governanceLpTokenAccountInfo.account.data);
     const lpAmount = new anchor.BN(data.amount);
 
     const tx = new anchor.web3.Transaction();
@@ -189,18 +205,20 @@ describe("withdraw-ticket", () => {
       tx.add(
         await program.createVaultUserTicketAccount({
           userSigner: userSigner,
-          userTicketAccountOwner: userSigner,
+          userTicketAccountOwner: governance,
         })
       );
     }
 
     tx.add(
       await program.openWithdrawTicket({
-        userLpTokenAccount,
+        userLpTokenAccount: governanceLpTokenAccount,
         lpAmount,
       })
     );
-    await program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS);
+    console.log(governance.toString(), "gover")
+    console.log(userSigner.toString(), "user")
+    await program.provider.sendAndConfirm(tx, [governanceKeypair], CONFIRM_OPTS);
   });
 
   it("Close withdraw ticket", async () => {
@@ -209,7 +227,7 @@ describe("withdraw-ticket", () => {
         [
           Buffer.from("ticket_mint"),
           program.vaultKeys[INPUT_TOKEN].vaultTicketMintPubkey.toBuffer(),
-          userSigner.toBuffer(),
+          governance.toBuffer(),
         ],
         program.programId
       );
@@ -224,13 +242,13 @@ describe("withdraw-ticket", () => {
     const lpAmount = new anchor.BN(data.amount);
 
     const wrappedKeypair = anchor.web3.Keypair.generate();
-    const userInputTokenAccount = wrappedKeypair.publicKey;
+    const governanceInputTokenAccount = wrappedKeypair.publicKey;
     const lamports = await spl.getMinimumBalanceForRentExemptAccount(
       program.provider.connection
     );
 
     const txs = await program.closeWithdrawTicket({
-      userInputTokenAccount,
+      userInputTokenAccount: governanceInputTokenAccount,
       lpAmount,
     });
 
@@ -239,31 +257,31 @@ describe("withdraw-ticket", () => {
         const txAll = new anchor.web3.Transaction()
           .add(
             anchor.web3.SystemProgram.createAccount({
-              fromPubkey: userSigner,
-              newAccountPubkey: userInputTokenAccount,
+              fromPubkey: governance,
+              newAccountPubkey: governanceInputTokenAccount,
               space: spl.ACCOUNT_SIZE,
               lamports,
               programId: spl.TOKEN_PROGRAM_ID,
             }),
             spl.createInitializeAccountInstruction(
-              userInputTokenAccount,
+              governanceInputTokenAccount,
               spl.NATIVE_MINT,
-              userSigner
+              governance
             )
           )
           .add(tx)
           .add(
             spl.createCloseAccountInstruction(
-              userInputTokenAccount,
-              userSigner,
-              userSigner,
+              governanceInputTokenAccount,
+              governance,
+              governance,
               []
             )
           );
 
         return program.provider.sendAndConfirm(
           txAll,
-          [wrappedKeypair],
+          [wrappedKeypair, governanceKeypair],
           CONFIRM_OPTS
         );
       })
