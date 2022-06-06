@@ -186,7 +186,11 @@ describe("withdraw-ticket", () => {
     const tx = new anchor.web3.Transaction();
 
     if (!vaultUserTicketAccountInfo) {
-      tx.add(await program.createVaultUserTicketAccount({userTicketAccountOwner:userSigner}));
+      tx.add(
+        await program.createVaultUserTicketAccount({
+          userTicketAccountOwner: userSigner,
+        })
+      );
     }
 
     tx.add(
@@ -199,6 +203,7 @@ describe("withdraw-ticket", () => {
   });
 
   it("Close withdraw ticket", async () => {
+    
     const [vaultUserTicketAccount, _bump] =
       await anchor.web3.PublicKey.findProgramAddress(
         [
