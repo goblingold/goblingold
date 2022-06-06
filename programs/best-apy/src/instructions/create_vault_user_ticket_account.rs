@@ -8,12 +8,14 @@ use anchor_spl::token::{Mint, Token, TokenAccount};
 pub struct CreateVaultUserTicketAccount<'info> {
     #[account(mut)]
     pub user_signer: Signer<'info>,
+    /// CHECKED: can create account to anyone
+    pub user_ticket_account_owner: AccountInfo<'info>,
     #[account(
         init,
         payer = user_signer,
         token::mint = vault_ticket_mint_pubkey,
         token::authority = vault_account,
-        seeds = [VAULT_TICKET_MINT_SEED, vault_ticket_mint_pubkey.key().as_ref(), user_signer.key().as_ref()],
+        seeds = [VAULT_TICKET_MINT_SEED, vault_ticket_mint_pubkey.key().as_ref(), user_ticket_account_owner.key().as_ref()],
         bump,
     )]
     pub vault_user_ticket_account: Account<'info, TokenAccount>,

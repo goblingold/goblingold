@@ -186,7 +186,7 @@ describe("withdraw-ticket", () => {
     const tx = new anchor.web3.Transaction();
 
     if (!vaultUserTicketAccountInfo) {
-      tx.add(await program.createVaultUserTicketAccount());
+      tx.add(await program.createVaultUserTicketAccount({userTicketAccountOwner:userSigner}));
     }
 
     tx.add(

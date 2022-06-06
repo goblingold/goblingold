@@ -80,7 +80,8 @@
           "name": "accountNumber",
           "type": "u8"
         }
-      ]
+      ],
+      "returns": null
     },
     {
       "name": "initializeTicketMint",
@@ -121,7 +122,8 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": null
     },
     {
       "name": "addProtocol",
@@ -142,7 +144,8 @@
           "name": "protocolId",
           "type": "u8"
         }
-      ]
+      ],
+      "returns": null
     },
     {
       "name": "setHashes",
@@ -177,7 +180,8 @@
             ]
           }
         }
-      ]
+      ],
+      "returns": null
     },
     {
       "name": "setRefreshParams",
@@ -200,7 +204,8 @@
             "defined": "RefreshParams"
           }
         }
-      ]
+      ],
+      "returns": null
     },
     {
       "name": "setProtocolWeights",
@@ -223,7 +228,8 @@
             "vec": "u32"
           }
         }
-      ]
+      ],
+      "returns": null
     },
     {
       "name": "deposit",
@@ -269,7 +275,8 @@
           "name": "amount",
           "type": "u64"
         }
-      ]
+      ],
+      "returns": null
     },
     {
       "name": "depositFromNative",
@@ -320,7 +327,8 @@
           "name": "amount",
           "type": "u64"
         }
-      ]
+      ],
+      "returns": null
     },
     {
       "name": "withdraw",
@@ -366,7 +374,8 @@
           "name": "lpAmount",
           "type": "u64"
         }
-      ]
+      ],
+      "returns": null
     },
     {
       "name": "createVaultUserTicketAccount",
@@ -375,6 +384,11 @@
           "name": "userSigner",
           "isMut": true,
           "isSigner": true
+        },
+        {
+          "name": "userTicketAccountOwner",
+          "isMut": false,
+          "isSigner": false
         },
         {
           "name": "vaultUserTicketAccount",
@@ -407,7 +421,8 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": null
     },
     {
       "name": "openWithdrawTicket",
@@ -462,7 +477,8 @@
           "name": "lpAmount",
           "type": "u64"
         }
-      ]
+      ],
+      "returns": null
     },
     {
       "name": "closeWithdrawTicket",
@@ -522,7 +538,8 @@
           "name": "lpAmount",
           "type": "u64"
         }
-      ]
+      ],
+      "returns": null
     },
     {
       "name": "refreshWeights",
@@ -548,7 +565,8 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": null
     },
     {
       "name": "mangoInitialize",
@@ -584,7 +602,8 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": null
     },
     {
       "name": "mangoDeposit",
@@ -650,7 +669,8 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": null
     },
     {
       "name": "mangoWithdraw",
@@ -731,7 +751,8 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": null
     },
     {
       "name": "mangoTvl",
@@ -772,7 +793,8 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": null
     },
     {
       "name": "solendDeposit",
@@ -838,7 +860,8 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": null
     },
     {
       "name": "solendWithdraw",
@@ -909,7 +932,8 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": null
     },
     {
       "name": "solendTvl",
@@ -935,7 +959,8 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": null
     },
     {
       "name": "solendIsolatedPoolDeposit",
@@ -1001,7 +1026,8 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": null
     },
     {
       "name": "solendIsolatedPoolWithdraw",
@@ -1072,7 +1098,8 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": null
     },
     {
       "name": "solendIsolatedPoolTvl",
@@ -1098,7 +1125,8 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": null
     },
     {
       "name": "portDeposit",
@@ -1164,7 +1192,8 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": null
     },
     {
       "name": "portWithdraw",
@@ -1235,7 +1264,8 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": null
     },
     {
       "name": "portTvl",
@@ -1261,7 +1291,8 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": null
     },
     {
       "name": "tulipDeposit",
@@ -1327,7 +1358,8 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": null
     },
     {
       "name": "tulipWithdraw",
@@ -1398,7 +1430,8 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": null
     },
     {
       "name": "tulipTvl",
@@ -1424,7 +1457,8 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": null
     },
     {
       "name": "franciumDeposit",
@@ -1490,7 +1524,8 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": null
     },
     {
       "name": "franciumWithdraw",
@@ -1561,7 +1596,8 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": null
     },
     {
       "name": "franciumTvl",
@@ -1587,7 +1623,8 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": null
     }
   ],
   "accounts": [
@@ -2038,5 +2075,8 @@
       "name": "InvalidTicketAmount",
       "msg": "Invalid ticket amount"
     }
-  ]
+  ],
+  "metadata": {
+    "address": "GGo1dnYpjKfe9omzUaFtaCyizvwpAMf3NhxSCMD61F3A"
+  }
 }
