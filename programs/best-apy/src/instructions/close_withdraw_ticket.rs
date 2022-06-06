@@ -118,8 +118,11 @@ pub fn handler(ctx: Context<CloseWithdrawTicket>, _bump_user: u8, lp_amount: u64
     let seeds = generate_seeds!(ctx.accounts.vault_account);
     let signer = &[&seeds[..]];
 
-    token::burn(ctx.accounts.burn_lps_ctx().with_signer(signer), amount)?;
-    token::burn(ctx.accounts.burn_ticket_ctx().with_signer(signer), amount)?;
+    token::burn(ctx.accounts.burn_lps_ctx().with_signer(signer), lp_amount)?;
+    token::burn(
+        ctx.accounts.burn_ticket_ctx().with_signer(signer),
+        lp_amount,
+    )?;
     token::transfer(
         ctx.accounts
             .transfer_from_vault_to_user_ctx()
