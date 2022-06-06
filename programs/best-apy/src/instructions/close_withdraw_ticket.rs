@@ -50,7 +50,7 @@ pub struct CloseWithdrawTicket<'info> {
     pub vault_input_token_account: Account<'info, TokenAccount>,
     #[account(
         mut,
-        associated_token::mint = vault_account.input_mint_pubkey,
+        associated_token::mint = vault_lp_token_mint_pubkey,
         associated_token::authority = vault_account,
     )]
     pub vault_lp_token_account: Account<'info, TokenAccount>,

@@ -135,7 +135,7 @@ const IX_CLOSE_WITHDRAW_TICKET_SIGHASH: [u8; 8] = [59, 115, 209, 162, 26, 58, 15
 
 /// Instruction data length (sighash + args)
 const IX_WITHDRAW_DATA_LEN: usize = 8 + 8;
-const IX_CLOSE_WITHDRAW_TICKET_DATA_LEN: usize = 8 + 8 + 1 + 1;
+const IX_CLOSE_WITHDRAW_TICKET_DATA_LEN: usize = 8 + 1 + 8;
 
 fn read_amount_from_deserialized_ix(ix_data: &[u8]) -> Result<u64> {
     require!(ix_data.len() > 8, ErrorCode::InvalidInstructions);
