@@ -209,16 +209,17 @@ describe("withdraw-ticket", () => {
         })
       );
     }
+    await program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS);
 
-    tx.add(
+    const tx2 = new anchor.web3.Transaction();
+    tx2.add(
       await program.openWithdrawTicket({
         userLpTokenAccount: governanceLpTokenAccount,
         lpAmount,
       })
     );
-    console.log(governance.toString(), "gover")
-    console.log(userSigner.toString(), "user")
-    await program.provider.sendAndConfirm(tx, [governanceKeypair], CONFIRM_OPTS);
+    
+    await program.provider.sendAndConfirm(tx2, [governanceKeypair], CONFIRM_OPTS);
   });
 
   it("Close withdraw ticket", async () => {
