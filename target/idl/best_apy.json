@@ -83,6 +83,47 @@
       ]
     },
     {
+      "name": "initializeTicketMint",
+      "accounts": [
+        {
+          "name": "userSigner",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "vaultAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultLpTokenMintPubkey",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultTicketMintPubkey",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "addProtocol",
       "accounts": [
         {
@@ -321,6 +362,162 @@
         }
       ],
       "args": [
+        {
+          "name": "lpAmount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "createVaultUserTicketAccount",
+      "accounts": [
+        {
+          "name": "userSigner",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "vaultUserTicketAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultTicketMintPubkey",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "openWithdrawTicket",
+      "accounts": [
+        {
+          "name": "userSigner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "userLpTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultUserTicketAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultLpTokenMintPubkey",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultTicketMintPubkey",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultLpTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bumpUser",
+          "type": "u8"
+        },
+        {
+          "name": "lpAmount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "closeWithdrawTicket",
+      "accounts": [
+        {
+          "name": "userSigner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "userInputTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultUserTicketAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultLpTokenMintPubkey",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultTicketMintPubkey",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultInputTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultLpTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bumpUser",
+          "type": "u8"
+        },
         {
           "name": "lpAmount",
           "type": "u64"
@@ -1450,11 +1647,24 @@
             }
           },
           {
-            "name": "padding",
+            "name": "bumpTicketMint",
+            "type": "u8"
+          },
+          {
+            "name": "padding1",
+            "type": {
+              "array": [
+                "u8",
+                7
+              ]
+            }
+          },
+          {
+            "name": "padding2",
             "type": {
               "array": [
                 "u64",
-                8
+                7
               ]
             }
           },
@@ -1822,6 +2032,11 @@
       "code": 6020,
       "name": "InvalidProtocolId",
       "msg": "Invalid protocol id"
+    },
+    {
+      "code": 6021,
+      "name": "InvalidTicketAmount",
+      "msg": "Invalid ticket amount"
     }
   ]
 }

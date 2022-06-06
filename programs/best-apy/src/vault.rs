@@ -48,8 +48,12 @@ pub struct VaultAccount {
     /// Price of the LP token in the previous interval
     pub previous_lp_price: LpPrice,
 
+    /// Bump seed for the ticket mint address
+    pub bump_ticket_mint: u8,
+
     /// Additional padding
-    pub _padding: [u64; 8],
+    pub _padding1: [u8; 7],
+    pub _padding2: [u64; 7],
 
     /// Protocol data (maximum = 10)
     pub protocols: Vec<ProtocolData>,

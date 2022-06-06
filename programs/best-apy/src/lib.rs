@@ -22,6 +22,8 @@ const PAUSED_WITHDRAW: bool = false;
 const VAULT_ACCOUNT_SEED: &[u8; 5] = b"vault";
 const VAULT_LP_TOKEN_MINT_SEED: &[u8; 4] = b"mint";
 
+const VAULT_TICKET_MINT_SEED: &[u8; 11] = b"ticket_mint";
+
 // DrrB1p8sxhwBZ3cXE8u5t2GxqEcTNuwAm7RcrQ8Yqjod
 const ADMIN_PUBKEY: Pubkey = Pubkey::new_from_array([
     191, 17, 77, 109, 253, 243, 16, 188, 64, 67, 249, 18, 51, 62, 173, 81, 128, 208, 121, 29, 74,
@@ -42,6 +44,12 @@ pub mod best_apy {
     #[access_control(is_admin(ctx.accounts.user_signer.key))]
     pub fn initialize_vault(ctx: Context<InitializeVault>, account_number: u8) -> Result<()> {
         instructions::initialize_vault::handler(ctx, account_number)
+    }
+
+    /// Initialize the ticket mint
+    #[access_control(is_admin(ctx.accounts.user_signer.key))]
+    pub fn initialize_ticket_mint(ctx: Context<InitializeTicketMint>) -> Result<()> {
+        instructions::initialize_ticket_mint::handler(ctx)
     }
 
     /// Add a new protocol to the vault_account
@@ -91,6 +99,33 @@ pub mod best_apy {
     #[access_control(withdraw_not_paused())]
     pub fn withdraw(ctx: Context<Withdraw>, lp_amount: u64) -> Result<()> {
         instructions::withdraw::handler(ctx, lp_amount)
+    }
+
+    /// Creates a vault_user_ticket_account
+    pub fn create_vault_user_ticket_account(
+        ctx: Context<CreateVaultUserTicketAccount>,
+    ) -> Result<()> {
+        instructions::create_vault_user_ticket_account::handler(ctx)
+    }
+
+    /// Open a withdrawal ticket (for delayed withdrawals)
+    #[access_control(withdraw_not_paused())]
+    pub fn open_withdraw_ticket(
+        ctx: Context<OpenWithdrawTicket>,
+        bump_user: u8,
+        lp_amount: u64,
+    ) -> Result<()> {
+        instructions::open_withdraw_ticket::handler(ctx, bump_user, lp_amount)
+    }
+
+    /// Close a withdrawal ticket
+    #[access_control(withdraw_not_paused())]
+    pub fn close_withdraw_ticket(
+        ctx: Context<CloseWithdrawTicket>,
+        bump_user: u8,
+        lp_amount: u64,
+    ) -> Result<()> {
+        instructions::close_withdraw_ticket::handler(ctx, bump_user, lp_amount)
     }
 
     /// Refresh the protocol weights

@@ -1,0 +1,46 @@
+extends = ["../best-apy/Test.protocols.toml"]
+
+[scripts]
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/withdraw-ticket/**/*.ts --exit"
+
+# solend
+[[test.validator.clone]]
+address = "8PbodeaosQP19SjYFx855UMqWxH2HynZLdBXmsrbac36"
+
+[[test.validator.clone]]
+address = "8UviNr47S8eL6J3WfDxMRa3hvLta1VDJwNWqsDgtN3Cv"
+
+[[test.validator.clone]]
+address = "5h6ssFpeDeRbzsEHDbTQNH7nVGgsKrZydxdSTnLm6QdV"
+
+[[test.validator.clone]]
+address = "H6ARHf6YXhGYeQfUzQNGk6rDNnLBQKrenN712K4AQJEG"
+
+[[test.validator.clone]]
+address = "AdtRGGhmqvom3Jemp5YNrxd9q9unX36BZk1pujkkXijL"
+
+# tulip
+[[test.validator.clone]]
+address = "4bcFeLv4nydFrsZqV5CgwCVrPhkQKsXtzfy2KyMz7ozM"
+
+[[test.validator.clone]]
+address = "FzbfXR7sopQL29Ubu312tkqWMxSre4dYSrFyYAjUYiC4"
+
+[[test.validator.clone]]
+address = "CPs1jJ5XAjhcAJsmTToWksAiPEqoLwKMbb1Z83rzaaaU"
+
+[[test.validator.clone]]
+address = "DQAcms41gjYzidRooXRE9GQM1jAauPXDcEpMbVh4FEc7"
+
+[[test.validator.clone]]
+address = "H4Q3hDbuMUw8Bu72Ph8oV2xMQ7BFNbekpfQZKS2xF7jW"
+
+# francium
+[[test.validator.clone]]
+address = "EnZC8MB6QLTxwN1LNqCXYC7XMpvXqitnYQPf5y5AcQRn"
+
+[[test.validator.clone]]
+address = "GiJwrxQW5NQWWAva4rnDMXwHxfrhyUzwMX5to1pmCCgF"
+
+[[test.validator.clone]]
+address = "92Zst3rEoJsyZUW2yNc2811GtkBwFrm3tqgxMTtFWuSB"

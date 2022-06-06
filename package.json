@@ -4,7 +4,7 @@
     "@solana/buffer-layout": "^4.0.0",
     "@solana/spl-token": "^0.2.0",
     "goblin-sdk": "goblingold/goblin-sdk",
-    "goblin-sdk-local":  "link:../goblin-sdk/"
+    "goblin-sdk-local":  "link:../goblingold-sdk-private/"
   },
   "devDependencies": {
     "@types/chai": "^4.3.0",
