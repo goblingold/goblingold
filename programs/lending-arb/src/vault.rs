@@ -33,10 +33,10 @@ pub struct VaultAccount {
     pub bumps: Bumps,
     /// Strategy input token mint address
     pub input_mint_pubkey: Pubkey,
-    /// Destination fee account
-    pub dao_treasury_lp_token_account: Pubkey,
     /// Strategy borrow token mint address
     pub borrow_mint_pubkey: Pubkey,
+    /// Destination fee account
+    pub dao_treasury_lp_token_account: Pubkey,
 
     /// Last refresh slot in which protocol weights were updated
     pub last_refresh_time: i64,
@@ -132,6 +132,8 @@ pub struct InitVaultAccountParams {
     pub bumps: Bumps,
     /// Strategy input token mint address
     pub input_mint_pubkey: Pubkey,
+    /// Strategy borrow token mint address
+    pub borrow_mint_pubkey: Pubkey,
     /// Destination fee account
     pub dao_treasury_lp_token_account: Pubkey,
 }

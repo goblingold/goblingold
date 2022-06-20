@@ -3,8 +3,8 @@ pub mod withdraw;
 pub mod close_withdraw_ticket;
 pub mod create_vault_user_ticket_account;
 pub mod initialize_vault;
-pub mod add_protocol;
 pub mod open_withdraw_ticket;
+pub mod add_protocol;
 pub mod set_hashes;
 
 pub use deposit::*;

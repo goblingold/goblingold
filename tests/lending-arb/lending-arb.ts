@@ -4,21 +4,23 @@ import { assert } from "chai";
 import { GoblinGold, Protocols, TOKENS, decodeAccount } from "goblin-sdk-local";
 import { getProtocols } from "./protocols";
 
-const INPUT_TOKEN = process.env.ASSET;
+const INPUT_TOKEN = "USDC";
 
 const INPUT_TOKEN_MINT = new anchor.web3.PublicKey(
   TOKENS[INPUT_TOKEN].mintAddress
 );
 
 const BORROW_TOKEN = "WSOL";
+const BORROW_TOKEN_MINT = new anchor.web3.PublicKey(
+  TOKENS[BORROW_TOKEN].mintAddress
+);
 const CONFIRM_OPTS: anchor.web3.ConfirmOptions = {
   skipPreflight: true,
 };
 
 const PROTOCOLS = getProtocols(INPUT_TOKEN);
 
-
-describe("deposit", () => {
+describe("borrow & deposit", () => {
   const provider = anchor.Provider.local();
   const userSigner = provider.wallet.publicKey;
 
@@ -28,11 +30,17 @@ describe("deposit", () => {
   });
 
   const program = client.LendingArb;
+  program.setToken(INPUT_TOKEN);
 
+  const wrappedKeypair = anchor.web3.Keypair.generate();
+  let userInputTokenAccount = wrappedKeypair.publicKey;
+  let userLpTokenAccount: anchor.web3.PublicKey;
 
   it("Initialize vault", async () => {
-    const tx = await program.initializeVault(new anchor.BN(0));
-
+    const tx = await program.initializeVault(
+      new anchor.BN(0),
+      BORROW_TOKEN_MINT
+    );
     const txProtocols = await Promise.all(
       PROTOCOLS.map(async (protocol) =>
         program.methods
@@ -44,7 +52,7 @@ describe("deposit", () => {
           .transaction()
       )
     );
-    txProtocols.reduce((acc, txProtocol) => acc.add(txProtocol), tx);
+    //txProtocols.reduce((acc, txProtocol) => acc.add(txProtocol), tx);
 
     await program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS);
     // const vaultData = await program.decodeVault();
@@ -62,10 +70,10 @@ describe("deposit", () => {
     await program.provider.sendAndConfirm(txHashes, [], CONFIRM_OPTS);
   });
 
-  it("Deposit", async () => {
+  it("Deposit Solend", async () => {
     const amount = new anchor.BN(1_000_000_000);
 
-    const userLpTokenAccount = await spl.getAssociatedTokenAddress(
+    userLpTokenAccount = await spl.getAssociatedTokenAddress(
       program.vaultKeys[INPUT_TOKEN].vaultLpTokenMintAddress,
       userSigner,
       false
@@ -74,8 +82,6 @@ describe("deposit", () => {
     const tx = new anchor.web3.Transaction();
 
     if (INPUT_TOKEN === "WSOL") {
-      const wrappedKeypair = anchor.web3.Keypair.generate();
-      const userInputTokenAccount = wrappedKeypair.publicKey;
       const lamports = await spl.getMinimumBalanceForRentExemptAccount(
         program.provider.connection
       );
@@ -124,7 +130,7 @@ describe("deposit", () => {
         );
       await program.provider.sendAndConfirm(tx, [wrappedKeypair], CONFIRM_OPTS);
     } else {
-      const userInputTokenAccount = await spl.getAssociatedTokenAddress(
+      userInputTokenAccount = await spl.getAssociatedTokenAddress(
         INPUT_TOKEN_MINT,
         userSigner,
         false
@@ -148,15 +154,20 @@ describe("deposit", () => {
     }
   });
 
-  it("Borrow", async () => {
-
-
-    await program.borrow({
+  it("Borrow Solend", async () => {
+    const tx = await program.borrow({
       userInputTokenAccount,
       userLpTokenAccount,
-      amount,
-    })
+      amount: new anchor.BN(1000),
+    });
+    await program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS);
   });
 
-
+  xit("Deposit WSOL Francium", async () => {
+    const tx = await program.borrow({
+      userInputTokenAccount,
+      userLpTokenAccount,
+      amount: new anchor.BN(1000),
+    });
+  });
 });

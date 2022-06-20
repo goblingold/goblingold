@@ -1,5 +1,32 @@
+extends = ["../../Anchor.toml"]
+
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/lending-arb/**/*.ts --exit"
+
+
+# USDC_mint
+[[test.validator.clone]]
+address = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+
+[[test.validator.account]]
+address = "W89eZsn18V2mMbhuih8sDPFvh8Lt2BNUsqu3WQ3xFDL"
+filename = "../accounts/W89eZsn18V2mMbhuih8sDPFvh8Lt2BNUsqu3WQ3xFDL.json"
+
+[[test.validator.account]]
+address = "D6cRe4QeGzsqxqFhm4iXfFtjSDAMsrRaEqSjczU8BbFj"
+filename = "../accounts/D6cRe4QeGzsqxqFhm4iXfFtjSDAMsrRaEqSjczU8BbFj.json"
+
+[[test.validator.account]]
+address = "2RkfbNb4PoNKiPAVSExfQbRzJ8rExWF1xh2KrQQaKY3w"
+filename = "../accounts/2RkfbNb4PoNKiPAVSExfQbRzJ8rExWF1xh2KrQQaKY3w.json"
+
+[[test.validator.account]]
+address = "xjPVdWkQDGC8UUFdA5NZ2FamoDUPdMR95o6aXrHswNK"
+filename = "../accounts/xjPVdWkQDGC8UUFdA5NZ2FamoDUPdMR95o6aXrHswNK.json"
+
+[[test.validator.account]]
+address = "H1u51MjTch9dgGLhwdaWSxqthucaA9BsnZLV9DK7WK75"
+filename = "../accounts/H1u51MjTch9dgGLhwdaWSxqthucaA9BsnZLV9DK7WK75.json"
 
 [test]
 startup_wait = 30_000

@@ -1,6 +1,6 @@
 use crate::vault::{Bumps, InitVaultAccountParams, VaultAccount};
 use crate::TREASURY_PUBKEY;
-use crate::{VAULT_ACCOUNT_SEED, VAULT_LP_TOKEN_MINT_SEED};
+use crate::{VAULT_ACCOUNT_SEED, VAULT_LP_TOKEN_MINT_SEED, VAULT_TICKET_MINT_SEED};
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::pubkey::Pubkey;
 use anchor_spl::associated_token::AssociatedToken;
@@ -11,7 +11,8 @@ use anchor_spl::token::{Mint, Token, TokenAccount};
 pub struct InitializeVault<'info> {
     #[account(mut)]
     pub user_signer: Signer<'info>,
-    pub input_token_mint_address: Account<'info, Mint>,
+    pub input_token_mint_address: Box<Account<'info, Mint>>,
+    pub borrow_token_mint_address: Box<Account<'info, Mint>>,
     #[account(
         init,
         payer = user_signer,
@@ -26,7 +27,14 @@ pub struct InitializeVault<'info> {
         associated_token::mint = input_token_mint_address,
         associated_token::authority = vault_account,
     )]
-    pub vault_input_token_account: Account<'info, TokenAccount>,
+    pub vault_input_token_account: Box<Account<'info, TokenAccount>>,
+    #[account(
+        init,
+        payer = user_signer,
+        associated_token::mint = borrow_token_mint_address,
+        associated_token::authority = vault_account,
+    )]
+    pub vault_borrow_token_account: Box<Account<'info, TokenAccount>>,
     #[account(
         init,
         payer = user_signer,
@@ -35,7 +43,7 @@ pub struct InitializeVault<'info> {
         seeds = [VAULT_LP_TOKEN_MINT_SEED, vault_account.key().as_ref()],
         bump,
     )]
-    pub vault_lp_token_mint_pubkey: Account<'info, Mint>,
+    pub vault_lp_token_mint_pubkey: Box<Account<'info, Mint>>,
     #[account(
         init,
         payer = user_signer,
@@ -43,6 +51,15 @@ pub struct InitializeVault<'info> {
         associated_token::authority = dao_treasury_owner,
     )]
     pub dao_treasury_lp_token_account: Account<'info, TokenAccount>,
+    #[account(
+    init,
+    payer = user_signer,
+    mint::decimals = input_token_mint_address.decimals,
+    mint::authority = vault_account.key(),
+    seeds = [VAULT_TICKET_MINT_SEED, vault_account.key().as_ref()],
+    bump,
+    )]
+    pub vault_ticket_mint_pubkey: Account<'info, Mint>,
     #[account(constraint = dao_treasury_owner.key == &TREASURY_PUBKEY)]
     /// CHECKED: address is checked
     pub dao_treasury_owner: AccountInfo<'info>,
@@ -63,6 +80,7 @@ pub fn handler(ctx: Context<InitializeVault>, account_number: u8) -> Result<()> 
                 ticket_mint : *ctx.bumps.get("vault_ticket_mint_pubkey").unwrap(),
             },
             input_mint_pubkey: ctx.accounts.input_token_mint_address.key(),
+            borrow_mint_pubkey: ctx.accounts.borrow_token_mint_address.key(),
             dao_treasury_lp_token_account: ctx.accounts.dao_treasury_lp_token_account.key(),
         }));
     Ok(())

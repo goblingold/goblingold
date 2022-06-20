@@ -14,7 +14,7 @@ mod protocols;
 mod vault;
 mod health;
 
-declare_id!("1nc1nerator11111111111111111111111111111111");
+declare_id!("GGo34nYpjKfe9omzUaFtaCyizvwpAMf3NhxSCMD61F3A");
 
 
 const PAUSED_DEPOSIT: bool = false;

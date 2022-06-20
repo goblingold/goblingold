@@ -39,7 +39,7 @@ pub fn handler<'info, T: ProtocolRepay<'info>>(
 pub struct GenericRepayAccounts<'info> {
     #[account(
         mut,
-        seeds = [VAULT_ACCOUNT_SEED, &[vault_account.seed_number][..], vault_account.borrow_mint_pubkey.as_ref()],
+        seeds = [VAULT_ACCOUNT_SEED, &[vault_account.seed_number][..], vault_account.input_mint_pubkey.as_ref()],
         bump = vault_account.bumps.vault
     )]
     pub vault_account: Box<Account<'info, VaultAccount>>,

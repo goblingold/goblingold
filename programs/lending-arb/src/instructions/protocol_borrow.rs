@@ -40,15 +40,16 @@ pub fn handler<'info, T: ProtocolBorrow<'info>>(
 pub struct GenericBorrowAccounts<'info> {
     #[account(
         mut,
-        seeds = [VAULT_ACCOUNT_SEED, &[vault_account.seed_number][..], vault_account.borrow_mint_pubkey.as_ref()],
+        seeds = [VAULT_ACCOUNT_SEED, &[vault_account.seed_number][..], vault_account.input_mint_pubkey.as_ref()],
         bump = vault_account.bumps.vault
     )]
     pub vault_account: Box<Account<'info, VaultAccount>>,
-    #[account(
-        mut,
-        associated_token::mint = vault_account.borrow_mint_pubkey,
-        associated_token::authority = vault_account,
-    )]
+    // #[account(
+    //     mut,
+    //     associated_token::mint = vault_account.borrow_mint_pubkey,
+    //     associated_token::authority = vault_account,
+    // )]
+    /// CHECKED inside
     pub vault_borrow_token_account: Account<'info, TokenAccount>,
     #[account()]
     /// CHECK inside

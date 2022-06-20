@@ -1,5 +1,5 @@
 [programs.localnet]
-best_apy = "GGo1dnYpjKfe9omzUaFtaCyizvwpAMf3NhxSCMD61F3A"
+lending_arb = "GGo34nYpjKfe9omzUaFtaCyizvwpAMf3NhxSCMD61F3A"
 
 [registry]
 url = "https://anchor.projectserum.com"
