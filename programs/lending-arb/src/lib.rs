@@ -97,17 +97,24 @@ pub mod lending_arb {
         instructions::create_vault_user_ticket_account::handler(ctx)
     }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 5a5b65426c4ee24650fbf1a1844d7dc7f6d8b264
     /// Deposit user input tokens into the vault account
     #[access_control(deposit_not_paused())]
     pub fn deposit(ctx: Context<Deposit>, amount: u64) -> Result<()> {
         instructions::deposit::handler(ctx, amount)
     }
+<<<<<<< HEAD
 
      /// Withdraw the required input tokens from the vault and send them back to the user
      #[access_control(withdraw_not_paused())]
      pub fn withdraw(ctx: Context<Withdraw>, lp_amount: u64) -> Result<()> {
          instructions::withdraw::handler(ctx, lp_amount)
      }
+=======
+>>>>>>> 5a5b65426c4ee24650fbf1a1844d7dc7f6d8b264
     
     /// Open a withdrawal ticket (for delayed withdrawals)
     #[access_control(withdraw_not_paused())]

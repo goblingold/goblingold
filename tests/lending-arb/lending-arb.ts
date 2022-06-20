@@ -17,7 +17,6 @@ const CONFIRM_OPTS: anchor.web3.ConfirmOptions = {
 
 const PROTOCOLS = getProtocols(INPUT_TOKEN);
 
-
 describe("deposit", () => {
   const provider = anchor.Provider.local();
   const userSigner = provider.wallet.publicKey;
@@ -28,7 +27,6 @@ describe("deposit", () => {
   });
 
   const program = client.LendingArb;
-
 
   it("Initialize vault", async () => {
     const tx = await program.initializeVault(new anchor.BN(0));
@@ -149,14 +147,10 @@ describe("deposit", () => {
   });
 
   it("Borrow", async () => {
-
-
     await program.borrow({
       userInputTokenAccount,
       userLpTokenAccount,
       amount,
-    })
+    });
   });
-
-
 });
