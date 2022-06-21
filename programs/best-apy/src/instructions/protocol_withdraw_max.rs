@@ -18,7 +18,7 @@ pub trait ProtocolWithdrawMax<'info> {
     fn input_token_account_as_mut(&mut self) -> &mut Account<'info, TokenAccount>;
 
     /// Compute the amount to deposit
-    fn get_amount(&self) -> Result<u64>;
+    fn get_amount(&self, min_amount: u64) -> Result<u64>;
 
     /// Convert reserve liquidity to collateral (if any)
     fn liquidity_to_collateral(&self, amount: u64) -> Result<u64> {
@@ -33,9 +33,10 @@ pub trait ProtocolWithdrawMax<'info> {
 pub fn handler<'info, T: ProtocolWithdrawMax<'info>>(
     ctx: Context<T>,
     protocol: Protocols,
+    min_amount: u64,
 ) -> Result<()> {
     let protocol_idx = ctx.accounts.protocol_position(protocol)?;
-    let amount = ctx.accounts.get_amount()?;
+    let amount = ctx.accounts.get_amount(min_amount)?;
     let mut lp_amount = ctx.accounts.liquidity_to_collateral(amount)?;
 
     // Add 1 as due to rounding. Otherwise it might happens that there wasn't enough funds

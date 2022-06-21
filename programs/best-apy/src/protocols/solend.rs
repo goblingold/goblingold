@@ -313,11 +313,14 @@ impl<'info> ProtocolWithdrawMax<'info> for SolendWithdrawMax<'info> {
         &mut self.generic_accs.vault_input_token_account
     }
 
-    fn get_amount(&self) -> Result<u64> {
+    fn get_amount(&self, min_amount: u64) -> Result<u64> {
         let reserve = solend_token_lending::state::Reserve::unpack(
             &self.solend_reserve_account.data.borrow(),
         )?;
-        Ok(reserve.liquidity.available_amount)
+
+        let amount = reserve.liquidity.available_amount;
+        require!(amount > min_amount, ErrorCode::InvalidProtocolWithdraw);
+        Ok(amount)
     }
 
     fn liquidity_to_collateral(&self, amount: u64) -> Result<u64> {

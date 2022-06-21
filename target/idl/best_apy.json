@@ -990,7 +990,12 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "minAmount",
+          "type": "u64"
+        }
+      ]
     },
     {
       "name": "solendTvl",

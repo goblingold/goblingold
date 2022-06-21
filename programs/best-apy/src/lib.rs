@@ -171,8 +171,8 @@ pub mod best_apy {
 
     #[access_control(is_admin(ctx.accounts.user_signer.key))]
     #[access_control(ctx.accounts.check_hash(Protocols::Solend))]
-    pub fn solend_withdraw_max(ctx: Context<SolendWithdrawMax>) -> Result<()> {
-        instructions::protocol_withdraw_max::handler(ctx, Protocols::Solend)
+    pub fn solend_withdraw_max(ctx: Context<SolendWithdrawMax>, min_amount: u64) -> Result<()> {
+        instructions::protocol_withdraw_max::handler(ctx, Protocols::Solend, min_amount)
     }
 
     /// Solend: Compute the TVL
