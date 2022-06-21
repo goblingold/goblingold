@@ -17,8 +17,8 @@ pub trait ProtocolWithdraw<'info> {
     /// Return the input token account
     fn input_token_account_as_mut(&mut self) -> &mut Account<'info, TokenAccount>;
 
-    /// Compute the amount to deposit
-    fn get_amount(&self, protocol_idx: usize) -> Result<u64>;
+    /// Compute the amount to withdraw
+    fn get_amount(&self, protocol_idx: usize) -> Result<AmountWithCaller>;
 
     /// Return maximum liquidity available for withdrawal from the protocol
     fn max_liquidity(&self) -> Result<u64> {
@@ -41,8 +41,8 @@ pub fn handler<'info, T: ProtocolWithdraw<'info>>(
 ) -> Result<()> {
     let protocol_idx = ctx.accounts.protocol_position(protocol)?;
 
-    let mut amount = ctx.accounts.get_amount(protocol_idx)?;
-    if !ctx.accounts.protocol_data_as_mut(protocol_idx).is_active() {
+    let AmountWithCaller { mut amount, caller } = ctx.accounts.get_amount(protocol_idx)?;
+    if !ctx.accounts.protocol_data_as_mut(protocol_idx).is_active() && caller == Caller::Bot {
         amount = std::cmp::min(amount, ctx.accounts.max_liquidity()?);
     }
 
@@ -80,6 +80,19 @@ pub fn handler<'info, T: ProtocolWithdraw<'info>>(
     Ok(())
 }
 
+/// Amount to withdraw and who call it
+pub struct AmountWithCaller {
+    pub amount: u64,
+    pub caller: Caller,
+}
+
+/// Who can call the withdraw ix
+#[derive(PartialEq, Eq)]
+pub enum Caller {
+    User,
+    Bot,
+}
+
 #[derive(Accounts)]
 pub struct GenericWithdrawAccounts<'info> {
     #[account(
@@ -105,11 +118,17 @@ impl<'info> GenericWithdrawAccounts<'info> {
     /// Compute the amount to withdraw from the protocol depending on whether the instruction comes
     /// from the bot or from a user, assuming for the latter that the following ix corresponds
     /// either to the `withdraw` or the `close_withdraw_ticket` one
-    pub fn amount_to_withdraw(&self, protocol_idx: usize) -> Result<u64> {
+    pub fn amount_to_withdraw(&self, protocol_idx: usize) -> Result<AmountWithCaller> {
         if let Some(amount) = self.read_amount_from_next_ix()? {
-            Ok(amount)
+            Ok(AmountWithCaller {
+                amount,
+                caller: Caller::User,
+            })
         } else {
-            Ok(self.vault_account.calculate_withdraw(protocol_idx)?)
+            Ok(AmountWithCaller {
+                amount: self.vault_account.calculate_withdraw(protocol_idx)?,
+                caller: Caller::Bot,
+            })
         }
     }
 

@@ -196,7 +196,7 @@ impl<'info> ProtocolWithdraw<'info> for TulipWithdraw<'info> {
         &mut self.generic_accs.vault_input_token_account
     }
 
-    fn get_amount(&self, protocol_idx: usize) -> Result<u64> {
+    fn get_amount(&self, protocol_idx: usize) -> Result<AmountWithCaller> {
         self.generic_accs.amount_to_withdraw(protocol_idx)
     }
 
