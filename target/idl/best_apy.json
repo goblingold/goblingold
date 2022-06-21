@@ -917,6 +917,82 @@
       "args": []
     },
     {
+      "name": "solendWithdrawMax",
+      "accounts": [
+        {
+          "name": "userSigner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "genericAccs",
+          "accounts": [
+            {
+              "name": "vaultAccount",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "vaultInputTokenAccount",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "tokenProgram",
+              "isMut": false,
+              "isSigner": false
+            },
+            {
+              "name": "clock",
+              "isMut": false,
+              "isSigner": false
+            },
+            {
+              "name": "instructions",
+              "isMut": false,
+              "isSigner": false
+            }
+          ]
+        },
+        {
+          "name": "solendProgramId",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "vaultSolendCollateralTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "solendReserveAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "solendLendingMarketAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "solendDerivedLendingMarketAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "solendReserveCollateralSplTokenMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "solendReserveLiquiditySupplySplTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "solendTvl",
       "accounts": [
         {
