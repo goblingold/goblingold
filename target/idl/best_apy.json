@@ -1857,6 +1857,20 @@
       }
     },
     {
+      "name": "Caller",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "User"
+          },
+          {
+            "name": "Bot"
+          }
+        ]
+      }
+    },
+    {
       "name": "Protocols",
       "type": {
         "kind": "enum",
