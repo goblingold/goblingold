@@ -20,6 +20,11 @@ pub trait ProtocolWithdraw<'info> {
     /// Compute the amount to deposit
     fn get_amount(&self, protocol_idx: usize) -> Result<u64>;
 
+    /// Return maximum liquidity available for withdrawal from the protocol
+    fn max_liquidity(&self) -> Result<u64> {
+        Ok(u64::MAX)
+    }
+
     /// Convert reserve liquidity to collateral (if any)
     fn liquidity_to_collateral(&self, amount: u64) -> Result<u64> {
         Ok(amount)
@@ -35,7 +40,12 @@ pub fn handler<'info, T: ProtocolWithdraw<'info>>(
     protocol: Protocols,
 ) -> Result<()> {
     let protocol_idx = ctx.accounts.protocol_position(protocol)?;
-    let amount = ctx.accounts.get_amount(protocol_idx)?;
+
+    let mut amount = ctx.accounts.get_amount(protocol_idx)?;
+    if !ctx.accounts.protocol_data_as_mut(protocol_idx).is_active() {
+        amount = std::cmp::min(amount, ctx.accounts.max_liquidity()?);
+    }
+
     let mut lp_amount = ctx.accounts.liquidity_to_collateral(amount)?;
 
     // Add 1 as due to rounding. Otherwise it might happens that there wasn't enough funds
