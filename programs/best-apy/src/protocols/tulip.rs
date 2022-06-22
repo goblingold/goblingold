@@ -196,8 +196,13 @@ impl<'info> ProtocolWithdraw<'info> for TulipWithdraw<'info> {
         &mut self.generic_accs.vault_input_token_account
     }
 
-    fn get_amount(&self, protocol_idx: usize) -> Result<u64> {
+    fn get_amount(&self, protocol_idx: usize) -> Result<AmountWithCaller> {
         self.generic_accs.amount_to_withdraw(protocol_idx)
+    }
+
+    fn max_liquidity(&self) -> Result<u64> {
+        let reserve = tulip_reserve::Reserve::unpack(&self.tulip_reserve_account.data.borrow())?;
+        Ok(reserve.liquidity.available_amount)
     }
 
     fn liquidity_to_collateral(&self, amount: u64) -> Result<u64> {

@@ -1,4 +1,3 @@
-//#! cargo clippy
 use crate::check_hash::*;
 use crate::error::ErrorCode;
 use crate::instructions::{protocol_deposit::*, protocol_rewards::*, protocol_withdraw::*};
@@ -185,8 +184,14 @@ impl<'info> ProtocolWithdraw<'info> for PortWithdraw<'info> {
         &mut self.generic_accs.vault_input_token_account
     }
 
-    fn get_amount(&self, protocol_idx: usize) -> Result<u64> {
+    fn get_amount(&self, protocol_idx: usize) -> Result<AmountWithCaller> {
         self.generic_accs.amount_to_withdraw(protocol_idx)
+    }
+
+    fn max_liquidity(&self) -> Result<u64> {
+        let mut account_data_slice: &[u8] = &self.port_reserve_account.try_borrow_data()?;
+        let reserve = port_anchor_adaptor::PortReserve::try_deserialize(&mut account_data_slice)?;
+        Ok(reserve.liquidity.available_amount)
     }
 
     fn liquidity_to_collateral(&self, amount: u64) -> Result<u64> {

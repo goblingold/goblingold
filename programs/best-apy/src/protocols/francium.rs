@@ -211,8 +211,15 @@ impl<'info> ProtocolWithdraw<'info> for FranciumWithdraw<'info> {
         &mut self.generic_accs.vault_input_token_account
     }
 
-    fn get_amount(&self, protocol_idx: usize) -> Result<u64> {
+    fn get_amount(&self, protocol_idx: usize) -> Result<AmountWithCaller> {
         self.generic_accs.amount_to_withdraw(protocol_idx)
+    }
+
+    fn max_liquidity(&self) -> Result<u64> {
+        let lending_pool = francium_lending_pool::LendingPool::unpack(
+            &self.francium_lending_pool_info_account.data.borrow(),
+        )?;
+        Ok(lending_pool.liquidity.available_amount)
     }
 
     fn liquidity_to_collateral(&self, amount: u64) -> Result<u64> {
