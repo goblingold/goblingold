@@ -8,6 +8,46 @@ test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/lending-arb/**/*.t
 [[test.validator.clone]]
 address = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
 
+# Solend USDC
+[[test.validator.clone]]
+address = "993dVFL2uXWYeoXuEBFXR4BijeXdTv4s6BzsCjJZuwqk"
+
+# Solend WSOL
+ [[test.validator.clone]]
+address = "5h6ssFpeDeRbzsEHDbTQNH7nVGgsKrZydxdSTnLm6QdV"
+       
+# solend
+[[test.validator.clone]]
+address = "DdZR6zRFiUt4S5mg7AV1uKB2z1f1WzcNYCaTEEWPAuby"
+[[test.validator.clone]]
+address = "4UpD2fh7xH3VP9QQaXtsS1YY3bxzWhtfpks7FatyKvdY"
+[[test.validator.clone]]
+address = "UtRy8gcEu9fCkDuUrU8EmC7Uc6FZy5NCwttzG7i6nkw"
+[[test.validator.clone]]
+address = "BgxfHJDzm44T7XG68MYKx7YisTjZu73tVovyZSjJMpmw"
+[[test.validator.clone]]
+address = "Gnt27xtC473ZT2Mw5u8wZ68Z3gULkSTb5DuxJy7eJotD"
+[[test.validator.clone]]
+address = "BgxfHJDzm44T7XG68MYKx7YisTjZu73tVovyZSjJMpmw"
+[[test.validator.clone]]
+address = "993dVFL2uXWYeoXuEBFXR4BijeXdTv4s6BzsCjJZuwqk"
+[[test.validator.clone]]
+address = "8SheGtsopRUDzdiD6v6BR9a6bqZ9QwywYQY99Fp5meNf"
+[[test.validator.clone]]
+address = "CZx29wKMUxaJDq6aLVQTdViPL754tTR64NAgQBUGxxHb"
+[[test.validator.clone]]
+address = "5Gdxn4yquneifE6uk9tK8X4CqHfWKjW2BvYU25hAykwP"
+
+
+#francium
+[[test.validator.clone]]
+address = "62fDf5daUJ9jBz8Xtj6Bmw1bh1DvHn8AG4L9hMmxCzpu"
+[[test.validator.clone]]
+address = "Hx6LbkMHe69DYawhPyVNs8Apa6tyfogfzQV6a7XkwBUU"
+[[test.validator.clone]]
+address = "CFp9kt8z3Epb1QSiEp3xA44KbSwuJxhFR3wQoerFqYS9"
+
+
 [[test.validator.account]]
 address = "W89eZsn18V2mMbhuih8sDPFvh8Lt2BNUsqu3WQ3xFDL"
 filename = "../accounts/W89eZsn18V2mMbhuih8sDPFvh8Lt2BNUsqu3WQ3xFDL.json"

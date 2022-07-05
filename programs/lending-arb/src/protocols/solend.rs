@@ -35,7 +35,8 @@ pub mod solend_program_id {
 pub struct SolendInitialize<'info> {
     pub user_signer: Signer<'info>,
     #[account(
-        seeds = [VAULT_ACCOUNT_SEED, vault_account.input_mint_pubkey.as_ref()],
+        mut,
+        seeds = [VAULT_ACCOUNT_SEED, &[vault_account.seed_number][..], vault_account.input_mint_pubkey.as_ref()],
         bump = vault_account.bumps.vault
     )]
     pub vault_account: Box<Account<'info, VaultAccount>>,
@@ -396,13 +397,6 @@ pub struct SolendBorrow<'info> {
     #[account(constraint = solend_program_id.key == &solend_program_id::ID)]
     /// CHECK: Solend CPI
     pub solend_program_id: AccountInfo<'info>,
-    // TODO
-    // #[account(
-    //     mut,
-    //     associated_token::mint = vault_solend_borrowed_token_account.mint,
-    //     associated_token::authority = generic_accs.vault_account,
-    // )]
-    pub vault_solend_borrow_token_account: Account<'info, TokenAccount>,
     #[account(mut)]
     /// CHECK: Solend CPI
     pub solend_reserve_account: AccountInfo<'info>,
@@ -414,25 +408,25 @@ pub struct SolendBorrow<'info> {
     pub vault_solend_obligation_account: AccountInfo<'info>,
     /// CHECK: Solend CPI
     pub solend_lending_market_account: AccountInfo<'info>,
+    /// CHECK: Solend CPI
+    pub solend_derived_lending_market_authority: AccountInfo<'info>,
+    pub clock: Sysvar<'info, Clock>,
+    pub token_program: Program<'info, Token>,
 }
 
 impl<'info> CheckHash<'info> for SolendBorrow<'info> {
     fn hash(&self) -> Hash {
         hashv(&[
-            self.vault_solend_borrow_token_account
-                .key()
-                .as_ref(),
             self.solend_reserve_account.key.as_ref(),
             self.borrow_reserve_liquidity_fee_receiver_pubkey
                 .key
                 .as_ref(),
             self.vault_solend_obligation_account.key.as_ref(),
             self.solend_lending_market_account.key.as_ref(),
-            self.solend_lending_market_account.key.as_ref(),
+            self.solend_derived_lending_market_authority.key.as_ref()
         ])
     }
 
-    
     fn target_hash(&self, protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
         let protocol_idx = self
             .generic_accs
@@ -441,7 +435,7 @@ impl<'info> CheckHash<'info> for SolendBorrow<'info> {
             .unwrap();
         self.generic_accs.vault_account.protocols[protocol_idx]
             .hash_pubkey
-            .hash_deposit
+            .hash_borrow
     }
 }
 
@@ -458,12 +452,14 @@ impl<'info> ProtocolBorrow<'info> for SolendBorrow<'info> {
 
         let obligation = solend_token_lending::state::Obligation::unpack(&self.vault_solend_obligation_account.data.borrow())?;
         get_health(obligation.allowed_borrow_value, Health::Keto)?; 
-        
+        msg!("obligation.allowed_borrow_value {}", obligation.allowed_borrow_value);
+        msg!("obligation.borrowed_value {}", obligation.borrowed_value);
         let optimal_amount = obligation.allowed_borrow_value.try_mul(OPTIMAL_HEALTH_FACTOR as u64)?;
-        require!(optimal_amount.gt(&obligation.unhealthy_borrow_value), ErrorCode::UnhealthyOperation);
-
-        let amount_to_borrow = optimal_amount.try_sub(obligation.borrowed_value)?;
-        Ok(amount_to_borrow.try_ceil_u64()?)
+        //require!(optimal_amount.gt(&obligation.unhealthy_borrow_value), ErrorCode::UnhealthyOperation);
+        //let amount_to_borrow = optimal_amount.try_sub(obligation.borrowed_value)?;
+        //msg!("amount to borrow {}", amount_to_borrow);
+        //Ok(amount_to_borrow.try_ceil_u64()?)
+        Ok(200)
     }
 
     fn cpi_borrow(&self, amount: u64) -> Result<()> {
@@ -474,7 +470,7 @@ impl<'info> ProtocolBorrow<'info> for SolendBorrow<'info> {
             solend_token_lending::instruction::borrow_obligation_liquidity(
                 solend_program_id::ID,
                 amount,
-                self.vault_solend_borrow_token_account.key(),
+                self.generic_accs.vault_input_token_account.key(),
                 self.generic_accs.vault_borrow_token_account.key(),
                 *self.solend_reserve_account.key,
                 *self.borrow_reserve_liquidity_fee_receiver_pubkey.key,
@@ -484,13 +480,16 @@ impl<'info> ProtocolBorrow<'info> for SolendBorrow<'info> {
                 Option::None,// host_fee_receiver  needed for this case ??
             );
         let accounts = [
-                self.vault_solend_borrow_token_account.to_account_info(),
+                self.generic_accs.vault_input_token_account.to_account_info(),
                 self.generic_accs.vault_borrow_token_account.to_account_info(),
                 self.solend_reserve_account.to_account_info(),
                 self.borrow_reserve_liquidity_fee_receiver_pubkey.to_account_info(),
                 self.vault_solend_obligation_account.to_account_info(),
                 self.solend_lending_market_account.to_account_info(),
+                self.solend_derived_lending_market_authority.to_account_info(),
                 self.generic_accs.vault_account.to_account_info(),
+                self.clock.to_account_info(),
+                self.token_program.to_account_info()
         ];
         invoke_signed(&ix, &accounts, signer)?;
 
@@ -520,6 +519,8 @@ pub struct SolendRepay<'info> {
     pub vault_solend_obligation_account: AccountInfo<'info>,
     /// CHECK: Solend CPI
     pub solend_lending_market_account: AccountInfo<'info>,
+    /// CHECK: Solend CPI
+    pub solend_derived_lending_market_authority: AccountInfo<'info>,
 }
 
 impl<'info> CheckHash<'info> for SolendRepay<'info> {
@@ -533,6 +534,7 @@ impl<'info> CheckHash<'info> for SolendRepay<'info> {
                 .key
                 .as_ref(),
             self.solend_lending_market_account.key.as_ref(),
+            self.solend_derived_lending_market_authority.key.as_ref()
         ])
     }
 
@@ -588,6 +590,7 @@ impl<'info> ProtocolRepay<'info> for SolendRepay<'info> {
                 self.solend_reserve_account.to_account_info(),
                 self.vault_solend_obligation_account.to_account_info(),
                 self.solend_lending_market_account.to_account_info(),
+                self.solend_derived_lending_market_authority.to_account_info(),
                 self.generic_accs.vault_account.to_account_info(),
         ];
         invoke_signed(&ix, &accounts, signer)?;

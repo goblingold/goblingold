@@ -52,13 +52,20 @@ describe("borrow & deposit", () => {
           .transaction()
       )
     );
-    //txProtocols.reduce((acc, txProtocol) => acc.add(txProtocol), tx);
+    txProtocols.reduce((acc, txProtocol) => acc.add(txProtocol), tx);
 
     await program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS);
     // const vaultData = await program.decodeVault();
     // const vaultProtocols = vaultData.protocols.map((data) => data.protocolId);
 
     // assert.deepStrictEqual(vaultProtocols, PROTOCOLS);
+  });
+
+  it("Initialize protocol accounts", async () => {
+    const txs = await program.initializeProtocolAccounts();
+    txs.map(async (tx) => {
+      await program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS);
+    });
   });
 
   it("Set hashes", async () => {
@@ -70,7 +77,7 @@ describe("borrow & deposit", () => {
     await program.provider.sendAndConfirm(txHashes, [], CONFIRM_OPTS);
   });
 
-  it("Deposit Solend", async () => {
+  it("Deposit into vault", async () => {
     const amount = new anchor.BN(1_000_000_000);
 
     userLpTokenAccount = await spl.getAssociatedTokenAddress(
@@ -150,6 +157,7 @@ describe("borrow & deposit", () => {
           amount,
         })
       );
+      tx.add(await program.protocolDeposit());
       await program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS);
     }
   });

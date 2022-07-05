@@ -80,6 +80,7 @@ impl VaultAccount {
         Self {
             bumps: params.bumps,
             input_mint_pubkey: params.input_mint_pubkey,
+            borrow_mint_pubkey: params.borrow_mint_pubkey,
             dao_treasury_lp_token_account: params.dao_treasury_lp_token_account,
             refresh: RefreshParams {
                 min_elapsed_time: 3000,
@@ -100,26 +101,26 @@ impl VaultAccount {
 
     /// Calculate amount to deposit in the given protocol
     pub fn calculate_deposit(&self, protocol_idx: usize, available_amount: u64) -> Result<u64> {
-        Ok(100)
+        Ok(1000)
     }
 
     /// Calculate amount to withdraw in the given protocol
     pub fn calculate_withdraw(&self, protocol_idx: usize, available_amount: u64) -> Result<u64> {
-        Ok(100)
+        Ok(999)
     }
 
     /// Calculate amount to borrow in the given protocol
     pub fn calculate_borrow(&self, protocol_idx: usize) -> Result<u64> {
 
 
-        Ok(100)
+        Ok(500)
     }
 
     /// Calculate amount to repay in the given protocol
     pub fn calculate_repay(&self, protocol_idx: usize) -> Result<u64> {
 
 
-        Ok(100)
+        Ok(400)
     }
 
 }
@@ -192,10 +193,11 @@ impl ProtocolData {
     }
 
     /// Set the protocol pubkey hashes
-    pub fn set_hashes(&mut self, hashes: [[u8; CHECKHASH_BYTES]; 3]) {
+    pub fn set_hashes(&mut self, hashes: [[u8; CHECKHASH_BYTES]; 4]) {
         self.hash_pubkey.hash_deposit = hashes[0];
         self.hash_pubkey.hash_withdraw = hashes[1];
         self.hash_pubkey.hash_tvl = hashes[2];
+        self.hash_pubkey.hash_borrow = hashes[3];
     }
 
     /// Amount that should be deposited according to the weight
@@ -275,6 +277,8 @@ pub struct HashPubkey {
     pub hash_withdraw: [u8; CHECKHASH_BYTES],
     /// Hash of important accounts for each protocol on tvl
     pub hash_tvl: [u8; CHECKHASH_BYTES],
+    /// Hash of important accounts for each protocol on borrow
+    pub hash_borrow: [u8; CHECKHASH_BYTES],
     // TODO additional padding
 }
 

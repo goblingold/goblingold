@@ -44,11 +44,17 @@ pub struct GenericBorrowAccounts<'info> {
         bump = vault_account.bumps.vault
     )]
     pub vault_account: Box<Account<'info, VaultAccount>>,
-    // #[account(
-    //     mut,
-    //     associated_token::mint = vault_account.borrow_mint_pubkey,
-    //     associated_token::authority = vault_account,
-    // )]
+    #[account(
+        mut,
+        associated_token::mint = vault_account.input_mint_pubkey,
+        associated_token::authority = vault_account,
+    )]
+    pub vault_input_token_account: Account<'info, TokenAccount>,
+    #[account(
+        mut,
+        associated_token::mint = vault_account.borrow_mint_pubkey,
+        associated_token::authority = vault_account,
+    )]
     /// CHECKED inside
     pub vault_borrow_token_account: Account<'info, TokenAccount>,
     #[account()]

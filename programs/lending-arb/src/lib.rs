@@ -54,6 +54,21 @@ pub mod lending_arb {
         instructions::add_protocol::handler(ctx, protocol_id)
     }
 
+    /// Set protocol hashes
+    #[access_control(is_admin(ctx.accounts.user_signer.key))]
+    pub fn set_hashes(
+        ctx: Context<SetHashes>,
+        protocol_id: u8,
+        hashes: [[u8; CHECKHASH_BYTES]; 4],
+    ) -> Result<()> {
+        instructions::set_hashes::handler(ctx, protocol_id, hashes)
+    }
+
+     /// Solend: Initialize from the vault account
+     pub fn solend_initialize(ctx: Context<SolendInitialize>) -> Result<()> {
+         instructions::protocol_initialize::handler(ctx)
+     }
+
     /// Solend: Deposit from the vault account
     #[access_control(ctx.accounts.check_hash(Protocols::Solend))]
     pub fn solend_deposit(ctx: Context<SolendDeposit>) -> Result<()> {
@@ -78,7 +93,7 @@ pub mod lending_arb {
           instructions::protocol_repay::handler(ctx, Protocols::Solend)
       }
 
-     /// Francium: Deposit from the vault account
+    /// Francium: Deposit from the vault account
     #[access_control(ctx.accounts.check_hash(Protocols::Francium))]
     pub fn francium_deposit(ctx: Context<FranciumDeposit>) -> Result<()> {
         instructions::protocol_deposit::handler(ctx, Protocols::Francium)
