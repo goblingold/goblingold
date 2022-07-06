@@ -402,6 +402,9 @@ pub struct SolendBorrow<'info> {
     pub solend_reserve_account: AccountInfo<'info>,
     #[account(mut)]
     /// CHECK: Solend CPI
+    pub solend_reserve_liquidity_supply_spl_token_account: AccountInfo<'info>,
+    #[account(mut)]
+    /// CHECK: Solend CPI
     pub borrow_reserve_liquidity_fee_receiver_pubkey: AccountInfo<'info>,
     #[account(mut)]
     /// CHECK: Solend CPI
@@ -418,6 +421,7 @@ impl<'info> CheckHash<'info> for SolendBorrow<'info> {
     fn hash(&self) -> Hash {
         hashv(&[
             self.solend_reserve_account.key.as_ref(),
+            self.solend_reserve_liquidity_supply_spl_token_account.key.as_ref(),
             self.borrow_reserve_liquidity_fee_receiver_pubkey
                 .key
                 .as_ref(),
@@ -470,7 +474,7 @@ impl<'info> ProtocolBorrow<'info> for SolendBorrow<'info> {
             solend_token_lending::instruction::borrow_obligation_liquidity(
                 solend_program_id::ID,
                 amount,
-                self.generic_accs.vault_input_token_account.key(),
+                self.solend_reserve_liquidity_supply_spl_token_account.key(),
                 self.generic_accs.vault_borrow_token_account.key(),
                 *self.solend_reserve_account.key,
                 *self.borrow_reserve_liquidity_fee_receiver_pubkey.key,
@@ -480,7 +484,7 @@ impl<'info> ProtocolBorrow<'info> for SolendBorrow<'info> {
                 Option::None,// host_fee_receiver  needed for this case ??
             );
         let accounts = [
-                self.generic_accs.vault_input_token_account.to_account_info(),
+                self.solend_reserve_liquidity_supply_spl_token_account.to_account_info(),
                 self.generic_accs.vault_borrow_token_account.to_account_info(),
                 self.solend_reserve_account.to_account_info(),
                 self.borrow_reserve_liquidity_fee_receiver_pubkey.to_account_info(),

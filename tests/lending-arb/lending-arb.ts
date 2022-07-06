@@ -1,4 +1,5 @@
 import * as anchor from "@project-serum/anchor";
+import { token } from "@project-serum/anchor/dist/cjs/utils";
 import * as spl from "@solana/spl-token";
 import { assert } from "chai";
 import { GoblinGold, Protocols, TOKENS, decodeAccount } from "goblin-sdk-local";
@@ -62,14 +63,14 @@ describe("borrow & deposit", () => {
   });
 
   it("Initialize protocol accounts", async () => {
-    const txs = await program.initializeProtocolAccounts();
+    const txs = await program.initializeProtocolAccounts(BORROW_TOKEN);
     txs.map(async (tx) => {
       await program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS);
     });
   });
 
   it("Set hashes", async () => {
-    const txsHashes = await program.setHashes();
+    const txsHashes = await program.setHashes(BORROW_TOKEN);
     const txHashes = txsHashes.reduce(
       (acc, tx) => acc.add(tx),
       new anchor.web3.Transaction()
@@ -157,7 +158,7 @@ describe("borrow & deposit", () => {
           amount,
         })
       );
-      tx.add(await program.protocolDeposit());
+      tx.add(await program.protocolDeposit(Protocols.Solend));
       await program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS);
     }
   });
@@ -171,11 +172,12 @@ describe("borrow & deposit", () => {
     await program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS);
   });
 
-  xit("Deposit WSOL Francium", async () => {
-    const tx = await program.borrow({
-      userInputTokenAccount,
-      userLpTokenAccount,
-      amount: new anchor.BN(1000),
-    });
+  it("Deposit WSOL Francium", async () => {
+    const tx = await program.protocolDeposit(Protocols.Francium, BORROW_TOKEN);
+    await program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS);
+  });
+
+  it("sleep ", async () => {
+    await new Promise((r) => setTimeout(r, 500));
   });
 });

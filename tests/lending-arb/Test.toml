@@ -3,7 +3,6 @@ extends = ["../../Anchor.toml"]
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/lending-arb/**/*.ts --exit"
 
-
 # USDC_mint
 [[test.validator.clone]]
 address = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
@@ -13,10 +12,10 @@ address = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
 address = "993dVFL2uXWYeoXuEBFXR4BijeXdTv4s6BzsCjJZuwqk"
 
 # Solend WSOL
- [[test.validator.clone]]
+[[test.validator.clone]]
+
 address = "5h6ssFpeDeRbzsEHDbTQNH7nVGgsKrZydxdSTnLm6QdV"
-       
-# solend
+# solend USDC
 [[test.validator.clone]]
 address = "DdZR6zRFiUt4S5mg7AV1uKB2z1f1WzcNYCaTEEWPAuby"
 [[test.validator.clone]]
@@ -37,6 +36,19 @@ address = "8SheGtsopRUDzdiD6v6BR9a6bqZ9QwywYQY99Fp5meNf"
 address = "CZx29wKMUxaJDq6aLVQTdViPL754tTR64NAgQBUGxxHb"
 [[test.validator.clone]]
 address = "5Gdxn4yquneifE6uk9tK8X4CqHfWKjW2BvYU25hAykwP"
+# solend wsol
+[[test.validator.clone]]
+address = "8UviNr47S8eL6J3WfDxMRa3hvLta1VDJwNWqsDgtN3Cv"
+[[test.validator.clone]]
+address = "8PbodeaosQP19SjYFx855UMqWxH2HynZLdBXmsrbac36"
+[[test.validator.clone]]
+address = "5wo1tFpi4HaVKnemqaXeQnBEpezrJXcXvuztYaPhvgC7"
+[[test.validator.clone]]
+address = "5h6ssFpeDeRbzsEHDbTQNH7nVGgsKrZydxdSTnLm6QdV"
+[[test.validator.clone]]
+address = "H6ARHf6YXhGYeQfUzQNGk6rDNnLBQKrenN712K4AQJEG"
+[[test.validator.clone]]
+address = "AdtRGGhmqvom3Jemp5YNrxd9q9unX36BZk1pujkkXijL"
 
 
 #francium
@@ -46,6 +58,14 @@ address = "62fDf5daUJ9jBz8Xtj6Bmw1bh1DvHn8AG4L9hMmxCzpu"
 address = "Hx6LbkMHe69DYawhPyVNs8Apa6tyfogfzQV6a7XkwBUU"
 [[test.validator.clone]]
 address = "CFp9kt8z3Epb1QSiEp3xA44KbSwuJxhFR3wQoerFqYS9"
+[[test.validator.clone]]
+address = "92Zst3rEoJsyZUW2yNc2811GtkBwFrm3tqgxMTtFWuSB"
+[[test.validator.clone]]
+address = "EnZC8MB6QLTxwN1LNqCXYC7XMpvXqitnYQPf5y5AcQRn"
+[[test.validator.clone]]
+address = "GiJwrxQW5NQWWAva4rnDMXwHxfrhyUzwMX5to1pmCCgF"
+[[test.validator.clone]]
+address = "4XNif294wbrxj6tJ8K5Rg7SuaEACnu9s2L27i28MQB6E"
 
 
 [[test.validator.account]]

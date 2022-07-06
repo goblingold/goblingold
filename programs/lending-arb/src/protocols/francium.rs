@@ -96,7 +96,7 @@ impl<'info> ProtocolDeposit<'info> for FranciumDeposit<'info> {
     }
 
     fn get_amount(&self, protocol_idx: usize) -> Result<u64> {
-        self.generic_accs.amount_to_deposit(protocol_idx)
+        Ok(self.generic_accs.vault_input_token_account.amount)
     }
 
     fn cpi_deposit(&self, amount: u64) -> Result<()> {
