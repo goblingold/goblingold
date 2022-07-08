@@ -164,16 +164,22 @@ describe("borrow & deposit", () => {
   });
 
   it("Borrow Solend", async () => {
-    const tx = await program.borrow({
-      userInputTokenAccount,
-      userLpTokenAccount,
-      amount: new anchor.BN(1000),
-    });
+    const tx = await program.borrow();
     await program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS);
   });
 
   it("Deposit WSOL Francium", async () => {
     const tx = await program.protocolDeposit(Protocols.Francium, BORROW_TOKEN);
+    await program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS);
+  });
+
+  it("Withdraw WSOL from Francium", async () => {
+    const tx = await program.protocolWithdraw(Protocols.Francium, BORROW_TOKEN);
+    await program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS);
+  });
+
+  it("Repay WSOL to Solend", async () => {
+    const tx = await program.repay();
     await program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS);
   });
 

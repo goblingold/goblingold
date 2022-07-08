@@ -59,7 +59,7 @@ pub mod lending_arb {
     pub fn set_hashes(
         ctx: Context<SetHashes>,
         protocol_id: u8,
-        hashes: [[u8; CHECKHASH_BYTES]; 4],
+        hashes: [[u8; CHECKHASH_BYTES]; 5],
     ) -> Result<()> {
         instructions::set_hashes::handler(ctx, protocol_id, hashes)
     }

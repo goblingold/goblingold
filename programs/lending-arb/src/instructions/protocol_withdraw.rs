@@ -80,8 +80,8 @@ pub struct GenericWithdrawAccounts<'info> {
     pub vault_account: Box<Account<'info, VaultAccount>>,
     #[account(
         mut,
-        associated_token::mint = vault_account.input_mint_pubkey,
-        associated_token::authority = vault_account,
+        // associated_token::mint = vault_account.input_mint_pubkey,
+        // associated_token::authority = vault_account,
     )]
     pub vault_input_token_account: Account<'info, TokenAccount>,
     pub token_program: Program<'info, Token>,

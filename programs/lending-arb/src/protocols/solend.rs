@@ -509,11 +509,11 @@ pub struct SolendRepay<'info> {
     /// CHECK: Solend CPI
     pub solend_program_id: AccountInfo<'info>,
     // TODO
-    // #[account(
-    //     mut,
+    #[account(
+        mut,
     //     associated_token::mint = vault_solend_borrowed_token_account.mint,
     //     associated_token::authority = generic_accs.vault_account,
-    // )]
+    )]
     pub vault_solend_borrow_token_account: Account<'info, TokenAccount>,
     #[account(mut)]
     /// CHECK: Solend CPI
@@ -525,6 +525,8 @@ pub struct SolendRepay<'info> {
     pub solend_lending_market_account: AccountInfo<'info>,
     /// CHECK: Solend CPI
     pub solend_derived_lending_market_authority: AccountInfo<'info>,
+    pub clock: Sysvar<'info, Clock>,
+    pub token_program: Program<'info, Token>,
 }
 
 impl<'info> CheckHash<'info> for SolendRepay<'info> {
@@ -551,7 +553,7 @@ impl<'info> CheckHash<'info> for SolendRepay<'info> {
             .unwrap();
         self.generic_accs.vault_account.protocols[protocol_idx]
             .hash_pubkey
-            .hash_deposit
+            .hash_repay
     }
 }
 
@@ -570,7 +572,7 @@ impl<'info> ProtocolRepay<'info> for SolendRepay<'info> {
 
         get_health(obligation.allowed_borrow_value, Health::Keto)?;  
 
-        Ok(0)
+        Ok(100)
     }
 
     fn cpi_repay(&self, amount: u64) -> Result<()> {
@@ -580,7 +582,7 @@ impl<'info> ProtocolRepay<'info> for SolendRepay<'info> {
         let ix =
             solend_token_lending::instruction::repay_obligation_liquidity(
                 solend_program_id::ID,
-                amount,
+                self.generic_accs.vault_borrow_token_account.amount,
                 self.generic_accs.vault_borrow_token_account.key(),
                 self.vault_solend_borrow_token_account.key(),
                 *self.solend_reserve_account.key,
@@ -596,6 +598,8 @@ impl<'info> ProtocolRepay<'info> for SolendRepay<'info> {
                 self.solend_lending_market_account.to_account_info(),
                 self.solend_derived_lending_market_authority.to_account_info(),
                 self.generic_accs.vault_account.to_account_info(),
+                self.clock.to_account_info(),
+                self.token_program.to_account_info()
         ];
         invoke_signed(&ix, &accounts, signer)?;
 

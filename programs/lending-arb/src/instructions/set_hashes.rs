@@ -22,7 +22,7 @@ pub struct SetHashes<'info> {
 pub fn handler(
     ctx: Context<SetHashes>,
     protocol_id: u8,
-    hashes: [[u8; CHECKHASH_BYTES]; 4],
+    hashes: [[u8; CHECKHASH_BYTES]; 5],
 ) -> Result<()> {
     let protocol: Protocols = usize::from(protocol_id)
         .try_into()

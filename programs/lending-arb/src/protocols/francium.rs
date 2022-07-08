@@ -259,11 +259,14 @@ impl<'info> ProtocolWithdraw<'info> for FranciumWithdraw<'info> {
                 }
             })
             .collect::<Vec<_>>();
+        let amount_ = 30;
+        msg!("amount {}", amount_);
+
         let ix = Instruction::new_with_borsh(
             francium_lending_program_id::ID,
             &InstructionAmountData {
                 instruction: 5,
-                amount,
+                amount: amount_,
             },
             account_metas,
         );

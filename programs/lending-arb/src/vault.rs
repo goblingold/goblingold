@@ -193,11 +193,12 @@ impl ProtocolData {
     }
 
     /// Set the protocol pubkey hashes
-    pub fn set_hashes(&mut self, hashes: [[u8; CHECKHASH_BYTES]; 4]) {
+    pub fn set_hashes(&mut self, hashes: [[u8; CHECKHASH_BYTES]; 5]) {
         self.hash_pubkey.hash_deposit = hashes[0];
         self.hash_pubkey.hash_withdraw = hashes[1];
         self.hash_pubkey.hash_tvl = hashes[2];
         self.hash_pubkey.hash_borrow = hashes[3];
+        self.hash_pubkey.hash_repay = hashes[4];
     }
 
     /// Amount that should be deposited according to the weight
@@ -279,6 +280,8 @@ pub struct HashPubkey {
     pub hash_tvl: [u8; CHECKHASH_BYTES],
     /// Hash of important accounts for each protocol on borrow
     pub hash_borrow: [u8; CHECKHASH_BYTES],
+    /// Hash of important accounts for each protocol on borrow
+    pub hash_repay: [u8; CHECKHASH_BYTES],
     // TODO additional padding
 }
 
