@@ -138,18 +138,28 @@ impl<'info> ProtocolDeposit<'info> for MangoDeposit<'info> {
         let seeds = generate_seeds!(self.generic_accs.vault_account);
         let signer = &[&seeds[..]];
 
-        let ix = mango::instruction::deposit(
-            &mango_program_id::ID,
-            self.mango_group_account.key,
-            self.vault_mango_account.key,
-            &self.generic_accs.vault_account.key(),
-            self.mango_cache_account.key,
-            self.mango_root_bank_account.key,
-            self.mango_node_bank_account.key,
-            self.mango_vault_account.key,
-            &self.generic_accs.vault_input_token_account.key(),
-            amount,
-        )?;
+        // newer mango versions incompatible with other crates, we create the ix by hand
+        let ix = {
+            let accounts = vec![
+                AccountMeta::new_readonly(self.mango_group_account.key(), false),
+                AccountMeta::new(self.vault_mango_account.key(), false),
+                AccountMeta::new_readonly(self.generic_accs.vault_account.key(), true),
+                AccountMeta::new(self.mango_cache_account.key(), false),
+                AccountMeta::new(self.mango_root_bank_account.key(), false),
+                AccountMeta::new(self.mango_node_bank_account.key(), false),
+                AccountMeta::new(self.mango_vault_account.key(), false),
+                AccountMeta::new_readonly(self.generic_accs.token_program.key(), false),
+                AccountMeta::new(self.generic_accs.vault_input_token_account.key(), false),
+            ];
+            let instr = mango::instruction::MangoInstruction::Deposit { quantity: amount };
+            let data = instr.pack();
+            anchor_lang::solana_program::instruction::Instruction {
+                program_id: mango_program_id::ID,
+                accounts,
+                data,
+            }
+        };
+
         let accounts = [
             self.mango_group_account.to_account_info(),
             self.vault_mango_account.to_account_info(),
@@ -163,6 +173,7 @@ impl<'info> ProtocolDeposit<'info> for MangoDeposit<'info> {
                 .vault_input_token_account
                 .to_account_info(),
         ];
+
         invoke_signed(&ix, &accounts, signer)?;
 
         Ok(())
@@ -244,21 +255,38 @@ impl<'info> ProtocolWithdraw<'info> for MangoWithdraw<'info> {
 
         let allow_borrow = false;
         let open_orders = vec![Pubkey::default(); mango::state::MAX_PAIRS];
-        let ix = mango::instruction::withdraw(
-            &mango_program_id::ID,
-            self.mango_group_account.key,
-            self.vault_mango_account.key,
-            &self.generic_accs.vault_account.key(),
-            self.mango_cache_account.key,
-            self.mango_root_bank_account.key,
-            self.mango_node_bank_account.key,
-            self.mango_vault_account.key,
-            &self.generic_accs.vault_input_token_account.key(),
-            self.mango_group_signer_account.key,
-            open_orders.as_slice(),
-            amount,
-            allow_borrow,
-        )?;
+
+        let ix = {
+            let mut accounts = vec![
+                AccountMeta::new_readonly(self.mango_group_account.key(), false),
+                AccountMeta::new(self.vault_mango_account.key(), false),
+                AccountMeta::new_readonly(self.generic_accs.vault_account.key(), true),
+                AccountMeta::new_readonly(self.mango_cache_account.key(), false),
+                AccountMeta::new_readonly(self.mango_root_bank_account.key(), false),
+                AccountMeta::new(self.mango_node_bank_account.key(), false),
+                AccountMeta::new(self.mango_vault_account.key(), false),
+                AccountMeta::new(self.generic_accs.vault_input_token_account.key(), false),
+                AccountMeta::new_readonly(self.mango_group_signer_account.key(), false),
+                AccountMeta::new_readonly(spl_token::ID, false),
+            ];
+
+            accounts.extend(
+                open_orders
+                    .iter()
+                    .map(|pk| AccountMeta::new_readonly(*pk, false)),
+            );
+
+            let instr = mango::instruction::MangoInstruction::Withdraw {
+                quantity: amount,
+                allow_borrow,
+            };
+            let data = instr.pack();
+            anchor_lang::solana_program::instruction::Instruction {
+                program_id: mango_program_id::ID,
+                accounts,
+                data,
+            }
+        };
         let accounts = vec![
             self.mango_group_account.to_account_info(),
             self.vault_mango_account.to_account_info(),
