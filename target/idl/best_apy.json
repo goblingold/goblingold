@@ -631,17 +631,17 @@
         },
         {
           "name": "mangoGroupAccount",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
           "name": "mangoCacheAccount",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
           "name": "mangoRootBankAccount",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -707,7 +707,7 @@
         },
         {
           "name": "mangoGroupAccount",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {

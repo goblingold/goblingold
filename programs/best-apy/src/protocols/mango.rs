@@ -81,11 +81,12 @@ pub struct MangoDeposit<'info> {
     #[account(mut)]
     /// CHECK: Mango CPI
     pub vault_mango_account: AccountInfo<'info>,
-    #[account(mut)]
     /// CHECK: Mango CPI
     pub mango_group_account: AccountInfo<'info>,
+    #[account(mut)]
     /// CHECK: Mango CPI
     pub mango_cache_account: AccountInfo<'info>,
+    #[account(mut)]
     /// CHECK: Mango CPI
     pub mango_root_bank_account: AccountInfo<'info>,
     #[account(mut)]
@@ -179,7 +180,6 @@ pub struct MangoWithdraw<'info> {
     pub vault_mango_account: AccountInfo<'info>,
     /// CHECK: Mango CPI
     pub mango_cache_account: AccountInfo<'info>,
-    #[account(mut)]
     /// CHECK: Mango CPI
     pub mango_group_account: AccountInfo<'info>,
     /// CHECK: Mango CPI
