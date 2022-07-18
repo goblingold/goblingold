@@ -1,21 +1,20 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::pubkey::Pubkey;
-use error::ErrorCode;
 use check_hash::{CheckHash, CHECKHASH_BYTES};
+use error::ErrorCode;
 use instructions::*;
 use protocols::{francium::*, solend::*, Protocols};
 use vault::{RefreshParams, VaultAccount};
 
 mod check_hash;
 mod error;
+mod health;
 mod instructions;
 mod macros;
 mod protocols;
 mod vault;
-mod health;
 
 declare_id!("GGo34nYpjKfe9omzUaFtaCyizvwpAMf3NhxSCMD61F3A");
-
 
 const PAUSED_DEPOSIT: bool = false;
 const PAUSED_WITHDRAW: bool = false;
@@ -47,7 +46,6 @@ pub mod lending_arb {
         instructions::initialize_vault::handler(ctx, account_number)
     }
 
-
     /// Add a new protocol to the vault_account
     #[access_control(is_admin(ctx.accounts.user_signer.key))]
     pub fn add_protocol(ctx: Context<AddProtocol>, protocol_id: u8) -> Result<()> {
@@ -64,10 +62,10 @@ pub mod lending_arb {
         instructions::set_hashes::handler(ctx, protocol_id, hashes)
     }
 
-     /// Solend: Initialize from the vault account
-     pub fn solend_initialize(ctx: Context<SolendInitialize>) -> Result<()> {
-         instructions::protocol_initialize::handler(ctx)
-     }
+    /// Solend: Initialize from the vault account
+    pub fn solend_initialize(ctx: Context<SolendInitialize>) -> Result<()> {
+        instructions::protocol_initialize::handler(ctx)
+    }
 
     /// Solend: Deposit from the vault account
     #[access_control(ctx.accounts.check_hash(Protocols::Solend))]
@@ -75,23 +73,23 @@ pub mod lending_arb {
         instructions::protocol_deposit::handler(ctx, Protocols::Solend)
     }
 
-     /// Solend: Withdraw to the vault account
-     #[access_control(ctx.accounts.check_hash(Protocols::Solend))]
-     pub fn solend_withdraw(ctx: Context<SolendWithdraw>) -> Result<()> {
-         instructions::protocol_withdraw::handler(ctx, Protocols::Solend)
-     }
-
-      /// Solend: Withdraw to the vault account
-      #[access_control(ctx.accounts.check_hash(Protocols::Solend))]
-      pub fn solend_borrow(ctx: Context<SolendBorrow>) -> Result<()> {
-          instructions::protocol_borrow::handler(ctx, Protocols::Solend)
-      }
+    /// Solend: Withdraw to the vault account
+    #[access_control(ctx.accounts.check_hash(Protocols::Solend))]
+    pub fn solend_withdraw(ctx: Context<SolendWithdraw>) -> Result<()> {
+        instructions::protocol_withdraw::handler(ctx, Protocols::Solend)
+    }
 
     /// Solend: Withdraw to the vault account
-      #[access_control(ctx.accounts.check_hash(Protocols::Solend))]
-      pub fn solend_repay(ctx: Context<SolendRepay>) -> Result<()> {
-          instructions::protocol_repay::handler(ctx, Protocols::Solend)
-      }
+    #[access_control(ctx.accounts.check_hash(Protocols::Solend))]
+    pub fn solend_borrow(ctx: Context<SolendBorrow>) -> Result<()> {
+        instructions::protocol_borrow::handler(ctx, Protocols::Solend)
+    }
+
+    /// Solend: Withdraw to the vault account
+    #[access_control(ctx.accounts.check_hash(Protocols::Solend))]
+    pub fn solend_repay(ctx: Context<SolendRepay>) -> Result<()> {
+        instructions::protocol_repay::handler(ctx, Protocols::Solend)
+    }
 
     /// Francium: Deposit from the vault account
     #[access_control(ctx.accounts.check_hash(Protocols::Francium))]
@@ -118,12 +116,12 @@ pub mod lending_arb {
         instructions::deposit::handler(ctx, amount)
     }
 
-     /// Withdraw the required input tokens from the vault and send them back to the user
-     #[access_control(withdraw_not_paused())]
-     pub fn withdraw(ctx: Context<Withdraw>, lp_amount: u64) -> Result<()> {
-         instructions::withdraw::handler(ctx, lp_amount)
-     }
-    
+    /// Withdraw the required input tokens from the vault and send them back to the user
+    #[access_control(withdraw_not_paused())]
+    pub fn withdraw(ctx: Context<Withdraw>, lp_amount: u64) -> Result<()> {
+        instructions::withdraw::handler(ctx, lp_amount)
+    }
+
     /// Open a withdrawal ticket (for delayed withdrawals)
     #[access_control(withdraw_not_paused())]
     pub fn open_withdraw_ticket(

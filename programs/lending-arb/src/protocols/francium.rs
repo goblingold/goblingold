@@ -95,7 +95,7 @@ impl<'info> ProtocolDeposit<'info> for FranciumDeposit<'info> {
         &mut self.generic_accs.vault_account.protocols[protocol_idx]
     }
 
-    fn get_amount(&self, protocol_idx: usize) -> Result<u64> {
+    fn get_amount(&self, _protocol_idx: usize) -> Result<u64> {
         Ok(self.generic_accs.vault_input_token_account.amount)
     }
 
@@ -259,14 +259,12 @@ impl<'info> ProtocolWithdraw<'info> for FranciumWithdraw<'info> {
                 }
             })
             .collect::<Vec<_>>();
-        let amount_ = 30;
-        msg!("amount {}", amount_);
 
         let ix = Instruction::new_with_borsh(
             francium_lending_program_id::ID,
             &InstructionAmountData {
                 instruction: 5,
-                amount: amount_,
+                amount: amount,
             },
             account_metas,
         );

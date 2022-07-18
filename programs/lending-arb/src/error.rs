@@ -51,4 +51,6 @@ pub enum ErrorCode {
     InvalidReapy,
     #[msg("The operation will remain with unhealthy account")]
     UnhealthyOperation,
+    #[msg("No withdraw is needed")]
+    InvaliWithdraw,
 }

@@ -111,18 +111,13 @@ impl VaultAccount {
 
     /// Calculate amount to borrow in the given protocol
     pub fn calculate_borrow(&self, protocol_idx: usize) -> Result<u64> {
-
-
         Ok(500)
     }
 
     /// Calculate amount to repay in the given protocol
     pub fn calculate_repay(&self, protocol_idx: usize) -> Result<u64> {
-
-
         Ok(400)
     }
-
 }
 
 /// Initialize a new vault
@@ -144,7 +139,7 @@ pub struct InitVaultAccountParams {
 pub struct Bumps {
     pub vault: u8,
     pub lp_token_mint: u8,
-    pub ticket_mint : u8,
+    pub ticket_mint: u8,
 }
 
 impl Bumps {
@@ -247,8 +242,8 @@ impl ProtocolData {
         Ok(())
     }
 
-     /// Update token amount after borrow from the protocol
-     pub fn update_after_borrow(&mut self, amount: u64) -> Result<()> {
+    /// Update token amount after borrow from the protocol
+    pub fn update_after_borrow(&mut self, amount: u64) -> Result<()> {
         self.rewards.borrowed_integral.accumulate(self.amount)?;
         self.amount = self
             .amount

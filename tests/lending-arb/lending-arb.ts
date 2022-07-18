@@ -173,14 +173,13 @@ describe("borrow & deposit", () => {
     await program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS);
   });
 
-  it("Withdraw WSOL from Francium", async () => {
-    const tx = await program.protocolWithdraw(Protocols.Francium, BORROW_TOKEN);
-    await program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS);
-  });
+  it("Withdraw WSOL from Francium & Repay WSOL to Solend", async () => {
+    const newTx = new anchor.web3.Transaction()
+    const txWithdraw = await program.protocolWithdraw(Protocols.Francium, BORROW_TOKEN);
+    const txRepay = await program.repay();
+    newTx.add(txRepay.instructions[0],txRepay.instructions[1], txRepay.instructions[2], txWithdraw, txRepay.instructions[3])
 
-  it("Repay WSOL to Solend", async () => {
-    const tx = await program.repay();
-    await program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS);
+    await program.provider.sendAndConfirm(newTx, [], CONFIRM_OPTS);
   });
 
   it("sleep ", async () => {

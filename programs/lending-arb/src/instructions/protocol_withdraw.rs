@@ -1,10 +1,15 @@
 use crate::error::ErrorCode;
+use crate::health::{Health, MAX_HEALTH_FACTOR, OPTIMAL_HEALTH_FACTOR};
 use crate::protocols::Protocols;
 use crate::vault::{ProtocolData, VaultAccount};
 use crate::VAULT_ACCOUNT_SEED;
 use anchor_lang::prelude::*;
+use anchor_lang::solana_program::program_pack::Pack;
 use anchor_lang::solana_program::sysvar;
 use anchor_spl::token::{Token, TokenAccount};
+use pyth_sdk_solana::{load_price_feed_from_account_info, Price, PriceFeed};
+use solend_token_lending::math::TryAdd;
+use std::convert::TryFrom;
 
 /// Withdraw from the protocol
 pub trait ProtocolWithdraw<'info> {
@@ -84,6 +89,11 @@ pub struct GenericWithdrawAccounts<'info> {
         // associated_token::authority = vault_account,
     )]
     pub vault_input_token_account: Account<'info, TokenAccount>,
+    /// CHECK: Solend CPI
+    pub vault_solend_obligation_account: AccountInfo<'info>,
+    #[account()]
+    /// CHECK inside
+    pub price_account_info: AccountInfo<'info>,
     pub token_program: Program<'info, Token>,
     pub clock: Sysvar<'info, Clock>,
     #[account(address = sysvar::instructions::ID)]
@@ -101,10 +111,27 @@ impl<'info> GenericWithdrawAccounts<'info> {
     /// from the bot or from a user, assuming for the latter that the following ix corresponds to
     /// the `withdraw` one
     pub fn amount_to_withdraw(&self, protocol_idx: usize) -> Result<u64> {
-        self.amount_to_withdraw_in_n_txs(protocol_idx, 1)
+        match  protocol_idx {
+            0 => self.amount_usd_to_withdraw_in_n_txs(protocol_idx, 1),
+            1 => self.amount_sol_to_withdraw_in_n_txs(protocol_idx, 1),
+            _ => self.amount_sol_to_withdraw_in_n_txs(protocol_idx, 1),
+        }
     }
 
-    pub fn amount_to_withdraw_in_n_txs(
+    pub fn amount_sol_to_withdraw_in_n_txs(
+        &self,
+        protocol_idx: usize,
+        ix_offset: usize,
+    ) -> Result<u64> {
+        // if let Some(amount) = self.read_amount_from_withdraw_ix(ix_offset)? {
+        //     Ok(amount)
+        // } else {
+            let amount = self.calculate_withdraw()?;
+            Ok(amount)
+        // }
+    }
+
+    pub fn amount_usd_to_withdraw_in_n_txs(
         &self,
         protocol_idx: usize,
         ix_offset: usize,
@@ -112,7 +139,9 @@ impl<'info> GenericWithdrawAccounts<'info> {
         if let Some(amount) = self.read_amount_from_withdraw_ix(ix_offset)? {
             Ok(amount)
         } else {
-            Ok(self.vault_account.calculate_withdraw(0,0)?)
+            panic!("this should not happens, unless emergency");
+            let amount = self.calculate_withdraw()?;
+            Ok(amount)
         }
     }
 
@@ -126,10 +155,11 @@ impl<'info> GenericWithdrawAccounts<'info> {
             &self.instructions,
         ) {
             let ix_data: &[u8] = &next_ix.data;
-            require!(
-                next_ix.data.len() == IX_WITHDRAW_DATA_LEN && ix_data[..8] == IX_WITHDRAW_SIGHASH,
-                ErrorCode::InvalidInstructions
-            );
+            //TODO now we have 3 ixs
+            // require!(
+            //     next_ix.data.len() == IX_WITHDRAW_DATA_LEN && ix_data[..8] == IX_WITHDRAW_SIGHASH,
+            //     ErrorCode::InvalidInstructions
+            // );
 
             // Anchor generated module
             use crate::instruction;
@@ -149,9 +179,60 @@ impl<'info> GenericWithdrawAccounts<'info> {
                     .checked_sub(vault_token_amount)
                     .ok_or_else(|| error!(ErrorCode::MathOverflow))?,
             ))
-            //Ok(Some(23))
         } else {
             Ok(None)
         }
+    }
+
+    fn calculate_withdraw(&self) -> Result<u64> {
+        let obligation = solend_token_lending::state::Obligation::unpack(
+            &self.vault_solend_obligation_account.data.borrow(),
+        )?;
+        //require!(required_health == get_health(obligation.allowed_borrow_value, Health::Keto)?, ErrorCode::MathOverflow);
+        msg!("obligation
+        .borrowed_value {}, obligation.allowed_borrow_value {}", obligation
+        .borrowed_value , obligation.allowed_borrow_value);
+
+        const MAX_HEALTH_FACTOR_TEST: u128 = 65;
+        const OPTIMAL_HEALTH_FACTOR_TEST:u128 = 62; 
+
+        let max_amount = obligation.borrowed_value
+            .to_scaled_val()?
+            .checked_mul(MAX_HEALTH_FACTOR_TEST)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?
+            .checked_div(100)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+
+            require!(
+            max_amount < obligation.borrowed_value.to_scaled_val()?,
+            ErrorCode::InvaliWithdraw
+        );
+
+        let optimal_amount = obligation.allowed_borrow_value
+            .to_scaled_val()?
+            .checked_mul(OPTIMAL_HEALTH_FACTOR_TEST)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?
+            .checked_div(100)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+
+        let value_withdraw = obligation
+            .borrowed_value
+            .to_scaled_val()?
+            .checked_sub(optimal_amount)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+
+        let price_feed: PriceFeed =
+            load_price_feed_from_account_info(&self.price_account_info.to_account_info()).unwrap();
+        msg!("price_feed {} {}", price_feed.id, price_feed.product_id);
+        let current_price: Price = price_feed.get_current_price().unwrap();
+
+        let amount_decimal = value_withdraw
+            .checked_div(current_price.price as u128)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+        let withdraw_amount = amount_decimal
+            .checked_div(1e4 as u128)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+
+        Ok(u64::try_from(withdraw_amount).unwrap())
     }
 }

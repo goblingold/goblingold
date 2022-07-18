@@ -1,10 +1,10 @@
+use crate::health::Health;
 use crate::protocols::Protocols;
 use crate::vault::{ProtocolData, VaultAccount};
 use crate::VAULT_ACCOUNT_SEED;
-use crate::health::{Health};
 use anchor_lang::prelude::*;
-use anchor_spl::token::{TokenAccount};
-use pyth_sdk_solana::{load_price_feed_from_account_info, PriceFeed, Price};
+use anchor_spl::token::TokenAccount;
+use pyth_sdk_solana::{load_price_feed_from_account_info, Price, PriceFeed};
 
 /// Borrow from the protocol
 pub trait ProtocolBorrow<'info> {
@@ -59,12 +59,14 @@ pub struct GenericBorrowAccounts<'info> {
     pub vault_borrow_token_account: Account<'info, TokenAccount>,
     #[account()]
     /// CHECK inside
-    pub price_account_info: AccountInfo<'info>
+    pub price_account_info: AccountInfo<'info>,
 }
 
 impl<'info> GenericBorrowAccounts<'info> {
-    fn price_feed(&self) -> Result<Price> {
-        let price_feed: PriceFeed = load_price_feed_from_account_info(&self.price_account_info.to_account_info()).unwrap();
+    pub fn price_feed(&self) -> Result<Price> {
+        let price_feed: PriceFeed =
+            load_price_feed_from_account_info(&self.price_account_info.to_account_info()).unwrap();
+        msg!("price_feed {} {}", price_feed.id, price_feed.product_id);
         let current_price: Price = price_feed.get_current_price().unwrap();
         Ok(current_price)
     }

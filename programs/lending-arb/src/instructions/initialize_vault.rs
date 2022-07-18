@@ -77,7 +77,7 @@ pub fn handler(ctx: Context<InitializeVault>, account_number: u8) -> Result<()> 
             bumps: Bumps {
                 vault: *ctx.bumps.get("vault_account").unwrap(),
                 lp_token_mint: *ctx.bumps.get("vault_lp_token_mint_pubkey").unwrap(),
-                ticket_mint : *ctx.bumps.get("vault_ticket_mint_pubkey").unwrap(),
+                ticket_mint: *ctx.bumps.get("vault_ticket_mint_pubkey").unwrap(),
             },
             input_mint_pubkey: ctx.accounts.input_token_mint_address.key(),
             borrow_mint_pubkey: ctx.accounts.borrow_token_mint_address.key(),

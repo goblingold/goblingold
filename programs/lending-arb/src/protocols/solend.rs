@@ -1,26 +1,30 @@
+use std::convert::TryInto;
+
 use crate::check_hash::*;
 use crate::error::ErrorCode;
-use crate::instructions::{protocol_initialize::*, protocol_deposit::*, protocol_withdraw::*, protocol_borrow::*, protocol_repay::*, protocol_rewards::*};
+use crate::health::{Health, MAX_HEALTH_FACTOR, MIN_HEALTH_FACTOR, OPTIMAL_HEALTH_FACTOR};
+use crate::instructions::{
+    protocol_borrow::*, protocol_deposit::*, protocol_initialize::*, protocol_repay::*,
+    protocol_rewards::*, protocol_withdraw::*,
+};
 use crate::macros::generate_seeds;
 use crate::protocols::Protocols;
 use crate::vault::{ProtocolData, VaultAccount};
-use crate::{VAULT_ACCOUNT_SEED};
-use crate::health::{MAX_HEALTH_FACTOR, MIN_HEALTH_FACTOR,OPTIMAL_HEALTH_FACTOR, Health};
+use crate::VAULT_ACCOUNT_SEED;
 
 use anchor_lang::prelude::*;
+use anchor_lang::solana_program::system_instruction;
 use anchor_lang::solana_program::{
     hash::{hashv, Hash},
+    instruction::Instruction,
     program::invoke_signed,
     program_pack::Pack,
     pubkey::Pubkey,
-    instruction::Instruction,
-};
-use anchor_lang::solana_program::{
-    system_instruction,
 };
 use anchor_spl::token::{Token, TokenAccount};
-use pyth_sdk_solana::{load_price_feed_from_account_info, PriceFeed, Price};
-use solend_token_lending::math::{TryMul, TrySub};
+use pyth_sdk_solana::{load_price_feed_from_account_info, Price, PriceFeed};
+use solend_token_lending::math::{TryDiv, TryMul, TrySub};
+use std::convert::TryFrom;
 
 /// Program id
 pub mod solend_program_id {
@@ -164,7 +168,6 @@ impl<'info> CheckHash<'info> for SolendDeposit<'info> {
         ])
     }
 
-    
     fn target_hash(&self, protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
         let protocol_idx = self
             .generic_accs
@@ -193,11 +196,14 @@ impl<'info> ProtocolDeposit<'info> for SolendDeposit<'info> {
     fn cpi_deposit(&self, amount: u64) -> Result<()> {
         let seeds = generate_seeds!(self.generic_accs.vault_account);
         let signer = &[&seeds[..]];
-
+        msg!(
+            "depositing {}",
+            self.generic_accs.vault_input_token_account.amount
+        );
         let ix =
             solend_token_lending::instruction::deposit_reserve_liquidity_and_obligation_collateral(
                 solend_program_id::ID,
-                amount,
+                self.generic_accs.vault_input_token_account.amount,
                 self.generic_accs.vault_input_token_account.key(),
                 self.vault_solend_destination_collateral_token_account.key(),
                 *self.solend_reserve_account.key,
@@ -421,13 +427,15 @@ impl<'info> CheckHash<'info> for SolendBorrow<'info> {
     fn hash(&self) -> Hash {
         hashv(&[
             self.solend_reserve_account.key.as_ref(),
-            self.solend_reserve_liquidity_supply_spl_token_account.key.as_ref(),
+            self.solend_reserve_liquidity_supply_spl_token_account
+                .key
+                .as_ref(),
             self.borrow_reserve_liquidity_fee_receiver_pubkey
                 .key
                 .as_ref(),
             self.vault_solend_obligation_account.key.as_ref(),
             self.solend_lending_market_account.key.as_ref(),
-            self.solend_derived_lending_market_authority.key.as_ref()
+            self.solend_derived_lending_market_authority.key.as_ref(),
         ])
     }
 
@@ -453,53 +461,71 @@ impl<'info> ProtocolBorrow<'info> for SolendBorrow<'info> {
     }
 
     fn amount_to_borrow(&self) -> Result<u64> {
+        let obligation = solend_token_lending::state::Obligation::unpack(
+            &self.vault_solend_obligation_account.data.borrow(),
+        )?;
+        get_health(obligation.allowed_borrow_value, Health::Keto)?;
 
-        let obligation = solend_token_lending::state::Obligation::unpack(&self.vault_solend_obligation_account.data.borrow())?;
-        get_health(obligation.allowed_borrow_value, Health::Keto)?; 
-        msg!("obligation.allowed_borrow_value {}", obligation.allowed_borrow_value);
-        msg!("obligation.borrowed_value {}", obligation.borrowed_value);
-        let optimal_amount = obligation.allowed_borrow_value.try_mul(OPTIMAL_HEALTH_FACTOR as u64)?;
-        //require!(optimal_amount.gt(&obligation.unhealthy_borrow_value), ErrorCode::UnhealthyOperation);
-        //let amount_to_borrow = optimal_amount.try_sub(obligation.borrowed_value)?;
-        //msg!("amount to borrow {}", amount_to_borrow);
-        //Ok(amount_to_borrow.try_ceil_u64()?)
-        Ok(200)
+        let optimal_amount = obligation
+            .allowed_borrow_value
+            .to_scaled_val()?
+            .checked_mul(OPTIMAL_HEALTH_FACTOR)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?
+            .checked_div(100)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+
+        let current_price: Price = self.generic_accs.price_feed()?;
+
+        let amount_decimal = optimal_amount
+            .checked_div(current_price.price as u128)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+        let borrow_amount = amount_decimal
+            .checked_div(10 as u128)
+            .ok_or_else(|| error!(ErrorCode::MathOverflow))?;
+        
+        Ok(u64::try_from(borrow_amount).unwrap())
     }
 
     fn cpi_borrow(&self, amount: u64) -> Result<()> {
         let seeds = generate_seeds!(self.generic_accs.vault_account);
         let signer = &[&seeds[..]];
+        let obligation = solend_token_lending::state::Obligation::unpack(
+            &self.vault_solend_obligation_account.data.borrow(),
+        )?;
 
-        let ix =
-            solend_token_lending::instruction::borrow_obligation_liquidity(
-                solend_program_id::ID,
-                amount,
-                self.solend_reserve_liquidity_supply_spl_token_account.key(),
-                self.generic_accs.vault_borrow_token_account.key(),
-                *self.solend_reserve_account.key,
-                *self.borrow_reserve_liquidity_fee_receiver_pubkey.key,
-                *self.vault_solend_obligation_account.key,
-                *self.solend_lending_market_account.key,
-                self.generic_accs.vault_account.key(),
-                Option::None,// host_fee_receiver  needed for this case ??
-            );
+        let ix = solend_token_lending::instruction::borrow_obligation_liquidity(
+            solend_program_id::ID,
+            amount,
+            self.solend_reserve_liquidity_supply_spl_token_account.key(),
+            self.generic_accs.vault_borrow_token_account.key(),
+            *self.solend_reserve_account.key,
+            *self.borrow_reserve_liquidity_fee_receiver_pubkey.key,
+            *self.vault_solend_obligation_account.key,
+            *self.solend_lending_market_account.key,
+            self.generic_accs.vault_account.key(),
+            Option::None, // host_fee_receiver  needed for this case ??
+        );
         let accounts = [
-                self.solend_reserve_liquidity_supply_spl_token_account.to_account_info(),
-                self.generic_accs.vault_borrow_token_account.to_account_info(),
-                self.solend_reserve_account.to_account_info(),
-                self.borrow_reserve_liquidity_fee_receiver_pubkey.to_account_info(),
-                self.vault_solend_obligation_account.to_account_info(),
-                self.solend_lending_market_account.to_account_info(),
-                self.solend_derived_lending_market_authority.to_account_info(),
-                self.generic_accs.vault_account.to_account_info(),
-                self.clock.to_account_info(),
-                self.token_program.to_account_info()
+            self.solend_reserve_liquidity_supply_spl_token_account
+                .to_account_info(),
+            self.generic_accs
+                .vault_borrow_token_account
+                .to_account_info(),
+            self.solend_reserve_account.to_account_info(),
+            self.borrow_reserve_liquidity_fee_receiver_pubkey
+                .to_account_info(),
+            self.vault_solend_obligation_account.to_account_info(),
+            self.solend_lending_market_account.to_account_info(),
+            self.solend_derived_lending_market_authority
+                .to_account_info(),
+            self.generic_accs.vault_account.to_account_info(),
+            self.clock.to_account_info(),
+            self.token_program.to_account_info(),
         ];
         invoke_signed(&ix, &accounts, signer)?;
 
         Ok(())
     }
-
 }
 
 #[derive(Accounts)]
@@ -532,19 +558,14 @@ pub struct SolendRepay<'info> {
 impl<'info> CheckHash<'info> for SolendRepay<'info> {
     fn hash(&self) -> Hash {
         hashv(&[
-            self.vault_solend_borrow_token_account
-                .key()
-                .as_ref(),
+            self.vault_solend_borrow_token_account.key().as_ref(),
             self.solend_reserve_account.key.as_ref(),
-            self.vault_solend_obligation_account
-                .key
-                .as_ref(),
+            self.vault_solend_obligation_account.key.as_ref(),
             self.solend_lending_market_account.key.as_ref(),
-            self.solend_derived_lending_market_authority.key.as_ref()
+            self.solend_derived_lending_market_authority.key.as_ref(),
         ])
     }
 
-    
     fn target_hash(&self, protocol: Protocols) -> [u8; CHECKHASH_BYTES] {
         let protocol_idx = self
             .generic_accs
@@ -566,11 +587,12 @@ impl<'info> ProtocolRepay<'info> for SolendRepay<'info> {
         &mut self.generic_accs.vault_account.protocols[protocol_idx]
     }
 
-    fn amount_to_repay(&self) -> Result<u64>{
-        
-        let obligation = solend_token_lending::state::Obligation::unpack(&self.vault_solend_obligation_account.data.borrow())?;
+    fn amount_to_repay(&self) -> Result<u64> {
+        let obligation = solend_token_lending::state::Obligation::unpack(
+            &self.vault_solend_obligation_account.data.borrow(),
+        )?;
 
-        get_health(obligation.allowed_borrow_value, Health::Keto)?;  
+        get_health(obligation.allowed_borrow_value, Health::Keto)?;
 
         Ok(100)
     }
@@ -579,33 +601,34 @@ impl<'info> ProtocolRepay<'info> for SolendRepay<'info> {
         let seeds = generate_seeds!(self.generic_accs.vault_account);
         let signer = &[&seeds[..]];
 
-        let ix =
-            solend_token_lending::instruction::repay_obligation_liquidity(
-                solend_program_id::ID,
-                self.generic_accs.vault_borrow_token_account.amount,
-                self.generic_accs.vault_borrow_token_account.key(),
-                self.vault_solend_borrow_token_account.key(),
-                *self.solend_reserve_account.key,
-                *self.vault_solend_obligation_account.key,
-                *self.solend_lending_market_account.key,
-                self.generic_accs.vault_account.key(),
-            );
+        let ix = solend_token_lending::instruction::repay_obligation_liquidity(
+            solend_program_id::ID,
+            self.generic_accs.vault_borrow_token_account.amount,
+            self.generic_accs.vault_borrow_token_account.key(),
+            self.vault_solend_borrow_token_account.key(),
+            *self.solend_reserve_account.key,
+            *self.vault_solend_obligation_account.key,
+            *self.solend_lending_market_account.key,
+            self.generic_accs.vault_account.key(),
+        );
         let accounts = [
-                self.generic_accs.vault_borrow_token_account.to_account_info(),
-                self.vault_solend_borrow_token_account.to_account_info(),
-                self.solend_reserve_account.to_account_info(),
-                self.vault_solend_obligation_account.to_account_info(),
-                self.solend_lending_market_account.to_account_info(),
-                self.solend_derived_lending_market_authority.to_account_info(),
-                self.generic_accs.vault_account.to_account_info(),
-                self.clock.to_account_info(),
-                self.token_program.to_account_info()
+            self.generic_accs
+                .vault_borrow_token_account
+                .to_account_info(),
+            self.vault_solend_borrow_token_account.to_account_info(),
+            self.solend_reserve_account.to_account_info(),
+            self.vault_solend_obligation_account.to_account_info(),
+            self.solend_lending_market_account.to_account_info(),
+            self.solend_derived_lending_market_authority
+                .to_account_info(),
+            self.generic_accs.vault_account.to_account_info(),
+            self.clock.to_account_info(),
+            self.token_program.to_account_info(),
         ];
         invoke_signed(&ix, &accounts, signer)?;
 
         Ok(())
     }
-
 }
 
 #[derive(Accounts)]
@@ -676,19 +699,24 @@ impl<'info> ProtocolRewards<'info> for SolendTVL<'info> {
     }
 }
 
-
-fn get_health(allowed_borrow_value: solend_token_lending::math::Decimal, required_health: Health) -> Result<Health>{
-
+pub fn get_health(
+    allowed_borrow_value: solend_token_lending::math::Decimal,
+    required_health: Health,
+) -> Result<Health> {
     // Really needed?
     // require(
     //     obligation.lending_market == self.solend_lending_market_account
     // )
 
-    if allowed_borrow_value.le(&solend_token_lending::math::Decimal::from_scaled_val(MIN_HEALTH_FACTOR)) {
-            Ok(Health::Keto)
-        }else if allowed_borrow_value.ge(&solend_token_lending::math::Decimal::from_scaled_val(MAX_HEALTH_FACTOR)){
-            Ok(Health::Vegetarian)
-        } else {
-            Ok(Health::Vegan)
-        }
+    if allowed_borrow_value.le(&solend_token_lending::math::Decimal::from_scaled_val(
+        MIN_HEALTH_FACTOR,
+    )) {
+        Ok(Health::Keto)
+    } else if allowed_borrow_value.ge(&solend_token_lending::math::Decimal::from_scaled_val(
+        MAX_HEALTH_FACTOR,
+    )) {
+        Ok(Health::Vegetarian)
+    } else {
+        Ok(Health::Vegan)
+    }
 }

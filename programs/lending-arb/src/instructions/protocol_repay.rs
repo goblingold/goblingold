@@ -1,9 +1,9 @@
+use crate::health::Health;
 use crate::protocols::Protocols;
 use crate::vault::{ProtocolData, VaultAccount};
 use crate::VAULT_ACCOUNT_SEED;
 use anchor_lang::prelude::*;
 use anchor_spl::token::{Token, TokenAccount};
-use crate::health::{Health};
 
 /// Repay back to the protocol
 pub trait ProtocolRepay<'info> {
@@ -21,10 +21,7 @@ pub trait ProtocolRepay<'info> {
 }
 
 /// Borrow from protocol and update protocol data
-pub fn handler<'info, T: ProtocolRepay<'info>>(
-    ctx: Context<T>,
-    protocol: Protocols,
-) -> Result<()> {
+pub fn handler<'info, T: ProtocolRepay<'info>>(ctx: Context<T>, protocol: Protocols) -> Result<()> {
     let protocol_idx = ctx.accounts.protocol_position(protocol)?;
     let amount = ctx.accounts.amount_to_repay()?;
     ctx.accounts.cpi_repay(amount)?;
