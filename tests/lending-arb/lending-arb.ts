@@ -174,12 +174,44 @@ describe("borrow & deposit", () => {
   });
 
   it("Withdraw WSOL from Francium & Repay WSOL to Solend", async () => {
-    const newTx = new anchor.web3.Transaction()
-    const txWithdraw = await program.protocolWithdraw(Protocols.Francium, BORROW_TOKEN);
+    const newTx = new anchor.web3.Transaction();
+    const txWithdraw = await program.protocolWithdraw(
+      Protocols.Francium,
+      BORROW_TOKEN
+    );
     const txRepay = await program.repay();
-    newTx.add(txRepay.instructions[0],txRepay.instructions[1], txRepay.instructions[2], txWithdraw, txRepay.instructions[3])
+    newTx.add(
+      txRepay.instructions[0],
+      txRepay.instructions[1],
+      txRepay.instructions[2],
+      txWithdraw,
+      txRepay.instructions[3]
+    );
 
     await program.provider.sendAndConfirm(newTx, [], CONFIRM_OPTS);
+  });
+
+  it("User withdraw", async () => {
+    const amount = new anchor.BN(1_000_000);
+
+    userLpTokenAccount = await spl.getAssociatedTokenAddress(
+      program.vaultKeys[INPUT_TOKEN].vaultLpTokenMintAddress,
+      userSigner,
+      false
+    );
+
+    userInputTokenAccount = await spl.getAssociatedTokenAddress(
+      INPUT_TOKEN_MINT,
+      userSigner,
+      false
+    );
+
+    const tx = await program.withdraw({
+      userInputTokenAccount: userInputTokenAccount,
+      userLpTokenAccount: userLpTokenAccount,
+      lpAmount: amount,
+    });
+    await program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS);
   });
 
   it("sleep ", async () => {

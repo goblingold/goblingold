@@ -103,13 +103,6 @@ pub mod lending_arb {
         instructions::protocol_withdraw::handler(ctx, Protocols::Francium)
     }
 
-    /// Creates a vault_user_ticket_account
-    pub fn create_vault_user_ticket_account(
-        ctx: Context<CreateVaultUserTicketAccount>,
-    ) -> Result<()> {
-        instructions::create_vault_user_ticket_account::handler(ctx)
-    }
-
     /// Deposit user input tokens into the vault account
     #[access_control(deposit_not_paused())]
     pub fn deposit(ctx: Context<Deposit>, amount: u64) -> Result<()> {
@@ -122,25 +115,6 @@ pub mod lending_arb {
         instructions::withdraw::handler(ctx, lp_amount)
     }
 
-    /// Open a withdrawal ticket (for delayed withdrawals)
-    #[access_control(withdraw_not_paused())]
-    pub fn open_withdraw_ticket(
-        ctx: Context<OpenWithdrawTicket>,
-        lp_amount: u64,
-        bump_user: u8,
-    ) -> Result<()> {
-        instructions::open_withdraw_ticket::handler(ctx, lp_amount, bump_user)
-    }
-
-    /// Close a withdrawal ticket
-    #[access_control(withdraw_not_paused())]
-    pub fn close_withdraw_ticket(
-        ctx: Context<CloseWithdrawTicket>,
-        lp_amount: u64,
-        bump_user: u8,
-    ) -> Result<()> {
-        instructions::close_withdraw_ticket::handler(ctx, lp_amount, bump_user)
-    }
 }
 
 /// Check if target key is authorized

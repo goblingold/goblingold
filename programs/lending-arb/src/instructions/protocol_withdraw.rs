@@ -111,10 +111,11 @@ impl<'info> GenericWithdrawAccounts<'info> {
     /// from the bot or from a user, assuming for the latter that the following ix corresponds to
     /// the `withdraw` one
     pub fn amount_to_withdraw(&self, protocol_idx: usize) -> Result<u64> {
+        msg!("matching to withdraw {}", protocol_idx);
         match  protocol_idx {
-            0 => self.amount_usd_to_withdraw_in_n_txs(protocol_idx, 1),
-            1 => self.amount_sol_to_withdraw_in_n_txs(protocol_idx, 1),
-            _ => self.amount_sol_to_withdraw_in_n_txs(protocol_idx, 1),
+            0 => self.amount_usd_to_withdraw_in_n_txs(protocol_idx, 2),
+            1 => self.amount_sol_to_withdraw_in_n_txs(protocol_idx, 3),
+            _ => self.amount_sol_to_withdraw_in_n_txs(protocol_idx, 2),
         }
     }
 
@@ -123,12 +124,12 @@ impl<'info> GenericWithdrawAccounts<'info> {
         protocol_idx: usize,
         ix_offset: usize,
     ) -> Result<u64> {
-        // if let Some(amount) = self.read_amount_from_withdraw_ix(ix_offset)? {
-        //     Ok(amount)
-        // } else {
+        if let Some(amount) = self.read_amount_from_withdraw_ix(ix_offset)? {
+            Ok(amount)
+        } else {
             let amount = self.calculate_withdraw()?;
             Ok(amount)
-        // }
+        }
     }
 
     pub fn amount_usd_to_withdraw_in_n_txs(
@@ -149,17 +150,16 @@ impl<'info> GenericWithdrawAccounts<'info> {
     fn read_amount_from_withdraw_ix(&self, target_ix: usize) -> Result<Option<u64>> {
         let current_index =
             sysvar::instructions::load_current_index_checked(&self.instructions)? as usize;
-
+        
         if let Ok(next_ix) = sysvar::instructions::load_instruction_at_checked(
             current_index.checked_add(target_ix).unwrap(),
             &self.instructions,
         ) {
             let ix_data: &[u8] = &next_ix.data;
-            //TODO now we have 3 ixs
-            // require!(
-            //     next_ix.data.len() == IX_WITHDRAW_DATA_LEN && ix_data[..8] == IX_WITHDRAW_SIGHASH,
-            //     ErrorCode::InvalidInstructions
-            // );
+
+            if (next_ix.data.len() != IX_WITHDRAW_DATA_LEN || ix_data[..8] != IX_WITHDRAW_SIGHASH){
+                return Ok(Option::None)
+            }
 
             // Anchor generated module
             use crate::instruction;

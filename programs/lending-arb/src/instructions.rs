@@ -1,18 +1,12 @@
 pub mod add_protocol;
-pub mod close_withdraw_ticket;
-pub mod create_vault_user_ticket_account;
 pub mod deposit;
 pub mod initialize_vault;
-pub mod open_withdraw_ticket;
 pub mod set_hashes;
 pub mod withdraw;
 
 pub use add_protocol::*;
-pub use close_withdraw_ticket::*;
-pub use create_vault_user_ticket_account::*;
 pub use deposit::*;
 pub use initialize_vault::*;
-pub use open_withdraw_ticket::*;
 pub use set_hashes::*;
 pub use withdraw::*;
 
