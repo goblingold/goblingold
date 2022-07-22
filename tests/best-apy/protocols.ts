@@ -57,6 +57,12 @@ export function getProtocols(token: string): Protocols[] {
         Protocols.Francium,
       ];
 
+    case "SAMO":
+      return [
+        Protocols.Tulip,
+        Protocols.Francium,
+      ];
+
     default:
       throw new Error("Invalidid asset '" + token + "':");
   }

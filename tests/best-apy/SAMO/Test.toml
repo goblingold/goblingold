@@ -1,0 +1,31 @@
+extends = ["../Test.protocols.toml"]
+
+[scripts]
+test = "bash tests/best-apy/launcher.sh BTC"
+
+# BTC_mint
+[[test.validator.clone]]
+address = "9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E"
+
+# BTC_ata for DrrB1 with 10^12 lamports
+[[test.validator.account]]
+address = "C3s7DKRLsr4YjdzDeKvQW47BoKcD8QzzThRNqV9Z71qm"
+filename = "../../accounts/C3s7DKRLsr4YjdzDeKvQW47BoKcD8QzzThRNqV9Z71qm.json"
+
+# tulip
+[[test.validator.clone]]
+address = "CEqYVZCL7sHQ8gChh1yL3uajc2UDs6DXuYjPZyRox6MC"
+[[test.validator.clone]]
+address = "F7jTRpp57TjrkCF4kfgiCfUVAQ8jQMn4MTYbHQ6qC2cV"
+[[test.validator.clone]]
+address = "GgiFHoSyQ66GLg2kPrkmYLkgXvNf6ECa2pKvaWAAH3RY"
+[[test.validator.clone]]
+address = "6nVuFQdDEPsh7yhPuHR3WbsYYEHHDjetEhvy3hrzbUBb"
+
+# francium
+[[test.validator.clone]]
+address = "A9H3fAqkWmRnnFzXXzydZHzyLQdzK5o9dMejCL27tqq8"
+[[test.validator.clone]]
+address = "HJLkovTpxof1z9tVMuX1pWp1ePDx1zgmnGYfFMxFRAd"
+[[test.validator.clone]]
+address = "J198uwytk8CPejCyNM9TMPJcLPCky6pZwGwP3n1CUfto"
