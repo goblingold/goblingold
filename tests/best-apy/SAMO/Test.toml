@@ -1,16 +1,16 @@
 extends = ["../Test.protocols.toml"]
 
 [scripts]
-test = "bash tests/best-apy/launcher.sh BTC"
+test = "bash tests/best-apy/launcher.sh SAMO"
 
-# BTC_mint
+# SAMO_mint
 [[test.validator.clone]]
-address = "9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E"
+address = "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU"
 
-# BTC_ata for DrrB1 with 10^12 lamports
+# SAMO_ata for DrrB1 with 10^12 lamports
 [[test.validator.account]]
-address = "C3s7DKRLsr4YjdzDeKvQW47BoKcD8QzzThRNqV9Z71qm"
-filename = "../../accounts/C3s7DKRLsr4YjdzDeKvQW47BoKcD8QzzThRNqV9Z71qm.json"
+address = "77MQfX2oHArHSGs2PEKqtsnnzPdZ6S1pUHq33LL7GZwB"
+filename = "../../accounts/77MQfX2oHArHSGs2PEKqtsnnzPdZ6S1pUHq33LL7GZwB.json"
 
 # tulip
 [[test.validator.clone]]
