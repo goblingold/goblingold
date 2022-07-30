@@ -1,0 +1,53 @@
+extends = ["../Test.protocols.toml"]
+
+[scripts]
+test = "bash tests/best-apy/launcher.sh ETH"
+
+# ETH_mint
+[[test.validator.clone]]
+address = "7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs"
+
+# ETH_ata for DrrB1 with 10^12 lamports
+[[test.validator.account]]
+address = "Cpwn5VVk7yvS5tgGJMKvuUfyaBQHiubCxMeHVvtLByw9"
+filename = "../../accounts/Cpwn5VVk7yvS5tgGJMKvuUfyaBQHiubCxMeHVvtLByw9.json"
+
+# francium 
+[[test.validator.clone]]
+address = "Hk8b6i2C7PxFBPdd1TCrGssuZpCDEg4fh8yFuyHNJuJe"
+[[test.validator.clone]]
+address = "EEokU6r9bBdTz1umHjGhkjgfikARsJzJBXhYxnTmN4Xk"
+[[test.validator.clone]]
+address = "9Mq6KEyW1nF24TcGrdLLfnK2pE5VdMxbY2SZtcP84R5X"
+
+# port
+[[test.validator.clone]]
+address = "JBu1AL4obBcCMqKBBxhpWCNUt136ijcuMZLFvTP7iWdB"
+[[test.validator.clone]]
+address = "AtooWNBQRrg94ZeNdx9nk5HMSzHyXVbVvsdPXtbcMG1J"
+[[test.validator.clone]]
+address = "Fu8gTpPR6DAxzWK2jDW7axuK3MBZcr5hKfjALXDpY3Zw"
+[[test.validator.clone]]
+address = "6a5Z5ZhzL5EWqHTkLzfUxteuKX9T2deesinsjCZSThZ2"
+
+# solend 
+[[test.validator.clone]]
+address = "JBu1AL4obBcCMqKBBxhpWCNUt136ijcuMZLFvTP7iWdB"
+[[test.validator.clone]]
+address = "CPDiKagfozERtJ33p7HHhEfJERjvfk1VAjMXAFLrvrKP"
+[[test.validator.clone]]
+address = "FbKvdbx5h6F86h1pZuEqv7FxwmsVhJ88cDuSqHvLm6Xf"
+[[test.validator.clone]]
+address = "8HAaZSiCbVqrLDQHxg3yey8JWuGbeyC2tNTEmzgmt4C4"
+[[test.validator.clone]]
+address = "QJc2HgGhdtW4e7zjvLB1TGRuwEpTre2agU5Lap2UqYz"
+
+# tulip
+[[test.validator.clone]]
+address = "85SyKDLXZPC1sqdFqasywQojutGhDCobbPHM6zczD1Li"
+[[test.validator.clone]]
+address = "EWhUcqPMNVetwrJLJhQSkpzE5sU8nAVtRmJJV2EpgD3g"
+[[test.validator.clone]]
+address = "5gmFU9vd4hgqYE6vja4T41gZmdUweZwxy3f6GeUQoqCA"
+[[test.validator.clone]]
+address = "7n9bDFUxehuw7yAHnK9eWKSfMx5u6NYWPVLKYnz93fzj"

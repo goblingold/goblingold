@@ -58,9 +58,14 @@ export function getProtocols(token: string): Protocols[] {
       ];
 
     case "SAMO":
+      return [Protocols.Tulip, Protocols.Francium];
+
+    case "ETH":
       return [
-        Protocols.Tulip,
         Protocols.Francium,
+        Protocols.Port,
+        Protocols.Solend,
+        Protocols.Tulip,
       ];
 
     default:
