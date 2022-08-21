@@ -28,7 +28,9 @@ address = "E9LAZYxBVhJr9Cdfi9Tn4GSiJHDWSZDsew5tfgJja6Cu"
 [[test.validator.clone]]
 address = "5grnVTzYxhhhbiSdbkznMff721ZPMP3SzYhy2Yzd37jt"
 [[test.validator.clone]]
-address = "EHwSRkm2ErRjWxCxrTxrmC7sT2kGb5jJcsiindUHAX7W"
+address = "4ivThkX8uRxBpHsdWSqyXYihzKF3zpRGAUCqyuagnLoV"
+[[test.validator.clone]]
+address = "7ySvXU4NSxBuuQZj3pG5qwqNTepMFa8XQNLGivM4qkEy"
 
 # tulip
 [[test.validator.clone]]
