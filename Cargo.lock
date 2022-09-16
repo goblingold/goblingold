@@ -1713,7 +1713,7 @@ dependencies = [
 [[package]]
 name = "solend-program"
 version = "0.1.0"
-source = "git+https://github.com/solendprotocol/solana-program-library?rev=81f34f2#81f34f2d1367c18f33f7c55dbf3eb4d292a49add"
+source = "git+https://github.com/solendprotocol/solana-program-library?rev=1feaffc#1feaffc3ff5e598c359e51694c3cc7f5aa3e9312"
 dependencies = [
  "arrayref",
  "bytemuck",
