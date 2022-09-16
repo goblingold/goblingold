@@ -81,7 +81,7 @@ impl<'info> CloseWithdrawTicket<'info> {
             self.token_program.to_account_info(),
             Burn {
                 mint: self.vault_lp_token_mint_pubkey.to_account_info(),
-                to: self.vault_lp_token_account.to_account_info(),
+                from: self.vault_lp_token_account.to_account_info(),
                 authority: self.vault_account.to_account_info(),
             },
         )
@@ -92,7 +92,7 @@ impl<'info> CloseWithdrawTicket<'info> {
             self.token_program.to_account_info(),
             Burn {
                 mint: self.vault_ticket_mint_pubkey.to_account_info(),
-                to: self.vault_user_ticket_account.to_account_info(),
+                from: self.vault_user_ticket_account.to_account_info(),
                 authority: self.vault_account.to_account_info(),
             },
         )
