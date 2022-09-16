@@ -59,7 +59,7 @@ impl<'info> Withdraw<'info> {
             self.token_program.to_account_info(),
             Burn {
                 mint: self.vault_lp_token_mint_pubkey.to_account_info(),
-                to: self.user_lp_token_account.to_account_info(),
+                from: self.user_lp_token_account.to_account_info(),
                 authority: self.user_signer.to_account_info(),
             },
         )
