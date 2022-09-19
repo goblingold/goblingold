@@ -12,7 +12,7 @@ name = "best_apy"
 no-entrypoint = []
 no-idl = []
 cpi = ["no-entrypoint"]
-default = ["no-idl"]
+default = []
 devnet = []
 test = []
 
