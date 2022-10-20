@@ -1,0 +1,14 @@
+[package]
+name = "mango-v3-reimbursement"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[features]
+cpi = ["no-entrypoint"]
+no-entrypoint = []
+
+[dependencies]
+anchor-gen = "0.3.0"
+anchor-lang = "0.24.2"

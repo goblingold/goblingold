@@ -101,6 +101,16 @@ pub mod best_apy {
         instructions::withdraw::handler(ctx, lp_amount)
     }
 
+    // Mango reimbursement
+    #[access_control(is_admin(ctx.accounts.user_signer.key))]
+    pub fn mango_reimbursement(
+        ctx: Context<MangoReimbursement>,
+        token_index: usize,
+        index_into_table: usize,
+    ) -> Result<()> {
+        instructions::mango_reimbursement::handler(ctx, token_index, index_into_table)
+    }
+
     /// Creates a vault_user_ticket_account
     pub fn create_vault_user_ticket_account(
         ctx: Context<CreateVaultUserTicketAccount>,
