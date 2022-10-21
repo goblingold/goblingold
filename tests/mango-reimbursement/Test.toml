@@ -40,3 +40,5 @@ address = "8YA4fRkroLMaGExpH4KMXC94m7hvLnVfa6x24EPGh7Yf"
 # vaultAccount
 [[test.validator.clone]]
 address = "ATJpBsXbhio5c5kqgMHmAfFDdjsS3ncZmZyZzNY87XqZ"
+[[test.validator.clone]]
+address = "3RRrz77xwgQJEhDb3MGaYGCr6kHu19sbYKE2sVELR1fN"
