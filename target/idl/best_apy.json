@@ -470,15 +470,11 @@
       "args": [
         {
           "name": "tokenIndex",
-          "type": {
-            "defined": "usize"
-          }
+          "type": "u8"
         },
         {
           "name": "indexIntoTable",
-          "type": {
-            "defined": "usize"
-          }
+          "type": "u8"
         }
       ]
     },
@@ -2372,5 +2368,8 @@
       "name": "InvalidTicketAmount",
       "msg": "Invalid ticket amount"
     }
-  ]
+  ],
+  "metadata": {
+    "address": "GGo1dnYpjKfe9omzUaFtaCyizvwpAMf3NhxSCMD61F3A"
+  }
 }

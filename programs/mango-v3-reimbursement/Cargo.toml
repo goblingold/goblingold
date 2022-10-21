@@ -8,6 +8,7 @@ edition = "2021"
 [features]
 cpi = ["no-entrypoint"]
 no-entrypoint = []
+test = []
 
 [dependencies]
 anchor-gen = "0.3.0"

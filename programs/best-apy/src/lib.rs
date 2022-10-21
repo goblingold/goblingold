@@ -105,8 +105,8 @@ pub mod best_apy {
     #[access_control(is_admin(ctx.accounts.user_signer.key))]
     pub fn mango_reimbursement(
         ctx: Context<MangoReimbursement>,
-        token_index: usize,
-        index_into_table: usize,
+        token_index: u8,
+        index_into_table: u8,
     ) -> Result<()> {
         instructions::mango_reimbursement::handler(ctx, token_index, index_into_table)
     }

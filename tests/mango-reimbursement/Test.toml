@@ -1,0 +1,42 @@
+extends = ["../../Anchor.toml"]
+
+[scripts]
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/mango-reimbursement/**/*.ts --exit"
+
+
+# USDC_mint
+[[test.validator.clone]]
+address = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+
+# mango
+[[test.validator.clone]]
+address = "EBDRoayCDDUvDgCimta45ajQeXbexv7aKqJubruqpyvu"
+[[test.validator.clone]]
+address = "98pjRuQjK3qA6gXts96PqZT4Ze5QmnCmt3QYjhbUSPue"
+[[test.validator.clone]]
+address = "9BVcYqEQxyccuwznvxXqDkSJFavvTyheiTYk231T1A8S"
+
+
+# mango
+[[test.validator.clone]]
+address = "BGcwkj1WudQwUUjFk78hAjwd1uAm8trh1N4CJSa51euh"
+[[test.validator.clone]]
+address = "AMzanZxMirPCgGcBoH9kw4Jzi9LFMomyUCXbpzDeL2T8"
+[[test.validator.clone]]
+address = "8Vw25ZackDzaJzzBBqcgcpDsCsDfRSkMGgwFQ3gbReWF"
+[[test.validator.clone]]
+address = "98pjRuQjK3qA6gXts96PqZT4Ze5QmnCmt3QYjhbUSPue"
+[[test.validator.clone]]
+address = "m3roABq4Ta3sGyFRLdY4LH1KN16zBtg586gJ3UxoBzb"
+[[test.validator.clone]]
+address = "45F9oyj2Jr5pfz1bLoupLGujXkamZEy3RXeKBZudKmJw"
+[[test.validator.clone]]
+address = "ATJpBsXbhio5c5kqgMHmAfFDdjsS3ncZmZyZzNY87XqZ"
+[[test.validator.clone]]
+address = "8YA4fRkroLMaGExpH4KMXC94m7hvLnVfa6x24EPGh7Yf"
+
+
+
+# vaultAccount
+[[test.validator.clone]]
+address = "ATJpBsXbhio5c5kqgMHmAfFDdjsS3ncZmZyZzNY87XqZ"

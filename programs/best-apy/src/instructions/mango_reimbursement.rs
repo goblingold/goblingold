@@ -47,8 +47,8 @@ pub struct MangoReimbursement<'info> {
 
 pub fn handler(
     ctx: Context<MangoReimbursement>,
-    token_index: usize,
-    index_into_table: usize,
+    token_index: u8,
+    index_into_table: u8,
 ) -> Result<()> {
     let seeds = generate_seeds!(ctx.accounts.vault_account);
     let signer = &[&seeds[..]];
@@ -73,13 +73,17 @@ pub fn handler(
     let accounts_info = [
         ctx.accounts.group.to_account_info(),
         ctx.accounts.reimbursement_account.to_account_info(),
+        ctx.accounts.mango_account_owner.to_account_info(),
+        ctx.accounts.user_signer.to_account_info(),
+        ctx.accounts.system_program.to_account_info(),
+        ctx.accounts.rent.to_account_info(),
     ];
 
     invoke_signed(&ix, &accounts_info[..], signer)?;
 
     let instr = mango_v3_reimbursement::instruction::Reimburse {
-        _token_index: token_index,
-        _index_into_table: index_into_table,
+        _token_index: token_index as usize,
+        _index_into_table: index_into_table as usize,
         _transfer_claim: true,
     };
 

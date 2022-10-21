@@ -1,0 +1,51 @@
+import * as anchor from "@project-serum/anchor";
+import * as spl from "@solana/spl-token";
+import { assert } from "chai";
+import { GoblinGold, Protocols, TOKENS, decodeAccount } from "goblin-sdk-local";
+
+const INPUT_TOKEN = "WSOL";
+const CONFIRM_OPTS: anchor.web3.ConfirmOptions = {
+  skipPreflight: true,
+};
+
+describe("mango reimbursement", () => {
+  const provider = anchor.Provider.local();
+  const userSigner = provider.wallet.publicKey;
+
+  const client = new GoblinGold({
+    connection: provider.connection,
+    wallet: provider.wallet,
+  });
+
+  const program = client.BestApy;
+
+  it("Mango reimbursement", async () => {
+    const amount = new anchor.BN(1_000_000_000);
+
+    const userLpTokenAccount = await spl.getAssociatedTokenAddress(
+      program.vaultKeys[INPUT_TOKEN].vaultLpTokenMintAddress,
+      userSigner,
+      false
+    );
+
+    const wrappedKeypair = anchor.web3.Keypair.generate();
+    const userWrappedAccount = wrappedKeypair.publicKey;
+    const lamports = await spl.getMinimumBalanceForRentExemptAccount(
+      program.provider.connection
+    );
+
+    let tx = await program.mangoReimbursement(
+      new anchor.web3.PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"),
+      1,
+      1
+    );
+
+    await program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS);
+
+    await sleep(2000);
+  });
+});
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
