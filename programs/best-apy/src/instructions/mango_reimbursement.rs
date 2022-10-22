@@ -2,9 +2,9 @@ use crate::macros::generate_seeds;
 use crate::vault::VaultAccount;
 use crate::VAULT_ACCOUNT_SEED;
 use anchor_lang::prelude::*;
-use anchor_lang::solana_program::{program::invoke_signed, pubkey::Pubkey};
-use anchor_lang::{InstructionData, ToAccountMetas};
+use anchor_lang::solana_program::pubkey::Pubkey;
 use anchor_spl::token::{Mint, Token, TokenAccount};
+use mango_v3_reimbursement::cpi::accounts::{CreateReimbursementAccount, Reimburse};
 
 #[derive(Accounts)]
 pub struct MangoReimbursement<'info> {
@@ -58,16 +58,10 @@ pub struct MangoReimbursement<'info> {
 impl<'info> MangoReimbursement<'info> {
     fn create_reimbursement_ctx(
         &self,
-    ) -> CpiContext<
-        '_,
-        '_,
-        '_,
-        'info,
-        mango_v3_reimbursement::cpi::accounts::CreateReimbursementAccount<'info>,
-    > {
+    ) -> CpiContext<'_, '_, '_, 'info, CreateReimbursementAccount<'info>> {
         CpiContext::new(
             self.mango_v3_reimbursement.to_account_info(),
-            mango_v3_reimbursement::cpi::accounts::CreateReimbursementAccount {
+            CreateReimbursementAccount {
                 group: self.group.to_account_info(),
                 reimbursement_account: self.reimbursement_account.to_account_info(),
                 mango_account_owner: self.mango_account_owner.to_account_info(),
@@ -78,13 +72,10 @@ impl<'info> MangoReimbursement<'info> {
         )
     }
 
-    fn reimburse_ctx(
-        &self,
-    ) -> CpiContext<'_, '_, '_, 'info, mango_v3_reimbursement::cpi::accounts::Reimburse<'info>>
-    {
+    fn reimburse_ctx(&self) -> CpiContext<'_, '_, '_, 'info, Reimburse<'info>> {
         CpiContext::new(
             self.mango_v3_reimbursement.to_account_info(),
-            mango_v3_reimbursement::cpi::accounts::Reimburse {
+            Reimburse {
                 group: self.group.to_account_info(),
                 vault: self.vault_token_account.to_account_info(),
                 token_account: self.token_account.to_account_info(),
@@ -113,7 +104,7 @@ pub fn handler(
     mango_v3_reimbursement::cpi::create_reimbursement_account(
         ctx.accounts.create_reimbursement_ctx(),
     )?;
-    msg!("{}",index_into_table);
+
     mango_v3_reimbursement::cpi::reimburse(
         ctx.accounts.reimburse_ctx().with_signer(signer),
         token_index as usize,
@@ -122,20 +113,4 @@ pub fn handler(
     )?;
 
     Ok(())
-}
-
-#[derive(Accounts)]
-pub struct CreateReimbursementAccounts<'info> {
-    /// CHECK:
-    pub group: AccountInfo<'info>,
-    /// CHECK:
-    pub reimbursement_account: AccountInfo<'info>,
-    /// CHECK:
-    pub mango_account_owner: AccountInfo<'info>,
-    /// CHECK:
-    pub payer: AccountInfo<'info>,
-    /// CHECK:
-    pub system_program: AccountInfo<'info>,
-    /// CHECK:
-    pub rent: AccountInfo<'info>,
 }
