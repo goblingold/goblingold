@@ -3,7 +3,6 @@ import * as spl from "@solana/spl-token";
 import { assert } from "chai";
 import { GoblinGold, Protocols, TOKENS, decodeAccount } from "goblin-sdk-local";
 import { BN, Idl, web3 } from "@project-serum/anchor";
-import { MangoV3ReimbursementClient } from "../../../mango-v3-reimbursement/ts/client/src";
 import { Provider } from "@project-serum/anchor";
 
 const INPUT_TOKEN = "USDC";
@@ -13,7 +12,6 @@ const CONFIRM_OPTS: anchor.web3.ConfirmOptions = {
 
 describe("mango reimbursement", () => {
   const provider = anchor.Provider.local();
-  const mangoV3ReimbursementClient = new MangoV3ReimbursementClient(provider as Provider);
 
   const client = new GoblinGold({
     connection: provider.connection,

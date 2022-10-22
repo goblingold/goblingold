@@ -4,7 +4,14 @@ use anchor_lang::solana_program::pubkey::Pubkey;
 use check_hash::{CheckHash, CHECKHASH_BYTES};
 use error::ErrorCode;
 use instructions::*;
-use protocols::{francium::*, mango::*, port::*, solend::*, tulip::*, Protocols};
+use protocols::{
+    francium::*,
+    //mango::*,
+    port::*,
+    solend::*,
+    tulip::*,
+    Protocols,
+};
 use vault::{RefreshParams, VaultAccount};
 
 mod check_hash;
@@ -143,11 +150,11 @@ pub mod best_apy {
         instructions::refresh_weights::handler(ctx)
     }
 
-    /// Mango: Initialize protocol accounts
-    #[access_control(is_admin(ctx.accounts.user_signer.key))]
-    pub fn mango_initialize(ctx: Context<MangoInitialize>) -> Result<()> {
-        instructions::protocol_initialize::handler(ctx)
-    }
+    ///// Mango: Initialize protocol accounts
+    //#[access_control(is_admin(ctx.accounts.user_signer.key))]
+    //pub fn mango_initialize(ctx: Context<MangoInitialize>) -> Result<()> {
+    //    instructions::protocol_initialize::handler(ctx)
+    //}
 
     ///// Mango: Deposit from the vault account
     //#[access_control(ctx.accounts.check_hash(Protocols::Mango))]
@@ -161,11 +168,11 @@ pub mod best_apy {
     //    instructions::protocol_withdraw::handler(ctx, Protocols::Mango)
     //}
 
-    /// Mango: Compute the TVL
-    #[access_control(ctx.accounts.check_hash(Protocols::Mango))]
-    pub fn mango_tvl(ctx: Context<MangoTVL>) -> Result<()> {
-        instructions::protocol_rewards::handler(ctx, Protocols::Mango)
-    }
+    ///// Mango: Compute the TVL
+    //#[access_control(ctx.accounts.check_hash(Protocols::Mango))]
+    //pub fn mango_tvl(ctx: Context<MangoTVL>) -> Result<()> {
+    //    instructions::protocol_rewards::handler(ctx, Protocols::Mango)
+    //}
 
     /// Solend: Deposit from the vault account
     #[access_control(ctx.accounts.check_hash(Protocols::Solend))]

@@ -1,5 +1,6 @@
 use crate::macros::generate_seeds;
-use crate::vault::VaultAccount;
+use crate::protocols::Protocols;
+use crate::vault::{AccumulatedRewards, VaultAccount};
 use crate::VAULT_ACCOUNT_SEED;
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::pubkey::Pubkey;
@@ -98,6 +99,17 @@ pub fn handler(
     token_index: u8,
     index_into_table: u64,
 ) -> Result<()> {
+    // clear mango data from vault_account
+    let mng_indx = ctx
+        .accounts
+        .vault_account
+        .protocol_position(Protocols::Mango)
+        .unwrap();
+
+    ctx.accounts.vault_account.protocols[mng_indx].weight = 0;
+    ctx.accounts.vault_account.protocols[mng_indx].amount = 0;
+    ctx.accounts.vault_account.protocols[mng_indx].rewards = AccumulatedRewards::default();
+
     let seeds = generate_seeds!(ctx.accounts.vault_account);
     let signer = &[&seeds[..]];
 

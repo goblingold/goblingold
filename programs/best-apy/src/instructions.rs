@@ -29,11 +29,11 @@ pub use set_refresh_params::*;
 pub use withdraw::*;
 
 pub mod protocol_deposit;
-pub mod protocol_initialize;
+//pub mod protocol_initialize;
 pub mod protocol_rewards;
 pub mod protocol_withdraw;
 
 pub use protocol_deposit::*;
-pub use protocol_initialize::*;
+//pub use protocol_initialize::*;
 pub use protocol_rewards::*;
 pub use protocol_withdraw::*;
