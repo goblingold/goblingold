@@ -63,11 +63,19 @@ address ="2u3wLVR6EY2P3Pkvcy7uDXdb6gjq5ks9AwrfJ2z6tB2t"
 # WSOL
 [[test.validator.clone]]
 address = "3bbkuWpFrEbXyzVbd9j9JCc52kN5coLD4DBo2wZU6Lgz"
-
 [[test.validator.clone]]
 address = "CNJrJumoPRxvCaQZ2MJTEUUitwwen955JsxiUvoJa7Wp"
-
 [[test.validator.clone]]
 address = "82BSXokLXRTB7Knm1ZZp2dA5iADotNzvdMuQDEmhHwoX"
-# [[test.validator.clone]]
-# address = ""
+[[test.validator.clone]]
+address = "C8TnPp5ZJ6j5nCdE1VueHTV9vM6rZAgxn2thsXx79JsF"
+
+#MNGO
+[[test.validator.clone]]
+address = "3Rr5y3ef1KESbkho7x4TeerkKGYqgATaojxPbgtaM2uj"
+[[test.validator.clone]]
+address = "gujNd9ZTMRuKKHVigat4kqFtaEfNvEZjjLn7nNDW3QE"
+[[test.validator.clone]]
+address = "E5znWeT1pEiMXpko8JUNvGfs1X6cuupHZB2PeDhx5mt8"
+[[test.validator.clone]]
+address = "2VyscLY9Dr6xSXVNGw8HkHb4YtqXTmF9vUuVHuKdDjg8"
