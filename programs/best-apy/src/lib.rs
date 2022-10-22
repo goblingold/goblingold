@@ -149,17 +149,17 @@ pub mod best_apy {
         instructions::protocol_initialize::handler(ctx)
     }
 
-    /// Mango: Deposit from the vault account
-    #[access_control(ctx.accounts.check_hash(Protocols::Mango))]
-    pub fn mango_deposit(ctx: Context<MangoDeposit>) -> Result<()> {
-        instructions::protocol_deposit::handler(ctx, Protocols::Mango)
-    }
+    ///// Mango: Deposit from the vault account
+    //#[access_control(ctx.accounts.check_hash(Protocols::Mango))]
+    //pub fn mango_deposit(ctx: Context<MangoDeposit>) -> Result<()> {
+    //    instructions::protocol_deposit::handler(ctx, Protocols::Mango)
+    //}
 
-    /// Mango: Withdraw to the vault account
-    #[access_control(ctx.accounts.check_hash(Protocols::Mango))]
-    pub fn mango_withdraw(ctx: Context<MangoWithdraw>) -> Result<()> {
-        instructions::protocol_withdraw::handler(ctx, Protocols::Mango)
-    }
+    ///// Mango: Withdraw to the vault account
+    //#[access_control(ctx.accounts.check_hash(Protocols::Mango))]
+    //pub fn mango_withdraw(ctx: Context<MangoWithdraw>) -> Result<()> {
+    //    instructions::protocol_withdraw::handler(ctx, Protocols::Mango)
+    //}
 
     /// Mango: Compute the TVL
     #[access_control(ctx.accounts.check_hash(Protocols::Mango))]
