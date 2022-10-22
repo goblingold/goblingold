@@ -80,8 +80,6 @@ address = "2VyscLY9Dr6xSXVNGw8HkHb4YtqXTmF9vUuVHuKdDjg8"
 
 # RAY
 [[test.validator.clone]]
-address = "CNJrJumoPRxvCaQZ2MJTEUUitwwen955JsxiUvoJa7Wp"
-[[test.validator.clone]]
 address = "HPxU37mc9varUSjj8JaJQ4orKSvY4tSc5Zdg1UaeW1jq"
 [[test.validator.clone]]
 address = "6w6NRsDUnBieNiVBHoixEqqfGnr2wXdoSWWZRn7S36db"
@@ -90,3 +88,15 @@ address = "6w6NRsDUnBieNiVBHoixEqqfGnr2wXdoSWWZRn7S36db"
 address = "FK7u45v9Yno2p9vsqk8ppikceMc1t9NUxzGopFZWYsqa"
 [[test.validator.clone]]
 address = "7ZmHsKGP8GvctL7VLGae8TMrFWqnWqeVapbHN82y6dz4"
+
+# mSOL
+[[test.validator.clone]]
+address = "6CpP78Rqygpf4N612FfYwG7STD9GY58o1rQHtejombmZ"
+[[test.validator.clone]]
+address = "7reMieMkh3MCJXQqmnv9xhCBcy3B5qaGbhf6HC8kZFyc"
+
+[[test.validator.clone]]
+address = "DTkyTEuhpzauuD8Q1mUj6eBeuKazkRxwtmUV7AdrxZmq"
+
+[[test.validator.clone]]
+address = "DSGiTZaeetMi3K5HrMkYpbGydG9MCtcpzpcZx4ZFVFSm"

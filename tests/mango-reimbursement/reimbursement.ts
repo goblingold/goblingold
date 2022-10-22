@@ -37,9 +37,15 @@ describe("mango reimbursement", () => {
     await program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS);
   });
 
-  it("Mango reimbursement RAY", async () => {
+  xit("Mango reimbursement RAY", async () => {
     program.setToken("RAY");
-    let tx = await program.mangoReimbursement(6, new BN(12090));
+    let tx = await program.mangoReimbursement(6, new BN(0));
+    await program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS);
+  });
+
+  xit("Mango reimbursement mSOL", async () => {
+    program.setToken("mSOL");
+    let tx = await program.mangoReimbursement(10, new BN(0));
     await program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS);
   });
 });
