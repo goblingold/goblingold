@@ -38,7 +38,6 @@ address = "ATJpBsXbhio5c5kqgMHmAfFDdjsS3ncZmZyZzNY87XqZ"
 address = "8YA4fRkroLMaGExpH4KMXC94m7hvLnVfa6x24EPGh7Yf"
 
 
-
 # vaultAccount
 [[test.validator.clone]]
 address = "ATJpBsXbhio5c5kqgMHmAfFDdjsS3ncZmZyZzNY87XqZ"
@@ -49,15 +48,14 @@ address = "3RRrz77xwgQJEhDb3MGaYGCr6kHu19sbYKE2sVELR1fN"
 address = "8DKwAVrCEVStDYNPCsmxHtUj8LH9oXNtkVRrBfpNKvhp"
 
 [[test.validator.clone]]
-address ="Hy4ZsZkVa1ZTVa2ghkKY3TsThYEK9MgaL8VPF569jsHP"
+address = "Hy4ZsZkVa1ZTVa2ghkKY3TsThYEK9MgaL8VPF569jsHP"
 
 [[test.validator.clone]]
-address ="E3ZucWEddfWaDYUXVQbJYRYD9oNHUsWNkFVW73Y2by52"
+address = "E3ZucWEddfWaDYUXVQbJYRYD9oNHUsWNkFVW73Y2by52"
 [[test.validator.clone]]
-address ="2c9x2g7VUwCd9ppHDV6LxJ1YDb1799MXwvp9SKJe8YXm"
+address = "2c9x2g7VUwCd9ppHDV6LxJ1YDb1799MXwvp9SKJe8YXm"
 [[test.validator.clone]]
-address ="2u3wLVR6EY2P3Pkvcy7uDXdb6gjq5ks9AwrfJ2z6tB2t"
-
+address = "2u3wLVR6EY2P3Pkvcy7uDXdb6gjq5ks9AwrfJ2z6tB2t"
 
 
 # WSOL
@@ -79,3 +77,16 @@ address = "gujNd9ZTMRuKKHVigat4kqFtaEfNvEZjjLn7nNDW3QE"
 address = "E5znWeT1pEiMXpko8JUNvGfs1X6cuupHZB2PeDhx5mt8"
 [[test.validator.clone]]
 address = "2VyscLY9Dr6xSXVNGw8HkHb4YtqXTmF9vUuVHuKdDjg8"
+
+# RAY
+[[test.validator.clone]]
+address = "CNJrJumoPRxvCaQZ2MJTEUUitwwen955JsxiUvoJa7Wp"
+[[test.validator.clone]]
+address = "HPxU37mc9varUSjj8JaJQ4orKSvY4tSc5Zdg1UaeW1jq"
+[[test.validator.clone]]
+address = "6w6NRsDUnBieNiVBHoixEqqfGnr2wXdoSWWZRn7S36db"
+
+[[test.validator.clone]]
+address = "FK7u45v9Yno2p9vsqk8ppikceMc1t9NUxzGopFZWYsqa"
+[[test.validator.clone]]
+address = "7ZmHsKGP8GvctL7VLGae8TMrFWqnWqeVapbHN82y6dz4"

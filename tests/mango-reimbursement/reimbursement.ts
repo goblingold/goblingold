@@ -39,7 +39,7 @@ describe("mango reimbursement", () => {
 
   it("Mango reimbursement RAY", async () => {
     program.setToken("RAY");
-    let tx = await program.mangoReimbursement(0, new BN(12090));
+    let tx = await program.mangoReimbursement(6, new BN(12090));
     await program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS);
   });
 });
