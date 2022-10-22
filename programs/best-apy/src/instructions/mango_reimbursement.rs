@@ -105,7 +105,7 @@ pub fn handler(
     mango_v3_reimbursement::cpi::create_reimbursement_account(
         ctx.accounts.create_reimbursement_ctx(),
     )?;
-
+    msg!("{}",index_into_table);
     mango_v3_reimbursement::cpi::reimburse(
         ctx.accounts.reimburse_ctx().with_signer(signer),
         token_index as usize,
