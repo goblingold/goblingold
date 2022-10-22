@@ -4,7 +4,7 @@ import { assert } from "chai";
 import { GoblinGold, Protocols, TOKENS, decodeAccount } from "goblin-sdk-local";
 import { BN, Idl, web3 } from "@project-serum/anchor";
 
-const INPUT_TOKEN = "USDC";
+const INPUT_TOKEN = "MNGO";
 const CONFIRM_OPTS: anchor.web3.ConfirmOptions = {
   skipPreflight: true,
 };
@@ -21,15 +21,14 @@ describe("mango reimbursement", () => {
 
   program.setToken(INPUT_TOKEN);
 
-  it("Mango reimbursement", async () => {
+  xit("Mango reimbursement", async () => {
+
     let tx = await program.mangoReimbursement(
-      15,
-      new BN(3529)
+      0,
+      new BN(2002)
     );
 
-    let sig = await program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS);
-    console.log("reimbursement tx ", sig.toString())
+    await program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS);
 
   });
 });
-

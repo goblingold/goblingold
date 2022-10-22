@@ -21,11 +21,11 @@ describe("mango reimbursement", () => {
 
   program.setToken(INPUT_TOKEN);
 
-  it("Mango reimbursement", async () => {
+  xit("Mango reimbursement", async () => {
 
     let tx = await program.mangoReimbursement(
-      0,
-      new BN(12)
+      3,
+      new BN(2002)
     );
 
     await program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS);
