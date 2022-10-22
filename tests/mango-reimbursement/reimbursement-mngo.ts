@@ -1,8 +1,6 @@
 import * as anchor from "@project-serum/anchor";
-import * as spl from "@solana/spl-token";
-import { assert } from "chai";
-import { GoblinGold, Protocols, TOKENS, decodeAccount } from "goblin-sdk-local";
-import { BN, Idl, web3 } from "@project-serum/anchor";
+import { GoblinGold } from "goblin-sdk-local";
+import { BN } from "@project-serum/anchor";
 
 const INPUT_TOKEN = "MNGO";
 const CONFIRM_OPTS: anchor.web3.ConfirmOptions = {
@@ -22,13 +20,11 @@ describe("mango reimbursement", () => {
   program.setToken(INPUT_TOKEN);
 
   it("Mango reimbursement mngo", async () => {
-
     let tx = await program.mangoReimbursement(
       0,
-      new BN(12243) //17154
+      new BN(12090) //12563
     );
 
     await program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS);
-
   });
 });
