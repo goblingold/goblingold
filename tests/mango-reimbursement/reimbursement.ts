@@ -48,4 +48,10 @@ describe("mango reimbursement", () => {
     let tx = await program.mangoReimbursement(10, new BN(0));
     await program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS);
   });
+
+  it("Mango reimbursement USDT", async () => {
+    program.setToken("USDT");
+    let tx = await program.mangoReimbursement(4, new BN(0));
+    await program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS);
+  });
 });

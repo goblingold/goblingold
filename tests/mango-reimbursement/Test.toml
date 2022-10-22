@@ -97,6 +97,16 @@ address = "7reMieMkh3MCJXQqmnv9xhCBcy3B5qaGbhf6HC8kZFyc"
 
 [[test.validator.clone]]
 address = "DTkyTEuhpzauuD8Q1mUj6eBeuKazkRxwtmUV7AdrxZmq"
-
 [[test.validator.clone]]
 address = "DSGiTZaeetMi3K5HrMkYpbGydG9MCtcpzpcZx4ZFVFSm"
+
+# USDT
+[[test.validator.clone]]
+address = "EFpqGXuaAeR7d9bAURYvBCukHTqE4G1YYnKPk6iMtL93"
+[[test.validator.clone]]
+address = "ATpgW6RzUvEt13rU9NMj1HsmEeW2zC9a1k5AQbako8md"
+
+[[test.validator.clone]]
+address = "3zheKGFZnQXeovB75fXDmyS37rRwYK5TxABfLV6nRnzX"
+[[test.validator.clone]]
+address = "5tPuRci5ug8Zd5PCY9r2F6mqh7P85JhQdomEieYnyPHR"
