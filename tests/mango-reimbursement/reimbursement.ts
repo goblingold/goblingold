@@ -1,11 +1,10 @@
 import * as anchor from "@project-serum/anchor";
+import { BN, Idl, web3 } from "@project-serum/anchor";
+import { Provider } from "@project-serum/anchor";
 import * as spl from "@solana/spl-token";
 import { assert } from "chai";
 import { GoblinGold, Protocols, TOKENS, decodeAccount } from "goblin-sdk-local";
-import { BN, Idl, web3 } from "@project-serum/anchor";
-import { Provider } from "@project-serum/anchor";
 
-const INPUT_TOKEN = "USDC";
 const CONFIRM_OPTS: anchor.web3.ConfirmOptions = {
   skipPreflight: true,
 };
@@ -20,12 +19,27 @@ describe("mango reimbursement", () => {
 
   const program = client.BestApy;
 
-  program.setToken(INPUT_TOKEN);
-
-  it("Mango reimbursement", async () => {
+  xit("Mango reimbursement USDC", async () => {
+    program.setToken("USDC");
     let tx = await program.mangoReimbursement(15, new BN(3529));
+    await program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS);
+  });
 
-    let sig = await program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS);
-    console.log("reimbursement tx ", sig.toString());
+  xit("Mango reimbursement WSOL", async () => {
+    program.setToken("WSOL");
+    let tx = await program.mangoReimbursement(3, new BN(2002));
+    await program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS);
+  });
+
+  xit("Mango reimbursement MNGO", async () => {
+    program.setToken("MNGO");
+    let tx = await program.mangoReimbursement(0, new BN(12090));
+    await program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS);
+  });
+
+  it("Mango reimbursement RAY", async () => {
+    program.setToken("RAY");
+    let tx = await program.mangoReimbursement(0, new BN(12090));
+    await program.provider.sendAndConfirm(tx, [], CONFIRM_OPTS);
   });
 });
