@@ -20,7 +20,11 @@ pub struct MangoReimbursement<'info> {
     #[account(mut)]
     pub vault_token_account: Account<'info, TokenAccount>,
 
-    #[account(mut)]
+    #[account(
+        mut,
+        associated_token::mint = vault_account.input_mint_pubkey,
+        associated_token::authority = vault_account,
+    )]
     pub token_account: Box<Account<'info, TokenAccount>>,
     /// CHECK: Mango checks this
     #[account(mut)]
@@ -39,7 +43,11 @@ pub struct MangoReimbursement<'info> {
         bump = vault_account.bumps.vault
     )]
     pub vault_account: Box<Account<'info, VaultAccount>>,
-    /// CHECK: permisionless
+
+    #[account(
+        address = mango_v3_reimbursement::id()
+    )]
+    /// CHECK:
     pub mango_v3_reimbursement: AccountInfo<'info>,
 
     pub system_program: Program<'info, System>,

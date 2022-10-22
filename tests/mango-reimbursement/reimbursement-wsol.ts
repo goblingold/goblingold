@@ -21,7 +21,7 @@ describe("mango reimbursement", () => {
 
   program.setToken(INPUT_TOKEN);
 
-  xit("Mango reimbursement", async () => {
+  it("Mango reimbursement", async () => {
 
     let tx = await program.mangoReimbursement(
       0,
