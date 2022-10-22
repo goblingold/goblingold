@@ -18,6 +18,9 @@
   "instructions": [
     {
       "name": "initializeVault",
+      "docs": [
+        "Initialize the vault account and its fields"
+      ],
       "accounts": [
         {
           "name": "userSigner",
@@ -52,7 +55,10 @@
         {
           "name": "daoTreasuryOwner",
           "isMut": false,
-          "isSigner": false
+          "isSigner": false,
+          "docs": [
+            "CHECKED: address is checked"
+          ]
         },
         {
           "name": "systemProgram",
@@ -84,6 +90,9 @@
     },
     {
       "name": "initializeTicketMint",
+      "docs": [
+        "Initialize the ticket mint"
+      ],
       "accounts": [
         {
           "name": "userSigner",
@@ -125,6 +134,9 @@
     },
     {
       "name": "addProtocol",
+      "docs": [
+        "Add a new protocol to the vault_account"
+      ],
       "accounts": [
         {
           "name": "userSigner",
@@ -146,6 +158,9 @@
     },
     {
       "name": "setHashes",
+      "docs": [
+        "Set protocol hashes"
+      ],
       "accounts": [
         {
           "name": "userSigner",
@@ -181,6 +196,9 @@
     },
     {
       "name": "setRefreshParams",
+      "docs": [
+        "Set the strategy refresh paraemeters"
+      ],
       "accounts": [
         {
           "name": "userSigner",
@@ -204,6 +222,9 @@
     },
     {
       "name": "setProtocolWeights",
+      "docs": [
+        "Set the protocol weights"
+      ],
       "accounts": [
         {
           "name": "userSigner",
@@ -227,6 +248,9 @@
     },
     {
       "name": "deposit",
+      "docs": [
+        "Deposit user input tokens into the vault account"
+      ],
       "accounts": [
         {
           "name": "userSigner",
@@ -273,6 +297,9 @@
     },
     {
       "name": "depositFromNative",
+      "docs": [
+        "Deposit user input native SOL into the vault account"
+      ],
       "accounts": [
         {
           "name": "userSigner",
@@ -324,6 +351,9 @@
     },
     {
       "name": "withdraw",
+      "docs": [
+        "Withdraw the required input tokens from the vault and send them back to the user"
+      ],
       "accounts": [
         {
           "name": "userSigner",
@@ -369,7 +399,95 @@
       ]
     },
     {
+      "name": "mangoReimbursement",
+      "accounts": [
+        {
+          "name": "userSigner",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "group",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "claimMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "reimbursementAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "mangoAccountOwner",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "claimMintTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "table",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "vaultAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "mangoV3Reimbursement",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "tokenIndex",
+          "type": "u8"
+        },
+        {
+          "name": "indexIntoTable",
+          "type": "u64"
+        }
+      ]
+    },
+    {
       "name": "createVaultUserTicketAccount",
+      "docs": [
+        "Creates a vault_user_ticket_account"
+      ],
       "accounts": [
         {
           "name": "userSigner",
@@ -379,7 +497,10 @@
         {
           "name": "userTicketAccountOwner",
           "isMut": false,
-          "isSigner": false
+          "isSigner": false,
+          "docs": [
+            "CHECKED: can create account to anyone"
+          ]
         },
         {
           "name": "vaultUserTicketAccount",
@@ -416,6 +537,9 @@
     },
     {
       "name": "openWithdrawTicket",
+      "docs": [
+        "Open a withdrawal ticket (for delayed withdrawals)"
+      ],
       "accounts": [
         {
           "name": "userSigner",
@@ -471,6 +595,9 @@
     },
     {
       "name": "closeWithdrawTicket",
+      "docs": [
+        "Close a withdrawal ticket"
+      ],
       "accounts": [
         {
           "name": "userSigner",
@@ -531,6 +658,9 @@
     },
     {
       "name": "refreshWeights",
+      "docs": [
+        "Refresh the protocol weights"
+      ],
       "accounts": [
         {
           "name": "vaultAccount",
@@ -556,231 +686,10 @@
       "args": []
     },
     {
-      "name": "mangoInitialize",
-      "accounts": [
-        {
-          "name": "userSigner",
-          "isMut": false,
-          "isSigner": true
-        },
-        {
-          "name": "vaultAccount",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "vaultMangoAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "mangoProgramId",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "mangoGroupAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": []
-    },
-    {
-      "name": "mangoDeposit",
-      "accounts": [
-        {
-          "name": "genericAccs",
-          "accounts": [
-            {
-              "name": "vaultAccount",
-              "isMut": true,
-              "isSigner": false
-            },
-            {
-              "name": "vaultInputTokenAccount",
-              "isMut": true,
-              "isSigner": false
-            },
-            {
-              "name": "tokenProgram",
-              "isMut": false,
-              "isSigner": false
-            },
-            {
-              "name": "clock",
-              "isMut": false,
-              "isSigner": false
-            }
-          ]
-        },
-        {
-          "name": "mangoProgramId",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "vaultMangoAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "mangoGroupAccount",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "mangoCacheAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "mangoRootBankAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "mangoNodeBankAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "mangoVaultAccount",
-          "isMut": true,
-          "isSigner": false
-        }
-      ],
-      "args": []
-    },
-    {
-      "name": "mangoWithdraw",
-      "accounts": [
-        {
-          "name": "genericAccs",
-          "accounts": [
-            {
-              "name": "vaultAccount",
-              "isMut": true,
-              "isSigner": false
-            },
-            {
-              "name": "vaultInputTokenAccount",
-              "isMut": true,
-              "isSigner": false
-            },
-            {
-              "name": "tokenProgram",
-              "isMut": false,
-              "isSigner": false
-            },
-            {
-              "name": "clock",
-              "isMut": false,
-              "isSigner": false
-            },
-            {
-              "name": "instructions",
-              "isMut": false,
-              "isSigner": false
-            }
-          ]
-        },
-        {
-          "name": "mangoProgramId",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "vaultMangoAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "mangoCacheAccount",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "mangoGroupAccount",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "mangoGroupSignerAccount",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "mangoRootBankAccount",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "mangoNodeBankAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "mangoVaultAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": []
-    },
-    {
-      "name": "mangoTvl",
-      "accounts": [
-        {
-          "name": "genericAccs",
-          "accounts": [
-            {
-              "name": "vaultAccount",
-              "isMut": true,
-              "isSigner": false
-            }
-          ]
-        },
-        {
-          "name": "vaultMangoAccount",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "mangoGroupAccount",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "mangoCacheAccount",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "mangoRootBankAccount",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "defaultPubkey",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": []
-    },
-    {
       "name": "solendDeposit",
+      "docs": [
+        "Solend: Deposit from the vault account"
+      ],
       "accounts": [
         {
           "name": "genericAccs",
@@ -847,6 +756,9 @@
     },
     {
       "name": "solendWithdraw",
+      "docs": [
+        "Solend: Withdraw to the vault account"
+      ],
       "accounts": [
         {
           "name": "genericAccs",
@@ -918,6 +830,9 @@
     },
     {
       "name": "solendTvl",
+      "docs": [
+        "Solend: Compute the TVL"
+      ],
       "accounts": [
         {
           "name": "genericAccs",
@@ -944,6 +859,9 @@
     },
     {
       "name": "solendIsolatedPoolDeposit",
+      "docs": [
+        "SolendIsolatedPool: Deposit from the vault account"
+      ],
       "accounts": [
         {
           "name": "genericAccs",
@@ -1010,6 +928,9 @@
     },
     {
       "name": "solendIsolatedPoolWithdraw",
+      "docs": [
+        "SolendIsolatedPool: Withdraw to the vault account"
+      ],
       "accounts": [
         {
           "name": "genericAccs",
@@ -1081,6 +1002,9 @@
     },
     {
       "name": "solendIsolatedPoolTvl",
+      "docs": [
+        "SolendIsolatedPool: Compute the TVL"
+      ],
       "accounts": [
         {
           "name": "genericAccs",
@@ -1107,6 +1031,9 @@
     },
     {
       "name": "portDeposit",
+      "docs": [
+        "Port: Deposit from the vault account"
+      ],
       "accounts": [
         {
           "name": "genericAccs",
@@ -1173,6 +1100,9 @@
     },
     {
       "name": "portWithdraw",
+      "docs": [
+        "Port: Withdraw to the vault account"
+      ],
       "accounts": [
         {
           "name": "genericAccs",
@@ -1244,6 +1174,9 @@
     },
     {
       "name": "portTvl",
+      "docs": [
+        "Port: Compute the TVL"
+      ],
       "accounts": [
         {
           "name": "genericAccs",
@@ -1270,6 +1203,9 @@
     },
     {
       "name": "tulipDeposit",
+      "docs": [
+        "Tulip: Deposit from the vault account"
+      ],
       "accounts": [
         {
           "name": "genericAccs",
@@ -1336,6 +1272,9 @@
     },
     {
       "name": "tulipWithdraw",
+      "docs": [
+        "Tulip: Withdraw to the vault account"
+      ],
       "accounts": [
         {
           "name": "genericAccs",
@@ -1407,6 +1346,9 @@
     },
     {
       "name": "tulipTvl",
+      "docs": [
+        "Tulip: Compute the TVL"
+      ],
       "accounts": [
         {
           "name": "genericAccs",
@@ -1433,6 +1375,9 @@
     },
     {
       "name": "franciumDeposit",
+      "docs": [
+        "Francium: Deposit from the vault account"
+      ],
       "accounts": [
         {
           "name": "genericAccs",
@@ -1499,6 +1444,9 @@
     },
     {
       "name": "franciumWithdraw",
+      "docs": [
+        "Francium: Withdraw to the vault account"
+      ],
       "accounts": [
         {
           "name": "genericAccs",
@@ -1570,6 +1518,9 @@
     },
     {
       "name": "franciumTvl",
+      "docs": [
+        "Francium: Compute the TVL"
+      ],
       "accounts": [
         {
           "name": "genericAccs",
@@ -1598,65 +1549,107 @@
   "accounts": [
     {
       "name": "VaultAccount",
+      "docs": [
+        "Strategy vault account"
+      ],
       "type": {
         "kind": "struct",
         "fields": [
           {
             "name": "version",
+            "docs": [
+              "Vault version"
+            ],
             "type": "u8"
           },
           {
             "name": "isPaused",
+            "docs": [
+              "This vault is paused"
+            ],
             "type": "bool"
           },
           {
             "name": "seedNumber",
+            "docs": [
+              "Account seed number"
+            ],
             "type": "u8"
           },
           {
             "name": "bumps",
+            "docs": [
+              "PDA bump seeds"
+            ],
             "type": {
               "defined": "Bumps"
             }
           },
           {
             "name": "inputMintPubkey",
+            "docs": [
+              "Strategy input token mint address"
+            ],
             "type": "publicKey"
           },
           {
             "name": "daoTreasuryLpTokenAccount",
+            "docs": [
+              "Destination fee account"
+            ],
             "type": "publicKey"
           },
           {
             "name": "lastRefreshTime",
+            "docs": [
+              "Last refresh slot in which protocol weights were updated"
+            ],
             "type": "i64"
           },
           {
             "name": "refresh",
+            "docs": [
+              "Strategy refresh parameters"
+            ],
             "type": {
               "defined": "RefreshParams"
             }
           },
           {
             "name": "currentTvl",
+            "docs": [
+              "Current TVL deposited in the strategy (considering deposits/withdraws)"
+            ],
             "type": "u64"
           },
           {
             "name": "rewardsSum",
+            "docs": [
+              "Accumulated rewards until fee is minted (not accounted in current_tvl)"
+            ],
             "type": "u64"
           },
           {
             "name": "previousLpPrice",
+            "docs": [
+              "Price of the LP token in the previous interval"
+            ],
             "type": {
               "defined": "LpPrice"
             }
           },
           {
             "name": "bumpTicketMint",
+            "docs": [
+              "Bump seed for the ticket mint address"
+            ],
             "type": "u8"
           },
           {
             "name": "padding1",
+            "docs": [
+              "Additional padding"
+            ],
             "type": {
               "array": [
                 "u8",
@@ -1675,6 +1668,9 @@
           },
           {
             "name": "protocols",
+            "docs": [
+              "Protocol data (maximum = 10)"
+            ],
             "type": {
               "vec": {
                 "defined": "ProtocolData"
@@ -1688,6 +1684,9 @@
   "types": [
     {
       "name": "Bumps",
+      "docs": [
+        "PDA bump seeds"
+      ],
       "type": {
         "kind": "struct",
         "fields": [
@@ -1704,15 +1703,24 @@
     },
     {
       "name": "RefreshParams",
+      "docs": [
+        "Strategy refresh parameters"
+      ],
       "type": {
         "kind": "struct",
         "fields": [
           {
             "name": "minElapsedTime",
+            "docs": [
+              "Minimum elapsed slots for updating the protocol weights"
+            ],
             "type": "i64"
           },
           {
             "name": "minDepositLamports",
+            "docs": [
+              "Minimum amount of lamports to deposit in each protocol"
+            ],
             "type": "u64"
           }
         ]
@@ -1720,35 +1728,56 @@
     },
     {
       "name": "ProtocolData",
+      "docs": [
+        "Protocol data"
+      ],
       "type": {
         "kind": "struct",
         "fields": [
           {
             "name": "protocolId",
+            "docs": [
+              "Protocol ID"
+            ],
             "type": "u8"
           },
           {
             "name": "hashPubkey",
+            "docs": [
+              "Hashes of Pubkey"
+            ],
             "type": {
               "defined": "HashPubkey"
             }
           },
           {
             "name": "weight",
+            "docs": [
+              "Percentage of the TVL that should be deposited in the protocol"
+            ],
             "type": "u32"
           },
           {
             "name": "amount",
+            "docs": [
+              "Deposited token amount in the protocol"
+            ],
             "type": "u64"
           },
           {
             "name": "rewards",
+            "docs": [
+              "Accumulated rewards"
+            ],
             "type": {
               "defined": "AccumulatedRewards"
             }
           },
           {
             "name": "padding",
+            "docs": [
+              "Padding for other future field"
+            ],
             "type": {
               "array": [
                 "u64",
@@ -1766,6 +1795,9 @@
         "fields": [
           {
             "name": "hashDeposit",
+            "docs": [
+              "Hash of important accounts for each protocol on deposit"
+            ],
             "type": {
               "array": [
                 "u8",
@@ -1775,6 +1807,9 @@
           },
           {
             "name": "hashWithdraw",
+            "docs": [
+              "Hash of important accounts for each protocol on withdraw"
+            ],
             "type": {
               "array": [
                 "u8",
@@ -1784,6 +1819,9 @@
           },
           {
             "name": "hashTvl",
+            "docs": [
+              "Hash of important accounts for each protocol on tvl"
+            ],
             "type": {
               "array": [
                 "u8",
@@ -1796,23 +1834,38 @@
     },
     {
       "name": "AccumulatedRewards",
+      "docs": [
+        "Generated rewards"
+      ],
       "type": {
         "kind": "struct",
         "fields": [
           {
             "name": "lastSlot",
+            "docs": [
+              "Last slot the rewards were accumulated"
+            ],
             "type": "u64"
           },
           {
             "name": "amount",
+            "docs": [
+              "Last accumulated rewards"
+            ],
             "type": "i64"
           },
           {
             "name": "depositedAvgWad",
+            "docs": [
+              "Slot-average deposited amount that generates these rewards"
+            ],
             "type": "u128"
           },
           {
             "name": "depositedIntegral",
+            "docs": [
+              "Slot-integrated deposited amount"
+            ],
             "type": {
               "defined": "SlotIntegrated"
             }
@@ -1822,19 +1875,31 @@
     },
     {
       "name": "SlotIntegrated",
+      "docs": [
+        "Slot-integrated quantities"
+      ],
       "type": {
         "kind": "struct",
         "fields": [
           {
             "name": "initialSlot",
+            "docs": [
+              "Initial slot from which the integral starts"
+            ],
             "type": "u64"
           },
           {
             "name": "lastSlot",
+            "docs": [
+              "Last slot the integral was updated"
+            ],
             "type": "u64"
           },
           {
             "name": "accumulator",
+            "docs": [
+              "Summation accumulator"
+            ],
             "type": "u128"
           }
         ]
@@ -1842,15 +1907,24 @@
     },
     {
       "name": "LpPrice",
+      "docs": [
+        "Strategy LP token price"
+      ],
       "type": {
         "kind": "struct",
         "fields": [
           {
             "name": "totalTokens",
+            "docs": [
+              "Total amount of tokens to be distributed"
+            ],
             "type": "u64"
           },
           {
             "name": "mintedTokens",
+            "docs": [
+              "Supply of strategy LP tokens"
+            ],
             "type": "u64"
           }
         ]
@@ -1858,6 +1932,9 @@
     },
     {
       "name": "Caller",
+      "docs": [
+        "Who can call the withdraw ix"
+      ],
       "type": {
         "kind": "enum",
         "variants": [
@@ -1872,6 +1949,9 @@
     },
     {
       "name": "Protocols",
+      "docs": [
+        "List of supported protocols"
+      ],
       "type": {
         "kind": "enum",
         "variants": [
@@ -2057,5 +2137,8 @@
       "name": "InvalidTicketAmount",
       "msg": "Invalid ticket amount"
     }
-  ]
+  ],
+  "metadata": {
+    "address": "GGo1dnYpjKfe9omzUaFtaCyizvwpAMf3NhxSCMD61F3A"
+  }
 }

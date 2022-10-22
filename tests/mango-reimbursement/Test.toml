@@ -1,0 +1,112 @@
+extends = ["../../Anchor.toml"]
+
+[scripts]
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/mango-reimbursement/**/*.ts --exit"
+
+
+# USDC_mint3RRrz77xwgQJEhDb3MGaYGCr6kHu19sbYKE2sVELR1fN
+[[test.validator.clone]]
+address = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+
+# mango
+[[test.validator.clone]]
+address = "EBDRoayCDDUvDgCimta45ajQeXbexv7aKqJubruqpyvu"
+[[test.validator.clone]]
+address = "98pjRuQjK3qA6gXts96PqZT4Ze5QmnCmt3QYjhbUSPue"
+[[test.validator.clone]]
+address = "9BVcYqEQxyccuwznvxXqDkSJFavvTyheiTYk231T1A8S"
+
+
+# mango
+[[test.validator.clone]]
+address = "BGcwkj1WudQwUUjFk78hAjwd1uAm8trh1N4CJSa51euh"
+[[test.validator.clone]]
+address = "AMzanZxMirPCgGcBoH9kw4Jzi9LFMomyUCXbpzDeL2T8"
+[[test.validator.clone]]
+address = "8Vw25ZackDzaJzzBBqcgcpDsCsDfRSkMGgwFQ3gbReWF"
+[[test.validator.clone]]
+address = "98pjRuQjK3qA6gXts96PqZT4Ze5QmnCmt3QYjhbUSPue"
+[[test.validator.clone]]
+address = "m3roABq4Ta3sGyFRLdY4LH1KN16zBtg586gJ3UxoBzb"
+[[test.validator.clone]]
+address = "GgZpS8itqi7kxmKCqCj2otkWgMjytACTqqmUkTg18gAy"
+[[test.validator.clone]]
+address = "45F9oyj2Jr5pfz1bLoupLGujXkamZEy3RXeKBZudKmJw"
+[[test.validator.clone]]
+address = "ATJpBsXbhio5c5kqgMHmAfFDdjsS3ncZmZyZzNY87XqZ"
+[[test.validator.clone]]
+address = "8YA4fRkroLMaGExpH4KMXC94m7hvLnVfa6x24EPGh7Yf"
+
+
+# vaultAccount
+[[test.validator.clone]]
+address = "ATJpBsXbhio5c5kqgMHmAfFDdjsS3ncZmZyZzNY87XqZ"
+[[test.validator.clone]]
+address = "3RRrz77xwgQJEhDb3MGaYGCr6kHu19sbYKE2sVELR1fN"
+
+[[test.validator.clone]]
+address = "8DKwAVrCEVStDYNPCsmxHtUj8LH9oXNtkVRrBfpNKvhp"
+
+[[test.validator.clone]]
+address = "Hy4ZsZkVa1ZTVa2ghkKY3TsThYEK9MgaL8VPF569jsHP"
+
+[[test.validator.clone]]
+address = "E3ZucWEddfWaDYUXVQbJYRYD9oNHUsWNkFVW73Y2by52"
+[[test.validator.clone]]
+address = "2c9x2g7VUwCd9ppHDV6LxJ1YDb1799MXwvp9SKJe8YXm"
+[[test.validator.clone]]
+address = "2u3wLVR6EY2P3Pkvcy7uDXdb6gjq5ks9AwrfJ2z6tB2t"
+
+
+# WSOL
+[[test.validator.clone]]
+address = "3bbkuWpFrEbXyzVbd9j9JCc52kN5coLD4DBo2wZU6Lgz"
+[[test.validator.clone]]
+address = "CNJrJumoPRxvCaQZ2MJTEUUitwwen955JsxiUvoJa7Wp"
+[[test.validator.clone]]
+address = "82BSXokLXRTB7Knm1ZZp2dA5iADotNzvdMuQDEmhHwoX"
+[[test.validator.clone]]
+address = "C8TnPp5ZJ6j5nCdE1VueHTV9vM6rZAgxn2thsXx79JsF"
+
+#MNGO
+[[test.validator.clone]]
+address = "3Rr5y3ef1KESbkho7x4TeerkKGYqgATaojxPbgtaM2uj"
+[[test.validator.clone]]
+address = "gujNd9ZTMRuKKHVigat4kqFtaEfNvEZjjLn7nNDW3QE"
+[[test.validator.clone]]
+address = "E5znWeT1pEiMXpko8JUNvGfs1X6cuupHZB2PeDhx5mt8"
+[[test.validator.clone]]
+address = "2VyscLY9Dr6xSXVNGw8HkHb4YtqXTmF9vUuVHuKdDjg8"
+
+# RAY
+[[test.validator.clone]]
+address = "HPxU37mc9varUSjj8JaJQ4orKSvY4tSc5Zdg1UaeW1jq"
+[[test.validator.clone]]
+address = "6w6NRsDUnBieNiVBHoixEqqfGnr2wXdoSWWZRn7S36db"
+
+[[test.validator.clone]]
+address = "FK7u45v9Yno2p9vsqk8ppikceMc1t9NUxzGopFZWYsqa"
+[[test.validator.clone]]
+address = "7ZmHsKGP8GvctL7VLGae8TMrFWqnWqeVapbHN82y6dz4"
+
+# mSOL
+[[test.validator.clone]]
+address = "6CpP78Rqygpf4N612FfYwG7STD9GY58o1rQHtejombmZ"
+[[test.validator.clone]]
+address = "7reMieMkh3MCJXQqmnv9xhCBcy3B5qaGbhf6HC8kZFyc"
+
+[[test.validator.clone]]
+address = "DTkyTEuhpzauuD8Q1mUj6eBeuKazkRxwtmUV7AdrxZmq"
+[[test.validator.clone]]
+address = "DSGiTZaeetMi3K5HrMkYpbGydG9MCtcpzpcZx4ZFVFSm"
+
+# USDT
+[[test.validator.clone]]
+address = "EFpqGXuaAeR7d9bAURYvBCukHTqE4G1YYnKPk6iMtL93"
+[[test.validator.clone]]
+address = "ATpgW6RzUvEt13rU9NMj1HsmEeW2zC9a1k5AQbako8md"
+
+[[test.validator.clone]]
+address = "3zheKGFZnQXeovB75fXDmyS37rRwYK5TxABfLV6nRnzX"
+[[test.validator.clone]]
+address = "5tPuRci5ug8Zd5PCY9r2F6mqh7P85JhQdomEieYnyPHR"

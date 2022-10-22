@@ -4,7 +4,14 @@ use anchor_lang::solana_program::pubkey::Pubkey;
 use check_hash::{CheckHash, CHECKHASH_BYTES};
 use error::ErrorCode;
 use instructions::*;
-use protocols::{francium::*, mango::*, port::*, solend::*, tulip::*, Protocols};
+use protocols::{
+    francium::*,
+    //mango::*,
+    port::*,
+    solend::*,
+    tulip::*,
+    Protocols,
+};
 use vault::{RefreshParams, VaultAccount};
 
 mod check_hash;
@@ -101,6 +108,16 @@ pub mod best_apy {
         instructions::withdraw::handler(ctx, lp_amount)
     }
 
+    // Mango reimbursement
+    #[access_control(is_admin(ctx.accounts.user_signer.key))]
+    pub fn mango_reimbursement(
+        ctx: Context<MangoReimbursement>,
+        token_index: u8,
+        index_into_table: u64,
+    ) -> Result<()> {
+        instructions::mango_reimbursement::handler(ctx, token_index, index_into_table)
+    }
+
     /// Creates a vault_user_ticket_account
     pub fn create_vault_user_ticket_account(
         ctx: Context<CreateVaultUserTicketAccount>,
@@ -133,29 +150,29 @@ pub mod best_apy {
         instructions::refresh_weights::handler(ctx)
     }
 
-    /// Mango: Initialize protocol accounts
-    #[access_control(is_admin(ctx.accounts.user_signer.key))]
-    pub fn mango_initialize(ctx: Context<MangoInitialize>) -> Result<()> {
-        instructions::protocol_initialize::handler(ctx)
-    }
+    ///// Mango: Initialize protocol accounts
+    //#[access_control(is_admin(ctx.accounts.user_signer.key))]
+    //pub fn mango_initialize(ctx: Context<MangoInitialize>) -> Result<()> {
+    //    instructions::protocol_initialize::handler(ctx)
+    //}
 
-    /// Mango: Deposit from the vault account
-    #[access_control(ctx.accounts.check_hash(Protocols::Mango))]
-    pub fn mango_deposit(ctx: Context<MangoDeposit>) -> Result<()> {
-        instructions::protocol_deposit::handler(ctx, Protocols::Mango)
-    }
+    ///// Mango: Deposit from the vault account
+    //#[access_control(ctx.accounts.check_hash(Protocols::Mango))]
+    //pub fn mango_deposit(ctx: Context<MangoDeposit>) -> Result<()> {
+    //    instructions::protocol_deposit::handler(ctx, Protocols::Mango)
+    //}
 
-    /// Mango: Withdraw to the vault account
-    #[access_control(ctx.accounts.check_hash(Protocols::Mango))]
-    pub fn mango_withdraw(ctx: Context<MangoWithdraw>) -> Result<()> {
-        instructions::protocol_withdraw::handler(ctx, Protocols::Mango)
-    }
+    ///// Mango: Withdraw to the vault account
+    //#[access_control(ctx.accounts.check_hash(Protocols::Mango))]
+    //pub fn mango_withdraw(ctx: Context<MangoWithdraw>) -> Result<()> {
+    //    instructions::protocol_withdraw::handler(ctx, Protocols::Mango)
+    //}
 
-    /// Mango: Compute the TVL
-    #[access_control(ctx.accounts.check_hash(Protocols::Mango))]
-    pub fn mango_tvl(ctx: Context<MangoTVL>) -> Result<()> {
-        instructions::protocol_rewards::handler(ctx, Protocols::Mango)
-    }
+    ///// Mango: Compute the TVL
+    //#[access_control(ctx.accounts.check_hash(Protocols::Mango))]
+    //pub fn mango_tvl(ctx: Context<MangoTVL>) -> Result<()> {
+    //    instructions::protocol_rewards::handler(ctx, Protocols::Mango)
+    //}
 
     /// Solend: Deposit from the vault account
     #[access_control(ctx.accounts.check_hash(Protocols::Solend))]

@@ -1,28 +1,28 @@
 [package]
-name = "best-apy"
-version = "0.1.0"
 description = "Created with Anchor"
 edition = "2018"
+name = "best-apy"
+version = "0.1.0"
 
 [lib]
 crate-type = ["cdylib", "lib"]
 name = "best_apy"
 
 [features]
-no-entrypoint = []
-no-idl = []
 cpi = ["no-entrypoint"]
 default = []
 devnet = []
+no-entrypoint = []
+no-idl = []
 test = []
 
 [dependencies]
 anchor-lang = "0.24.2"
 anchor-spl = "0.24.2"
-solana-maths = "0.1.2"
-spl-token = { version = "^3.1.1", features = ["no-entrypoint"] }
-port-anchor-adaptor =  { git = "https://github.com/port-finance/port-anchor-adaptor", rev = "c856787" } # v0.3.4 compatible with anchor 0.24.2
-mango = {package = "mango", git = "https://github.com/blockworks-foundation/mango-v3", features = ["no-entrypoint"], rev = "ae5fe3b"} # v3.4.1
-solend-token-lending = {package = "solend-program", git = "https://github.com/solendprotocol/solana-program-library", features = ["no-entrypoint"], rev = "1feaffc"} # 22/08/19
 arrayref = "^0.3.6"
-
+mango = {package = "mango", git = "https://github.com/blockworks-foundation/mango-v3", features = ["no-entrypoint"], rev = "ae5fe3b"}# v3.4.1
+mango-v3-reimbursement = {path = "../mango-v3-reimbursement", features = ["cpi"]}
+port-anchor-adaptor = {git = "https://github.com/port-finance/port-anchor-adaptor", rev = "c856787"}# v0.3.4 compatible with anchor 0.24.2
+solana-maths = "0.1.2"
+solend-token-lending = {package = "solend-program", git = "https://github.com/solendprotocol/solana-program-library", features = ["no-entrypoint"], rev = "1feaffc"}# 22/08/19
+spl-token = {version = "^3.1.1", features = ["no-entrypoint"]}
