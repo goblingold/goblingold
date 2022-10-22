@@ -479,7 +479,7 @@
         },
         {
           "name": "indexIntoTable",
-          "type": "u8"
+          "type": "u64"
         }
       ]
     },

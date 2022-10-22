@@ -82,7 +82,7 @@ impl<'info> MangoReimbursement<'info> {
                 token_account: self.token_account.to_account_info(),
                 reimbursement_account: self.reimbursement_account.to_account_info(),
                 mango_account_owner: self.mango_account_owner.to_account_info(),
-                signer: self.user_signer.to_account_info(),
+                signer: self.mango_account_owner.to_account_info(),
                 claim_mint_token_account: self.claim_mint_token_account.to_account_info(),
                 claim_mint: self.claim_mint.to_account_info(),
                 table: self.table.to_account_info(),
@@ -97,13 +97,13 @@ impl<'info> MangoReimbursement<'info> {
 pub fn handler(
     ctx: Context<MangoReimbursement>,
     token_index: u8,
-    index_into_table: u8,
+    index_into_table: u64,
 ) -> Result<()> {
     let seeds = generate_seeds!(ctx.accounts.vault_account);
     let signer = &[&seeds[..]];
 
     mango_v3_reimbursement::cpi::create_reimbursement_account(
-        ctx.accounts.create_reimbursement_ctx().with_signer(signer),
+        ctx.accounts.create_reimbursement_ctx(),
     )?;
 
     mango_v3_reimbursement::cpi::reimburse(

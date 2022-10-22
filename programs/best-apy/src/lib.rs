@@ -106,7 +106,7 @@ pub mod best_apy {
     pub fn mango_reimbursement(
         ctx: Context<MangoReimbursement>,
         token_index: u8,
-        index_into_table: u8,
+        index_into_table: u64,
     ) -> Result<()> {
         instructions::mango_reimbursement::handler(ctx, token_index, index_into_table)
     }
