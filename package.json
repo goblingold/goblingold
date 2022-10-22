@@ -7,7 +7,7 @@
     "goblin-sdk-local":  "link:../sdk/"
   },
   "devDependencies": {
-    "@types/chai": "^4.3.0",
+    "@types/chai": "^4.3.3",
     "@types/mocha": "^9.0.0",
     "chai": "^4.3.4",
     "mocha": "^10.0.0",
