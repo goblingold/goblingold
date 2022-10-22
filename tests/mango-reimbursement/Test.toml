@@ -4,7 +4,7 @@ extends = ["../../Anchor.toml"]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/mango-reimbursement/**/*.ts --exit"
 
 
-# USDC_mint
+# USDC_mint3RRrz77xwgQJEhDb3MGaYGCr6kHu19sbYKE2sVELR1fN
 [[test.validator.clone]]
 address = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
 
@@ -29,6 +29,8 @@ address = "98pjRuQjK3qA6gXts96PqZT4Ze5QmnCmt3QYjhbUSPue"
 [[test.validator.clone]]
 address = "m3roABq4Ta3sGyFRLdY4LH1KN16zBtg586gJ3UxoBzb"
 [[test.validator.clone]]
+address = "GgZpS8itqi7kxmKCqCj2otkWgMjytACTqqmUkTg18gAy"
+[[test.validator.clone]]
 address = "45F9oyj2Jr5pfz1bLoupLGujXkamZEy3RXeKBZudKmJw"
 [[test.validator.clone]]
 address = "ATJpBsXbhio5c5kqgMHmAfFDdjsS3ncZmZyZzNY87XqZ"
@@ -42,3 +44,9 @@ address = "8YA4fRkroLMaGExpH4KMXC94m7hvLnVfa6x24EPGh7Yf"
 address = "ATJpBsXbhio5c5kqgMHmAfFDdjsS3ncZmZyZzNY87XqZ"
 [[test.validator.clone]]
 address = "3RRrz77xwgQJEhDb3MGaYGCr6kHu19sbYKE2sVELR1fN"
+
+[[test.validator.clone]]
+address = "8DKwAVrCEVStDYNPCsmxHtUj8LH9oXNtkVRrBfpNKvhp"
+
+[[test.validator.clone]]
+address ="Hy4ZsZkVa1ZTVa2ghkKY3TsThYEK9MgaL8VPF569jsHP"

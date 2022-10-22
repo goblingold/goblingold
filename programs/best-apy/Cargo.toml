@@ -21,7 +21,7 @@ anchor-lang = "0.24.2"
 anchor-spl = "0.24.2"
 arrayref = "^0.3.6"
 mango = {package = "mango", git = "https://github.com/blockworks-foundation/mango-v3", features = ["no-entrypoint"], rev = "ae5fe3b"}# v3.4.1
-mango-v3-reimbursement = {path = "../mango-v3-reimbursement", features = ["no-entrypoint"]}
+mango-v3-reimbursement = {path = "../mango-v3-reimbursement", features = ["cpi"]}
 port-anchor-adaptor = {git = "https://github.com/port-finance/port-anchor-adaptor", rev = "c856787"}# v0.3.4 compatible with anchor 0.24.2
 solana-maths = "0.1.2"
 solend-token-lending = {package = "solend-program", git = "https://github.com/solendprotocol/solana-program-library", features = ["no-entrypoint"], rev = "1feaffc"}# 22/08/19

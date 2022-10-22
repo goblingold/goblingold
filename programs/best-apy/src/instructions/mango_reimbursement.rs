@@ -39,10 +39,59 @@ pub struct MangoReimbursement<'info> {
         bump = vault_account.bumps.vault
     )]
     pub vault_account: Box<Account<'info, VaultAccount>>,
+    /// CHECK: permisionless
+    pub mango_v3_reimbursement: AccountInfo<'info>,
 
     pub system_program: Program<'info, System>,
     pub token_program: Program<'info, Token>,
     pub rent: Sysvar<'info, Rent>,
+}
+
+impl<'info> MangoReimbursement<'info> {
+    fn create_reimbursement_ctx(
+        &self,
+    ) -> CpiContext<
+        '_,
+        '_,
+        '_,
+        'info,
+        mango_v3_reimbursement::cpi::accounts::CreateReimbursementAccount<'info>,
+    > {
+        CpiContext::new(
+            self.mango_v3_reimbursement.to_account_info(),
+            mango_v3_reimbursement::cpi::accounts::CreateReimbursementAccount {
+                group: self.group.to_account_info(),
+                reimbursement_account: self.reimbursement_account.to_account_info(),
+                mango_account_owner: self.mango_account_owner.to_account_info(),
+                payer: self.user_signer.to_account_info(),
+                system_program: self.system_program.to_account_info(),
+                rent: self.rent.to_account_info(),
+            },
+        )
+    }
+
+    fn reimburse_ctx(
+        &self,
+    ) -> CpiContext<'_, '_, '_, 'info, mango_v3_reimbursement::cpi::accounts::Reimburse<'info>>
+    {
+        CpiContext::new(
+            self.mango_v3_reimbursement.to_account_info(),
+            mango_v3_reimbursement::cpi::accounts::Reimburse {
+                group: self.group.to_account_info(),
+                vault: self.vault_token_account.to_account_info(),
+                token_account: self.token_account.to_account_info(),
+                reimbursement_account: self.reimbursement_account.to_account_info(),
+                mango_account_owner: self.mango_account_owner.to_account_info(),
+                signer: self.user_signer.to_account_info(),
+                claim_mint_token_account: self.claim_mint_token_account.to_account_info(),
+                claim_mint: self.claim_mint.to_account_info(),
+                table: self.table.to_account_info(),
+                token_program: self.token_program.to_account_info(),
+                system_program: self.system_program.to_account_info(),
+                rent: self.rent.to_account_info(),
+            },
+        )
+    }
 }
 
 pub fn handler(
@@ -53,75 +102,32 @@ pub fn handler(
     let seeds = generate_seeds!(ctx.accounts.vault_account);
     let signer = &[&seeds[..]];
 
-    let instr = mango_v3_reimbursement::instruction::CreateReimbursementAccount {};
+    mango_v3_reimbursement::cpi::create_reimbursement_account(
+        ctx.accounts.create_reimbursement_ctx().with_signer(signer),
+    )?;
 
-    let accounts = mango_v3_reimbursement::accounts::CreateReimbursementAccount {
-        group: ctx.accounts.group.key(),
-        reimbursement_account: ctx.accounts.reimbursement_account.key(),
-        mango_account_owner: ctx.accounts.mango_account_owner.key(),
-        payer: ctx.accounts.user_signer.key(),
-        system_program: ctx.accounts.system_program.key(),
-        rent: ctx.accounts.rent.key(),
-    };
-
-    let ix = anchor_lang::solana_program::instruction::Instruction {
-        program_id: mango_v3_reimbursement::id(),
-        accounts: accounts.to_account_metas(None),
-        data: instr.data(),
-    };
-
-    let accounts_info = [
-        ctx.accounts.group.to_account_info(),
-        ctx.accounts.reimbursement_account.to_account_info(),
-        ctx.accounts.mango_account_owner.to_account_info(),
-        ctx.accounts.user_signer.to_account_info(),
-        ctx.accounts.system_program.to_account_info(),
-        ctx.accounts.rent.to_account_info(),
-    ];
-
-    invoke_signed(&ix, &accounts_info[..], signer)?;
-
-    let instr = mango_v3_reimbursement::instruction::Reimburse {
-        _token_index: token_index as usize,
-        _index_into_table: index_into_table as usize,
-        _transfer_claim: true,
-    };
-
-    let accounts = mango_v3_reimbursement::accounts::Reimburse {
-        group: ctx.accounts.group.key(),
-        vault: ctx.accounts.vault_token_account.key(),
-        token_account: ctx.accounts.token_account.key(),
-        reimbursement_account: ctx.accounts.reimbursement_account.key(),
-        mango_account_owner: ctx.accounts.mango_account_owner.key(),
-        signer: ctx.accounts.user_signer.key(),
-        claim_mint_token_account: ctx.accounts.claim_mint_token_account.key(),
-        claim_mint: ctx.accounts.claim_mint.key(),
-        table: ctx.accounts.table.key(),
-        token_program: ctx.accounts.token_program.key(),
-        system_program: ctx.accounts.system_program.key(),
-        rent: ctx.accounts.rent.key(),
-    };
-    let ix = anchor_lang::solana_program::instruction::Instruction {
-        program_id: mango_v3_reimbursement::id(),
-        accounts: accounts.to_account_metas(None),
-        data: instr.data(),
-    };
-
-    let accounts_info = [
-        ctx.accounts.group.to_account_info(),
-        ctx.accounts.vault_token_account.to_account_info(),
-        ctx.accounts.token_account.to_account_info(),
-        ctx.accounts.reimbursement_account.to_account_info(),
-        ctx.accounts.mango_account_owner.to_account_info(),
-        ctx.accounts.user_signer.to_account_info(),
-        ctx.accounts.claim_mint_token_account.to_account_info(),
-        ctx.accounts.claim_mint.to_account_info(),
-        ctx.accounts.table.to_account_info(),
-        ctx.accounts.token_program.to_account_info(),
-        ctx.accounts.system_program.to_account_info(),
-    ];
-
-    invoke_signed(&ix, &accounts_info[..], signer)?;
+    mango_v3_reimbursement::cpi::reimburse(
+        ctx.accounts.reimburse_ctx().with_signer(signer),
+        token_index as usize,
+        index_into_table as usize,
+        true,
+    )?;
 
     Ok(())
+}
+
+#[derive(Accounts)]
+pub struct CreateReimbursementAccounts<'info> {
+    /// CHECK:
+    pub group: AccountInfo<'info>,
+    /// CHECK:
+    pub reimbursement_account: AccountInfo<'info>,
+    /// CHECK:
+    pub mango_account_owner: AccountInfo<'info>,
+    /// CHECK:
+    pub payer: AccountInfo<'info>,
+    /// CHECK:
+    pub system_program: AccountInfo<'info>,
+    /// CHECK:
+    pub rent: AccountInfo<'info>,
 }
