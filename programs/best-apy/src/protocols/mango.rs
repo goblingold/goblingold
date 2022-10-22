@@ -1,5 +1,5 @@
 use crate::check_hash::*;
-use crate::error::ErrorCode;
+//use crate::error::ErrorCode;
 use crate::instructions::{
     protocol_deposit::*, protocol_initialize::*, protocol_rewards::*, protocol_withdraw::*,
 };
@@ -359,48 +359,49 @@ impl<'info> ProtocolRewards<'info> for MangoTVL<'info> {
     }
 
     fn max_withdrawable(&self) -> Result<u64> {
-        let mango_account = mango::state::MangoAccount::load_checked(
-            &self.vault_mango_account,
-            &mango_program_id::ID,
-            self.mango_group_account.key,
-        )
-        .unwrap();
+        //let mango_account = mango::state::MangoAccount::load_checked(
+        //    &self.vault_mango_account,
+        //    &mango_program_id::ID,
+        //    self.mango_group_account.key,
+        //)
+        //.unwrap();
 
-        require!(
-            mango_account.owner == self.generic_accs.vault_account.key(),
-            ErrorCode::InvalidOwner,
-        );
+        //require!(
+        //    mango_account.owner == self.generic_accs.vault_account.key(),
+        //    ErrorCode::InvalidOwner,
+        //);
 
-        let mango_group = mango::state::MangoGroup::load_checked(
-            &self.mango_group_account,
-            &mango_program_id::ID,
-        )
-        .unwrap();
-        let mango_cache = mango::state::MangoCache::load_checked(
-            &self.mango_cache_account,
-            &mango_program_id::ID,
-            &mango_group,
-        )
-        .unwrap();
+        //let mango_group = mango::state::MangoGroup::load_checked(
+        //    &self.mango_group_account,
+        //    &mango_program_id::ID,
+        //)
+        //.unwrap();
+        //let mango_cache = mango::state::MangoCache::load_checked(
+        //    &self.mango_cache_account,
+        //    &mango_program_id::ID,
+        //    &mango_group,
+        //)
+        //.unwrap();
 
-        let open_orders_ais_vec =
-            vec![self.default_pubkey.to_account_info(); mango::state::MAX_PAIRS];
-        let open_orders_ais = arrayref::array_ref![open_orders_ais_vec, 0, mango::state::MAX_PAIRS];
-        let active_assets =
-            mango::state::UserActiveAssets::new(&mango_group, &mango_account, vec![]);
-        let mut health_cache = mango::state::HealthCache::new(active_assets);
-        health_cache
-            .init_vals(&mango_group, &mango_cache, &mango_account, open_orders_ais)
-            .unwrap();
-        let health = health_cache.get_health(&mango_group, mango::state::HealthType::Init);
-        let token_index = mango_group
-            .find_root_bank_index(self.mango_root_bank_account.key)
-            .unwrap();
+        //let open_orders_ais_vec =
+        //    vec![self.default_pubkey.to_account_info(); mango::state::MAX_PAIRS];
+        //let open_orders_ais = arrayref::array_ref![open_orders_ais_vec, 0, mango::state::MAX_PAIRS];
+        //let active_assets =
+        //    mango::state::UserActiveAssets::new(&mango_group, &mango_account, vec![]);
+        //let mut health_cache = mango::state::HealthCache::new(active_assets);
+        //health_cache
+        //    .init_vals(&mango_group, &mango_cache, &mango_account, open_orders_ais)
+        //    .unwrap();
+        //let health = health_cache.get_health(&mango_group, mango::state::HealthType::Init);
+        //let token_index = mango_group
+        //    .find_root_bank_index(self.mango_root_bank_account.key)
+        //    .unwrap();
 
-        let tvl = mango_account
-            .max_withdrawable(&mango_group, &mango_cache, token_index, health)
-            .unwrap();
+        //let tvl = mango_account
+        //    .max_withdrawable(&mango_group, &mango_cache, token_index, health)
+        //    .unwrap();
 
-        Ok(tvl)
+        //Ok(tvl)
+        Ok(0)
     }
 }
