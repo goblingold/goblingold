@@ -2,7 +2,7 @@
   "dependencies": {
     "@project-serum/anchor": "^0.23.0",
     "@solana/buffer-layout": "^4.0.0",
-    "@solana/spl-token": "^0.2.0",
+    "@solana/spl-token": "^0.3.6",
     "goblin-sdk": "goblingold/goblingold-sdk-private",
     "goblin-sdk-local":  "link:../sdk/"
   },
