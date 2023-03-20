@@ -23,8 +23,8 @@ mod vault;
 
 declare_id!("GGo1dnYpjKfe9omzUaFtaCyizvwpAMf3NhxSCMD61F3A");
 
-const PAUSED_DEPOSIT: bool = false;
-const PAUSED_WITHDRAW: bool = false;
+const PAUSED_DEPOSIT: bool = true;
+const PAUSED_WITHDRAW: bool = true;
 
 const VAULT_ACCOUNT_SEED: &[u8; 5] = b"vault";
 const VAULT_LP_TOKEN_MINT_SEED: &[u8; 4] = b"mint";
