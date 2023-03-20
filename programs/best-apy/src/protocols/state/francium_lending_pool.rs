@@ -16,6 +16,8 @@ const INITIAL_COLLATERAL_RATE: u64 = INITIAL_COLLATERAL_RATIO * WAD;
 const PROGRAM_VERSION: u8 = 1;
 const UNINITIALIZED_VERSION: u8 = 0;
 
+const BTC_POOL_VERSION: u8 = 254;
+
 /// Lending market reserve state
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct LendingPool {
@@ -228,7 +230,9 @@ impl Pack for LendingPool {
         ];
 
         let version = u8::from_le_bytes(*version);
-        if version > PROGRAM_VERSION {
+
+        // dirty hack
+        if version > PROGRAM_VERSION && version != BTC_POOL_VERSION {
             msg!("Francium LendingPool version does not match lending program version");
             return Err(ProgramError::InvalidAccountData);
         }
