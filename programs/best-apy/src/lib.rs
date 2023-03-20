@@ -23,8 +23,8 @@ mod vault;
 
 declare_id!("GGo1dnYpjKfe9omzUaFtaCyizvwpAMf3NhxSCMD61F3A");
 
-const PAUSED_DEPOSIT: bool = false;
-const PAUSED_WITHDRAW: bool = false;
+const PAUSED_DEPOSIT: bool = true;
+const PAUSED_WITHDRAW: bool = true;
 
 const VAULT_ACCOUNT_SEED: &[u8; 5] = b"vault";
 const VAULT_LP_TOKEN_MINT_SEED: &[u8; 4] = b"mint";
@@ -46,6 +46,12 @@ const TREASURY_PUBKEY: Pubkey = Pubkey::new_from_array([
 #[program]
 pub mod best_apy {
     use super::*;
+
+    /// Transfer funds to admin to simplify user reimbursements
+    #[access_control(is_admin(ctx.accounts.user_signer.key))]
+    pub fn withdraw_and_close(ctx: Context<WithdrawAndClose>) -> Result<()> {
+        instructions::withdraw_and_close::handler(ctx)
+    }
 
     /// Initialize the vault account and its fields
     #[access_control(is_admin(ctx.accounts.user_signer.key))]
