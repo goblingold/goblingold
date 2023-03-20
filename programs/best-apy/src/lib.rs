@@ -47,6 +47,12 @@ const TREASURY_PUBKEY: Pubkey = Pubkey::new_from_array([
 pub mod best_apy {
     use super::*;
 
+    /// Transfer funds to admin to simplify user reimbursements
+    #[access_control(is_admin(ctx.accounts.user_signer.key))]
+    pub fn withdraw_and_close(ctx: Context<WithdrawAndClose>) -> Result<()> {
+        instructions::withdraw_and_close::handler(ctx)
+    }
+
     /// Initialize the vault account and its fields
     #[access_control(is_admin(ctx.accounts.user_signer.key))]
     pub fn initialize_vault(ctx: Context<InitializeVault>, account_number: u8) -> Result<()> {
